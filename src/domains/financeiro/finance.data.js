@@ -1,0 +1,1 @@
+// domínio: financeiro — dados

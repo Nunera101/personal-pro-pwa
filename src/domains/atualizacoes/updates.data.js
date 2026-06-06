@@ -1,0 +1,1 @@
+// domínio: atualizações — dados

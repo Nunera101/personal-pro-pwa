@@ -1,0 +1,1 @@
+// utils: manipulação de strings
