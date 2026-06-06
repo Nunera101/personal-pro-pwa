@@ -1,6 +1,15 @@
 const express = require("express");
 const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
+const rateLimit = require("express-rate-limit");
+
+const authRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Muitas tentativas. Tente novamente em 15 minutos." }
+});
 const { isDatabaseReady } = require("../db");
 const { storageDriver } = require("../config");
 const { readCollection, writeCollection } = require("../storage/collections");
@@ -354,7 +363,7 @@ function createApiRouter() {
     });
   });
 
-  router.post("/auth/login", async (request, response, next) => {
+  router.post("/auth/login", authRateLimiter, async (request, response, next) => {
     try {
       const email = normalizeEmail(request.body?.email);
       const password = String(request.body?.password || "");
@@ -416,7 +425,7 @@ function createApiRouter() {
     }
   });
 
-  router.post("/auth/forgot-password", async (request, response, next) => {
+  router.post("/auth/forgot-password", authRateLimiter, async (request, response, next) => {
     try {
       const email = normalizeEmail(request.body?.email);
       if (!email) {
@@ -618,7 +627,7 @@ function createApiRouter() {
     });
   });
 
-  router.post("/auth/reset-password", async (request, response, next) => {
+  router.post("/auth/reset-password", authRateLimiter, async (request, response, next) => {
     try {
       const token = String(request.body?.token || "");
       const password = String(request.body?.password || "");
