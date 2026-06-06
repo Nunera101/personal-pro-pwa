@@ -1,0 +1,692 @@
+const express = require("express");
+const crypto = require("crypto");
+const bcrypt = require("bcryptjs");
+const { isDatabaseReady } = require("../db");
+const { storageDriver } = require("../config");
+const { readCollection, writeCollection } = require("../storage/collections");
+const { isMailConfigured, sendPasswordResetEmail, sendStudentInviteEmail, sendContractEmail } = require("../mail");
+const { TRAINER_ID, SESSION_TTL, createSessionToken, requireAuth, requireManager } = require("../auth");
+
+const ADMIN_EMAIL = "admin@personalpro.app";
+const STUDENTS_KEY = "personal-pro-students-v2";
+const EXERCISES_KEY = "personal-pro-exercises-v1";
+const WORKOUTS_KEY = "personal-pro-workouts-v3";
+const ACTIVITIES_KEY = "personal-pro-activities-v2";
+const SESSIONS_KEY = "personal-pro-training-sessions-v1";
+const UPDATES_KEY = "personal-pro-updates-v1";
+const CONTRACTS_KEY = "personal-pro-contracts-v1";
+const MESSAGES_KEY = "personal-pro-messages-v1";
+const PAYMENTS_KEY = "personal-pro-payments-v1";
+const DIETS_KEY = "personal-pro-diets-v1";
+const SETTINGS_KEY = "personal-pro-settings-v1";
+const PASSWORD_RESETS_KEY = "personal-pro-password-resets-v1";
+const PASSWORD_RESET_TTL_MS = 60 * 60 * 1000;
+const STUDENT_INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const CONTRACT_LINK_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const COLLECTION_ALLOWLIST = new Set([
+  STUDENTS_KEY,
+  EXERCISES_KEY,
+  WORKOUTS_KEY,
+  ACTIVITIES_KEY,
+  SESSIONS_KEY,
+  UPDATES_KEY,
+  CONTRACTS_KEY,
+  MESSAGES_KEY,
+  PAYMENTS_KEY,
+  DIETS_KEY,
+  SETTINGS_KEY
+]);
+
+function normalizeEmail(email) {
+  return String(email || "").trim().toLowerCase();
+}
+
+function hashPassword(value) {
+  let hash = 2166136261;
+  const input = `personal-pro-demo:${String(value || "")}`;
+  for (let index = 0; index < input.length; index += 1) {
+    hash ^= input.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return `fnv1a:${(hash >>> 0).toString(16).padStart(8, "0")}`;
+}
+
+function isBcryptHash(value) {
+  return /^\$2[aby]\$\d{2}\$/.test(String(value || ""));
+}
+
+function createPasswordHash(password) {
+  return bcrypt.hashSync(String(password || ""), 12);
+}
+
+function verifyPassword(password, storedHash) {
+  const hash = String(storedHash || "");
+  if (!hash) return false;
+  if (isBcryptHash(hash)) return bcrypt.compareSync(String(password || ""), hash);
+  return hashPassword(password) === hash;
+}
+
+function hashToken(token) {
+  return crypto.createHash("sha256").update(String(token || "")).digest("hex");
+}
+
+function createId(prefix) {
+  return `${prefix}-${Date.now().toString(36)}-${crypto.randomBytes(4).toString("hex")}`;
+}
+
+function sanitizeBaseUrl(value) {
+  try {
+    const url = new URL(value || "");
+    if (url.protocol !== "https:" && url.hostname !== "localhost" && url.hostname !== "127.0.0.1") return "";
+    url.search = "";
+    url.hash = "";
+    return url.toString();
+  } catch (_error) {
+    return "";
+  }
+}
+
+function buildResetUrl(request, token) {
+  const requestedBase = sanitizeBaseUrl(request.body?.appUrl);
+  const origin = `${request.protocol}://${request.get("host")}`;
+  const fallbackBase = sanitizeBaseUrl(process.env.APP_PUBLIC_URL || origin) || origin;
+  const url = new URL(requestedBase || fallbackBase);
+  url.searchParams.set("reset", token);
+  return url.toString();
+}
+
+function buildContractUrl(request, token) {
+  const requestedBase = sanitizeBaseUrl(request.body?.appUrl);
+  const origin = `${request.protocol}://${request.get("host")}`;
+  const fallbackBase = sanitizeBaseUrl(process.env.APP_PUBLIC_URL || origin) || origin;
+  const url = new URL(requestedBase || fallbackBase);
+  url.searchParams.set("contract", token);
+  return url.toString();
+}
+
+function normalizeStudentAccessStatus(value, hasPassword = false) {
+  const status = String(value || "").trim();
+  if (["active", "invite_pending", "awaiting_activation"].includes(status)) return status;
+  return hasPassword ? "active" : "invite_pending";
+}
+
+function sanitizeStudent(student = {}) {
+  const hasPassword = Boolean(student.passwordHash || student.hasPassword);
+  const { password, passwordHash, ...safeStudent } = student;
+  return {
+    ...safeStudent,
+    accessStatus: normalizeStudentAccessStatus(student.accessStatus, hasPassword),
+    hasPassword
+  };
+}
+
+function sanitizeSettings(settings = {}) {
+  const { adminPasswordHash, ...safeSettings } = settings || {};
+  return {
+    ...safeSettings,
+    adminPasswordConfigured: Boolean(adminPasswordHash)
+  };
+}
+
+function sanitizeCollection(collection, value, auth) {
+  if (collection === SETTINGS_KEY) return sanitizeSettings(value || {});
+  if (!Array.isArray(value)) return value;
+
+  if (collection === STUDENTS_KEY) {
+    const students = auth.role === "student" ? value.filter((item) => item.id === auth.studentId) : value;
+    return students.map(sanitizeStudent);
+  }
+
+  if (auth.role === "manager") return value;
+
+  if ([ACTIVITIES_KEY, SESSIONS_KEY, UPDATES_KEY, CONTRACTS_KEY, MESSAGES_KEY, PAYMENTS_KEY, DIETS_KEY].includes(collection)) {
+    return value.filter((item) => item.studentId === auth.studentId);
+  }
+
+  if (collection === WORKOUTS_KEY) {
+    return value.filter((item) => item.studentId === auth.studentId && item.status === "published");
+  }
+
+  if (collection === EXERCISES_KEY) {
+    return value.filter((item) => item.status !== "inactive");
+  }
+
+  return [];
+}
+
+function mergeStudentsForWrite(existing = [], incoming = []) {
+  const existingById = new Map(existing.map((item) => [String(item.id || ""), item]));
+  return incoming.map((student) => {
+    const previous = existingById.get(String(student.id || "")) || {};
+    const passwordHash = student.passwordHash && student.passwordHash !== "[hash]" ? student.passwordHash : previous.passwordHash || "";
+    return {
+      ...student,
+      passwordHash,
+      accessStatus: normalizeStudentAccessStatus(student.accessStatus, Boolean(passwordHash || student.hasPassword))
+    };
+  });
+}
+
+function mergeSettingsForWrite(existing = {}, incoming = {}) {
+  return {
+    ...incoming,
+    adminPasswordHash:
+      incoming.adminPasswordHash && incoming.adminPasswordHash !== "[hash]"
+        ? incoming.adminPasswordHash
+        : existing.adminPasswordHash || ""
+  };
+}
+
+function mergeStudentContracts(existing = [], incoming = [], auth = {}) {
+  const incomingById = new Map(incoming.filter((item) => item.studentId === auth.studentId).map((item) => [String(item.id || ""), item]));
+  return existing.map((contract) => {
+    const next = incomingById.get(String(contract.id || ""));
+    if (!next || contract.studentId !== auth.studentId) return contract;
+    const signed = next.status === "signed" || contract.status === "signed";
+    return {
+      ...contract,
+      viewedAt: next.viewedAt || contract.viewedAt || "",
+      status: signed ? "signed" : contract.status,
+      signedAt: signed ? next.signedAt || contract.signedAt || new Date().toISOString() : contract.signedAt || "",
+      signedVersion: signed ? contract.version || next.signedVersion || "" : contract.signedVersion || "",
+      technicalId: next.technicalId || contract.technicalId || "",
+      signatureIp: next.signatureIp || contract.signatureIp || "",
+      signatureUserAgent: next.signatureUserAgent || contract.signatureUserAgent || "",
+      signatureMeta: next.signatureMeta || contract.signatureMeta || ""
+    };
+  });
+}
+
+function mergeStudentMessages(existing = [], incoming = [], auth = {}) {
+  const byId = new Map(existing.map((item) => [String(item.id || ""), item]));
+  incoming
+    .filter((item) => item.studentId === auth.studentId)
+    .forEach((message) => {
+      const id = String(message.id || "");
+      const previous = byId.get(id);
+      if (previous) {
+        byId.set(id, { ...previous, readAt: message.readAt || previous.readAt || null });
+        return;
+      }
+      if (message.senderRole === "student") {
+        byId.set(id, {
+          ...message,
+          trainerId: TRAINER_ID,
+          studentId: auth.studentId,
+          senderRole: "student"
+        });
+      }
+    });
+  return Array.from(byId.values());
+}
+
+function mergeStudentOwnedCollection(existing = [], incoming = [], auth = {}) {
+  const remaining = existing.filter((item) => item.studentId !== auth.studentId);
+  const owned = incoming.filter((item) => item.studentId === auth.studentId);
+  return [...remaining, ...owned];
+}
+
+async function readCollectionForAuth(collection, auth) {
+  if (!COLLECTION_ALLOWLIST.has(collection)) {
+    const error = new Error("Colecao indisponivel.");
+    error.statusCode = 404;
+    throw error;
+  }
+  const fallback = collection === SETTINGS_KEY ? {} : [];
+  return sanitizeCollection(collection, await readCollection(collection, fallback), auth);
+}
+
+async function writeCollectionForAuth(collection, payload, auth) {
+  if (!COLLECTION_ALLOWLIST.has(collection)) {
+    const error = new Error("Colecao indisponivel.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const fallback = collection === SETTINGS_KEY ? {} : [];
+  const existing = await readCollection(collection, fallback);
+
+  if (auth.role === "manager") {
+    if (collection === STUDENTS_KEY) return writeCollection(collection, mergeStudentsForWrite(existing, Array.isArray(payload) ? payload : []));
+    if (collection === SETTINGS_KEY) return writeCollection(collection, mergeSettingsForWrite(existing, payload || {}));
+    return writeCollection(collection, payload);
+  }
+
+  if ([EXERCISES_KEY, WORKOUTS_KEY, STUDENTS_KEY, SETTINGS_KEY, PAYMENTS_KEY, DIETS_KEY].includes(collection)) return;
+  if (collection === CONTRACTS_KEY) return writeCollection(collection, mergeStudentContracts(existing, Array.isArray(payload) ? payload : [], auth));
+  if (collection === MESSAGES_KEY) return writeCollection(collection, mergeStudentMessages(existing, Array.isArray(payload) ? payload : [], auth));
+  if ([ACTIVITIES_KEY, SESSIONS_KEY, UPDATES_KEY].includes(collection)) {
+    return writeCollection(collection, mergeStudentOwnedCollection(existing, Array.isArray(payload) ? payload : [], auth));
+  }
+}
+
+async function createAccountToken(account, ttlMs, type = "password_reset", extra = {}) {
+  const token = crypto.randomBytes(32).toString("hex");
+  const now = new Date();
+  const reset = {
+    id: createId(type === "student_invite" ? "invite" : "reset"),
+    trainerId: TRAINER_ID,
+    type,
+    email: account.email,
+    role: account.role,
+    studentId: account.studentId || "",
+    tokenHash: hashToken(token),
+    createdAt: now.toISOString(),
+    expiresAt: new Date(now.getTime() + ttlMs).toISOString(),
+    usedAt: "",
+    ...extra
+  };
+
+  const resets = await readCollection(PASSWORD_RESETS_KEY, []);
+  const activeResets = resets.filter((item) => {
+    if (item.expiresAt <= now.toISOString() || item.usedAt) return false;
+    if (type === "student_invite" && item.type === "student_invite" && item.studentId === account.studentId) return false;
+    if (type === "contract_view" && item.type === "contract_view" && item.contractId === extra.contractId) return false;
+    return true;
+  });
+  activeResets.push(reset);
+  await writeCollection(PASSWORD_RESETS_KEY, activeResets);
+  return { token, reset };
+}
+
+async function findAccountByEmail(email) {
+  const normalizedEmail = normalizeEmail(email);
+  if (normalizedEmail === ADMIN_EMAIL) {
+    return {
+      role: "manager",
+      email: ADMIN_EMAIL,
+      name: "Admin",
+      studentId: ""
+    };
+  }
+
+  const students = await readCollection(STUDENTS_KEY, []);
+  const student = students.find((item) => normalizeEmail(item.email) === normalizedEmail && item.status !== "inactive");
+  if (!student) return null;
+  return {
+    role: "student",
+    email: normalizedEmail,
+    name: student.name || "Aluno",
+    studentId: student.id || ""
+  };
+}
+
+async function updateAccountPassword(reset, password) {
+  if (reset.role === "manager") {
+    const settings = await readCollection(SETTINGS_KEY, {});
+    await writeCollection(SETTINGS_KEY, {
+      ...settings,
+      adminPasswordHash: createPasswordHash(password),
+      adminPasswordUpdatedAt: new Date().toISOString()
+    });
+    return;
+  }
+
+  const students = await readCollection(STUDENTS_KEY, []);
+  const index = students.findIndex((item) => item.id === reset.studentId || normalizeEmail(item.email) === reset.email);
+  if (index < 0) {
+    const error = new Error("Conta nao encontrada.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  students[index] = {
+    ...students[index],
+    passwordHash: createPasswordHash(password),
+    accessStatus: "active",
+    inviteAcceptedAt: reset.type === "student_invite" ? new Date().toISOString() : students[index].inviteAcceptedAt || "",
+    passwordUpdatedAt: new Date().toISOString()
+  };
+  await writeCollection(STUDENTS_KEY, students);
+}
+
+function createApiRouter() {
+  const router = express.Router();
+
+  router.get("/health", async (_request, response) => {
+    const dbReady = await isDatabaseReady();
+    response.json({
+      ok: true,
+      storage: dbReady ? "postgres" : storageDriver === "postgres" ? "postgres-unavailable" : "json",
+      databaseReady: dbReady,
+      realtime: true,
+      mailConfigured: isMailConfigured()
+    });
+  });
+
+  router.post("/auth/login", async (request, response, next) => {
+    try {
+      const email = normalizeEmail(request.body?.email);
+      const password = String(request.body?.password || "");
+      if (!email || !password) {
+        response.status(400).json({ error: "Informe e-mail e senha." });
+        return;
+      }
+
+      if (email === ADMIN_EMAIL) {
+        const settings = await readCollection(SETTINGS_KEY, {});
+        const storedHash = settings.adminPasswordHash || hashPassword("Admin@2026");
+        if (!verifyPassword(password, storedHash)) {
+          response.status(401).json({ error: "E-mail ou senha invalidos." });
+          return;
+        }
+
+        if (!isBcryptHash(storedHash)) {
+          await writeCollection(SETTINGS_KEY, {
+            ...settings,
+            adminPasswordHash: createPasswordHash(password),
+            adminPasswordUpdatedAt: new Date().toISOString()
+          });
+        }
+
+        const user = {
+          role: "manager",
+          name: settings.trainerName || "Gestor Elite AS",
+          email,
+          trainerId: TRAINER_ID
+        };
+        response.json({ ok: true, token: createSessionToken(user), expiresIn: SESSION_TTL, user });
+        return;
+      }
+
+      const students = await readCollection(STUDENTS_KEY, []);
+      const student = students.find((item) => normalizeEmail(item.email) === email && item.status !== "inactive");
+      if (!student || !verifyPassword(password, student.passwordHash)) {
+        response.status(401).json({ error: "E-mail ou senha invalidos." });
+        return;
+      }
+
+      const hasPassword = Boolean(student.passwordHash);
+      const accessStatus = normalizeStudentAccessStatus(student.accessStatus, hasPassword);
+      if (accessStatus !== "active" || !hasPassword) {
+        response.status(403).json({ error: "Acesso ainda nao ativado. Use o link de convite para criar sua senha." });
+        return;
+      }
+
+      const user = {
+        role: "student",
+        name: student.name || "Aluno",
+        email,
+        trainerId: student.trainerId || TRAINER_ID,
+        studentId: student.id || ""
+      };
+      response.json({ ok: true, token: createSessionToken(user), expiresIn: SESSION_TTL, user });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post("/auth/forgot-password", async (request, response, next) => {
+    try {
+      const email = normalizeEmail(request.body?.email);
+      if (!email) {
+        response.status(400).json({ error: "Informe o e-mail da conta." });
+        return;
+      }
+
+      const account = await findAccountByEmail(email);
+      if (!account) {
+        response.status(404).json({ error: "Esse e-mail ainda nao tem uma conta cadastrada." });
+        return;
+      }
+
+      if (!isMailConfigured()) {
+        response.status(503).json({ error: "Envio de e-mail ainda nao configurado no servidor." });
+        return;
+      }
+
+      const { token } = await createAccountToken(account, PASSWORD_RESET_TTL_MS, "password_reset");
+      const resetUrl = buildResetUrl(request, token);
+      await sendPasswordResetEmail({
+        to: account.email,
+        name: account.name,
+        resetUrl
+      });
+
+      response.json({ ok: true, message: "Link de redefinicao enviado por e-mail." });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post("/auth/student-invite", requireManager, async (request, response, next) => {
+    try {
+      const studentId = String(request.body?.studentId || "");
+      const email = normalizeEmail(request.body?.email);
+      const students = await readCollection(STUDENTS_KEY, []);
+      const index = students.findIndex((item) => (studentId && item.id === studentId) || (email && normalizeEmail(item.email) === email));
+      if (index < 0) {
+        response.status(404).json({ error: "Aluno nao encontrado." });
+        return;
+      }
+
+      const student = students[index];
+      if (student.status === "inactive") {
+        response.status(400).json({ error: "Aluno inativo. Ative o cadastro antes de enviar convite." });
+        return;
+      }
+
+      const account = {
+        role: "student",
+        email: normalizeEmail(student.email),
+        name: student.name || "Aluno",
+        studentId: student.id || ""
+      };
+      if (!account.email) {
+        response.status(400).json({ error: "Aluno sem e-mail cadastrado." });
+        return;
+      }
+
+      const { token, reset } = await createAccountToken(account, STUDENT_INVITE_TTL_MS, "student_invite");
+      const inviteUrl = buildResetUrl(request, token);
+      const now = new Date().toISOString();
+      students[index] = {
+        ...student,
+        accessStatus: student.passwordHash ? "active" : "invite_pending",
+        inviteSentAt: now,
+        inviteExpiresAt: reset.expiresAt
+      };
+      await writeCollection(STUDENTS_KEY, students);
+
+      const mailConfigured = isMailConfigured();
+      if (mailConfigured) {
+        await sendStudentInviteEmail({
+          to: account.email,
+          name: account.name,
+          inviteUrl
+        });
+      }
+
+      response.json({
+        ok: true,
+        mailConfigured,
+        inviteUrl: mailConfigured ? "" : inviteUrl,
+        expiresAt: reset.expiresAt,
+        student: {
+          ...students[index],
+          passwordHash: students[index].passwordHash ? "[hash]" : ""
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post("/auth/contract-link", requireManager, async (request, response, next) => {
+    try {
+      const contractId = String(request.body?.contractId || "");
+      const contracts = await readCollection(CONTRACTS_KEY, []);
+      const contractIndex = contracts.findIndex((item) => item.id === contractId && item.status !== "canceled");
+      if (contractIndex < 0) {
+        response.status(404).json({ error: "Contrato nao encontrado." });
+        return;
+      }
+
+      const contract = contracts[contractIndex];
+      if (contract.status === "signed") {
+        response.status(400).json({ error: "Contrato ja assinado." });
+        return;
+      }
+
+      const students = await readCollection(STUDENTS_KEY, []);
+      const student = students.find((item) => item.id === contract.studentId && item.status !== "inactive");
+      if (!student || !student.email) {
+        response.status(400).json({ error: "Aluno sem e-mail ativo." });
+        return;
+      }
+
+      const account = {
+        role: "student",
+        email: normalizeEmail(student.email),
+        name: student.name || "Aluno",
+        studentId: student.id || ""
+      };
+      const { token, reset } = await createAccountToken(account, CONTRACT_LINK_TTL_MS, "contract_view", { contractId: contract.id });
+      const contractUrl = buildContractUrl(request, token);
+      const subject = String(request.body?.subject || "").replace(/\{link_contrato\}/g, contractUrl);
+      const message = String(request.body?.message || "").replace(/\{link_contrato\}/g, contractUrl);
+      const signature = String(request.body?.signature || "").replace(/\{link_contrato\}/g, contractUrl);
+      const mailConfigured = isMailConfigured();
+      if (mailConfigured) {
+        await sendContractEmail({
+          to: account.email,
+          name: account.name,
+          contractUrl,
+          subject,
+          message,
+          signature
+        });
+      }
+
+      contracts[contractIndex] = {
+        ...contract,
+        emailSentAt: mailConfigured ? new Date().toISOString() : contract.emailSentAt || "",
+        linkSentAt: new Date().toISOString(),
+        contractLinkExpiresAt: reset.expiresAt
+      };
+      await writeCollection(CONTRACTS_KEY, contracts);
+
+      response.json({
+        ok: true,
+        mailConfigured,
+        contractUrl: mailConfigured ? "" : contractUrl,
+        expiresAt: reset.expiresAt
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post("/auth/contract-token", async (request, response, next) => {
+    try {
+      const token = String(request.body?.token || "");
+      const tokenHash = hashToken(token);
+      const resets = await readCollection(PASSWORD_RESETS_KEY, []);
+      const now = new Date().toISOString();
+      const reset = resets.find((item) => item.type === "contract_view" && item.tokenHash === tokenHash && !item.usedAt && item.expiresAt > now);
+      if (!reset?.contractId) {
+        response.status(400).json({ error: "Link invalido ou expirado." });
+        return;
+      }
+
+      const contracts = await readCollection(CONTRACTS_KEY, []);
+      const contract = contracts.find((item) => item.id === reset.contractId && item.studentId === reset.studentId && item.status !== "canceled");
+      if (!contract) {
+        response.status(404).json({ error: "Contrato nao encontrado." });
+        return;
+      }
+
+      response.json({
+        ok: true,
+        studentId: reset.studentId,
+        contractId: reset.contractId,
+        email: reset.email
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post("/auth/contract-signature-meta", requireAuth, async (request, response) => {
+    response.json({
+      ok: true,
+      contractId: String(request.body?.contractId || ""),
+      studentId: String(request.body?.studentId || ""),
+      ip: request.ip || request.headers["x-forwarded-for"] || "",
+      userAgent: request.get("user-agent") || "",
+      acceptedAt: new Date().toISOString()
+    });
+  });
+
+  router.post("/auth/reset-password", async (request, response, next) => {
+    try {
+      const token = String(request.body?.token || "");
+      const password = String(request.body?.password || "");
+      if (!token || password.length < 8) {
+        response.status(400).json({ error: "Informe um link valido e uma senha com pelo menos 8 caracteres." });
+        return;
+      }
+
+      const tokenHash = hashToken(token);
+      const resets = await readCollection(PASSWORD_RESETS_KEY, []);
+      const now = new Date().toISOString();
+      const resetIndex = resets.findIndex((item) => item.tokenHash === tokenHash && !item.usedAt && item.expiresAt > now);
+      if (resetIndex < 0) {
+        response.status(400).json({ error: "Link invalido ou expirado. Solicite um novo link." });
+        return;
+      }
+
+      const reset = resets[resetIndex];
+      await updateAccountPassword(reset, password);
+      resets[resetIndex] = {
+        ...reset,
+        usedAt: now
+      };
+      await writeCollection(PASSWORD_RESETS_KEY, resets);
+
+      response.json({ ok: true, role: reset.role, email: reset.email, type: reset.type || "password_reset" });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.get("/collections/:collection", requireAuth, async (request, response, next) => {
+    try {
+      response.json(await readCollectionForAuth(request.params.collection, request.auth));
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.put("/collections/:collection", requireAuth, async (request, response, next) => {
+    try {
+      await writeCollectionForAuth(request.params.collection, request.body, request.auth);
+      response.json({ ok: true });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.get("/:collection", requireAuth, async (request, response, next) => {
+    try {
+      response.json(await readCollectionForAuth(request.params.collection, request.auth));
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.put("/:collection", requireAuth, async (request, response, next) => {
+    try {
+      await writeCollectionForAuth(request.params.collection, request.body, request.auth);
+      response.json({ ok: true });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  return router;
+}
+
+module.exports = {
+  createApiRouter
+};

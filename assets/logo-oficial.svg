@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Logo oficial do aplicativo</title>
+  <desc id="desc">Arquivo temporario para receber a logo oficial enviada pelo personal trainer.</desc>
+  <rect width="512" height="512" rx="112" fill="#0b6b57"/>
+  <rect x="58" y="58" width="396" height="396" rx="88" fill="#ffffff"/>
+  <path d="M154 336V176h114c46 0 78 31 78 75s-32 76-78 76h-58v9h-56Zm56-59h50c18 0 30-10 30-26s-12-25-30-25h-50v51Z" fill="#0b6b57"/>
+  <path d="M301 336V176h58v160h-58Z" fill="#e7a83e"/>
+  <path d="M154 374h204" stroke="#0b6b57" stroke-width="24" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,59 @@
+﻿{
+  "name": "Elite AS - Treinos e GestÃ£o",
+  "short_name": "Elite AS",
+  "description": "Aplicativo instalÃ¡vel Elite AS para alunos e gestor acompanharem treinos, agenda, atualizaÃ§Ãµes, contratos e evoluÃ§Ã£o.",
+  "id": "./",
+  "start_url": "./?v=53&source=pwa",
+  "scope": "./",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "display": "standalone",
+  "display_override": ["standalone", "fullscreen", "browser"],
+  "orientation": "portrait-primary",
+  "theme_color": "#050505",
+  "background_color": "#050505",
+  "categories": ["fitness", "health", "productivity"],
+  "icons": [
+    {
+      "src": "./assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Meu treino",
+      "short_name": "Treino",
+      "description": "Abrir a Ã¡rea do aluno",
+      "url": "./?v=53&area=aluno",
+      "icons": [{ "src": "./assets/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Painel do gestor",
+      "short_name": "Gestor",
+      "description": "Abrir o painel de acompanhamento",
+      "url": "./?v=53&area=gestor",
+      "icons": [{ "src": "./assets/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
+
