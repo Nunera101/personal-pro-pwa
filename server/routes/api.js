@@ -10,7 +10,7 @@ const authRateLimiter = rateLimit({
   legacyHeaders: false,
   message: { error: "Muitas tentativas. Tente novamente em 15 minutos." }
 });
-const { isDatabaseReady } = require("../db");
+const { isDatabaseReady, query: dbQuery } = require("../db");
 const { storageDriver } = require("../config");
 const { readCollection, writeCollection } = require("../storage/collections");
 const { isMailConfigured, sendPasswordResetEmail, sendStudentInviteEmail, sendContractEmail } = require("../mail");
@@ -233,6 +233,25 @@ function mergeStudentOwnedCollection(existing = [], incoming = [], auth = {}) {
   const remaining = existing.filter((item) => item.studentId !== auth.studentId);
   const owned = incoming.filter((item) => item.studentId === auth.studentId);
   return [...remaining, ...owned];
+}
+
+async function writeAuditLog(action, entityType, entityId, auth) {
+  try {
+    if (!await isDatabaseReady()) return;
+    await dbQuery(
+      "insert into audit_logs (action, entity_type, entity_id, trainer_id, actor_id, actor_role) values ($1, $2, $3, $4, $5, $6)",
+      [
+        action,
+        entityType,
+        String(entityId || ""),
+        auth.trainerId || TRAINER_ID,
+        auth.studentId || auth.trainerId || "",
+        auth.role || ""
+      ]
+    );
+  } catch (_error) {
+    // audit log failures are non-critical
+  }
 }
 
 async function readCollectionForAuth(collection, auth) {
@@ -670,6 +689,32 @@ function createApiRouter() {
   router.put("/collections/:collection", requireAuth, async (request, response, next) => {
     try {
       await writeCollectionForAuth(request.params.collection, request.body, request.auth);
+      await writeAuditLog("update", "collection", request.params.collection, request.auth);
+      response.json({ ok: true });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.delete("/collections/:collection/:id", requireAuth, async (request, response, next) => {
+    try {
+      const { collection, id } = request.params;
+      if (!COLLECTION_ALLOWLIST.has(collection)) {
+        response.status(404).json({ error: "Colecao indisponivel." });
+        return;
+      }
+      if (collection === STUDENTS_KEY && request.auth.role !== "manager") {
+        response.status(403).json({ error: "Acesso negado." });
+        return;
+      }
+      const existing = await readCollection(collection, []);
+      if (!Array.isArray(existing)) {
+        response.status(400).json({ error: "Operacao nao suportada para essa colecao." });
+        return;
+      }
+      const updated = existing.filter((item) => String(item.id || "") !== String(id));
+      await writeCollection(collection, updated);
+      await writeAuditLog("delete", "collection", id, request.auth);
       response.json({ ok: true });
     } catch (error) {
       next(error);
@@ -687,6 +732,7 @@ function createApiRouter() {
   router.put("/:collection", requireAuth, async (request, response, next) => {
     try {
       await writeCollectionForAuth(request.params.collection, request.body, request.auth);
+      await writeAuditLog("update", "collection", request.params.collection, request.auth);
       response.json({ ok: true });
     } catch (error) {
       next(error);
