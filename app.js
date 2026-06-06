@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
   const TRAINER_ID = "trainer-demo";
   const ADMIN = {
     email: "admin@personalpro.app",
@@ -2175,7 +2175,7 @@
       more: renderManagerMore,
       settings: renderSettings
     };
-    elements.managerContent.innerHTML = (renderers[state.managerMenu] || renderManagerHome)();
+    elements.managerContent.innerHTML = (renderers[state.managerMenu] || renderManagerHomeV2)();
   }
 
   function renderStudent() {
@@ -2225,75 +2225,6 @@
 
   function emptyState(title, description) {
     return `<div class="empty-state"><strong>${escapeHtml(title)}</strong><span>${escapeHtml(description)}</span></div>`;
-  }
-
-  function renderManagerHome() {
-    const today = todayISO();
-    const activeStudents = state.data.students.filter((student) => student.status === "active").length;
-    const todayWorkoutActivities = state.data.activities.filter((item) => item.type === "workout" && item.date === today);
-    const completedToday = state.data.sessions.filter((session) => isSameDay(session.finishedAt, today)).length;
-    const pendingUpdates = state.data.updates.filter((update) => update.status === "pending").length;
-    const overdueUpdates = state.data.updates.filter((update) => update.status === "pending" && update.dueDate < today);
-    const unsignedContracts = state.data.contracts.filter((contract) => contract.status === "pending" || contract.status === "viewed");
-    const studentsWithoutWorkout = state.data.students.filter((student) => !getStudentWorkouts(student.id, { publishedOnly: true }).length);
-    const recentMessages = getRecentMessages(4);
-    const agendaToday = getAgendaItemsForDate(today);
-    const pendingItems = [
-      ...overdueUpdates.map((update) => ({
-        title: `AtualizaÃ§Ã£o atrasada Â· ${getStudentName(update.studentId)}`,
-        meta: `Vencimento ${formatDate(update.dueDate)}`,
-        action: `<button class="mini-button" type="button" data-manager-nav="updates">Ver</button>`,
-        tone: "danger",
-        label: "Alta prioridade"
-      })),
-      ...unsignedContracts.slice(0, 4).map((contract) => ({
-        title: `Contrato pendente Â· ${getStudentName(contract.studentId)}`,
-        meta: contract.title,
-        action: `<button class="mini-button" type="button" data-open-student-profile="${contract.studentId}">Abrir</button>`,
-        tone: "info"
-      })),
-      ...studentsWithoutWorkout.slice(0, 4).map((student) => ({
-        title: `Aluno sem treino publicado Â· ${student.name}`,
-        meta: student.goal || "Sem objetivo",
-        action: `<button class="mini-button" type="button" data-open-student-profile="${student.id}">Abrir</button>`,
-        tone: "info"
-      }))
-    ].slice(0, 6);
-
-    return `
-      <div class="content-stack">
-        ${pageHeader("Dashboard", "VisÃ£o geral da operaÃ§Ã£o do personal", '<button class="primary-action" type="button" data-open-activity-form>Agendar atividade</button>')}
-
-        <section class="dashboard-grid dashboard-priority">
-          <div class="panel">
-            <div class="section-title"><h3>PendÃªncias crÃ­ticas</h3><button class="mini-button" type="button" data-manager-nav="updates">Ver todas</button></div>
-            ${pendingItems.length ? `<div class="entity-list">${pendingItems.map(renderOperationalItem).join("")}</div>` : emptyState("OperaÃ§Ã£o em dia", "Sem pendÃªncias importantes para agora.")}
-          </div>
-          <div class="panel">
-            <div class="section-title"><h3>Agenda de hoje</h3><button class="mini-button" type="button" data-manager-nav="agenda">Abrir agenda</button></div>
-            ${agendaToday.length ? `<div class="entity-list">${agendaToday.slice(0, 5).map((item) => renderAgendaCompact(item, true)).join("")}</div>` : emptyState("Agenda livre hoje", "Novos treinos e atualizaÃ§Ãµes aparecerÃ£o aqui.")}
-          </div>
-        </section>
-
-        <section class="metric-grid">
-          ${metricCard("Alunos ativos", activeStudents)}
-          ${metricCard("Treinos hoje", todayWorkoutActivities.length)}
-          ${metricCard("ConcluÃ­dos hoje", completedToday)}
-          ${metricCard("AtualizaÃ§Ãµes pendentes", pendingUpdates)}
-          ${metricCard("Mensagens", state.data.messages.length)}
-        </section>
-
-        <section class="panel">
-          <div class="section-title"><h3>Acesso rÃ¡pido</h3><span class="small-text">Atalhos operacionais</span></div>
-          <div class="quick-grid">
-            <button class="quick-link" type="button" data-open-student-form><strong>Novo aluno</strong><span>Cadastrar e liberar acesso</span></button>
-            <button class="quick-link" type="button" data-open-workout-form><strong>Novo padrÃ£o</strong><span>Criar modelo base</span></button>
-            <button class="quick-link" type="button" data-open-exercise-form><strong>Novo exercÃ­cio</strong><span>Adicionar Ã  biblioteca</span></button>
-            ${quickLink("Mensagens", recentMessages.length ? "Conversas recentes" : "Abrir relacionamento", "messages")}
-          </div>
-        </section>
-      </div>
-    `;
   }
 
   function renderOperationalItem(item) {
