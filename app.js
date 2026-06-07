@@ -56,6 +56,7 @@
     contractFilterOpen: false,
     messageFilters: { q: "", status: "all" },
     financeFilters: { q: "", status: "all", month: todayISO().slice(0, 7) },
+    financeFilterOpen: false,
     dietFilters: { q: "", status: "all", objective: "all" },
     activeSession: null,
     rest: null,
@@ -2783,11 +2784,12 @@
     const stats = financeStats(allRecords);
     const previousStats = financeStats(buildFinanceRecords(financePreviousMonth(month)));
     const paidDelta = previousStats.paidTotal ? Math.round(((stats.paidTotal - previousStats.paidTotal) / previousStats.paidTotal) * 100) : stats.paidTotal ? 100 : 0;
+    const hasActiveFilters = filters.status !== "all";
+    const filterPanelOpen = state.financeFilterOpen || hasActiveFilters;
     return `
       <div class="content-stack finance-workspace">
         <section class="finance-hero">
           <div>
-            <span class="eyebrow">Elite AS</span>
             <h3>Financeiro</h3>
             <p>Acompanhe mensalidades, faturamento e recebimentos</p>
           </div>
@@ -2806,14 +2808,14 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 21l-4.3-4.3M10.8 18a7.2 7.2 0 1 1 0-14.4 7.2 7.2 0 0 1 0 14.4Z"/></svg>
             <input type="search" data-finance-filter="q" placeholder="Buscar aluno ou pagamento..." value="${escapeHtml(filters.q)}" />
           </label>
-          ${financeFilterSelect("status", "Filtrar", icons.settings, [
-            ["all", "Todos"],
-            ["paid", "Pago"],
-            ["pending", "Pendente"],
-            ["overdue", "Atrasado"],
-            ["upcoming", "Próximos vencimentos"]
-          ], filters.status)}
+          <button class="filter-btn" type="button" data-toggle-finance-filter>
+            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+            <span>Filtrar</span>
+            ${hasActiveFilters ? `<span class="filter-active-pill">1</span>` : ""}
+            <svg class="filter-chevron${filterPanelOpen ? " is-open" : ""}" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
         </div>
+        ${filterPanelOpen ? `<div class="finance-filter-grid">${financeFilterSelect("status", "Status", icons.updates, [["all", "Todos"], ["paid", "Pago"], ["pending", "Pendente"], ["overdue", "Atrasado"], ["upcoming", "Próximos vencimentos"]], filters.status)}</div>` : ""}
 
         <section class="finance-month-panel">
           <div class="section-title">
@@ -2992,7 +2994,7 @@
       weeks[index] += moneyValue(record.amount);
     });
     const bestIndex = weeks.reduce((best, value, index) => (value > weeks[best] ? index : best), 0);
-    return `${bestIndex + 1}Âª semana · ${currencyValue(weeks[bestIndex])}`;
+    return `${bestIndex + 1}ª semana · ${currencyValue(weeks[bestIndex])}`;
   }
 
   function financeInsightCard(icon, title, value, subtitle, tone = "") {
@@ -7472,7 +7474,8 @@
       if (target.matches("[data-open-payment-detail]")) openPaymentDetail(target.dataset.openPaymentDetail);
       if (target.matches("[data-open-payment-receipt]")) openPaymentReceipt(target.dataset.openPaymentReceipt);
       if (target.matches("[data-finance-charge]")) chargeFinanceRecord(target.dataset.financeCharge);
-      if (target.matches("[data-finance-show-all]")) { state.financeFilters.q = ""; state.financeFilters.status = "all"; renderManager(); }
+      if (target.matches("[data-finance-show-all]")) { state.financeFilters.q = ""; state.financeFilters.status = "all"; state.financeFilterOpen = false; renderManager(); }
+      if (target.matches("[data-toggle-finance-filter]")) { state.financeFilterOpen = !state.financeFilterOpen; renderManager(); }
       if (target.dataset.financeMonthShift) {
         state.financeFilters.month = Number(target.dataset.financeMonthShift) > 0 ? financeNextMonth(state.financeFilters.month) : financePreviousMonth(state.financeFilters.month);
         renderManager();
@@ -7484,7 +7487,7 @@
     });
     document.addEventListener("change", (event) => {
       const target = event.target;
-      if (target.matches("[data-finance-filter]")) { state.financeFilters[target.dataset.financeFilter] = target.value; renderManager(); }
+      if (target.matches("[data-finance-filter]")) { state.financeFilters[target.dataset.financeFilter] = target.value; state.financeFilterOpen = true; renderManager(); }
     });
     document.addEventListener("submit", async (event) => {
       event.preventDefault();

@@ -256,7 +256,6 @@
   stroke-width: 3;
   stroke-linecap: round;
   stroke-linejoin: round;
-  filter: drop-shadow(0 0.38rem 0.8rem rgba(245, 181, 27, 0.22));
 }
 
 .finance-chart-dot {
@@ -513,6 +512,21 @@
   font-size: 0.78rem;
 }
 
+.finance-filter-grid {
+  display: grid;
+  gap: 0.62rem;
+  padding: 0.72rem 0.82rem;
+  border: 1px solid var(--line);
+  border-radius: 0.82rem;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.064), rgba(255, 255, 255, 0.024)),
+    rgba(12, 12, 12, 0.88);
+}
+
+.finance-workspace .filter-chevron.is-open {
+  transform: rotate(180deg);
+}
+
 .finance-detail,
 .finance-receipt {
   display: grid;
@@ -608,13 +622,13 @@
 }
 
 @media (max-width: 57.99rem) {
-  .finance-hero,
-  .finance-toolbar {
-    grid-template-columns: 1fr;
+  .finance-hero {
+    grid-template-columns: 1fr auto;
+    align-items: center;
   }
 
-  .finance-hero .primary-action {
-    width: 100%;
+  .finance-toolbar {
+    grid-template-columns: 1fr;
   }
 
   .finance-summary-grid {
