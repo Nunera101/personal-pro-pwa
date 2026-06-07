@@ -6383,3 +6383,8 @@ body::before {
   }
 }
 
+/* ── Eyebrow brand text: remove from all screens ── */
+.eyebrow {
+  display: none !important;
+}
+

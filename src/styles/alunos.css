@@ -1097,6 +1097,125 @@
   height: 1.35rem !important;
 }
 
+/* ═══════════════════════════════════════════════
+   ALUNOS v54 — flat/chapado, sem liquid glass
+   ═══════════════════════════════════════════════ */
+
+/* Search field: flat */
+.student-search-field {
+  background: #1A1A1A !important;
+  box-shadow: none !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.student-search-field:focus-within {
+  border-color: rgba(245, 159, 11, 0.5) !important;
+  box-shadow: 0 0 0 2px rgba(245, 159, 11, 0.08) !important;
+}
+
+/* Filter pills: flat */
+.student-filter {
+  background: #1A1A1A !important;
+  box-shadow: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Student card: flat, no glow, no radial orb */
+.student-card {
+  background: #1A1A1A !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 16px !important;
+  padding: 14px !important;
+  gap: 10px !important;
+}
+
+/* Avatar: no glow ring */
+.student-card .entity-avatar {
+  width: 52px !important;
+  height: 52px !important;
+  min-width: 52px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: none !important;
+}
+
+/* Card side: badge only (no menu alongside) */
+.student-card-side {
+  grid-template-columns: auto !important;
+  justify-content: end !important;
+  align-items: start !important;
+}
+
+.student-card-side .badge {
+  font-size: 0.7rem !important;
+  padding: 3px 8px !important;
+}
+
+/* Goal icon: target circle */
+.student-goal svg {
+  width: 14px !important;
+  height: 14px !important;
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 1.5 !important;
+  color: #F59E0B !important;
+}
+
+/* Info blocks: compact */
+.student-card-info {
+  padding-top: 10px !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+.student-info-block {
+  padding-inline: 0 !important;
+  border-left: 0 !important;
+  gap: 0.15rem !important;
+}
+
+.student-info-block:not(:first-child) {
+  border-left: 1px solid rgba(255, 255, 255, 0.06) !important;
+  padding-left: 0.5rem !important;
+}
+
+/* Action buttons: gold outline */
+.student-card-actions .secondary-action {
+  background: transparent !important;
+  border: 1px solid rgba(245, 159, 11, 0.4) !important;
+  color: #F59E0B !important;
+  font-size: 0.8rem !important;
+  min-height: 40px !important;
+}
+
+.student-card-actions .secondary-action:hover {
+  background: rgba(245, 159, 11, 0.08) !important;
+}
+
+.student-card-actions .secondary-action svg {
+  color: #F59E0B !important;
+}
+
+/* Flat hero button */
+.students-hero .primary-action {
+  box-shadow: none !important;
+}
+
+/* List gap */
+.student-card-list {
+  gap: 10px !important;
+}
+
+/* Hero eyebrow gone (hidden globally via base.css .eyebrow rule) */
+
+/* Students list panel: no extra padding */
+.students-list-panel {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+
 .student-profile-hero {
   position: relative !important;
   padding: clamp(0.82rem, 3.2vw, 1.1rem) !important;

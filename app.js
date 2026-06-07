@@ -136,6 +136,8 @@
     finance: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v12H4zM4 10h16M17 15h1M7 7V5h10v2"/></svg>',
     diet: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v8M5 3v8M11 3v8M5 11h6l-1 10H6zM16 4c3 1 4 4 3 7-1 4-5 5-7 3 0-4 1-8 4-10Z"/></svg>',
     more: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM19 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM5 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"/></svg>',
+    goal: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
+    link: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>',
     logout: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>'
   };
 
@@ -3190,7 +3192,6 @@
       <div class="content-stack students-workspace">
         <section class="students-hero">
           <div>
-            <span class="eyebrow">Elite AS</span>
             <h3>Alunos</h3>
             <p>Gerencie alunos, treinos e evolução.</p>
           </div>
@@ -3235,15 +3236,9 @@
           </div>
         </section>
 
-        <section class="panel students-list-panel">
-          <div class="section-title">
-            <div>
-              <h3>Alunos cadastrados</h3>
-              <span class="small-text">${students.length} aluno(s) encontrado(s). Abra o perfil para detalhes.</span>
-            </div>
-          </div>
+        <div class="students-list-panel">
           ${students.length ? `<div class="student-card-list">${students.map(renderStudentRow).join("")}</div>` : emptyState("Nenhum aluno encontrado", state.search ? "Ajuste a busca ou os filtros para ver mais alunos." : "Crie um aluno para publicar treinos e acompanhar evolução.", icons.students)}
-        </section>
+        </div>
       </div>
     `;
   }
@@ -3344,29 +3339,20 @@
           ${studentAvatar(student)}
           <div class="student-card-main">
             <strong>${escapeHtml(student.name)}</strong>
-            <span class="student-goal">${icons.progress}${escapeHtml(student.goal || "Sem objetivo")}</span>
+            <span class="student-goal">${icons.goal}${escapeHtml(student.goal || "Sem objetivo")}</span>
           </div>
           <div class="student-card-side">
             ${statusBadge(status.label, status.tone)}
-            <details class="action-menu student-card-menu">
-              <summary aria-label="Mais ações">${icons.more}</summary>
-              <div>
-                <button class="mini-button" type="button" data-open-student-form="${student.id}">Editar dados</button>
-                <button class="mini-button" type="button" data-send-student-invite="${student.id}">${escapeHtml(inviteLabel)}</button>
-                <button class="mini-button" type="button" data-open-contract-form="${student.id}">Enviar contrato</button>
-                <button class="mini-button is-danger" type="button" data-delete-student="${student.id}">Remover aluno</button>
-              </div>
-            </details>
           </div>
         </div>
         <div class="student-card-info">
           ${renderStudentInfoBlock(icons.agenda, "Próx. atualização", nextUpdateLabel)}
-          ${renderStudentInfoBlock(icons.workouts, "Ãšltimo treino", lastWorkoutLabel)}
+          ${renderStudentInfoBlock(icons.workouts, "Último treino", lastWorkoutLabel)}
           ${renderStudentInfoBlock(icons.contracts, "Contrato", contract.plan || contract.label)}
         </div>
         <div class="student-card-actions">
           <button class="secondary-action student-primary-link" type="button" data-open-student-profile="${student.id}">${icons.profile}<span>Abrir perfil</span></button>
-          <button class="secondary-action student-secondary-link" type="button" data-send-student-invite="${student.id}">${icons.contracts}<span>${escapeHtml(inviteLabel)}</span></button>
+          <button class="secondary-action student-secondary-link" type="button" data-send-student-invite="${student.id}">${icons.link}<span>${escapeHtml(inviteLabel)}</span></button>
         </div>
       </article>
     `;
