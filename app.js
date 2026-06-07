@@ -58,6 +58,7 @@
     financeFilters: { q: "", status: "all", month: todayISO().slice(0, 7) },
     financeFilterOpen: false,
     dietFilters: { q: "", status: "all", objective: "all" },
+    dietFilterOpen: false,
     activeSession: null,
     rest: null,
     restTimer: null,
@@ -3032,6 +3033,9 @@
       .sort((a, b) => String(b.updatedAt || b.lastUpdatedAt).localeCompare(String(a.updatedAt || a.lastUpdatedAt)));
     const plans = allPlans.filter((plan) => dietPlanMatchesFilters(plan, filters));
     const stats = dietStats(allPlans);
+    const hasActiveFilters = filters.status !== "all" || filters.objective !== "all";
+    const activeFilterCount = [filters.status !== "all", filters.objective !== "all"].filter(Boolean).length;
+    const filterPanelOpen = state.dietFilterOpen || hasActiveFilters;
     return `
       <div class="content-stack diet-workspace">
         <section class="diet-hero">
@@ -3040,8 +3044,11 @@
             <h3>Dieta</h3>
             <p>Organize planos alimentares e acompanhamento</p>
           </div>
-          <button class="btn-action-header" type="button" data-open-diet-form>🍎<span>Novo plano alimentar</span></button>
         </section>
+
+        <button class="diet-new-btn" type="button" data-open-diet-form>
+          <span aria-hidden="true">🍎</span><span>Novo plano alimentar</span>
+        </button>
 
         <section class="metrics-row metrics-row--3">
           ${stdMetricCard("Planos ativos", stats.active, stats.active ? "em acompanhamento" : "nenhum ativo", "success")}
@@ -3054,7 +3061,16 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 21l-4.3-4.3M10.8 18a7.2 7.2 0 1 1 0-14.4 7.2 7.2 0 0 1 0 14.4Z"/></svg>
             <input type="search" data-diet-filter="q" placeholder="Buscar plano alimentar..." value="${escapeHtml(filters.q)}" />
           </label>
-          ${dietFilterSelect("status", "Filtrar", icons.settings, [
+          <button class="filter-btn" type="button" data-toggle-diet-filter>
+            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+            <span>Filtrar</span>
+            ${hasActiveFilters ? `<span class="filter-active-pill">${activeFilterCount}</span>` : ""}
+            <svg class="filter-chevron${filterPanelOpen ? " is-open" : ""}" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+        </div>
+        ${filterPanelOpen ? `
+        <div class="diet-filter-grid">
+          ${dietFilterSelect("status", "Status", icons.updates, [
             ["all", "Todos"],
             ["active", "Ativo"],
             ["review_pending", "Revisão pendente"],
@@ -3072,7 +3088,7 @@
             ["Condicionamento", "Condicionamento"],
             ["Outro", "Outro"]
           ], filters.objective)}
-        </div>
+        </div>` : ""}
 
         <section class="diet-list-panel">
           <div class="section-title">
@@ -3153,8 +3169,8 @@
           </details>
         </div>
         <div class="diet-plan-grid">
-          <article>${icons.agenda}<span>Protocolo atual</span><strong>${escapeHtml(plan.protocol || plan.title || "Plano alimentar")}</strong></article>
-          <article>${icons.diet}<span>Refeições</span><strong>${escapeHtml(String(mealCount))} refeição(ões)/dia</strong></article>
+          <article>${icons.agenda}<span>Protocolo / kcal</span><strong>${escapeHtml(plan.protocol || plan.title || "Plano alimentar")}${plan.calories ? ` · ${escapeHtml(String(plan.calories))} kcal` : ""}</strong></article>
+          <article>${icons.diet}<span>Refeições/dia</span><strong>${escapeHtml(String(mealCount))}</strong></article>
           <article>${icons.today}<span>Última atualização</span><strong>${formatShortDate(String(plan.lastUpdatedAt || plan.updatedAt).slice(0, 10))}</strong></article>
           <article>${icons.agenda}<span>Próxima revisão</span><strong>${escapeHtml(nextReview)}</strong></article>
         </div>
@@ -7540,7 +7556,8 @@
       if (target.matches("[data-send-diet-link]")) sendDietPlanLink(target.dataset.sendDietLink);
       if (target.matches("[data-duplicate-diet]")) duplicateDietPlan(target.dataset.duplicateDiet);
       if (target.matches("[data-archive-diet]")) archiveDietPlan(target.dataset.archiveDiet);
-      if (target.matches("[data-diet-show-all]")) { state.dietFilters = { q: "", status: "all", objective: "all" }; renderManager(); }
+      if (target.matches("[data-diet-show-all]")) { state.dietFilters = { q: "", status: "all", objective: "all" }; state.dietFilterOpen = false; renderManager(); }
+      if (target.matches("[data-toggle-diet-filter]")) { state.dietFilterOpen = !state.dietFilterOpen; renderManager(); }
     });
     document.addEventListener("input", (event) => {
       const target = event.target;

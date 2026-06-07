@@ -4,10 +4,6 @@
 }
 
 .diet-hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: end;
-  gap: 1rem;
   padding-top: 0.2rem;
 }
 
@@ -24,17 +20,40 @@
   font-size: clamp(0.95rem, 2.5vw, 1.08rem);
 }
 
-.diet-hero .primary-action {
-  min-height: 3rem;
-  padding-inline: 1.2rem;
+.diet-new-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.52rem;
+  width: 100%;
+  min-height: 2.9rem;
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: var(--radius);
   background: linear-gradient(135deg, #f7d06a, #f5b51b 58%, #c7810d);
   color: #0b0904;
-  box-shadow: none;
+  font-size: 0.95rem;
+  font-weight: 820;
+  cursor: pointer;
 }
 
-.diet-hero .primary-action svg {
-  width: 1.18rem;
-  height: 1.18rem;
+.diet-filter-grid {
+  display: grid;
+  gap: 0.62rem;
+  padding: 0.72rem 0.82rem;
+  border: 1px solid var(--line);
+  border-radius: 0.82rem;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.064), rgba(255, 255, 255, 0.024)),
+    rgba(12, 12, 12, 0.88);
+}
+
+.diet-workspace .filter-chevron {
+  transition: transform 200ms ease;
+}
+
+.diet-workspace .filter-chevron.is-open {
+  transform: rotate(180deg);
 }
 
 .diet-summary-grid {
@@ -108,7 +127,6 @@
   color: var(--danger);
 }
 
-.diet-toolbar,
 .diet-list-panel,
 .diet-insights-panel {
   display: grid;
@@ -120,11 +138,6 @@
     linear-gradient(145deg, rgba(255, 255, 255, 0.062), rgba(255, 255, 255, 0.024)),
     rgba(12, 12, 12, 0.9);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-}
-
-.diet-toolbar {
-  grid-template-columns: minmax(0, 1fr) minmax(10.5rem, 0.32fr) minmax(11rem, 0.32fr);
-  align-items: stretch;
 }
 
 .diet-search-field,
@@ -455,15 +468,6 @@
 }
 
 @media (max-width: 57.99rem) {
-  .diet-hero,
-  .diet-toolbar {
-    grid-template-columns: 1fr;
-  }
-
-  .diet-hero .primary-action {
-    width: 100%;
-  }
-
   .diet-summary-grid {
     gap: 0.52rem;
   }
