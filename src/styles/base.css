@@ -33,6 +33,7 @@ html {
 body {
   min-height: 100vh;
   margin: 0;
+  overflow-x: hidden;
   color: var(--ink);
   background:
     linear-gradient(180deg, rgba(11, 107, 87, 0.09), rgba(246, 247, 242, 0) 30rem),
@@ -65,6 +66,11 @@ h2,
 h3,
 p {
   margin: 0;
+}
+
+h1 {
+  font-size: clamp(28px, 8vw, 40px);
+  line-height: 1.1;
 }
 
 .startup-splash {
@@ -500,7 +506,7 @@ svg {
   top: 0;
   z-index: 20;
   gap: 0.8rem;
-  padding: max(0.9rem, env(safe-area-inset-top, 0px)) 1rem 0.9rem;
+  padding: max(0.9rem, env(safe-area-inset-top, 0px)) clamp(12px, 4vw, 20px) 0.9rem;
   border-bottom: 1px solid rgba(217, 225, 221, 0.78);
   background: rgba(246, 247, 242, 0.94);
   backdrop-filter: blur(18px);
@@ -538,7 +544,7 @@ svg {
 .workspace-layout {
   width: min(100%, 76rem);
   margin: 0 auto;
-  padding: 1rem;
+  padding: 1rem clamp(12px, 4vw, 20px);
 }
 
 .side-nav {
@@ -830,13 +836,24 @@ svg {
 .workout-main strong,
 .quick-main strong {
   display: block;
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .entity-main span,
 .agenda-main span,
 .workout-main span,
-.quick-main span,
+.quick-main span {
+  display: block;
+  margin-top: 0.18rem;
+  font-size: 0.84rem;
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .small-text {
   display: block;
   margin-top: 0.18rem;
@@ -2086,7 +2103,7 @@ body::before {
 
 .workspace-header {
   min-height: 4.5rem;
-  padding: max(0.75rem, env(safe-area-inset-top, 0px)) 1rem 0.75rem;
+  padding: max(0.75rem, env(safe-area-inset-top, 0px)) clamp(12px, 4vw, 20px) 0.75rem;
   border-bottom-color: var(--line);
   background:
     linear-gradient(120deg, rgba(255, 255, 255, 0.065) 0 31%, transparent 31% 100%),
@@ -2719,7 +2736,7 @@ body::before {
   top: 0;
   z-index: 24;
   min-height: 3.85rem;
-  padding: max(0.52rem, env(safe-area-inset-top, 0px)) 0.85rem 0.52rem;
+  padding: max(0.52rem, env(safe-area-inset-top, 0px)) clamp(12px, 4vw, 20px) 0.52rem;
 }
 
 .manager-header .brand-inline {
@@ -3127,7 +3144,7 @@ button.dashboard-metric {
 
 @media (max-width: 57.99rem) {
   .manager-workspace .workspace-layout {
-    padding: 0.7rem 0.78rem 1rem;
+    padding: 0.7rem clamp(12px, 4vw, 20px) 1rem;
   }
 
   .dashboard-hero {
@@ -3229,7 +3246,7 @@ button.dashboard-metric {
 
 .manager-header {
   min-height: 3.45rem;
-  padding: max(0.45rem, env(safe-area-inset-top, 0px)) 0.74rem 0.45rem;
+  padding: max(0.45rem, env(safe-area-inset-top, 0px)) clamp(12px, 4vw, 20px) 0.45rem;
 }
 
 .manager-header .brand-inline {
