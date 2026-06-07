@@ -286,14 +286,14 @@
 }
 
 .update-title-block em {
-  color: rgba(247, 244, 235, 0.34);
+  color: rgba(247, 244, 235, 0.72);
   font-style: normal;
 }
 
 .update-card-menu summary {
   display: inline-grid;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.75rem;
+  height: 2.75rem;
   place-items: center;
   border-radius: 0.75rem;
 }
@@ -760,7 +760,7 @@
 
 .updates-page .update-filter-label,
 .updates-page .updates-extra-filter summary small {
-  color: rgba(247, 244, 235, 0.58) !important;
+  color: rgba(247, 244, 235, 0.72) !important;
   font-size: clamp(0.62rem, 2.25vw, 0.76rem) !important;
   line-height: 1.1 !important;
 }
@@ -786,7 +786,7 @@
   gap: 0.52rem !important;
   width: max-content !important;
   max-width: 100% !important;
-  min-height: 2.38rem !important;
+  min-height: 2.75rem !important;
   padding: 0.42rem 0.62rem !important;
   cursor: pointer !important;
   list-style: none !important;
@@ -814,8 +814,8 @@
   width: max-content !important;
   max-width: 100% !important;
   box-sizing: border-box !important;
-  height: 2.38rem !important;
-  min-height: 2.38rem !important;
+  height: 2.75rem !important;
+  min-height: 2.75rem !important;
   padding: 0.42rem 0.62rem !important;
 }
 
@@ -883,13 +883,13 @@
 }
 
 .updates-page .update-card-menu summary {
-  width: 1.9rem !important;
-  height: 1.9rem !important;
-  min-height: 1.9rem !important;
+  width: 2.75rem !important;
+  height: 2.75rem !important;
+  min-height: 2.75rem !important;
   padding: 0 !important;
   border: 0 !important;
   background: transparent !important;
-  color: rgba(247, 244, 235, 0.62) !important;
+  color: rgba(247, 244, 235, 0.72) !important;
   box-shadow: none !important;
 }
 
@@ -967,7 +967,7 @@
 }
 
 .updates-page .update-primary-action {
-  min-height: clamp(2.34rem, 9.5vw, 2.86rem) !important;
+  min-height: clamp(2.75rem, 9.5vw, 3rem) !important;
   border-radius: 0.68rem !important;
   background: rgba(5, 5, 5, 0.18) !important;
   border-color: rgba(245, 184, 46, 0.58) !important;

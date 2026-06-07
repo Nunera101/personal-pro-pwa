@@ -2015,7 +2015,7 @@ body::before {
 
 .field input::placeholder,
 .field textarea::placeholder {
-  color: rgba(247, 244, 235, 0.38);
+  color: rgba(247, 244, 235, 0.65);
 }
 
 .field input:focus,
@@ -3630,7 +3630,7 @@ button.dashboard-metric {
 
 .dashboard-metric small {
   max-width: 100%;
-  color: rgba(247, 244, 235, 0.62);
+  color: rgba(247, 244, 235, 0.72);
 }
 
 .dashboard-panel {
@@ -4310,7 +4310,7 @@ button.dashboard-metric {
 .contract-primary-action,
 .finance-primary-action,
 .finance-secondary-action {
-  min-height: 2.28rem;
+  min-height: 2.75rem;
   font-size: 0.76rem;
 }
 
@@ -4941,7 +4941,7 @@ button.dashboard-metric {
 
 .dashboard-metric small {
   margin-top: 0.2rem;
-  color: rgba(244, 241, 234, 0.58) !important;
+  color: rgba(244, 241, 234, 0.72) !important;
   font-size: 0.66rem !important;
   line-height: 1.16 !important;
 }
@@ -5022,7 +5022,7 @@ button.dashboard-metric {
 
 .dashboard-pending-actions .mini-button,
 .dashboard-pending-actions .badge {
-  min-height: 1.7rem !important;
+  min-height: 2.75rem !important;
   padding: 0.25rem 0.46rem !important;
   font-size: 0.62rem !important;
 }
@@ -5158,7 +5158,7 @@ button.dashboard-metric {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 0.2rem;
-  color: rgba(244, 241, 234, 0.56);
+  color: rgba(244, 241, 234, 0.72);
   font-size: 0.62rem;
   font-weight: 800;
   text-align: center;
@@ -5373,7 +5373,7 @@ button.dashboard-metric {
 }
 
 .dashboard-hero .primary-action {
-  min-height: 2.62rem !important;
+  min-height: 2.75rem !important;
   padding: 0.55rem 0.88rem !important;
   border-radius: 0.78rem !important;
   font-size: 0.8rem !important;
@@ -5491,7 +5491,17 @@ button.dashboard-metric {
   flex-wrap: nowrap;
 }
 
-.dashboard-pending-actions .mini-button,
+.dashboard-pending-actions .mini-button {
+  min-height: 2.75rem !important;
+  max-width: 5.9rem;
+  padding: 0.18rem 0.36rem !important;
+  overflow: hidden;
+  font-size: 0.55rem !important;
+  line-height: 1 !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .dashboard-pending-actions .badge {
   min-height: 1.42rem !important;
   max-width: 5.9rem;
@@ -5535,7 +5545,7 @@ button.dashboard-metric {
 
 .dashboard-quick-link {
   grid-template-columns: auto minmax(0, 1fr) auto !important;
-  min-height: 2.28rem !important;
+  min-height: 2.75rem !important;
   padding: 0.32rem 0.44rem !important;
   gap: 0.18rem 0.42rem !important;
   border-radius: 0.62rem !important;
@@ -5639,8 +5649,8 @@ button.dashboard-metric {
 
   .manager-header .notification-button {
     display: grid !important;
-    width: 2.12rem !important;
-    height: 2.12rem !important;
+    width: 2.75rem !important;
+    height: 2.75rem !important;
   }
 
   .manager-header .notification-button::after {
@@ -5651,8 +5661,8 @@ button.dashboard-metric {
   }
 
   .manager-header .avatar-button {
-    width: 2.22rem !important;
-    height: 2.22rem !important;
+    width: 2.75rem !important;
+    height: 2.75rem !important;
   }
 
   .manager-header .brand-logo-wordmark {
@@ -5739,6 +5749,7 @@ button.dashboard-metric {
   align-items: center;
   gap: 8px;
   width: auto !important;
+  min-height: 44px;
   padding: 12px 18px;
   background: linear-gradient(135deg, #F5C542 0%, #F59E0B 100%);
   color: #1a1a1a;
@@ -5802,7 +5813,7 @@ button.dashboard-metric {
 
 .metric-card .mc-sub {
   font-size: 11px;
-  color: #6b7280;
+  color: #9ca3af;
   margin-top: 4px;
 }
 
@@ -5826,6 +5837,7 @@ button.dashboard-metric {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  min-height: 44px;
   padding: 11px 16px;
   white-space: nowrap;
   background: #1a1a1a;

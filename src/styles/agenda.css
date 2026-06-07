@@ -334,7 +334,7 @@
   align-items: center;
   gap: 0.58rem;
   min-height: 4.05rem;
-  padding: 0.55rem;
+  padding: 0.75rem 0.55rem;
   border: 1px solid var(--line);
   border-left-width: 0.22rem;
   border-radius: 0.85rem;
@@ -651,8 +651,8 @@
 }
 
 .agenda-view-tabs button {
-  min-height: 2.58rem !important;
-  color: rgba(247, 244, 235, 0.58) !important;
+  min-height: 2.75rem !important;
+  color: rgba(247, 244, 235, 0.72) !important;
   font-size: 0.88rem !important;
   font-weight: 780 !important;
 }
@@ -665,15 +665,15 @@
 
 .agenda-period-nav {
   display: grid !important;
-  grid-template-columns: 2.48rem minmax(0, 1fr) 2.48rem auto !important;
+  grid-template-columns: 2.75rem minmax(0, 1fr) 2.75rem auto !important;
   gap: 0.42rem !important;
-  min-height: 2.62rem !important;
+  min-height: 2.75rem !important;
 }
 
 .agenda-period-nav .icon-button,
 .agenda-period-label,
 .agenda-today-button {
-  min-height: 2.42rem !important;
+  min-height: 2.75rem !important;
   border-radius: 0.72rem !important;
   border-color: rgba(255, 255, 255, 0.1) !important;
   background:
@@ -682,7 +682,7 @@
 }
 
 .agenda-period-nav .icon-button {
-  width: 2.48rem !important;
+  width: 2.75rem !important;
   padding: 0 !important;
 }
 
@@ -731,7 +731,7 @@
 
 .agenda-week-day {
   min-width: 0 !important;
-  min-height: 2.62rem !important;
+  min-height: 2.75rem !important;
   padding: 0.22rem 0.08rem !important;
 }
 
@@ -741,7 +741,7 @@
 }
 
 .agenda-week-day span {
-  color: rgba(247, 244, 235, 0.58) !important;
+  color: rgba(247, 244, 235, 0.72) !important;
   font-size: clamp(0.54rem, 1.9vw, 0.68rem) !important;
 }
 
@@ -751,7 +751,7 @@
 
 .agenda-hour-label,
 .agenda-week-slot {
-  min-height: clamp(2.54rem, 10.2vw, 3.35rem) !important;
+  min-height: clamp(2.75rem, 10.2vw, 3.35rem) !important;
 }
 
 .agenda-hour-label {
@@ -884,7 +884,7 @@
   grid-template-columns: 2rem 0.42rem 2.72rem minmax(0, 1fr) auto auto !important;
   min-height: 3.08rem !important;
   gap: 0.38rem !important;
-  padding: 0.4rem 0.44rem !important;
+  padding: 0.75rem 0.44rem !important;
   border-radius: 0.76rem !important;
 }
 
@@ -910,7 +910,7 @@
 .agenda-main span,
 .agenda-main small,
 .agenda-main .agenda-note {
-  color: rgba(247, 244, 235, 0.62) !important;
+  color: rgba(247, 244, 235, 0.72) !important;
   font-size: 0.66rem !important;
   line-height: 1.15 !important;
   white-space: nowrap !important;
@@ -955,12 +955,12 @@ body.is-manager-view {
   .agenda-hero .primary-action {
     width: auto !important;
     min-width: 9.7rem !important;
-    min-height: 2.5rem !important;
+    min-height: 2.75rem !important;
     padding-inline: 0.64rem !important;
   }
 
   .agenda-period-nav {
-    grid-template-columns: 2.36rem minmax(0, 1fr) 2.36rem auto !important;
+    grid-template-columns: 2.75rem minmax(0, 1fr) 2.75rem auto !important;
   }
 
   .agenda-today-button {
@@ -1022,23 +1022,23 @@ body.is-manager-view {
   }
 
   .agenda-view-tabs button {
-    min-height: 2.34rem !important;
+    min-height: 2.75rem !important;
     font-size: 0.78rem !important;
   }
 
   .agenda-period-nav {
-    grid-template-columns: 2.18rem minmax(0, 1fr) 2.18rem auto !important;
+    grid-template-columns: 2.75rem minmax(0, 1fr) 2.75rem auto !important;
     gap: 0.3rem !important;
   }
 
   .agenda-period-nav .icon-button {
-    width: 2.18rem !important;
+    width: 2.75rem !important;
   }
 
   .agenda-period-label,
   .agenda-period-nav .icon-button,
   .agenda-today-button {
-    min-height: 2.18rem !important;
+    min-height: 2.75rem !important;
   }
 
   .agenda-period-label svg {
@@ -1065,12 +1065,12 @@ body.is-manager-view {
   }
 
   .agenda-week-day {
-    min-height: 2.26rem !important;
+    min-height: 2.75rem !important;
   }
 
   .agenda-hour-label,
   .agenda-week-slot {
-    min-height: 2.34rem !important;
+    min-height: 2.75rem !important;
   }
 
   .agenda-week-slot {
@@ -1152,7 +1152,7 @@ body.is-manager-view {
 
   .agenda-item .row-actions .mini-button {
     display: inline-flex !important;
-    min-height: 2.1rem !important;
+    min-height: 2.75rem !important;
     padding: 0.42rem 0.68rem !important;
     font-size: 0.74rem !important;
     line-height: 1 !important;

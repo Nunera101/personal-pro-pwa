@@ -169,7 +169,7 @@
 }
 
 .message-search-field input::placeholder {
-  color: rgba(247, 244, 235, 0.38);
+  color: rgba(247, 244, 235, 0.65);
 }
 
 .message-filter {
@@ -217,7 +217,7 @@
 }
 
 .message-see-all {
-  min-height: 2.2rem;
+  min-height: 2.75rem;
   padding: 0 0.2rem;
   white-space: nowrap;
 }

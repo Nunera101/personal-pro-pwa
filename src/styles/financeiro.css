@@ -187,7 +187,7 @@
 }
 
 .finance-search-field input::placeholder {
-  color: rgba(247, 244, 235, 0.46);
+  color: rgba(247, 244, 235, 0.65);
 }
 
 .finance-filter-label {
