@@ -59,6 +59,7 @@
     financeFilterOpen: false,
     dietFilters: { q: "", status: "all", objective: "all" },
     dietFilterOpen: false,
+    workoutFilterOpen: false,
     activeSession: null,
     rest: null,
     restTimer: null,
@@ -3827,34 +3828,32 @@
           ${stdMetricCard("Rascunhos", allPatterns.filter((workout) => workout.status === "draft").length, "Em edição", "warning")}
           ${stdMetricCard("Publicados", allPatterns.filter((workout) => workout.status === "published").length, "Disponíveis", "success")}
         </section>
-        <div class="search-filter-row patterns-toolbar">
-          <label class="pattern-search-field search-input-wrap">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.3-4.3M10.8 18a7.2 7.2 0 1 1 0-14.4 7.2 7.2 0 0 1 0 14.4Z"/></svg>
-            <input type="search" data-workout-filter="q" placeholder="Buscar padrões de treino..." value="${escapeHtml(filters.q)}" />
-          </label>
-          ${patternFilterSelect("status", "Status", icons.profile, [
-            ["all", "Todos"],
-            ["published", "Publicado"],
-            ["draft", "Rascunho"],
-            ["archived", "Arquivado"]
-          ], filters.status)}
-          ${patternFilterSelect("goal", "Objetivo", icons.progress, patternGoalOptions(), filters.goal || "all")}
-          ${patternFilterSelect("level", "Nível", icons.workouts, [
-            ["all", "Todos"],
-            ["beginner", "Iniciante"],
-            ["intermediate", "Intermediário"],
-            ["advanced", "Avançado"],
-            ["none", "Não definido"]
-          ], filters.level)}
-        </div>
-        <section class="patterns-list-panel">
-          <div class="section-title">
-            <div>
-              <h3>Padrões cadastrados</h3>
-              <span class="small-text">Crie modelos base, aplique em alunos e ajuste individualmente no perfil.</span>
-            </div>
-            <span class="small-text">${workouts.length} padrão(s) encontrado(s)</span>
+        ${(() => {
+          const hasActiveFilters = filters.status !== "all" || (filters.goal || "all") !== "all" || filters.level !== "all";
+          const activeFilterCount = [filters.status !== "all", (filters.goal || "all") !== "all", filters.level !== "all"].filter(Boolean).length;
+          const filterPanelOpen = state.workoutFilterOpen || hasActiveFilters;
+          return `
+          <div class="search-filter-row" aria-label="Busca e filtros de padrões">
+            <label class="pattern-search-field search-input-wrap">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.3-4.3M10.8 18a7.2 7.2 0 1 1 0-14.4 7.2 7.2 0 0 1 0 14.4Z"/></svg>
+              <input type="search" data-workout-filter="q" placeholder="Buscar padrões de treino..." value="${escapeHtml(filters.q)}" />
+            </label>
+            <button class="filter-btn" type="button" data-toggle-workout-filter>
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+              <span>Filtrar</span>
+              ${hasActiveFilters ? `<span class="filter-active-pill">${activeFilterCount}</span>` : ""}
+              <svg class="filter-chevron${filterPanelOpen ? " is-open" : ""}" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
           </div>
+          ${filterPanelOpen ? `
+          <div class="pattern-filter-grid">
+            ${patternFilterSelect("status", "Status", icons.profile, [["all", "Todos"],["published", "Publicado"],["draft", "Rascunho"],["archived", "Arquivado"]], filters.status)}
+            ${patternFilterSelect("goal", "Objetivo", icons.goal, patternGoalOptions(), filters.goal || "all")}
+            ${patternFilterSelect("level", "Nível", icons.workouts, [["all", "Todos"],["beginner", "Iniciante"],["intermediate", "Intermediário"],["advanced", "Avançado"],["none", "Não definido"]], filters.level)}
+          </div>` : ""}
+          `;
+        })()}
+        <section class="patterns-list-panel">
           ${state.data.exercises.some((exercise) => exercise.status === "active") ? "" : emptyState("Biblioteca vazia", "Cadastre exercícios ativos antes de montar um padrão.", icons.library)}
           ${workouts.length ? `<div class="pattern-card-list">${workouts.map(renderPatternCard).join("")}</div>` : emptyState(allPatterns.length ? "Nenhum padrão encontrado" : "Nenhum padrão criado ainda", allPatterns.length ? "Tente ajustar os filtros ou criar um novo modelo." : "Crie modelos base para agilizar a montagem dos treinos dos alunos.", icons.workouts)}
         </section>
@@ -3888,43 +3887,52 @@
     return `
       <article class="pattern-card">
         <div class="pattern-card-head">
-          <div class="pattern-title-block">
-            <span class="pattern-icon">${icons.workouts}</span>
-            <div>
-              <h3>${escapeHtml(workout.title)}</h3>
-              <p>${escapeHtml(workout.description || "Sem descrição cadastrada.")}</p>
-            </div>
-          </div>
+          <span class="pattern-icon">${icons.workouts}</span>
+          <h3 class="pattern-name">${escapeHtml(workout.title)}</h3>
           <span class="badge ${patternStatusClass(workout.status)}">${patternStatusLabel(workout.status)}</span>
         </div>
-        <div class="pattern-meta-grid">
-          ${patternMetaItem(icons.progress, "Objetivo", goal)}
-          ${patternMetaItem(icons.workouts, "Nível", workoutLevelLabel(workout.level))}
-          ${patternMetaItem(icons.library, "Exercícios", `${exerciseCount} exercício(s)`)}
-          ${patternMetaItem(icons.agenda, "Última edição", updatedAt)}
+        <div class="pattern-meta-inline">
+          ${patternMetaInline(icons.goal, "Objetivo", goal)}
+          ${patternMetaInline(icons.workouts, "Nível", workoutLevelLabel(workout.level))}
+          ${patternMetaInline(icons.library, "Exercícios", `${exerciseCount}`)}
+          ${patternMetaInline(icons.agenda, "Editado", updatedAt)}
         </div>
-        ${renderPatternExercisePreview(workout)}
+        ${patternExercisePreviewLine(workout)}
         <div class="pattern-card-actions">
           <button class="secondary-action pattern-apply-button" type="button" data-open-apply-pattern-form="${escapeHtml(workout.id)}">
             ${icons.students}
             <span>Aplicar</span>
           </button>
           <details class="action-menu pattern-action-menu">
-            <summary aria-label="Mais ações">${icons.more}<span>Mais ações</span></summary>
+            <summary aria-label="Mais ações">${icons.more}</summary>
             <div>
               <button class="mini-button" type="button" data-open-workout-form="${escapeHtml(workout.id)}">Visualizar/editar</button>
               <button class="mini-button" type="button" data-duplicate-workout="${escapeHtml(workout.id)}">Duplicar</button>
-              ${
-                workout.status === "archived"
-                  ? `<button class="mini-button" type="button" data-restore-workout="${escapeHtml(workout.id)}">Reativar</button>`
-                  : `<button class="mini-button" type="button" data-archive-workout="${escapeHtml(workout.id)}">Arquivar</button>`
-              }
+              ${workout.status === "archived" ? `<button class="mini-button" type="button" data-restore-workout="${escapeHtml(workout.id)}">Reativar</button>` : `<button class="mini-button" type="button" data-archive-workout="${escapeHtml(workout.id)}">Arquivar</button>`}
               <button class="mini-button is-danger" type="button" data-delete-workout="${escapeHtml(workout.id)}">Remover</button>
             </div>
           </details>
         </div>
       </article>
     `;
+  }
+
+  function patternMetaInline(icon, label, value) {
+    return `
+      <span class="pattern-meta-item">
+        <span class="pattern-meta-icon">${icon}</span>
+        <small>${escapeHtml(label)}</small>
+        <strong>${escapeHtml(value || "-")}</strong>
+      </span>
+    `;
+  }
+
+  function patternExercisePreviewLine(workout) {
+    if (!workout.exercises.length) return "";
+    const rows = [...workout.exercises].sort((a, b) => a.order - b.order);
+    const names = rows.slice(0, 3).map((r) => getExercise(r.exerciseId)?.name || "?").join(" · ");
+    const extra = rows.length > 3 ? ` +${rows.length - 3}` : "";
+    return `<p class="pattern-exercise-preview">${escapeHtml(names + extra)}</p>`;
   }
 
   function patternMetaItem(icon, label, value) {
@@ -7446,6 +7454,7 @@
     document.addEventListener("click", (event) => {
       const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-manager-drawer-backdrop]");
       if (!target) return;
+      if (target.matches("[data-toggle-workout-filter]")) { state.workoutFilterOpen = !state.workoutFilterOpen; renderManager(); }
       if (target.matches("[data-open-workout-form]")) openWorkoutForm(target.dataset.openWorkoutForm || "", target.dataset.prefillStudent || "");
       if (target.matches("[data-open-apply-pattern-form]")) openApplyPatternForm(target.dataset.openApplyPatternForm);
       if (target.matches("[data-open-student-pattern-workout]")) openStudentPatternWorkoutForm(target.dataset.openStudentPatternWorkout);
@@ -7476,7 +7485,7 @@
     });
     document.addEventListener("change", (event) => {
       const target = event.target;
-      if (target.matches("[data-workout-filter]")) { state.workoutFilters[target.dataset.workoutFilter] = target.value; renderManager(); }
+      if (target.matches("[data-workout-filter]")) { state.workoutFilters[target.dataset.workoutFilter] = target.value; state.workoutFilterOpen = true; renderManager(); }
       if (target.matches("[data-activity-student]")) {
         const workoutSelect = elements.modalBody.querySelector('[name="workoutId"]');
         if (workoutSelect) workoutSelect.innerHTML = workoutOptions(target.value);
