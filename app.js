@@ -2660,7 +2660,7 @@
             <p>Aceites digitais e planos</p>
           </div>
         </section>
-        <section class="metrics-row">
+        <section class="metrics-row metrics-row--3">
           ${stdMetricCard("Pendentes", pending.length, "Aguardando assinatura", "warning")}
           ${stdMetricCard("Assinados", signed.length, "Ativos", "success")}
           ${stdMetricCard("Próx. vencimentos", upcoming.length, "30 dias", upcoming.length ? "warning" : "")}
@@ -3015,7 +3015,7 @@
           <button class="btn-action-header" type="button" data-open-diet-form>🍎<span>Novo plano alimentar</span></button>
         </section>
 
-        <section class="metrics-row">
+        <section class="metrics-row metrics-row--3">
           ${stdMetricCard("Planos ativos", stats.active, stats.active ? "em acompanhamento" : "nenhum ativo", "success")}
           ${stdMetricCard("Revisões pendentes", stats.reviews, stats.reviews ? "Aguardando" : "Em dia", stats.reviews ? "warning" : "success")}
           ${stdMetricCard("Próximas entregas", stats.upcoming, "Até 7 dias", "warning")}
@@ -3746,7 +3746,7 @@
             <span>Novo padrão</span>
           </button>
         </section>
-        <section class="metrics-row">
+        <section class="metrics-row metrics-row--3">
           ${stdMetricCard("Total de padrões", allPatterns.length, "Modelos criados", "")}
           ${stdMetricCard("Rascunhos", allPatterns.filter((workout) => workout.status === "draft").length, "Em edição", "warning")}
           ${stdMetricCard("Publicados", allPatterns.filter((workout) => workout.status === "published").length, "Disponíveis", "success")}
@@ -4471,7 +4471,7 @@
             <p>Acompanhe peso, fotos e observações.</p>
           </div>
         </section>
-        <div class="metrics-row">
+        <div class="metrics-row metrics-row--3">
           ${stdMetricCard("Recebidas", receivedCount, receivedCount ? "Aguardam avaliação" : "Sem novos envios", "success")}
           ${stdMetricCard("Pendentes", pendingCount, "Aguardando", "warning")}
           ${stdMetricCard("Atrasadas", lateCount, lateCount ? "Requerem atenção" : "Em dia", "danger")}

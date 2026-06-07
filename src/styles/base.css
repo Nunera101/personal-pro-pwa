@@ -6477,6 +6477,19 @@ body::before {
   max-width: 100% !important;
   flex: none !important;
 }
+/* Padding compacto em --3 para caber em 360px */
+.metrics-row--3 .metric-card {
+  padding: 10px !important;
+}
+.metrics-row--3 .mc-label {
+  font-size: 10px !important;
+}
+.metrics-row--3 .mc-value {
+  font-size: clamp(18px, 5vw, 26px) !important;
+}
+.metrics-row--3 .mc-sub {
+  font-size: 10px !important;
+}
 /* Remove a regra 50% anterior */
 .metrics-row + .metrics-row .dashboard-metric {
   max-width: 100% !important;
