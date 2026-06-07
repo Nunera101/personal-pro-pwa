@@ -2070,6 +2070,12 @@
   }
 
   function renderNav(target, menus, activeId, attribute) {
+    const existing = target.querySelectorAll(".nav-button");
+    if (existing.length === menus.length) {
+      // Reutiliza botões existentes — apenas altera a classe ativa (sem recriar DOM)
+      existing.forEach((btn, i) => btn.classList.toggle("is-active", menus[i].id === activeId));
+      return;
+    }
     target.innerHTML = menus
       .map(
         (menu) => `
