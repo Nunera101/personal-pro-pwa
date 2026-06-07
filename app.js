@@ -2159,6 +2159,29 @@
     scrubVisibleText(elements.managerView.hidden ? elements.studentView : elements.managerView);
   }
 
+  const SKELETON_TABS = new Set(["students", "agenda", "workouts", "diet", "messages", "contracts"]);
+
+  function buildTabSkeleton(menuId) {
+    const card    = (h = "4.5rem") => `<div class="skeleton skeleton-card" style="height:${h}"></div>`;
+    const rows    = (n, h) => Array(n).fill(card(h)).join("");
+    const metric  = () => `<div class="skeleton skeleton-metric"></div>`;
+    const g2      = (n) => `<div class="skeleton-grid-2">${Array(n).fill(metric()).join("")}</div>`;
+
+    if (menuId === "messages") {
+      return `<div class="skeleton-wrap">${rows(7, "6rem")}</div>`;
+    }
+    if (menuId === "students") {
+      return `<div class="skeleton-wrap">${rows(8)}</div>`;
+    }
+    if (menuId === "agenda") {
+      return `<div class="skeleton-wrap">${card("2.5rem")}${rows(6, "4rem")}</div>`;
+    }
+    if (menuId === "contracts") {
+      return `<div class="skeleton-wrap">${g2(2)}<div style="margin-top:0.25rem"></div>${rows(5, "5.5rem")}</div>`;
+    }
+    return `<div class="skeleton-wrap">${g2(2)}<div style="margin-top:0.25rem"></div>${rows(5)}</div>`;
+  }
+
   function renderManager() {
     const menu = managerMenus.find((item) => item.id === state.managerMenu) || { id: "studentProfile", label: "Perfil do aluno" };
     elements.managerTitle.textContent = fixMojibake(menu.label);
@@ -2186,10 +2209,27 @@
       more: renderManagerMore,
       settings: renderSettings
     };
-    elements.managerContent.innerHTML = fixMojibake((renderers[state.managerMenu] || renderManagerHomeV2)());
-    elements.managerContent.classList.remove("is-entering");
-    void elements.managerContent.offsetWidth;
-    elements.managerContent.classList.add("is-entering");
+
+    const html = fixMojibake((renderers[state.managerMenu] || renderManagerHomeV2)());
+
+    const applyContent = () => {
+      elements.managerContent.innerHTML = html;
+      elements.managerContent.classList.remove("is-entering");
+      void elements.managerContent.offsetWidth;
+      elements.managerContent.classList.add("is-entering");
+    };
+
+    if (SKELETON_TABS.has(state.managerMenu) && document.body.classList.contains("app-ready")) {
+      const version = ++skeletonRenderVersion;
+      elements.managerContent.innerHTML = buildTabSkeleton(state.managerMenu);
+      void elements.managerContent.offsetWidth;
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        if (skeletonRenderVersion !== version) return;
+        applyContent();
+      }));
+    } else {
+      applyContent();
+    }
   }
 
   function renderStudent() {
@@ -5118,6 +5158,7 @@
   }
 
   let modalCloseTimer = null;
+  let skeletonRenderVersion = 0;
 
   function openModal(title, body) {
     if (modalCloseTimer) { clearTimeout(modalCloseTimer); modalCloseTimer = null; }

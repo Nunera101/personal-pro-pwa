@@ -783,7 +783,7 @@ p {
   background: var(--brand);
   color: #fff;
   transition: opacity 260ms ease, visibility 260ms ease;
-  animation: splash-fallback 1100ms ease 1300ms forwards;
+  animation: splash-fallback 1100ms ease 10000ms forwards;
 }
 
 .startup-splash img {
