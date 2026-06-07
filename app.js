@@ -7198,6 +7198,95 @@
     }
   }
 
+  async function getPushVapidKey() {
+    try {
+      const base = state.apiBase || REMOTE_API_BASE;
+      const res = await fetch(`${base}/push/vapid-public-key`);
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data.publicKey || null;
+    } catch (_error) {
+      return null;
+    }
+  }
+
+  function urlBase64ToUint8Array(base64String) {
+    const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+    const raw = atob(base64);
+    return Uint8Array.from([...raw].map((c) => c.charCodeAt(0)));
+  }
+
+  async function registerPushSubscription() {
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+    if (Notification.permission === "denied") return;
+    try {
+      const vapidKey = await getPushVapidKey();
+      if (!vapidKey) return;
+      const registration = await navigator.serviceWorker.ready;
+      const existing = await registration.pushManager.getSubscription();
+      const subscription = existing || await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(vapidKey)
+      });
+      const base = state.apiBase || REMOTE_API_BASE;
+      await fetch(`${base}/push/subscribe`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${state.authToken}` },
+        body: JSON.stringify(subscription.toJSON())
+      });
+    } catch (_error) {
+      // suporte ou permissão indisponíveis — app continua normalmente
+    }
+  }
+
+  async function requestPushPermission() {
+    if (!("Notification" in window) || !("PushManager" in window)) return;
+    if (Notification.permission !== "default") {
+      if (Notification.permission === "granted") registerPushSubscription().catch(() => {});
+      return;
+    }
+    // Mostra banner suave antes de pedir permissão do browser
+    const banner = document.createElement("div");
+    banner.id = "push-permission-banner";
+    banner.innerHTML = `
+      <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--color-surface,#1e1e2e);border-top:1px solid var(--color-border,#333);position:fixed;bottom:0;left:0;right:0;z-index:9999;box-shadow:0 -2px 12px rgba(0,0,0,.4);">
+        <span style="font-size:1.4em">🔔</span>
+        <span style="flex:1;font-size:.9em;color:var(--color-text,#e0e0e0)">Ativar notificações para receber avisos de treinos e mensagens?</span>
+        <button id="push-allow-btn" style="background:var(--color-primary,#7c3aed);color:#fff;border:none;border-radius:6px;padding:8px 14px;cursor:pointer;font-size:.85em;white-space:nowrap">Ativar</button>
+        <button id="push-deny-btn" style="background:transparent;color:var(--color-muted,#888);border:none;cursor:pointer;font-size:.85em;padding:8px">Agora não</button>
+      </div>`;
+    document.body.appendChild(banner);
+
+    await new Promise((resolve) => {
+      document.getElementById("push-allow-btn").onclick = () => { banner.remove(); resolve(true); };
+      document.getElementById("push-deny-btn").onclick = () => { banner.remove(); resolve(false); };
+      window.setTimeout(() => { if (document.body.contains(banner)) { banner.remove(); resolve(false); } }, 30000);
+    }).then(async (accepted) => {
+      if (!accepted) return;
+      const permission = await Notification.requestPermission();
+      if (permission === "granted") registerPushSubscription().catch(() => {});
+    });
+  }
+
+  function schedulePushPermissionRequest() {
+    if (!("Notification" in window) || !("PushManager" in window)) return;
+    if (Notification.permission === "granted") {
+      window.setTimeout(() => registerPushSubscription().catch(() => {}), 2000);
+      return;
+    }
+    if (Notification.permission !== "default") return;
+    // Pede após primeira interação significativa do usuário (mínimo 8 s após login)
+    let fired = false;
+    const fire = () => {
+      if (fired) return;
+      fired = true;
+      document.removeEventListener("click", fire);
+      window.setTimeout(() => requestPushPermission().catch(() => {}), 3000);
+    };
+    window.setTimeout(() => document.addEventListener("click", fire, { once: true }), 8000);
+  }
+
   async function handleAppRefreshRequest() {
     const params = new URLSearchParams(window.location.search);
     if (!params.has("refreshApp") && !params.has("resetPwa")) return false;
@@ -7573,6 +7662,7 @@
       renderApp();
       openPendingContractAfterLogin();
       showToast(user.role === "manager" ? "Painel do gestor aberto." : "área do aluno aberta.");
+      schedulePushPermissionRequest();
       } catch (error) {
         showToast(error.message || getLoginAccessMessage(elements.email.value) || "E-mail ou senha inválidos.");
       }
@@ -7870,6 +7960,7 @@
     applyRouteFromHash();
     renderApp();
     openPendingContractAfterLogin();
+    schedulePushPermissionRequest();
     return true;
   }
 

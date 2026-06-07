@@ -1,6 +1,7 @@
 const { isDatabaseReady, query } = require("./db");
 const { readCollection, writeCollection } = require("./storage/collections");
 const { TRAINER_ID, verifySessionToken } = require("./auth");
+const { sendPushToStudent, sendPushToManager } = require("./push");
 
 function createId(prefix) {
   return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
@@ -79,6 +80,25 @@ function configureRealtime(io) {
 
         await saveMessage(message);
         io.to(`trainer:${message.trainerId}`).to(`student:${message.studentId}`).emit("message:new", message);
+
+        const senderName = message.senderRole === "student" ? "Aluno" : "Gestor";
+        const preview = message.body.length > 60 ? `${message.body.slice(0, 57)}...` : message.body;
+        if (message.senderRole === "student") {
+          const students = await readCollection("personal-pro-students-v2", []);
+          const student = students.find((s) => s.id === message.studentId);
+          sendPushToManager({
+            title: `${student?.name || "Aluno"} enviou uma mensagem`,
+            body: preview,
+            url: `/#messages`
+          }).catch(() => {});
+        } else {
+          sendPushToStudent(message.studentId, {
+            title: `${senderName} respondeu sua mensagem`,
+            body: preview,
+            url: "/#messages"
+          }).catch(() => {});
+        }
+
         if (callback) callback({ ok: true, message });
       } catch (error) {
         if (callback) callback({ ok: false, error: error.message });

@@ -8,9 +8,11 @@ const { rootDir, uploadDir } = require("./config");
 const { createApiRouter } = require("./routes/api");
 const { createUploadRouter } = require("./routes/uploads");
 const { configureRealtime } = require("./realtime");
+const { initWebPush } = require("./push");
 
 function createServer() {
   fs.mkdirSync(uploadDir, { recursive: true });
+  initWebPush();
 
   const app = express();
   const server = http.createServer(app);

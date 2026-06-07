@@ -43,6 +43,41 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+self.addEventListener("push", (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch (_error) {
+    data = { title: "Personal Pro", body: event.data ? event.data.text() : "Nova notificação." };
+  }
+
+  const title = data.title || "Personal Pro";
+  const options = {
+    body: data.body || "",
+    icon: "./assets/icon-192.png",
+    badge: "./assets/favicon.svg",
+    data: { url: data.url || "/" },
+    vibrate: [200, 100, 200]
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const targetUrl = event.notification.data?.url || "/";
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+      const match = clients.find((c) => c.url.includes(self.location.origin));
+      if (match) {
+        match.focus();
+        return match.navigate(targetUrl);
+      }
+      return self.clients.openWindow(targetUrl);
+    })
+  );
+});
+
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") {
     return;

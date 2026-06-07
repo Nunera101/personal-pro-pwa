@@ -15,6 +15,7 @@ const { storageDriver } = require("../config");
 const { readCollection, writeCollection } = require("../storage/collections");
 const { isMailConfigured, sendPasswordResetEmail, sendStudentInviteEmail, sendContractEmail } = require("../mail");
 const { TRAINER_ID, SESSION_TTL, createSessionToken, requireAuth, requireManager } = require("../auth");
+const { getVapidPublicKey, savePushSubscription, removePushSubscriptionByEndpoint, sendPushToStudent, sendPushToManager } = require("../push");
 
 const ADMIN_EMAIL = "admin@personalpro.app";
 const STUDENTS_KEY = "personal-pro-students-v2";
@@ -277,13 +278,63 @@ async function writeCollectionForAuth(collection, payload, auth) {
   if (auth.role === "manager") {
     if (collection === STUDENTS_KEY) return writeCollection(collection, mergeStudentsForWrite(existing, Array.isArray(payload) ? payload : []));
     if (collection === SETTINGS_KEY) return writeCollection(collection, mergeSettingsForWrite(existing, payload || {}));
+
+    if (collection === WORKOUTS_KEY && Array.isArray(payload)) {
+      const existingById = new Map((Array.isArray(existing) ? existing : []).map((w) => [w.id, w]));
+      const newlyPublished = payload.filter((w) => {
+        const old = existingById.get(w.id);
+        return w.status === "published" && w.studentId && (!old || old.status !== "published");
+      });
+      await writeCollection(collection, payload);
+      for (const w of newlyPublished) {
+        sendPushToStudent(w.studentId, {
+          title: "Novo treino disponível!",
+          body: `Seu treino "${w.title || "Treino"}" foi publicado.`,
+          url: "/#workouts"
+        }).catch(() => {});
+      }
+      return;
+    }
+
+    if (collection === ACTIVITIES_KEY && Array.isArray(payload)) {
+      const existingIds = new Set((Array.isArray(existing) ? existing : []).map((a) => a.id));
+      const newActivities = payload.filter((a) => !existingIds.has(a.id) && a.studentId);
+      await writeCollection(collection, payload);
+      for (const a of newActivities) {
+        sendPushToStudent(a.studentId, {
+          title: "Nova atividade na agenda!",
+          body: a.title || "O gestor adicionou uma atividade para você.",
+          url: "/#agenda"
+        }).catch(() => {});
+      }
+      return;
+    }
+
     return writeCollection(collection, payload);
   }
 
   if ([EXERCISES_KEY, WORKOUTS_KEY, STUDENTS_KEY, SETTINGS_KEY, PAYMENTS_KEY, DIETS_KEY].includes(collection)) return;
   if (collection === CONTRACTS_KEY) return writeCollection(collection, mergeStudentContracts(existing, Array.isArray(payload) ? payload : [], auth));
   if (collection === MESSAGES_KEY) return writeCollection(collection, mergeStudentMessages(existing, Array.isArray(payload) ? payload : [], auth));
-  if ([ACTIVITIES_KEY, SESSIONS_KEY, UPDATES_KEY].includes(collection)) {
+
+  if (collection === UPDATES_KEY && Array.isArray(payload)) {
+    const existingIds = new Set((Array.isArray(existing) ? existing : []).map((u) => u.id));
+    const newUpdates = payload.filter((u) => u.studentId === auth.studentId && !existingIds.has(u.id));
+    const merged = mergeStudentOwnedCollection(existing, payload, auth);
+    await writeCollection(collection, merged);
+    if (newUpdates.length) {
+      const students = await readCollection(STUDENTS_KEY, []);
+      const student = students.find((s) => s.id === auth.studentId);
+      sendPushToManager({
+        title: "Atualização de progresso!",
+        body: `${student?.name || "Um aluno"} enviou uma atualização de progresso.`,
+        url: "/#updates"
+      }).catch(() => {});
+    }
+    return;
+  }
+
+  if ([ACTIVITIES_KEY, SESSIONS_KEY].includes(collection)) {
     return writeCollection(collection, mergeStudentOwnedCollection(existing, Array.isArray(payload) ? payload : [], auth));
   }
 }
@@ -378,8 +429,48 @@ function createApiRouter() {
       storage: dbReady ? "postgres" : storageDriver === "postgres" ? "postgres-unavailable" : "json",
       databaseReady: dbReady,
       realtime: true,
-      mailConfigured: isMailConfigured()
+      mailConfigured: isMailConfigured(),
+      pushConfigured: Boolean(getVapidPublicKey())
     });
+  });
+
+  router.get("/push/vapid-public-key", (_request, response) => {
+    const key = getVapidPublicKey();
+    if (!key) {
+      response.status(503).json({ error: "Push nao configurado no servidor." });
+      return;
+    }
+    response.json({ ok: true, publicKey: key });
+  });
+
+  router.post("/push/subscribe", requireAuth, async (request, response, next) => {
+    try {
+      const { endpoint, keys } = request.body || {};
+      if (!endpoint || !keys?.p256dh || !keys?.auth) {
+        response.status(400).json({ error: "Subscription invalida." });
+        return;
+      }
+      await savePushSubscription({
+        endpoint,
+        keys,
+        userId: request.auth.studentId || request.auth.trainerId || "",
+        role: request.auth.role,
+        studentId: request.auth.studentId || ""
+      });
+      response.json({ ok: true });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.delete("/push/subscribe", requireAuth, async (request, response, next) => {
+    try {
+      const { endpoint } = request.body || {};
+      if (endpoint) await removePushSubscriptionByEndpoint(endpoint);
+      response.json({ ok: true });
+    } catch (error) {
+      next(error);
+    }
   });
 
   router.post("/auth/login", authRateLimiter, async (request, response, next) => {
