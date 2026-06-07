@@ -3248,13 +3248,17 @@ body::before {
 .drawer-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 999;
-  display: none;
+  z-index: 9998;
+  display: block;
+  opacity: 0;
+  pointer-events: none;
   background: rgba(0, 0, 0, 0.6);
+  transition: opacity 0.28s;
 }
 
-.manager-drawer-open .drawer-backdrop {
-  display: block;
+.drawer-backdrop.visible {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .toast {
@@ -3272,27 +3276,26 @@ body::before {
     position: fixed;
     top: 0;
     left: 0;
-    height: 100vh;
-    z-index: 1000;
+    height: 100dvh;
+    z-index: 9999;
     display: grid;
     align-content: start;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    width: 280px;
+    overscroll-behavior: contain;
+    width: min(82vw, 300px);
     gap: 0.28rem;
-    padding: calc(1rem + env(safe-area-inset-top, 0px)) 0.75rem calc(1rem + var(--safe-bottom));
-    border: 1px solid var(--line);
-    border-left: 0;
-    border-radius: 0 1rem 1rem 0;
-    background:
-      radial-gradient(circle at top right, rgba(245, 181, 27, 0.14), transparent 14rem),
-      rgba(7, 7, 7, 0.98);
+    padding-top: env(safe-area-inset-top, 16px);
+    padding-right: 0.75rem;
+    padding-left: 0.75rem;
+    padding-bottom: env(safe-area-inset-bottom, 16px);
+    background: #111111;
     box-shadow: 24px 0 70px rgba(0, 0, 0, 0.58);
-    transform: translateX(-105%);
-    transition: transform 180ms ease;
+    transform: translateX(-100%);
+    transition: transform 0.28s ease;
   }
 
-  .manager-drawer-open .manager-workspace .side-nav {
+  .manager-workspace .side-nav.open {
     transform: translateX(0);
   }
 
@@ -9420,8 +9423,10 @@ button.dashboard-metric {
 }
 
 .manager-header .menu-trigger {
-  width: 2.45rem;
-  height: 2.45rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  min-width: 44px;
+  min-height: 44px;
   color: var(--elite-ink);
 }
 
@@ -9915,8 +9920,8 @@ button.dashboard-metric {
 
   .manager-header .menu-trigger,
   .manager-header .notification-button {
-    width: 2.15rem;
-    height: 2.15rem;
+    width: 2.75rem;
+    height: 2.75rem;
   }
 
   .manager-header .brand-inline {
