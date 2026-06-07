@@ -1846,13 +1846,16 @@
 .profile-card-body > span {
   color: #9CA3AF !important;
   font-size: 10px !important;
-  line-height: 1.2 !important;
+  line-height: 1.3 !important;
   font-weight: 500 !important;
   text-transform: uppercase !important;
   letter-spacing: 0.02em !important;
-  white-space: nowrap !important;
+  white-space: normal !important;
   overflow: hidden !important;
-  text-overflow: ellipsis !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  text-overflow: unset !important;
 }
 
 .profile-card-body > strong {
@@ -2055,4 +2058,9 @@
   border-radius: 10px !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
   overflow: visible !important;
+}
+
+/* styles.css hides nth-child(2) with higher specificity — override here since alunos.css loads after */
+.student-summary-grid .student-summary-card:nth-child(2) {
+  display: grid !important;
 }
