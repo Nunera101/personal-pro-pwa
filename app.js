@@ -2044,6 +2044,10 @@
     elements.body.classList.toggle("is-student-view", viewName === "student");
     closeManagerDrawer();
     window.scrollTo({ top: 0, behavior: "auto" });
+    const incoming = viewName === "login" ? elements.loginView : viewName === "manager" ? elements.managerView : elements.studentView;
+    incoming.classList.remove("is-entering");
+    void incoming.offsetWidth;
+    incoming.classList.add("is-entering");
   }
 
   function renderNav(target, menus, activeId, attribute) {
@@ -2173,6 +2177,9 @@
       settings: renderSettings
     };
     elements.managerContent.innerHTML = fixMojibake((renderers[state.managerMenu] || renderManagerHomeV2)());
+    elements.managerContent.classList.remove("is-entering");
+    void elements.managerContent.offsetWidth;
+    elements.managerContent.classList.add("is-entering");
   }
 
   function renderStudent() {
@@ -2183,6 +2190,9 @@
       elements.studentSideNav.innerHTML = "";
       elements.studentBottomNav.innerHTML = "";
       elements.studentContent.innerHTML = fixMojibake(renderStudentContractGate(blockingContract));
+      elements.studentContent.classList.remove("is-entering");
+      void elements.studentContent.offsetWidth;
+      elements.studentContent.classList.add("is-entering");
       return;
     }
 
@@ -2201,6 +2211,9 @@
       profile: renderStudentProfile
     };
     elements.studentContent.innerHTML = fixMojibake((renderers[state.studentMenu] || renderStudentToday)());
+    elements.studentContent.classList.remove("is-entering");
+    void elements.studentContent.offsetWidth;
+    elements.studentContent.classList.add("is-entering");
   }
 
   function metricCard(label, value) {
@@ -5175,20 +5188,33 @@
     return session.exercises.reduce((total, exercise) => total + exercise.sets.reduce((sum, set) => sum + Number(set.volumeLoad || 0), 0), 0);
   }
 
+  let modalCloseTimer = null;
+
   function openModal(title, body) {
+    if (modalCloseTimer) { clearTimeout(modalCloseTimer); modalCloseTimer = null; }
+    elements.modal.classList.remove("is-closing", "is-open");
     elements.modalTitle.textContent = fixMojibake(title);
     elements.modalBody.innerHTML = fixMojibake(body);
     scrubVisibleText(elements.modalBody);
     elements.modal.hidden = false;
+    void elements.modal.offsetWidth;
+    elements.modal.classList.add("is-open");
     document.body.style.overflow = "hidden";
     const first = elements.modalBody.querySelector("input, select, textarea, button");
     if (first) first.focus({ preventScroll: true });
   }
 
   function closeModal() {
-    elements.modal.hidden = true;
-    elements.modalBody.innerHTML = "";
-    document.body.style.overflow = "";
+    if (elements.modal.hidden) return;
+    elements.modal.classList.remove("is-open");
+    elements.modal.classList.add("is-closing");
+    modalCloseTimer = setTimeout(() => {
+      modalCloseTimer = null;
+      elements.modal.hidden = true;
+      elements.modal.classList.remove("is-closing");
+      elements.modalBody.innerHTML = "";
+      document.body.style.overflow = "";
+    }, 160);
   }
 
   function studentOptions(selected = "") {
@@ -7143,15 +7169,28 @@
     showToast(`Treino finalizado. Volume load total: ${finalSession.totalVolumeLoad}.`);
   }
 
+  let installSheetCloseTimer = null;
+
   function openInstallSheet(customMessage) {
+    if (installSheetCloseTimer) { clearTimeout(installSheetCloseTimer); installSheetCloseTimer = null; }
     renderInstallInstructions(customMessage);
+    elements.installSheet.classList.remove("is-closing", "is-open");
     elements.installSheet.hidden = false;
+    void elements.installSheet.offsetWidth;
+    elements.installSheet.classList.add("is-open");
     document.body.style.overflow = "hidden";
   }
 
   function closeInstallSheet() {
-    elements.installSheet.hidden = true;
-    document.body.style.overflow = "";
+    if (elements.installSheet.hidden) return;
+    elements.installSheet.classList.remove("is-open");
+    elements.installSheet.classList.add("is-closing");
+    installSheetCloseTimer = setTimeout(() => {
+      installSheetCloseTimer = null;
+      elements.installSheet.hidden = true;
+      elements.installSheet.classList.remove("is-closing");
+      document.body.style.overflow = "";
+    }, 160);
   }
 
   function renderInstallInstructions(customMessage) {
