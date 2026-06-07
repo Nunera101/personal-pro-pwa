@@ -397,9 +397,7 @@
 
 .agenda-status .badge {
   white-space: nowrap;
-  max-width: 7.5rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  flex-shrink: 0;
 }
 
 .agenda-item .row-actions {

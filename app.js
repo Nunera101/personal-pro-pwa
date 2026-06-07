@@ -4218,7 +4218,6 @@
               <h3>Itens do dia</h3>
               <span class="small-text">${formatLongDate(state.agendaDate)} · ${selectedDayItems.length} item(ns)</span>
             </div>
-            ${!isDayView ? `<button class="mini-button" type="button" data-agenda-view="day">Ver dia</button>` : ""}
           </div>
           ${renderAgendaList(selectedDayItems, isManager)}
         </section>
