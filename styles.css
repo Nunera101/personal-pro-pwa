@@ -1339,8 +1339,13 @@ svg {
 }
 
 .metric-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.65rem;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 10px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
 
 .metric-card,
@@ -1357,8 +1362,10 @@ svg {
 }
 
 .metric-card {
-  min-height: 5.4rem;
-  padding: 0.85rem;
+  flex: 1;
+  min-width: 100px;
+  min-height: unset;
+  padding: 12px;
 }
 
 .metric-card span,
@@ -1375,8 +1382,9 @@ svg {
 
 .metric-card strong {
   display: block;
-  margin-top: 0.45rem;
-  font-size: clamp(1.2rem, 6vw, 1.8rem);
+  margin-top: 0.35rem;
+  font-size: 24px;
+  font-weight: 700;
   line-height: 1;
 }
 
@@ -2795,7 +2803,8 @@ body::before {
 
 .workspace-header {
   min-height: 4.5rem;
-  padding: max(0.75rem, env(safe-area-inset-top, 0px)) 1rem 0.75rem;
+  padding: 0.75rem 1rem;
+  padding-top: calc(0.75rem + env(safe-area-inset-top, 16px));
   border-bottom-color: var(--line);
   background:
     linear-gradient(120deg, rgba(255, 255, 255, 0.065) 0 31%, transparent 31% 100%),
@@ -2908,19 +2917,27 @@ body::before {
 }
 
 .page-actions .primary-action {
-  min-height: 3rem;
-  padding: 0 1.15rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: auto;
+  min-height: unset;
+  padding: 10px 18px;
+  border-radius: 24px;
+  background: #F59E0B;
+  color: #000;
+  font-weight: 600;
+  font-size: 14px;
 }
 
 .metric-grid {
-  gap: 0.75rem;
+  gap: 10px;
 }
 
 .metric-card {
-  display: grid;
-  align-content: center;
-  min-height: 6rem;
-  padding: 1rem;
+  display: block;
+  min-height: unset;
+  padding: 12px;
 }
 
 .metric-card span {
@@ -3231,9 +3248,9 @@ body::before {
 .drawer-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 28;
+  z-index: 999;
   display: none;
-  background: rgba(0, 0, 0, 0.58);
+  background: rgba(0, 0, 0, 0.6);
 }
 
 .manager-drawer-open .drawer-backdrop {
@@ -3254,14 +3271,16 @@ body::before {
   .manager-workspace .side-nav {
     position: fixed;
     top: 0;
-    bottom: 0;
     left: 0;
-    z-index: 35;
+    height: 100vh;
+    z-index: 1000;
     display: grid;
     align-content: start;
-    width: min(84vw, 21rem);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 280px;
     gap: 0.28rem;
-    padding: max(1rem, env(safe-area-inset-top, 0px)) 0.75rem calc(1rem + var(--safe-bottom));
+    padding: calc(1rem + env(safe-area-inset-top, 0px)) 0.75rem calc(1rem + var(--safe-bottom));
     border: 1px solid var(--line);
     border-left: 0;
     border-radius: 0 1rem 1rem 0;
@@ -3297,11 +3316,11 @@ body::before {
   .page-actions .primary-action,
   .page-actions .secondary-action,
   .page-actions .pill-button {
-    width: 100%;
+    width: auto;
   }
 
   .metric-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    flex-wrap: nowrap;
   }
 
   .dashboard-grid {
@@ -7412,8 +7431,24 @@ button.dashboard-metric {
 }
 
 .student-search-panel {
-  display: grid;
-  gap: 0.75rem;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.student-search-panel .student-search-field {
+  flex: 1;
+  min-width: 180px;
+}
+
+.student-search-panel .student-filter-grid {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
 }
 
 .student-search-field {
@@ -9427,6 +9462,21 @@ button.dashboard-metric {
   color: rgba(247, 244, 237, 0.72);
   font-weight: 760;
   letter-spacing: 0.02em;
+}
+
+.manager-badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(245, 158, 11, 0.18);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  color: #F59E0B;
+  font-size: 0.62rem;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1.4;
+  margin-top: 0.15rem;
 }
 
 .manager-header .header-actions {

@@ -1,4 +1,4 @@
-﻿<!doctype html>
+﻿﻿<!doctype html>
 <html lang="pt-BR">
   <head>
     <meta charset="utf-8" />
@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#050505" />
     <meta name="color-scheme" content="dark" />
     <meta name="app-version" content="53" />
-    <meta name="description" content="Aplicativo instalÃ¡vel Elite AS para acompanhamento de treinos, alunos, agenda e gestÃ£o do personal trainer." />
+    <meta name="description" content="Aplicativo instalável Elite AS para acompanhamento de treinos, alunos, agenda e gestão do personal trainer." />
 
     <title>Elite AS</title>
 
@@ -42,7 +42,7 @@
       <section class="login-view view is-active" id="loginView" aria-labelledby="loginTitle">
         <div class="login-card">
           <div class="login-install-row">
-            <span id="installStatus">Aplicativo pronto para instalaÃ§Ã£o</span>
+            <span id="installStatus">Aplicativo pronto para instalação</span>
             <button class="pill-button" type="button" data-install-trigger>Baixar app</button>
           </div>
 
@@ -93,15 +93,15 @@
             <img class="brand-logo brand-logo-wordmark" src="./assets/elite-as-wordmark.svg" alt="Elite AS" />
             <div>
               <h2>Elite AS</h2>
-              <span class="manager-subtitle">GESTOR â€¢ <strong id="managerTitle">Dashboard</strong></span>
+              <span class="manager-badge">GESTOR</span>
             </div>
           </div>
+          <span id="managerTitle" hidden>Dashboard</span>
           <div class="header-actions">
-            <button class="icon-button notification-button" type="button" aria-label="NotificaÃ§Ãµes" data-manager-nav="updates">
+            <button class="icon-button notification-button" type="button" aria-label="Notificações" data-manager-nav="updates">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>
             </button>
-            <button class="pill-button" type="button" data-install-trigger>Baixar app</button>
-            <button class="avatar-button" type="button" aria-label="ConfiguraÃ§Ãµes" data-manager-nav="settings">AS</button>
+            <button class="avatar-button" type="button" aria-label="Configurações" data-manager-nav="settings">AS</button>
           </div>
         </header>
 
@@ -119,7 +119,7 @@
           <div class="brand-inline">
             <img class="brand-logo" src="./assets/logo-oficial.svg" alt="Logo oficial do aplicativo" />
             <div>
-              <span>Ãrea do aluno</span>
+              <span>Área do aluno</span>
               <h2 id="studentTitle">Hoje</h2>
             </div>
           </div>
@@ -158,8 +158,8 @@
         <img class="sheet-logo" src="./assets/logo-oficial.svg" alt="Logo oficial do aplicativo" />
         <h2 id="installSheetTitle">Instalar aplicativo</h2>
         <p id="installSheetMessage">
-          Seu app estÃ¡ pronto para instalaÃ§Ã£o. Caso o botÃ£o de instalaÃ§Ã£o nÃ£o apareÃ§a automaticamente neste aparelho,
-          abra o menu do navegador e escolha a opÃ§Ã£o de instalar o aplicativo.
+          Seu app está pronto para instalação. Caso o botão de instalação não apareça automaticamente neste aparelho,
+          abra o menu do navegador e escolha a opção de instalar o aplicativo.
         </p>
         <ol class="install-steps" id="installSteps"></ol>
         <div class="sheet-actions">
