@@ -1107,7 +1107,7 @@
     const patterns = getAvailableWorkoutPatterns();
     if (!patterns.length) return '<option value="">Crie um padrão primeiro</option>';
     return patterns
-      .map((workout) => `<option value="${escapeHtml(workout.id)}" ${workout.id === selected ? "selected" : ""}>${escapeHtml(workout.title)} Â· ${escapeHtml(workout.focus || "Sem foco")}</option>`)
+      .map((workout) => `<option value="${escapeHtml(workout.id)}" ${workout.id === selected ? "selected" : ""}>${escapeHtml(workout.title)} · ${escapeHtml(workout.focus || "Sem foco")}</option>`)
       .join("");
   }
 
@@ -1617,10 +1617,10 @@
     if (exercise.videoUrl) {
       const label = exercise.videoName || (exercise.videoStorage === "external" ? "Link cadastrado" : "Vídeo cadastrado");
       const size = formatFileSize(exercise.videoSize);
-      return `<span class="video-meta"><a class="video-link" href="${escapeHtml(exercise.videoUrl)}" target="_blank" rel="noreferrer">Abrir vídeo</a><span class="small-text">${escapeHtml(label)}${size ? ` Â· ${escapeHtml(size)}` : ""}</span></span>`;
+      return `<span class="video-meta"><a class="video-link" href="${escapeHtml(exercise.videoUrl)}" target="_blank" rel="noreferrer">Abrir vídeo</a><span class="small-text">${escapeHtml(label)}${size ? ` · ${escapeHtml(size)}` : ""}</span></span>`;
     }
     if (exercise.videoStorage === "indexeddb" && exercise.videoKey) {
-      return `<span class="video-meta"><button class="mini-button" type="button" data-open-local-video="${escapeHtml(exercise.id)}">Abrir vídeo local</button><span class="small-text">Vídeo local deste aparelho: ${escapeHtml(exercise.videoName || "arquivo local")}${exercise.videoSize ? ` Â· ${escapeHtml(formatFileSize(exercise.videoSize))}` : ""}</span></span>`;
+      return `<span class="video-meta"><button class="mini-button" type="button" data-open-local-video="${escapeHtml(exercise.id)}">Abrir vídeo local</button><span class="small-text">Vídeo local deste aparelho: ${escapeHtml(exercise.videoName || "arquivo local")}${exercise.videoSize ? ` · ${escapeHtml(formatFileSize(exercise.videoSize))}` : ""}</span></span>`;
     }
     return `<span class="small-text video-meta">Sem vídeo cadastrado.</span>`;
   }
@@ -2978,7 +2978,7 @@
       weeks[index] += moneyValue(record.amount);
     });
     const bestIndex = weeks.reduce((best, value, index) => (value > weeks[best] ? index : best), 0);
-    return `${bestIndex + 1}Âª semana Â· ${currencyValue(weeks[bestIndex])}`;
+    return `${bestIndex + 1}Âª semana · ${currencyValue(weeks[bestIndex])}`;
   }
 
   function financeInsightCard(icon, title, value, subtitle, tone = "") {
@@ -3125,7 +3125,7 @@
         <div class="diet-plan-grid">
           <article>${icons.agenda}<span>Protocolo atual</span><strong>${escapeHtml(plan.protocol || plan.title || "Plano alimentar")}</strong></article>
           <article>${icons.diet}<span>Refeições</span><strong>${escapeHtml(String(mealCount))} refeição(ões)/dia</strong></article>
-          <article>${icons.today}<span>Ãšltima atualização</span><strong>${formatShortDate(String(plan.lastUpdatedAt || plan.updatedAt).slice(0, 10))}</strong></article>
+          <article>${icons.today}<span>Última atualização</span><strong>${formatShortDate(String(plan.lastUpdatedAt || plan.updatedAt).slice(0, 10))}</strong></article>
           <article>${icons.agenda}<span>Próxima revisão</span><strong>${escapeHtml(nextReview)}</strong></article>
         </div>
         <div class="diet-plan-actions">
@@ -3141,7 +3141,7 @@
       .filter((plan) => plan.nextReviewDate && dietStatusKey(plan) !== "archived")
       .sort((a, b) => a.nextReviewDate.localeCompare(b.nextReviewDate))[0];
     if (!upcoming) return "Sem revisão marcada";
-    return `${getStudentName(upcoming.studentId)} Â· ${formatShortDate(upcoming.nextReviewDate)}`;
+    return `${getStudentName(upcoming.studentId)} · ${formatShortDate(upcoming.nextReviewDate)}`;
   }
 
   function dietInsightCard(icon, title, value, subtitle, tone = "") {
@@ -3365,7 +3365,7 @@
         ${studentAvatar(student)}
         <div class="entity-main">
           <strong>${escapeHtml(getStudentName(message.studentId))}</strong>
-          <span>${message.senderRole === "manager" ? "Personal" : "Aluno"} Â· ${new Date(message.createdAt).toLocaleString("pt-BR")}</span>
+          <span>${message.senderRole === "manager" ? "Personal" : "Aluno"} · ${new Date(message.createdAt).toLocaleString("pt-BR")}</span>
           <span>${escapeHtml(message.body)}</span>
         </div>
         <div class="row-actions">
@@ -3512,7 +3512,7 @@
       ? { label: "Publicado", tone: "success" }
       : { label: "Arquivado", tone: "muted" };
     const params = exercise.defaultSets || exercise.defaultReps || exercise.defaultRest
-      ? `${escapeHtml(exercise.defaultSets || "3")} séries â€¢ ${escapeHtml(exercise.defaultReps || "10-12")} reps â€¢ ${escapeHtml(exercise.defaultRest || "60s")} descanso`
+      ? `${escapeHtml(exercise.defaultSets || "3")} séries • ${escapeHtml(exercise.defaultReps || "10-12")} reps • ${escapeHtml(exercise.defaultRest || "60s")} descanso`
       : "Parâmetros definidos no treino";
 
     return `
@@ -3675,7 +3675,7 @@
       <article class="entity-row compact-row library-row">
         <div class="entity-main">
           <strong>${escapeHtml(exercise.name)}</strong>
-          <span><b>Principal:</b> ${escapeHtml(primaryMuscle)} Â· ${escapeHtml(exercise.equipment)}</span>
+          <span><b>Principal:</b> ${escapeHtml(primaryMuscle)} · ${escapeHtml(exercise.equipment)}</span>
           <div class="muscle-chip-row">
             ${secondaryMuscles.length ? secondaryMuscles.map((item) => `<span class="subtle-chip">${escapeHtml(item)}</span>`).join("") : '<span class="small-text">Sem grupos secundários.</span>'}
           </div>
@@ -3882,7 +3882,7 @@
         ${visibleRows
           .map((row, index) => {
             const exercise = getExercise(row.exerciseId);
-            const target = `${escapeHtml(row.sets)}x${escapeHtml(row.targetReps)} Â· ${escapeHtml(row.restSeconds)}s${row.suggestedLoad ? ` Â· ${escapeHtml(row.suggestedLoad)}` : ""}`;
+            const target = `${escapeHtml(row.sets)}x${escapeHtml(row.targetReps)} · ${escapeHtml(row.restSeconds)}s${row.suggestedLoad ? ` · ${escapeHtml(row.suggestedLoad)}` : ""}`;
             return `<span><b>${index + 1}. ${escapeHtml(exercise?.name || "Exercício removido")}</b><small>${target}</small></span>`;
           })
           .join("")}
@@ -3909,7 +3909,7 @@
         ${visibleRows
           .map((row, index) => {
             const exercise = getExercise(row.exerciseId);
-            return `<span>${index + 1}. ${escapeHtml(exercise?.name || "Exercício removido")} Â· ${escapeHtml(row.sets)}x${escapeHtml(row.targetReps)} Â· ${escapeHtml(row.restSeconds)}s</span>`;
+            return `<span>${index + 1}. ${escapeHtml(exercise?.name || "Exercício removido")} · ${escapeHtml(row.sets)}x${escapeHtml(row.targetReps)} · ${escapeHtml(row.restSeconds)}s</span>`;
           })
           .join("")}
         ${extra > 0 ? `<span>+${extra} exercício(s)</span>` : ""}
@@ -3930,9 +3930,9 @@
       <article class="workout-row">
         <div class="workout-main">
           <strong>${escapeHtml(workout.title)}</strong>
-          <span>${escapeHtml(ownerLabel)} Â· ${escapeHtml(workout.focus || "Sem foco")} Â· ${escapeHtml(levelLabel)} Â· ${exerciseCount} exercício(s)</span>
+          <span>${escapeHtml(ownerLabel)} · ${escapeHtml(workout.focus || "Sem foco")} · ${escapeHtml(levelLabel)} · ${exerciseCount} exercício(s)</span>
           <span>${escapeHtml(workout.description || "Sem descrição.")}</span>
-          <span>Criado em ${escapeHtml(createdLabel)} Â· Ãšltima execução: ${escapeHtml(executionLabel)} Â· ${escapeHtml(originLabel)}</span>
+          <span>Criado em ${escapeHtml(createdLabel)} · Ãšltima execução: ${escapeHtml(executionLabel)} · ${escapeHtml(originLabel)}</span>
           ${renderWorkoutExercisePreview(workout)}
           <div class="badge-row">
             <span class="badge ${workout.status === "published" ? "is-success" : workout.status === "archived" ? "is-danger" : "is-info"}">${statusWorkout(workout.status, isPattern)}</span>
@@ -4006,7 +4006,7 @@
           <div>
             <p>Hoje</p>
             <h3>${escapeHtml(student?.name || "Aluno")}</h3>
-            <span>${agenda.length} item(ns) na agenda Â· ${workouts.length} treino(s) publicado(s)</span>
+            <span>${agenda.length} item(ns) na agenda · ${workouts.length} treino(s) publicado(s)</span>
           </div>
           ${
             nextWorkout
@@ -4148,7 +4148,7 @@
           <div class="section-title">
             <div>
               <h3>Itens do dia</h3>
-              <span class="small-text">${formatLongDate(state.agendaDate)} Â· ${selectedDayItems.length} item(ns)</span>
+              <span class="small-text">${formatLongDate(state.agendaDate)} · ${selectedDayItems.length} item(ns)</span>
             </div>
             ${state.agendaView !== "day" ? `<button class="mini-button" type="button" data-agenda-view="day">Ver dia</button>` : ""}
           </div>
@@ -4279,7 +4279,7 @@
     return `
       <button class="day-event ${mode ? `is-${mode}` : ""} ${agendaItemClass(item)}" type="button" data-open-agenda-detail="${escapeHtml(item.id)}" data-agenda-date="${escapeHtml(item.date)}" data-agenda-student="${escapeHtml(item.studentId)}">
         <strong>${escapeHtml(activityLabel(item.type))}</strong>
-        <span>${escapeHtml(item.time || "--:--")}${studentName ? ` Â· ${escapeHtml(shortName(studentName))}` : ""}</span>
+        <span>${escapeHtml(item.time || "--:--")}${studentName ? ` · ${escapeHtml(shortName(studentName))}` : ""}</span>
       </button>
     `;
   }
@@ -4298,7 +4298,7 @@
                 <div class="agenda-main">
                   <strong>${escapeHtml(activityLabel(item.type))}</strong>
                   <span>${escapeHtml(getStudentName(item.studentId))}</span>
-                  <small>${escapeHtml(item.title)}${item.duration ? ` Â· ${escapeHtml(item.duration)} min` : ""}</small>
+                  <small>${escapeHtml(item.title)}${item.duration ? ` · ${escapeHtml(item.duration)} min` : ""}</small>
                   ${item.notes ? `<span class="agenda-note">${escapeHtml(item.notes)}</span>` : ""}
                 </div>
                 <div class="agenda-status">${statusBadge(agendaStatusLabel(item.status), agendaStatusTone(item.status))}</div>
@@ -4338,7 +4338,7 @@
         <div class="agenda-time">${escapeHtml(item.time || "--:--")}</div>
         <div class="entity-main">
           <strong>${escapeHtml(item.title)}</strong>
-          <span>${escapeHtml(getStudentName(item.studentId))} Â· ${activityLabel(item.type)}</span>
+          <span>${escapeHtml(getStudentName(item.studentId))} · ${activityLabel(item.type)}</span>
           <div class="badge-row">${statusBadge(agendaStatusLabel(item.status), agendaStatusTone(item.status))}</div>
         </div>
         <div class="row-actions">
@@ -4539,7 +4539,7 @@
           ${studentAvatar(student)}
           <div class="update-title-block">
             <strong>${escapeHtml(getStudentName(update.studentId))}</strong>
-            <span><i class="${meta.dotClass}"></i>${escapeHtml(meta.label)} <em>â€¢</em> ${escapeHtml(updateMomentLabel(update))}</span>
+            <span><i class="${meta.dotClass}"></i>${escapeHtml(meta.label)} <em>•</em> ${escapeHtml(updateMomentLabel(update))}</span>
           </div>
           <details class="action-menu update-card-menu">
             <summary aria-label="Mais ações">${icons.more}</summary>
@@ -4735,8 +4735,8 @@
         ${studentAvatar(student)}
         <div class="entity-main">
           <strong>${escapeHtml(getStudentName(update.studentId))}</strong>
-          <span>Vencimento: ${formatDate(update.dueDate)}${update.submittedAt ? ` Â· Enviada em ${formatDate(update.submittedAt.slice(0, 10))}` : ""}</span>
-          ${update.weight ? `<span>Peso: ${escapeHtml(update.weight)} kg Â· Energia: ${escapeHtml(update.energy || "-")}/5 Â· Dor: ${escapeHtml(update.pain || "-")}/5</span>` : ""}
+          <span>Vencimento: ${formatDate(update.dueDate)}${update.submittedAt ? ` · Enviada em ${formatDate(update.submittedAt.slice(0, 10))}` : ""}</span>
+          ${update.weight ? `<span>Peso: ${escapeHtml(update.weight)} kg · Energia: ${escapeHtml(update.energy || "-")}/5 · Dor: ${escapeHtml(update.pain || "-")}/5</span>` : ""}
           ${update.trainingNotes ? `<span>Treino: ${escapeHtml(update.trainingNotes)}</span>` : ""}
           ${update.dietNotes ? `<span>Dieta: ${escapeHtml(update.dietNotes)}</span>` : ""}
           ${update.generalNotes ? `<span>Geral: ${escapeHtml(update.generalNotes)}</span>` : ""}
@@ -4783,7 +4783,7 @@
         </section>
         <section class="panel">
           <div class="section-title"><h3>Evolução por exercício</h3><span class="small-text">Maior carga registrada</span></div>
-          ${exerciseProgress.length ? `<div class="entity-list">${exerciseProgress.map((item) => `<article class="entity-row"><div class="entity-main"><strong>${escapeHtml(item.name)}</strong><span>Maior carga: ${item.maxLoad} Â· Volume acumulado: ${item.volume}</span></div></article>`).join("")}</div>` : emptyState("Nenhum dado de carga", "Registre carga e repetições durante a execução do treino.", icons.progress)}
+          ${exerciseProgress.length ? `<div class="entity-list">${exerciseProgress.map((item) => `<article class="entity-row"><div class="entity-main"><strong>${escapeHtml(item.name)}</strong><span>Maior carga: ${item.maxLoad} · Volume acumulado: ${item.volume}</span></div></article>`).join("")}</div>` : emptyState("Nenhum dado de carga", "Registre carga e repetições durante a execução do treino.", icons.progress)}
         </section>
         <section class="panel">
           <div class="section-title"><h3>Peso corporal</h3><span class="small-text">Atualizações</span></div>
@@ -4814,7 +4814,7 @@
       <article class="entity-row">
         <div class="entity-main">
           <strong>${escapeHtml(workout?.title || "Treino realizado")}</strong>
-          <span>${escapeHtml(getStudentName(session.studentId))} Â· ${formatDate(session.finishedAt.slice(0, 10))}</span>
+          <span>${escapeHtml(getStudentName(session.studentId))} · ${formatDate(session.finishedAt.slice(0, 10))}</span>
           <div class="badge-row"><span class="badge is-success">Volume load ${session.totalVolumeLoad}</span></div>
         </div>
       </article>
@@ -4865,8 +4865,8 @@
         ${studentAvatar(student)}
         <div class="entity-main">
           <strong>${escapeHtml(manager ? getStudentName(contract.studentId) : contract.title)}</strong>
-          <span>${escapeHtml(contract.title)} Â· Versão ${escapeHtml(contract.version)}</span>
-          <span>Criado em ${formatDate(contract.createdAt.slice(0, 10))}${contract.signedAt ? ` Â· Assinado em ${formatDate(contract.signedAt.slice(0, 10))}` : ""}${contract.emailSentAt || contract.linkSentAt ? ` Â· Link enviado em ${formatDate(String(contract.emailSentAt || contract.linkSentAt).slice(0, 10))}` : ""}</span>
+          <span>${escapeHtml(contract.title)} · Versão ${escapeHtml(contract.version)}</span>
+          <span>Criado em ${formatDate(contract.createdAt.slice(0, 10))}${contract.signedAt ? ` · Assinado em ${formatDate(contract.signedAt.slice(0, 10))}` : ""}${contract.emailSentAt || contract.linkSentAt ? ` · Link enviado em ${formatDate(String(contract.emailSentAt || contract.linkSentAt).slice(0, 10))}` : ""}</span>
           <div class="badge-row"><span class="badge ${meta.badgeClass}">${escapeHtml(meta.label)}</span></div>
         </div>
         <div class="row-actions contract-actions">
@@ -5045,7 +5045,7 @@
         <section class="panel demo-only">
           <div class="section-title"><h3>Sistema local</h3><span class="small-text">Ferramentas de teste</span></div>
           <div class="profile-grid">
-            <article class="profile-card"><span>Dados</span><strong>${state.data.students.length} alunos</strong><small>${state.data.exercises.length} exercícios Â· ${state.data.workouts.length} treinos Â· ${state.data.sessions.length} históricos</small></article>
+            <article class="profile-card"><span>Dados</span><strong>${state.data.students.length} alunos</strong><small>${state.data.exercises.length} exercícios · ${state.data.workouts.length} treinos · ${state.data.sessions.length} históricos</small></article>
             <article class="profile-card"><span>Admin</span><strong>${ADMIN.email}</strong><small>Senha de teste: Admin@2026</small></article>
           </div>
           <p class="small-text">A produção com autenticação forte e redefinição por link depende do backend ativo.</p>
@@ -5067,7 +5067,7 @@
           <div>
             <p>Treino em execução</p>
             <h3>${escapeHtml(workout?.title || "Treino")}</h3>
-            <span>${doneSets}/${totalSets} séries concluídas Â· Volume atual ${calculateSessionVolume(session)}</span>
+            <span>${doneSets}/${totalSets} séries concluídas · Volume atual ${calculateSessionVolume(session)}</span>
           </div>
           <button class="secondary-action" type="button" data-cancel-active-session>Cancelar</button>
         </section>
@@ -5118,7 +5118,7 @@
       <article class="set-row ${done ? "is-done" : running ? "is-running" : ""}">
         <div>
           <strong>Série ${setIndex + 1}</strong>
-          <span>Alvo: ${escapeHtml(exercise.targetReps)} reps Â· Sugestão: ${escapeHtml(exercise.suggestedLoad || "-")} Â· Descanso: ${exercise.restSeconds}s</span>
+          <span>Alvo: ${escapeHtml(exercise.targetReps)} reps · Sugestão: ${escapeHtml(exercise.suggestedLoad || "-")} · Descanso: ${exercise.restSeconds}s</span>
         </div>
         <label><span>Carga</span><input type="number" step="0.5" min="0" value="${escapeHtml(set.load)}" data-set-load="${exerciseIndex}:${setIndex}" ${inputsDisabled ? "disabled" : ""} /></label>
         <label><span>Reps</span><input type="number" step="1" min="0" value="${escapeHtml(set.reps)}" data-set-reps="${exerciseIndex}:${setIndex}" ${inputsDisabled ? "disabled" : ""} /></label>
@@ -5184,7 +5184,7 @@
   function exerciseOptions(selected = "") {
     const active = state.data.exercises.filter((exercise) => exercise.status === "active");
     if (!active.length) return '<option value="">Cadastre exercícios primeiro</option>';
-    return active.map((exercise) => `<option value="${exercise.id}" ${exercise.id === selected ? "selected" : ""}>${escapeHtml(exercise.name)} Â· ${escapeHtml(getExercisePrimaryMuscle(exercise))}</option>`).join("");
+    return active.map((exercise) => `<option value="${exercise.id}" ${exercise.id === selected ? "selected" : ""}>${escapeHtml(exercise.name)} · ${escapeHtml(getExercisePrimaryMuscle(exercise))}</option>`).join("");
   }
 
   function workoutOptions(studentId = "", selected = "") {
@@ -5269,10 +5269,8 @@
   }
 
   function renderStudentProfileHero(student, providedStats = null) {
-    const stats = providedStats || getStudentProfileStats(student);
     const access = getStudentAccessState(student);
     const status = getStudentOperationalStatus(student);
-    const contract = getStudentContractState(student.id);
     return `
       <section class="profile-hero student-profile-hero">
         <div class="student-hero-main">
@@ -5280,11 +5278,7 @@
           <div class="student-hero-identity">
             <h3>${escapeHtml(student.name)}</h3>
             <p>Objetivo: ${escapeHtml(student.goal || "Sem objetivo cadastrado")}</p>
-            <div class="badge-row">
-              ${statusBadge(status.label, status.tone)}
-              ${statusBadge(access.label, access.tone)}
-              ${statusBadge(`Contrato: ${contract.label}`, contract.tone)}
-            </div>
+            ${statusBadge(status.label, status.tone)}
           </div>
           <details class="action-menu student-hero-menu">
             <summary aria-label="Mais ações">${icons.more}</summary>
@@ -5293,20 +5287,9 @@
               <button class="mini-button" type="button" data-open-workout-form data-prefill-student="${student.id}">Novo treino</button>
               <button class="mini-button" type="button" data-open-activity-form data-prefill-student="${student.id}">Agendar atividade</button>
               <button class="mini-button" type="button" data-open-contract-form="${student.id}">Novo contrato</button>
+              <button class="mini-button is-danger" type="button" data-delete-student="${student.id}">Remover aluno</button>
             </div>
           </details>
-        </div>
-        <div class="student-hero-details">
-          <article>${icons.profile}<span>Telefone</span><strong>${escapeHtml(student.phone || "-")}</strong></article>
-          <article>${icons.messages}<span>E-mail</span><strong>${escapeHtml(student.email)}</strong></article>
-          <article>${icons.settings}<span>Acesso</span><strong>${escapeHtml(access.label)}</strong></article>
-          <article>${icons.workouts}<span>Ãšltimo treino</span><strong>${stats.lastSession ? formatShortDate(stats.lastSession.finishedAt.slice(0, 10)) : "Nunca"}</strong></article>
-          <article>${icons.agenda}<span>Próxima atividade</span><strong>${stats.nextActivity ? `${formatShortDate(stats.nextActivity.date)} Â· ${escapeHtml(stats.nextActivity.time || "--:--")}` : "Sem agendamento"}</strong></article>
-          <article>${icons.updates}<span>Ãšltima atualização</span><strong>${stats.lastUpdate ? formatShortDate(String(stats.lastUpdate.submittedAt || stats.lastUpdate.dueDate).slice(0, 10)) : "Nenhuma"}</strong></article>
-          <article>${icons.today}<span>Próxima atualização</span><strong>${stats.pendingUpdate ? formatShortDate(stats.pendingUpdate.dueDate) : "Em dia"}</strong></article>
-          <article>${icons.contracts}<span>Contrato</span><strong>${escapeHtml(contract.label)}</strong></article>
-          <article>${icons.agenda}<span>Treinos na semana</span><strong>${stats.sessionsWeek.length}</strong></article>
-          <article>${icons.progress}<span>Treinos no mês</span><strong>${stats.sessionsMonth.length}</strong></article>
         </div>
       </section>
     `;
@@ -5315,17 +5298,14 @@
   function renderStudentSummaryCards(student, stats = getStudentProfileStats(student)) {
     const access = getStudentAccessState(student);
     const contract = getStudentContractState(student.id);
-    const diet = getCurrentDietPlanForStudent(student.id);
-    const dietMeta = diet ? dietStatusMeta(diet) : { label: "Sem plano", tone: "warning" };
     return `
       <section class="student-summary-grid">
-        ${profileSummaryCard(icons.profile, "Acesso", access.label, access.detail, access.tone)}
-        ${profileSummaryCard(icons.diet, "Dieta", diet ? dietMeta.label : "Sem plano", diet ? `${diet.protocol || diet.title || "Plano alimentar"} Â· revisão ${diet.nextReviewDate ? formatShortDate(diet.nextReviewDate) : "a definir"}` : "Plano alimentar não criado", dietMeta.tone)}
+        ${profileSummaryCard(icons.profile, "Acesso", access.label, access.detail || access.label, access.tone)}
         ${profileSummaryCard(icons.contracts, "Contrato", contract.contract?.endDate ? formatShortDate(contract.contract.endDate) : contract.label, contract.contract ? "Vigência e status" : "Nenhum contrato enviado", contract.tone)}
-        ${profileSummaryCard(icons.updates, "Ãšltima atualização", stats.lastUpdate ? formatShortDate(String(stats.lastUpdate.submittedAt || stats.lastUpdate.dueDate).slice(0, 10)) : "Nenhuma", stats.lastUpdate ? "Registro enviado" : "Sem envio registrado")}
-        ${profileSummaryCard(icons.workouts, "Próximo treino", stats.nextActivity ? formatShortDate(stats.nextActivity.date) : "Sem agenda", stats.nextActivity ? `${activityLabel(stats.nextActivity.type)} Â· ${stats.nextActivity.time || "--:--"}` : "Nenhuma atividade marcada")}
+        ${profileSummaryCard(icons.updates, "Última atualização", stats.lastUpdate ? formatShortDate(String(stats.lastUpdate.submittedAt || stats.lastUpdate.dueDate).slice(0, 10)) : "Nenhuma", stats.lastUpdate ? "Registro enviado" : "Sem envio registrado")}
+        ${profileSummaryCard(icons.workouts, "Próximo treino", stats.nextActivity ? formatShortDate(stats.nextActivity.date) : "Sem agenda", stats.nextActivity ? `${activityLabel(stats.nextActivity.type)} · ${stats.nextActivity.time || "--:--"}` : "Nenhuma atividade marcada")}
         ${profileSummaryCard(icons.agenda, "Treinos na semana", `${stats.sessionsWeek.length}`, stats.sessionsWeek.length ? "Concluídos nesta semana" : "Sem treino concluído")}
-        ${profileSummaryCard(icons.progress, "Volume recente", stats.recentVolume, "Volume load dos últimos 4 treinos")}
+        ${profileSummaryCard(icons.progress, "Volume recente", stats.recentVolume, "Últimos 4 treinos")}
       </section>
     `;
   }
@@ -5334,9 +5314,11 @@
     return `
       <article class="profile-card student-summary-card ${tone ? `is-${tone}` : ""}">
         <span class="profile-card-icon">${icon}</span>
-        <span>${escapeHtml(label)}</span>
-        <strong>${escapeHtml(String(value))}</strong>
-        ${detail ? `<small>${escapeHtml(detail)}</small>` : ""}
+        <div class="profile-card-body">
+          <span>${escapeHtml(label)}</span>
+          <strong>${escapeHtml(String(value))}</strong>
+          ${detail ? `<small>${escapeHtml(detail)}</small>` : ""}
+        </div>
       </article>
     `;
   }
@@ -5403,7 +5385,7 @@
           <div class="section-title">
             <div>
               <h3>Treinos do aluno</h3>
-              <span class="small-text">${workouts.length} treino(s) Â· ${published.length} publicado(s) Â· ${drafts.length} rascunho(s) Â· ${archived.length} arquivado(s)</span>
+              <span class="small-text">${workouts.length} treino(s) · ${published.length} publicado(s) · ${drafts.length} rascunho(s) · ${archived.length} arquivado(s)</span>
             </div>
             <div class="section-actions">
               <button class="mini-button" type="button" data-open-workout-form data-prefill-student="${student.id}">Novo treino</button>
@@ -5527,11 +5509,11 @@
     const latestWorkout = latestSession ? getWorkout(latestSession.workoutId) : null;
     const nextTitle = nextActivity ? activityLabel(nextActivity.type) : "Nenhum treino programado";
     const nextSubtitle = nextActivity
-      ? `${formatShortDate(nextActivity.date)} â€¢ ${nextActivity.time || "--:--"}`
+      ? `${formatShortDate(nextActivity.date)} • ${nextActivity.time || "--:--"}`
       : "Agende uma atividade ou crie um treino para este aluno.";
     const lastTitle = latestWorkout?.title || (latestSession ? "Treino concluído" : "Sem histórico");
     const lastSubtitle = latestSession
-      ? `${formatShortDate(latestSession.finishedAt)} â€¢ ${Number(latestSession.totalVolumeLoad || 0).toLocaleString("pt-BR")} kg`
+      ? `${formatShortDate(latestSession.finishedAt)} • ${Number(latestSession.totalVolumeLoad || 0).toLocaleString("pt-BR")} kg`
       : "Treinos finalizados aparecerão aqui.";
 
     return `
@@ -5546,7 +5528,7 @@
             : `<button class="mini-button" type="button" data-open-activity-form data-prefill-student="${escapeHtml(student.id)}">Agendar</button>`
         })}
         ${renderProfileActivityCard({
-          title: "Ãšltimo treino concluído",
+          title: "Último treino concluído",
           icon: icons.today,
           primary: lastTitle,
           secondary: lastSubtitle,
@@ -5588,7 +5570,7 @@
         icon: icons.updates,
         title: "Atualização pendente",
         subtitle: `Vencimento: ${formatShortDate(pendingUpdate.dueDate)}`,
-        action: `<button class="mini-button" type="button" data-profile-tab="updates">Abrir</button>`,
+        action: 'data-profile-tab="updates"',
         tone: "warning"
       }));
     }
@@ -5598,7 +5580,7 @@
         icon: icons.contracts,
         title: "Contrato pendente",
         subtitle: `Plano: ${escapeHtml(pendingContract.plan || "Contrato do aluno")}`,
-        action: `<button class="mini-button" type="button" data-profile-tab="contracts">Visualizar</button>`,
+        action: 'data-profile-tab="contracts"',
         tone: "warning"
       }));
     }
@@ -5608,7 +5590,7 @@
         icon: icons.workouts,
         title: "Aluno sem treino publicado",
         subtitle: escapeHtml(student.goal || "Monte um treino para iniciar o acompanhamento."),
-        action: `<button class="mini-button" type="button" data-open-workout-form data-prefill-student="${escapeHtml(student.id)}">Criar treino</button>`,
+        action: `data-open-workout-form data-prefill-student="${escapeHtml(student.id)}"`,
         tone: "info"
       }));
     }
@@ -5619,7 +5601,7 @@
         icon: icons.messages,
         title: `${unread} mensagem(ns) não lida(s)`,
         subtitle: "Conversa aguardando resposta",
-        action: `<button class="mini-button" type="button" data-open-messages="${escapeHtml(student.id)}">Responder</button>`,
+        action: `data-open-messages="${escapeHtml(student.id)}"`,
         tone: "success"
       }));
     }
@@ -5640,15 +5622,16 @@
   }
 
   function renderProfilePendingRow({ icon, title, subtitle, action, tone = "" }) {
+    const badgeLabel = tone === "danger" ? "Urgente" : tone === "success" ? "Responder" : "Pendente";
     return `
-      <article class="profile-pending-row ${tone ? `is-${tone}` : ""}">
+      <button class="profile-pending-row ${tone ? `is-${tone}` : ""}" type="button" ${action || ""}>
         <span class="profile-pending-icon">${icon}</span>
-        <div>
+        <div class="profile-pending-text">
           <strong>${escapeHtml(title)}</strong>
-          <span>${subtitle}</span>
+          <span>${escapeHtml(subtitle)}</span>
         </div>
-        <div class="profile-pending-action">${action || ""}</div>
-      </article>
+        ${statusBadge(badgeLabel, tone)}
+      </button>
     `;
   }
 
@@ -5681,8 +5664,8 @@
     return `
       <section class="panel profile-evolution-panel ${expanded ? "is-expanded" : ""}">
         <div class="section-title">
-          <h3>Evolução â€“ Volume total (kg)</h3>
-          <button class="mini-button profile-period-pill" type="button" data-profile-tab="progress">Ãšltimos 6 treinos</button>
+          <h3>Evolução – Volume total (kg)</h3>
+          <button class="mini-button profile-period-pill" type="button" data-profile-tab="progress">Últimos 6 treinos</button>
         </div>
         <div class="profile-evolution-layout ${hasData ? "" : "is-empty"}">
           <div class="profile-chart-wrap">
@@ -5703,7 +5686,7 @@
           <aside class="profile-chart-summary">
             <strong>${Number(total || 0).toLocaleString("pt-BR")} <small>kg</small></strong>
             <span>Volume total</span>
-            <em class="${change >= 0 ? "is-positive" : "is-negative"}">${change >= 0 ? "â†‘" : "â†“"} ${Math.abs(change)}%</em>
+            <em class="${change >= 0 ? "is-positive" : "is-negative"}">${change >= 0 ? "↑" : "↓"} ${Math.abs(change)}%</em>
             <small>vs. período anterior</small>
           </aside>
         </div>
@@ -5717,7 +5700,7 @@
     const secondaryMuscles = getExerciseSecondaryMuscles(exercise);
     const videoLink = exercise.videoStorage === "indexeddb" ? "" : exercise.videoUrl || "";
     const currentVideo = hasExerciseVideo(exercise)
-      ? `${escapeHtml(exercise.videoName || exercise.videoUrl || "Vídeo cadastrado")}${exercise.videoStorage === "indexeddb" ? " Â· vídeo local deste aparelho" : ""}${exercise.videoSize ? ` Â· ${escapeHtml(formatFileSize(exercise.videoSize))}` : ""}`
+      ? `${escapeHtml(exercise.videoName || exercise.videoUrl || "Vídeo cadastrado")}${exercise.videoStorage === "indexeddb" ? " · vídeo local deste aparelho" : ""}${exercise.videoSize ? ` · ${escapeHtml(formatFileSize(exercise.videoSize))}` : ""}`
       : "Nenhum vídeo cadastrado.";
     openModal(
       exercise.id ? "Editar exercício" : "Novo exercício",
@@ -5962,7 +5945,7 @@
             <div>
               <span class="eyebrow">Dieta</span>
               <h3>${escapeHtml(plan.title || plan.protocol || "Plano alimentar")}</h3>
-              <p>${escapeHtml(getStudentName(plan.studentId))} Â· ${escapeHtml(plan.objective || student?.goal || "Objetivo não informado")}</p>
+              <p>${escapeHtml(getStudentName(plan.studentId))} · ${escapeHtml(plan.objective || student?.goal || "Objetivo não informado")}</p>
             </div>
             <span class="badge ${meta.tone ? `is-${meta.tone}` : ""}">${escapeHtml(meta.label)}</span>
           </section>
@@ -5971,7 +5954,7 @@
             <article><span>Calorias</span><strong>${escapeHtml(plan.calories || "-")}</strong></article>
             <article><span>Refeições</span><strong>${escapeHtml(String(plan.mealCount || plan.meals.length || "-"))}</strong></article>
             <article><span>Próxima revisão</span><strong>${plan.nextReviewDate ? formatShortDate(plan.nextReviewDate) : "A definir"}</strong></article>
-            <article><span>Ãšltima atualização</span><strong>${formatShortDate(String(plan.lastUpdatedAt || plan.updatedAt).slice(0, 10))}</strong></article>
+            <article><span>Última atualização</span><strong>${formatShortDate(String(plan.lastUpdatedAt || plan.updatedAt).slice(0, 10))}</strong></article>
             <article><span>Link enviado</span><strong>${plan.linkSentAt ? formatShortDate(plan.linkSentAt.slice(0, 10)) : "Ainda não enviado"}</strong></article>
           </section>
           <section class="diet-meal-list">
@@ -6034,7 +6017,7 @@
             ${studentAvatar(student)}
             <div class="update-detail-title">
               <strong>${escapeHtml(getStudentName(update.studentId))}</strong>
-              <span>${escapeHtml(meta.label)} â€¢ ${escapeHtml(updateMomentLabel(update))}</span>
+              <span>${escapeHtml(meta.label)} • ${escapeHtml(updateMomentLabel(update))}</span>
             </div>
             <span class="badge ${meta.className === "is-late" ? "is-danger" : meta.className === "is-pending" ? "is-warning" : "is-success"}">${escapeHtml(meta.label)}</span>
           </section>
@@ -6053,7 +6036,7 @@
             </article>
             <article>
               <span>Energia / Dor</span>
-              <strong>${escapeHtml(update.energy || "-")}/5 â€¢ ${escapeHtml(update.pain || "-")}/5</strong>
+              <strong>${escapeHtml(update.energy || "-")}/5 • ${escapeHtml(update.pain || "-")}/5</strong>
             </article>
           </section>
           <section class="update-detail-section">
@@ -6173,7 +6156,7 @@
             ${studentAvatar(student)}
             <div class="contract-detail-title">
               <strong>${escapeHtml(contract.title)}</strong>
-              <span>${escapeHtml(getStudentName(contract.studentId))} â€¢ Versão ${escapeHtml(contract.version)}</span>
+              <span>${escapeHtml(getStudentName(contract.studentId))} • Versão ${escapeHtml(contract.version)}</span>
             </div>
             <span class="badge ${meta.badgeClass}">${escapeHtml(meta.label)}</span>
           </section>
@@ -6193,7 +6176,7 @@
             <p class="contract-body premium-contract-body">${escapeHtml(contract.body || "Texto do contrato não informado.")}</p>
             ${
               contract.signedAt
-                ? `<p class="small-text">Assinado em ${new Date(contract.signedAt).toLocaleString("pt-BR")} â€¢ Versão aceita ${escapeHtml(contract.signedVersion || contract.version)} â€¢ ${escapeHtml(contract.technicalId || "identificação técnica não disponível")}${contract.signatureIp ? ` â€¢ IP ${escapeHtml(contract.signatureIp)}` : ""}</p>`
+                ? `<p class="small-text">Assinado em ${new Date(contract.signedAt).toLocaleString("pt-BR")} • Versão aceita ${escapeHtml(contract.signedVersion || contract.version)} • ${escapeHtml(contract.technicalId || "identificação técnica não disponível")}${contract.signatureIp ? ` • IP ${escapeHtml(contract.signatureIp)}` : ""}</p>`
                 : `<p class="small-text">${contract.emailSentAt || contract.linkSentAt ? `Link enviado em ${new Date(contract.emailSentAt || contract.linkSentAt).toLocaleString("pt-BR")}` : "Link ainda não enviado."}</p>`
             }
           </section>
@@ -6226,7 +6209,7 @@
       }
     }
     openModal(
-      `Mensagens Â· ${student.name}`,
+      `Mensagens · ${student.name}`,
       `
         <div class="message-detail">
           <section class="message-detail-hero">
@@ -6234,7 +6217,7 @@
             <div>
               <span class="eyebrow">Conversa</span>
               <h3>${escapeHtml(student.name)}</h3>
-              <p>${escapeHtml(student.goal || "Aluno Elite AS")} Â· ${state.socketReady ? "tempo real ativo" : "modo local"}</p>
+              <p>${escapeHtml(student.goal || "Aluno Elite AS")} · ${state.socketReady ? "tempo real ativo" : "modo local"}</p>
             </div>
             ${state.currentUser?.role === "manager" ? `<button class="secondary-action" type="button" data-open-student-profile="${escapeHtml(student.id)}">Abrir perfil</button>` : ""}
           </section>
@@ -6272,7 +6255,7 @@
         <form class="form-grid payment-form" id="paymentForm" data-payment-id="${escapeHtml(payment?.id || "")}">
           <div class="form-grid two">
             <label class="field"><span>Aluno</span><select name="studentId" required>${studentOptions(selectedStudentId)}</select></label>
-            <label class="field"><span>Contrato/plano</span><select name="contractId"><option value="">Sem contrato vinculado</option>${activeContracts.map((item) => `<option value="${escapeHtml(item.id)}" ${item.id === (payment?.contractId || contract?.id || "") ? "selected" : ""}>${escapeHtml(item.plan || item.title)} Â· ${escapeHtml(item.value || "sem valor")}</option>`).join("")}</select></label>
+            <label class="field"><span>Contrato/plano</span><select name="contractId"><option value="">Sem contrato vinculado</option>${activeContracts.map((item) => `<option value="${escapeHtml(item.id)}" ${item.id === (payment?.contractId || contract?.id || "") ? "selected" : ""}>${escapeHtml(item.plan || item.title)} · ${escapeHtml(item.value || "sem valor")}</option>`).join("")}</select></label>
             <label class="field"><span>Mês de referência</span><input name="referenceMonth" type="month" value="${escapeHtml(referenceMonth)}" required /></label>
             <label class="field"><span>Valor</span><input name="amount" type="text" inputmode="decimal" value="${escapeHtml(amount)}" placeholder="R$ 0,00" required /></label>
             <label class="field"><span>Vencimento</span><input name="dueDate" type="date" value="${escapeHtml(dueDate)}" /></label>
@@ -6316,7 +6299,7 @@
             <div>
               <span class="eyebrow">Financeiro</span>
               <h3>${escapeHtml(getStudentName(record.studentId))}</h3>
-              <p>${escapeHtml(record.plan || "Plano não informado")} Â· ${escapeHtml(financeMonthLabel(record.referenceMonth))}</p>
+              <p>${escapeHtml(record.plan || "Plano não informado")} · ${escapeHtml(financeMonthLabel(record.referenceMonth))}</p>
             </div>
             <span class="badge ${meta.tone ? `is-${meta.tone}` : ""}">${escapeHtml(meta.label)}</span>
           </section>

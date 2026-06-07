@@ -1753,3 +1753,210 @@
   }
 }
 
+/* ═══════════════════════════════════════════════════════
+   PERFIL DO ALUNO v54 — flat/chapado, sem liquid glass
+   ═══════════════════════════════════════════════════════ */
+
+/* Hero card: flat, compact */
+.student-profile-hero {
+  background: #1A1A1A !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 16px !important;
+  padding: 14px !important;
+}
+
+.student-profile-hero .student-hero-main {
+  align-items: center !important;
+  gap: 14px !important;
+}
+
+.student-profile-hero .entity-avatar {
+  width: 60px !important;
+  height: 60px !important;
+  min-width: 60px !important;
+  box-shadow: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+.student-hero-identity {
+  gap: 4px !important;
+}
+
+.student-hero-identity h3 {
+  font-size: clamp(1.1rem, 4.5vw, 1.4rem) !important;
+  font-weight: 700 !important;
+  line-height: 1.1 !important;
+}
+
+.student-hero-identity p {
+  color: #9CA3AF !important;
+  font-size: 0.82rem !important;
+  margin: 0 !important;
+}
+
+.student-hero-identity .badge {
+  margin-top: 4px !important;
+}
+
+/* Summary grid: 3 columns × 2 rows */
+.student-summary-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+/* Summary card: flat, icon-left layout */
+.student-summary-card {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 12px !important;
+  border-radius: 12px !important;
+  background: #1A1A1A !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: none !important;
+  min-height: 0 !important;
+}
+
+.student-summary-card .profile-card-icon {
+  grid-row: 1 !important;
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 8px !important;
+  background: rgba(245, 159, 11, 0.1) !important;
+  color: #F59E0B !important;
+  display: grid !important;
+  place-items: center !important;
+  flex: 0 0 auto !important;
+}
+
+.student-summary-card .profile-card-icon svg {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+.profile-card-body {
+  display: grid !important;
+  gap: 1px !important;
+  min-width: 0 !important;
+}
+
+.profile-card-body > span {
+  color: #9CA3AF !important;
+  font-size: 10px !important;
+  line-height: 1.2 !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.02em !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.profile-card-body > strong {
+  color: #fff !important;
+  font-size: clamp(0.8rem, 3.2vw, 1rem) !important;
+  font-weight: 700 !important;
+  line-height: 1.1 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.profile-card-body > small {
+  color: #9CA3AF !important;
+  font-size: 10px !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Tone colors for summary cards */
+.student-summary-card.is-success .profile-card-icon { background: rgba(72, 215, 100, 0.12) !important; color: #48d764 !important; }
+.student-summary-card.is-warning .profile-card-icon { background: rgba(245, 159, 11, 0.12) !important; color: #F59E0B !important; }
+.student-summary-card.is-danger  .profile-card-icon { background: rgba(255, 90, 79, 0.12) !important; color: #ff5a4f !important; }
+
+/* Activity cards side-by-side */
+.profile-activity-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+/* All panels: flat */
+.student-page .panel,
+.profile-activity-card,
+.profile-pending-panel,
+.profile-evolution-panel {
+  background: #1A1A1A !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 16px !important;
+}
+
+/* Pending rows: full-width button */
+.profile-pending-row {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 10px !important;
+  width: 100% !important;
+  text-align: left !important;
+  padding: 10px 12px !important;
+  border-radius: 10px !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  cursor: pointer !important;
+  transition: background 100ms ease !important;
+}
+
+.profile-pending-row:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+.profile-pending-text {
+  min-width: 0;
+}
+
+.profile-pending-text strong {
+  display: block;
+  color: #fff;
+  font-size: 0.84rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profile-pending-text span {
+  display: block;
+  color: #9CA3AF;
+  font-size: 0.72rem;
+  margin-top: 2px;
+}
+
+/* Active tab: clean underline, no glow */
+.student-profile-tabs button.is-active {
+  background: rgba(245, 159, 11, 0.08) !important;
+  box-shadow: inset 0 -2px 0 #F59E0B !important;
+}
+
+/* Evolution panel: ↑/↓ indicators */
+.profile-chart-summary .is-positive { color: #48d764 !important; }
+.profile-chart-summary .is-negative { color: #ff5a4f !important; }
+
+/* Responsive: stack activity cards on very small screens */
+@media (max-width: 28rem) {
+  .profile-activity-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .student-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
