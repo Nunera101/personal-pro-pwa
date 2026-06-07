@@ -37,7 +37,7 @@
   border-radius: 0.82rem;
   background: linear-gradient(135deg, #ffd66f, var(--brand));
   color: #080808;
-  box-shadow: 0 18px 42px rgba(245, 181, 27, 0.18);
+  box-shadow: none;
 }
 
 .agenda-hero .primary-action svg {
@@ -142,7 +142,6 @@
   border-radius: 0.95rem;
   padding: 0.85rem;
   background:
-    radial-gradient(circle at right top, rgba(245, 181, 27, 0.08), transparent 16rem),
     rgba(255, 255, 255, 0.035);
 }
 
@@ -630,7 +629,7 @@
   padding: 0.58rem 0.9rem !important;
   border-radius: 0.86rem !important;
   font-size: 0.88rem !important;
-  box-shadow: 0 0.85rem 1.85rem rgba(245, 184, 46, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
 }
 
 .agenda-control-panel {
@@ -660,7 +659,7 @@
 .agenda-view-tabs button.is-active {
   color: var(--elite-gold-3, #ffc84b) !important;
   background: linear-gradient(180deg, rgba(245, 184, 46, 0.13), rgba(245, 184, 46, 0.025)) !important;
-  box-shadow: inset 0 -2px 0 var(--elite-gold, #f5b82e), 0 0.55rem 1.2rem rgba(245, 184, 46, 0.08) !important;
+  box-shadow: inset 0 -2px 0 var(--elite-gold, #f5b82e) !important;
 }
 
 .agenda-period-nav {
@@ -832,7 +831,7 @@
 
 .month-view .day-cell.is-selected {
   background: rgba(245, 184, 46, 0.1) !important;
-  box-shadow: inset 0 0 0 1px rgba(245, 184, 46, 0.28);
+  box-shadow: none;
 }
 
 .day-select {
@@ -1213,7 +1212,7 @@ body.is-manager-view {
   flex-shrink: 0 !important;
 }
 
-.btn-action-header:hover { background: rgba(245, 159, 11, 0.16) !important; box-shadow: none !important; }
+box-shadow: none !important;
 .btn-action-header:active { background: rgba(245, 159, 11, 0.2) !important; }
 
 /* ── Panels: fundo chapado, sem glow ── */

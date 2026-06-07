@@ -29,7 +29,7 @@
   padding-inline: 1.2rem;
   background: linear-gradient(135deg, #f7d06a, #f5b51b 58%, #c7810d);
   color: #0b0904;
-  box-shadow: 0 1rem 2.4rem rgba(245, 181, 27, 0.24);
+  box-shadow: none;
 }
 
 .diet-hero .primary-action svg {
@@ -53,7 +53,6 @@
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background:
-    radial-gradient(circle at right bottom, rgba(245, 181, 27, 0.08), transparent 5.5rem),
     linear-gradient(145deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.025)),
     rgba(12, 12, 12, 0.9);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045);
@@ -198,7 +197,6 @@
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background:
-    radial-gradient(circle at right top, rgba(245, 181, 27, 0.08), transparent 11rem),
     rgba(255, 255, 255, 0.032);
 }
 
@@ -317,7 +315,7 @@
 .diet-primary-action {
   background: linear-gradient(135deg, rgba(245, 181, 27, 0.96), rgba(199, 129, 13, 0.96));
   color: #100c04;
-  box-shadow: 0 0.7rem 1.35rem rgba(245, 181, 27, 0.16);
+  box-shadow: none;
 }
 
 .diet-primary-action svg,

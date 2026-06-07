@@ -32,7 +32,7 @@
   padding-inline: 1.25rem;
   background: linear-gradient(135deg, #f7d06a, #f5b51b 55%, #cb850b);
   color: #0b0904;
-  box-shadow: 0 1rem 2.2rem rgba(245, 181, 27, 0.25);
+  box-shadow: none;
 }
 
 .finance-hero .primary-action svg {
@@ -59,7 +59,6 @@
   border: 1px solid var(--line);
   border-radius: 0.88rem;
   background:
-    radial-gradient(circle at right bottom, rgba(245, 181, 27, 0.07), transparent 5rem),
     linear-gradient(145deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.026)),
     rgba(12, 12, 12, 0.9);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
@@ -357,7 +356,6 @@
   border: 1px solid var(--line);
   border-radius: 0.9rem;
   background:
-    radial-gradient(circle at right top, rgba(245, 181, 27, 0.075), transparent 11rem),
     rgba(255, 255, 255, 0.032);
 }
 
@@ -449,7 +447,7 @@
 .finance-primary-action {
   background: linear-gradient(135deg, rgba(245, 181, 27, 0.95), rgba(199, 129, 13, 0.95));
   color: #100c04;
-  box-shadow: 0 0.7rem 1.4rem rgba(245, 181, 27, 0.18);
+  box-shadow: none;
 }
 
 .finance-primary-action svg,
@@ -547,7 +545,6 @@
   border: 1px solid rgba(245, 181, 27, 0.28);
   border-radius: 0.95rem;
   background:
-    radial-gradient(circle at right top, rgba(245, 181, 27, 0.12), transparent 12rem),
     rgba(255, 255, 255, 0.045);
 }
 

@@ -54,7 +54,7 @@
   padding-inline: 1.25rem;
   background: linear-gradient(135deg, #f7d06a, #f5b51b 55%, #cb850b);
   color: #0b0904;
-  box-shadow: 0 1rem 2.2rem rgba(245, 181, 27, 0.25);
+  box-shadow: none;
 }
 
 .finance-hero .primary-action svg {
@@ -81,7 +81,6 @@
   border: 1px solid var(--line);
   border-radius: 0.88rem;
   background:
-    radial-gradient(circle at right bottom, rgba(245, 181, 27, 0.07), transparent 5rem),
     linear-gradient(145deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.026)),
     rgba(12, 12, 12, 0.9);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
@@ -379,7 +378,6 @@
   border: 1px solid var(--line);
   border-radius: 0.9rem;
   background:
-    radial-gradient(circle at right top, rgba(245, 181, 27, 0.075), transparent 11rem),
     rgba(255, 255, 255, 0.032);
 }
 
@@ -471,7 +469,7 @@
 .finance-primary-action {
   background: linear-gradient(135deg, rgba(245, 181, 27, 0.95), rgba(199, 129, 13, 0.95));
   color: #100c04;
-  box-shadow: 0 0.7rem 1.4rem rgba(245, 181, 27, 0.18);
+  box-shadow: none;
 }
 
 .finance-primary-action svg,
@@ -569,7 +567,6 @@
   border: 1px solid rgba(245, 181, 27, 0.28);
   border-radius: 0.95rem;
   background:
-    radial-gradient(circle at right top, rgba(245, 181, 27, 0.12), transparent 12rem),
     rgba(255, 255, 255, 0.045);
 }
 
@@ -984,7 +981,7 @@ body.demo-mode .demo-only {
 .remember-control:hover {
   border-color: rgba(231, 168, 62, 0.55);
   background: rgba(231, 168, 62, 0.08);
-  box-shadow: 0 0 0 3px rgba(231, 168, 62, 0.11);
+  box-shadow: none;
 }
 
 .remember-control input {
@@ -1211,7 +1208,6 @@ svg {
   padding: max(0.9rem, env(safe-area-inset-top, 0px)) 1rem 0.9rem;
   border-bottom: 1px solid rgba(217, 225, 221, 0.78);
   background: rgba(246, 247, 242, 0.94);
-  backdrop-filter: blur(18px);
 }
 
 .brand-inline {
@@ -2149,7 +2145,6 @@ svg {
   padding: 0.55rem 0.55rem calc(0.55rem + var(--safe-bottom));
   border-top: 1px solid rgba(217, 225, 221, 0.8);
   background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(18px);
 }
 
 .nav-button {
@@ -2656,7 +2651,6 @@ body {
 body {
   color: var(--ink);
   background:
-    radial-gradient(circle at 100% 18rem, rgba(245, 181, 27, 0.16), transparent 17rem),
     linear-gradient(120deg, rgba(255, 255, 255, 0.06) 0 17%, transparent 17% 100%),
     linear-gradient(180deg, #020202, #0a0a0a 34rem, #050505);
 }
@@ -2668,10 +2662,9 @@ body::before {
   z-index: -1;
   pointer-events: none;
   background-image:
-    radial-gradient(circle, rgba(245, 181, 27, 0.26) 0 1px, transparent 1px),
     linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 34rem);
-  background-position: right 10rem top 15rem, 0 0;
-  background-size: 9px 9px, 100% 100%;
+  background-position: 0 0;
+  background-size: 100% 100%;
   mask-image: radial-gradient(circle at right 18rem top 24rem, #000 0 16rem, transparent 24rem);
 }
 
@@ -2720,7 +2713,6 @@ body::before {
 .sheet-panel {
   border-color: var(--line);
   background:
-    radial-gradient(circle at top right, rgba(245, 181, 27, 0.12), transparent 15rem),
     rgba(9, 9, 9, 0.96);
 }
 
@@ -2771,14 +2763,14 @@ body::before {
 .field select:focus,
 .field textarea:focus {
   border-color: rgba(245, 181, 27, 0.75);
-  box-shadow: 0 0 0 4px rgba(245, 181, 27, 0.13);
+  box-shadow: none;
 }
 
 .primary-action {
   border: 1px solid rgba(255, 220, 134, 0.44);
   background: linear-gradient(135deg, #ffd36a, #f5a90b);
   color: #0b0b0b;
-  box-shadow: 0 16px 34px rgba(245, 181, 27, 0.24);
+  box-shadow: none;
 }
 
 .secondary-action,
@@ -2858,7 +2850,6 @@ body::before {
   background:
     linear-gradient(120deg, rgba(255, 255, 255, 0.065) 0 31%, transparent 31% 100%),
     rgba(2, 2, 2, 0.92);
-  backdrop-filter: blur(18px);
 }
 
 .manager-header {
@@ -3048,7 +3039,6 @@ body::before {
   border: 1px solid rgba(245, 181, 27, 0.35);
   border-radius: 999px;
   background:
-    radial-gradient(circle at top left, rgba(245, 181, 27, 0.28), transparent 62%),
     rgba(255, 255, 255, 0.055);
   color: var(--brand-strong);
   font-size: 0.9rem;
@@ -3211,7 +3201,6 @@ body::before {
 .student-profile-hero {
   border-color: var(--line);
   background:
-    radial-gradient(circle at right top, rgba(245, 181, 27, 0.16), transparent 18rem),
     linear-gradient(145deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.025)),
     rgba(12, 12, 12, 0.9);
 }
@@ -3264,7 +3253,7 @@ body::before {
 .nav-button.is-active {
   background: rgba(245, 181, 27, 0.12);
   color: var(--brand-strong);
-  box-shadow: inset 0 0 0 1px rgba(245, 181, 27, 0.22);
+  box-shadow: none;
 }
 
 .side-nav {
@@ -3553,7 +3542,7 @@ body::before {
   border-radius: 0.72rem;
   background: linear-gradient(135deg, #ffd66f, var(--brand));
   color: #080808;
-  box-shadow: 0 18px 42px rgba(245, 181, 27, 0.18);
+  box-shadow: none;
 }
 
 .dashboard-hero .primary-action svg {
@@ -3738,7 +3727,7 @@ button.dashboard-metric {
 
 .status-dot.is-warning {
   background: var(--brand);
-  box-shadow: 0 0 0 0.28rem rgba(245, 181, 27, 0.12);
+  box-shadow: none;
 }
 
 .dashboard-agenda-list {
@@ -3858,7 +3847,7 @@ button.dashboard-metric {
   min-height: 0.85rem;
   border-radius: 999px 999px 0.35rem 0.35rem;
   background: linear-gradient(180deg, #ffd66f, rgba(245, 181, 27, 0.34));
-  box-shadow: 0 10px 24px rgba(245, 181, 27, 0.12);
+  box-shadow: none;
 }
 
 .weekly-bar small {
@@ -4047,7 +4036,7 @@ button.dashboard-metric {
   min-width: 10rem;
   padding-inline: 0.95rem;
   border-radius: 0.68rem;
-  box-shadow: 0 12px 30px rgba(245, 181, 27, 0.18);
+  box-shadow: none;
 }
 
 .dashboard-hero .primary-action svg {
@@ -4356,7 +4345,6 @@ button.dashboard-metric {
   gap: 0.05rem 0.48rem;
   padding: 0.56rem 0.6rem;
   background:
-    radial-gradient(circle at 88% 74%, rgba(245, 181, 27, 0.11), transparent 3.4rem),
     linear-gradient(145deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.02));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 14px 38px rgba(0, 0, 0, 0.22);
 }
@@ -4392,7 +4380,6 @@ button.dashboard-metric {
 
 .dashboard-panel {
   background:
-    radial-gradient(circle at 100% 0%, rgba(245, 181, 27, 0.055), transparent 10rem),
     linear-gradient(145deg, rgba(255, 255, 255, 0.052), rgba(255, 255, 255, 0.018));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 16px 44px rgba(0, 0, 0, 0.2);
 }
@@ -4614,7 +4601,7 @@ button.dashboard-metric {
   border-radius: 0.82rem;
   background: linear-gradient(135deg, #ffd66f, var(--brand));
   color: #080808;
-  box-shadow: 0 18px 42px rgba(245, 181, 27, 0.18);
+  box-shadow: none;
 }
 
 .agenda-hero .primary-action svg {
@@ -4719,7 +4706,6 @@ button.dashboard-metric {
   border-radius: 0.95rem;
   padding: 0.85rem;
   background:
-    radial-gradient(circle at right top, rgba(245, 181, 27, 0.08), transparent 16rem),
     rgba(255, 255, 255, 0.035);
 }
 
@@ -5217,7 +5203,7 @@ button.dashboard-metric {
   border-radius: 0.86rem;
   background: linear-gradient(135deg, #ffd66f, var(--brand));
   color: #080808;
-  box-shadow: 0 18px 42px rgba(245, 181, 27, 0.18);
+  box-shadow: none;
 }
 
 .patterns-hero .primary-action svg {
@@ -5243,7 +5229,6 @@ button.dashboard-metric {
   border: 1px solid var(--line);
   border-radius: 0.95rem;
   background:
-    radial-gradient(circle at right top, rgba(245, 181, 27, 0.1), transparent 9rem),
     linear-gradient(145deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.025)),
     rgba(10, 10, 10, 0.9);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
@@ -5329,7 +5314,7 @@ button.dashboard-metric {
 
 .pattern-search-field:focus-within {
   border-color: rgba(245, 181, 27, 0.62);
-  box-shadow: 0 0 0 3px rgba(245, 181, 27, 0.1);
+  box-shadow: none;
 }
 
 .pattern-search-field input {
@@ -5414,7 +5399,6 @@ button.dashboard-metric {
   border: 1px solid var(--line);
   border-radius: 1rem;
   background:
-    radial-gradient(circle at right top, rgba(245, 181, 27, 0.09), transparent 16rem),
     linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.024)),
     rgba(9, 9, 9, 0.9);
 }
@@ -5441,7 +5425,6 @@ button.dashboard-metric {
   border: 1px solid var(--line);
   border-radius: 1rem;
   background:
-    radial-gradient(circle at right top, rgba(245, 181, 27, 0.08), transparent 14rem),
     linear-gradient(145deg, rgba(255, 255, 255, 0.062), rgba(255, 255, 255, 0.025)),
     rgba(10, 10, 10, 0.92);
   box-shadow: 0 18px 45px rgba(0, 0, 0, 0.16);
@@ -5923,7 +5906,6 @@ button.dashboard-metric {
   border: 1px solid var(--line);
   border-radius: 1rem;
   background:
-    radial-gradient(circle at right top, rgba(245, 181, 27, 0.09), transparent 13rem),
     linear-gradient(145deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.022)),
     rgba(12, 12, 12, 0.9);
 }
@@ -6557,7 +6539,6 @@ button.dashboard-metric {
   border: 1px solid var(--line);
   border-radius: 0.92rem;
   background:
-    radial-gradient(circle at right top, rgba(245, 181, 27, 0.08), transparent 12rem),
     linear-gradient(145deg, rgba(255, 255, 255, 0.066), rgba(255, 255, 255, 0.022)),
     rgba(12, 12, 12, 0.9);
 }
@@ -7222,7 +7203,7 @@ button.dashboard-metric {
 
 .conversation-card.has-unread .entity-avatar,
 .recent-message-card.has-unread .entity-avatar {
-  box-shadow: 0 0 0 2px rgba(245, 181, 27, 0.16);
+  box-shadow: none;
 }
 
 .conversation-copy {
@@ -7288,7 +7269,6 @@ button.dashboard-metric {
   border: 1px solid var(--line);
   border-radius: 0.95rem;
   background:
-    radial-gradient(circle at right top, rgba(245, 181, 27, 0.12), transparent 12rem),
     linear-gradient(145deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.024)),
     rgba(12, 12, 12, 0.92);
 }
@@ -7476,7 +7456,7 @@ button.dashboard-metric {
   border-radius: 0.85rem;
   background: linear-gradient(135deg, #ffd66f, var(--brand));
   color: #080808;
-  box-shadow: 0 18px 42px rgba(245, 181, 27, 0.18);
+  box-shadow: none;
 }
 
 .students-hero .primary-action svg,
@@ -7530,7 +7510,7 @@ button.dashboard-metric {
 
 .student-search-field:focus-within {
   border-color: rgba(245, 181, 27, 0.62);
-  box-shadow: 0 0 0 3px rgba(245, 181, 27, 0.1);
+  box-shadow: none;
 }
 
 .student-search-field input {
@@ -7621,7 +7601,6 @@ button.dashboard-metric {
   border: 1px solid var(--line);
   border-radius: 1rem;
   background:
-    radial-gradient(circle at right top, rgba(245, 181, 27, 0.1), transparent 14rem),
     linear-gradient(145deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.025)),
     rgba(10, 10, 10, 0.9);
   box-shadow: 0 20px 45px rgba(0, 0, 0, 0.18);
@@ -7641,7 +7620,6 @@ button.dashboard-metric {
   flex-basis: 4.35rem;
   font-size: 1.25rem;
   background:
-    radial-gradient(circle at 35% 25%, rgba(255, 214, 111, 0.24), transparent 58%),
     linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)),
     rgba(20, 20, 20, 0.95);
 }
@@ -8065,7 +8043,7 @@ button.dashboard-metric {
   padding-inline: 1.2rem;
   background: linear-gradient(135deg, #f7d06a, #f5b51b 58%, #c7810d);
   color: #0b0904;
-  box-shadow: 0 1rem 2.4rem rgba(245, 181, 27, 0.24);
+  box-shadow: none;
 }
 
 .diet-hero .primary-action svg {
@@ -8089,7 +8067,6 @@ button.dashboard-metric {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background:
-    radial-gradient(circle at right bottom, rgba(245, 181, 27, 0.08), transparent 5.5rem),
     linear-gradient(145deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.025)),
     rgba(12, 12, 12, 0.9);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045);
@@ -8234,7 +8211,6 @@ button.dashboard-metric {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background:
-    radial-gradient(circle at right top, rgba(245, 181, 27, 0.08), transparent 11rem),
     rgba(255, 255, 255, 0.032);
 }
 
@@ -8353,7 +8329,7 @@ button.dashboard-metric {
 .diet-primary-action {
   background: linear-gradient(135deg, rgba(245, 181, 27, 0.96), rgba(199, 129, 13, 0.96));
   color: #100c04;
-  box-shadow: 0 0.7rem 1.35rem rgba(245, 181, 27, 0.16);
+  box-shadow: none;
 }
 
 .diet-primary-action svg,
@@ -8605,7 +8581,7 @@ button.dashboard-metric {
   width: 2.52rem;
   height: 2.52rem;
   border-color: rgba(245, 181, 27, 0.72);
-  box-shadow: 0 0 0 0.16rem rgba(245, 181, 27, 0.08);
+  box-shadow: none;
 }
 
 .panel,
@@ -8632,7 +8608,6 @@ button.dashboard-metric {
   border: 1px solid rgba(255, 255, 255, 0.105);
   border-radius: 0.9rem;
   background:
-    radial-gradient(circle at 100% 0%, rgba(245, 181, 27, 0.055), transparent 9rem),
     linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
     rgba(10, 10, 10, 0.9);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045), 0 1rem 2.2rem rgba(0, 0, 0, 0.18);
@@ -8739,7 +8714,7 @@ button.dashboard-metric {
   padding-inline: 0.95rem;
   background: linear-gradient(135deg, #ffd978 0%, #f5b51b 54%, #c9800c 100%);
   color: #090805;
-  box-shadow: 0 0.75rem 1.75rem rgba(245, 181, 27, 0.18);
+  box-shadow: none;
 }
 
 .mini-button {
@@ -9157,7 +9132,7 @@ button.dashboard-metric {
 }
 
 .nav-button.is-active {
-  box-shadow: inset 0 0 0 1px rgba(245, 181, 27, 0.42), 0 0 1.2rem rgba(245, 181, 27, 0.18);
+  box-shadow: none;
 }
 
 @media (min-width: 58rem) {
@@ -9445,8 +9420,6 @@ button.dashboard-metric {
 
 .manager-workspace {
   background:
-    radial-gradient(circle at 96% 26%, rgba(245, 184, 46, 0.12), transparent 15rem),
-    radial-gradient(circle at 7% 66%, rgba(245, 184, 46, 0.055), transparent 14rem),
     linear-gradient(116deg, rgba(255, 255, 255, 0.055) 0 19%, transparent 19% 100%),
     var(--elite-bg) !important;
 }
@@ -9458,7 +9431,6 @@ button.dashboard-metric {
     linear-gradient(116deg, rgba(255, 255, 255, 0.07) 0 30%, transparent 30%),
     rgba(2, 2, 2, 0.96) !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.09) !important;
-  backdrop-filter: blur(18px);
 }
 
 .manager-header .menu-trigger {
@@ -9547,7 +9519,7 @@ button.dashboard-metric {
   height: 0.54rem;
   border-radius: 999px;
   background: var(--elite-gold);
-  box-shadow: 0 0 0.75rem rgba(245, 184, 46, 0.62);
+  box-shadow: none;
 }
 
 .manager-header .avatar-button {
@@ -9555,7 +9527,6 @@ button.dashboard-metric {
   height: 2.85rem !important;
   border: 1px solid rgba(245, 184, 46, 0.72) !important;
   color: #ffd567;
-  background: radial-gradient(circle at 50% 12%, rgba(245, 184, 46, 0.12), rgba(255, 255, 255, 0.035) 42%, rgba(7, 7, 7, 0.92) 100%) !important;
   font-weight: 860;
 }
 
@@ -9601,7 +9572,7 @@ button.dashboard-metric {
   font-weight: 830;
   white-space: nowrap;
   background: linear-gradient(135deg, #ffe18a 0%, #f5b82e 48%, #ca820c 100%) !important;
-  box-shadow: 0 0.9rem 2rem rgba(245, 184, 46, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.32) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.32) !important;
 }
 
 .dashboard-hero .primary-action svg {
@@ -9622,7 +9593,6 @@ button.dashboard-metric {
   border: 1px solid var(--elite-border) !important;
   border-radius: 0.9rem !important;
   background:
-    radial-gradient(circle at 82% 66%, rgba(245, 184, 46, 0.115), transparent 2.6rem),
     linear-gradient(145deg, rgba(255, 255, 255, 0.064), rgba(255, 255, 255, 0.018)),
     rgba(9, 9, 9, 0.9) !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.052), 0 0.9rem 1.8rem rgba(0, 0, 0, 0.2) !important;
@@ -9638,7 +9608,6 @@ button.dashboard-metric {
   height: 3.1rem;
   border-radius: 999px;
   background: rgba(245, 184, 46, 0.055);
-  filter: blur(0.08rem);
 }
 
 .dashboard-metric .metric-icon {
@@ -9688,7 +9657,6 @@ button.dashboard-metric {
   padding: 0.72rem !important;
   border-radius: 0.92rem !important;
   background:
-    radial-gradient(circle at 100% 10%, rgba(245, 184, 46, 0.065), transparent 9rem),
     linear-gradient(145deg, rgba(255, 255, 255, 0.058), rgba(255, 255, 255, 0.018)),
     rgba(9, 9, 9, 0.92) !important;
 }
@@ -9943,7 +9911,6 @@ button.dashboard-metric {
 
 .nav-button.is-active {
   background:
-    radial-gradient(circle at 50% 12%, rgba(245, 184, 46, 0.18), transparent 62%),
     rgba(245, 184, 46, 0.075) !important;
 }
 
@@ -10487,7 +10454,7 @@ button.dashboard-metric {
   padding: 0.58rem 0.9rem !important;
   border-radius: 0.86rem !important;
   font-size: 0.88rem !important;
-  box-shadow: 0 0.85rem 1.85rem rgba(245, 184, 46, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
 }
 
 .agenda-control-panel {
@@ -10517,7 +10484,7 @@ button.dashboard-metric {
 .agenda-view-tabs button.is-active {
   color: var(--elite-gold-3, #ffc84b) !important;
   background: linear-gradient(180deg, rgba(245, 184, 46, 0.13), rgba(245, 184, 46, 0.025)) !important;
-  box-shadow: inset 0 -2px 0 var(--elite-gold, #f5b82e), 0 0.55rem 1.2rem rgba(245, 184, 46, 0.08) !important;
+  box-shadow: inset 0 -2px 0 var(--elite-gold, #f5b82e) !important;
 }
 
 .agenda-period-nav {
@@ -10689,7 +10656,7 @@ button.dashboard-metric {
 
 .month-view .day-cell.is-selected {
   background: rgba(245, 184, 46, 0.1) !important;
-  box-shadow: inset 0 0 0 1px rgba(245, 184, 46, 0.28);
+  box-shadow: none;
 }
 
 .day-select {
@@ -11062,7 +11029,7 @@ body.is-manager-view {
   padding: 0.64rem 1.05rem !important;
   border-radius: 0.9rem !important;
   font-size: 0.86rem !important;
-  box-shadow: 0 0.9rem 2.2rem rgba(245, 184, 46, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
 }
 
 .students-hero .primary-action svg {
@@ -11089,7 +11056,7 @@ body.is-manager-view {
 
 .student-search-field:focus-within {
   border-color: rgba(245, 184, 46, 0.54) !important;
-  box-shadow: 0 0 0 1px rgba(245, 184, 46, 0.12), 0 0.9rem 2.2rem rgba(245, 184, 46, 0.08) !important;
+  box-shadow: none !important;
 }
 
 .student-search-field svg {
@@ -11199,7 +11166,6 @@ body.is-manager-view {
   border-radius: 0.92rem !important;
   border: 1px solid rgba(255, 255, 255, 0.105) !important;
   background:
-    radial-gradient(circle at 93% 18%, rgba(245, 184, 46, 0.08), transparent 32%),
     linear-gradient(145deg, rgba(255, 255, 255, 0.064), rgba(255, 255, 255, 0.018)) !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045), 0 1.2rem 2.8rem rgba(0, 0, 0, 0.28) !important;
   overflow: visible !important;
@@ -11217,7 +11183,7 @@ body.is-manager-view {
   height: clamp(3.25rem, 14vw, 4.15rem) !important;
   min-width: clamp(3.25rem, 14vw, 4.15rem) !important;
   border: 1px solid rgba(255, 255, 255, 0.13) !important;
-  box-shadow: 0 0 0 1px rgba(245, 184, 46, 0.08), 0 0.75rem 1.6rem rgba(0, 0, 0, 0.28) !important;
+  box-shadow: none !important;
 }
 
 .student-card-main {
@@ -11533,7 +11499,6 @@ body.is-manager-view {
   padding: clamp(0.82rem, 3.2vw, 1.1rem) !important;
   border-radius: 1.02rem !important;
   background:
-    radial-gradient(circle at 94% 14%, rgba(245, 184, 46, 0.15), transparent 30%),
     linear-gradient(135deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.025)) !important;
   border: 1px solid rgba(255, 255, 255, 0.11) !important;
   box-shadow: 0 1rem 2.4rem rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
@@ -11553,7 +11518,7 @@ body.is-manager-view {
   height: clamp(4.55rem, 19vw, 6.6rem) !important;
   min-width: clamp(4.55rem, 19vw, 6.6rem) !important;
   border: 1px solid rgba(255, 255, 255, 0.18) !important;
-  box-shadow: 0 0 0 1px rgba(245, 184, 46, 0.12), 0 0.8rem 1.8rem rgba(0, 0, 0, 0.32) !important;
+  box-shadow: none !important;
 }
 
 .student-profile-hero .student-hero-identity {
@@ -11643,7 +11608,6 @@ body.is-manager-view {
   padding: 0.72rem !important;
   border-radius: 0.86rem !important;
   background:
-    radial-gradient(circle at 92% 18%, rgba(245, 184, 46, 0.11), transparent 33%),
     linear-gradient(135deg, rgba(255, 255, 255, 0.062), rgba(255, 255, 255, 0.025)) !important;
   border: 1px solid rgba(255, 255, 255, 0.105) !important;
   box-shadow: 0 0.75rem 1.6rem rgba(0, 0, 0, 0.22) !important;
@@ -11688,7 +11652,7 @@ body.is-manager-view {
   scroll-snap-type: x proximity !important;
   background: rgba(255, 255, 255, 0.04) !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  box-shadow: inset 0 -1px 0 rgba(245, 184, 46, 0.05) !important;
+  box-shadow: none !important;
   -webkit-overflow-scrolling: touch !important;
   scrollbar-width: none !important;
 }
@@ -11719,7 +11683,7 @@ body.is-manager-view {
 .student-profile-tabs button.is-active {
   color: var(--brand-strong) !important;
   background: linear-gradient(180deg, rgba(245, 184, 46, 0.11), rgba(245, 184, 46, 0.02)) !important;
-  box-shadow: inset 0 -2px 0 var(--brand-strong), 0 0.7rem 1.2rem rgba(245, 184, 46, 0.1) !important;
+  box-shadow: inset 0 -2px 0 var(--brand-strong) !important;
 }
 
 .profile-activity-grid {
@@ -11734,7 +11698,6 @@ body.is-manager-view {
 .profile-evolution-panel {
   border-radius: 0.92rem !important;
   background:
-    radial-gradient(circle at 92% 12%, rgba(245, 184, 46, 0.09), transparent 31%),
     linear-gradient(135deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.025)) !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   box-shadow: 0 0.85rem 1.8rem rgba(0, 0, 0, 0.24) !important;
@@ -12112,7 +12075,7 @@ body.is-manager-view {
   border-radius: 0.88rem !important;
   background: linear-gradient(135deg, #f8d477, #f2a91d) !important;
   color: #111 !important;
-  box-shadow: 0 0.85rem 1.8rem rgba(245, 184, 46, 0.22) !important;
+  box-shadow: none !important;
   font-size: clamp(0.82rem, 3.15vw, 0.94rem) !important;
   font-weight: 760 !important;
 }
@@ -12131,7 +12094,6 @@ body.is-manager-view {
   padding: 0.7rem !important;
   border-radius: 0.86rem !important;
   background:
-    radial-gradient(circle at 90% 18%, rgba(245, 184, 46, 0.12), transparent 32%),
     linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.025)) !important;
   border: 1px solid rgba(255, 255, 255, 0.105) !important;
   box-shadow: 0 0.72rem 1.5rem rgba(0, 0, 0, 0.22) !important;
@@ -12287,7 +12249,6 @@ body.is-manager-view {
   padding: 0.62rem !important;
   border-radius: 0.92rem !important;
   background:
-    radial-gradient(circle at 92% 15%, rgba(245, 184, 46, 0.11), transparent 34%),
     linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.025)) !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   box-shadow: 0 0.78rem 1.7rem rgba(0, 0, 0, 0.25) !important;
@@ -12309,7 +12270,6 @@ body.is-manager-view {
   border: 0 !important;
   border-radius: 0.72rem !important;
   background:
-    radial-gradient(circle at 50% 40%, rgba(245, 184, 46, 0.2), transparent 33%),
     linear-gradient(135deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.025)) !important;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
   cursor: pointer !important;
@@ -12339,7 +12299,7 @@ body.is-manager-view {
   border-radius: 999px !important;
   color: #121212 !important;
   background: linear-gradient(135deg, #f8d477, #f2a91d) !important;
-  box-shadow: 0 0.65rem 1.2rem rgba(245, 184, 46, 0.25) !important;
+  box-shadow: none !important;
 }
 
 .library-play-badge svg {
@@ -12687,7 +12647,6 @@ body.is-manager-view {
   grid-template-columns: auto minmax(0, 1fr) !important;
   gap: 0.12rem 0.44rem !important;
   background:
-    radial-gradient(circle at 96% 90%, rgba(245, 184, 46, 0.09), transparent 3.9rem),
     linear-gradient(145deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.018)),
     rgba(9, 9, 9, 0.92) !important;
   border-color: rgba(255, 255, 255, 0.105) !important;
@@ -12850,7 +12809,6 @@ body.is-manager-view {
   padding: clamp(0.64rem, 2.4vw, 0.86rem) !important;
   border-radius: 0.96rem !important;
   background:
-    radial-gradient(circle at 98% 4%, rgba(245, 184, 46, 0.1), transparent 9rem),
     linear-gradient(145deg, rgba(255, 255, 255, 0.066), rgba(255, 255, 255, 0.018)),
     rgba(8, 8, 8, 0.93) !important;
   border-color: rgba(255, 255, 255, 0.105) !important;
