@@ -236,6 +236,9 @@
   color: var(--ink);
   font-size: 1.08rem;
   line-height: 1.12;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .diet-plan-title span {
@@ -245,11 +248,16 @@
   color: var(--muted);
   font-size: 0.82rem;
   line-height: 1.2;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .diet-plan-title svg {
   width: 1rem;
   height: 1rem;
+  flex-shrink: 0;
   color: var(--brand-strong);
   stroke: currentColor;
 }
@@ -282,12 +290,19 @@
   color: var(--muted);
   font-size: 0.72rem;
   line-height: 1.16;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .diet-plan-grid strong {
   color: var(--ink);
   font-size: 0.88rem;
   line-height: 1.18;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .diet-plan-actions {

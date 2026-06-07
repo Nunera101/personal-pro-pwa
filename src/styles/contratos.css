@@ -258,6 +258,9 @@
   color: var(--muted);
   font-size: 0.84rem;
   line-height: 1.22;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .contract-student-info b {
@@ -265,6 +268,9 @@
   font-size: 0.86rem;
   font-weight: 820;
   line-height: 1.22;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .contract-validity {
@@ -289,12 +295,18 @@
   color: var(--muted);
   font-size: 0.76rem;
   line-height: 1.1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .contract-validity strong {
   color: var(--ink);
   font-size: 0.95rem;
   line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .contract-card-actions {

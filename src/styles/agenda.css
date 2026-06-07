@@ -392,10 +392,14 @@
 .agenda-status {
   display: flex;
   justify-content: flex-end;
+  flex-shrink: 0;
 }
 
 .agenda-status .badge {
   white-space: nowrap;
+  max-width: 7.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .agenda-item .row-actions {

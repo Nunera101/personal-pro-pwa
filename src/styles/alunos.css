@@ -204,6 +204,9 @@
   color: var(--ink);
   font-size: clamp(1.14rem, 4.2vw, 1.45rem);
   line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .student-goal {
@@ -213,6 +216,9 @@
   gap: 0.4rem;
   color: var(--muted);
   font-size: 0.92rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .student-goal svg {

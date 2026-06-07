@@ -1572,6 +1572,8 @@ svg {
   color: var(--brand-strong);
   font-size: 0.76rem;
   font-weight: 800;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .badge.is-success {
