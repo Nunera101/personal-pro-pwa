@@ -115,7 +115,8 @@
     installSheetMessage: document.getElementById("installSheetMessage"),
     installSteps: document.getElementById("installSteps"),
     retryInstall: document.getElementById("retryInstall"),
-    toast: document.getElementById("toast")
+    toast: document.getElementById("toast"),
+    drawerBackdrop: document.querySelector("[data-manager-drawer-backdrop]")
   };
 
   const icons = {
@@ -2090,11 +2091,13 @@
   }
 
   function openManagerDrawer() {
-    elements.body.classList.add("manager-drawer-open");
+    elements.managerSideNav.classList.add("open");
+    elements.drawerBackdrop.classList.add("visible");
   }
 
   function closeManagerDrawer() {
-    elements.body.classList.remove("manager-drawer-open");
+    elements.managerSideNav.classList.remove("open");
+    elements.drawerBackdrop.classList.remove("visible");
   }
 
   function pageHeader(title, subtitle, action = "") {

@@ -2522,13 +2522,16 @@ body::before {
 .drawer-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 28;
-  display: none;
-  background: rgba(0, 0, 0, 0.58);
+  z-index: 9998;
+  background: rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s;
 }
 
-.manager-drawer-open .drawer-backdrop {
-  display: block;
+.drawer-backdrop.visible {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .toast {
@@ -2545,26 +2548,30 @@ body::before {
   .manager-workspace .side-nav {
     position: fixed;
     top: 0;
-    bottom: 0;
     left: 0;
-    z-index: 35;
+    height: 100dvh;
+    width: min(82vw, 300px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    z-index: 9999;
     display: grid;
     align-content: start;
-    width: min(84vw, 21rem);
     gap: 0.28rem;
-    padding: max(1rem, env(safe-area-inset-top, 0px)) 0.75rem calc(1rem + var(--safe-bottom));
+    padding-top: env(safe-area-inset-top, 16px);
+    padding-bottom: env(safe-area-inset-bottom, 16px);
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
     border: 1px solid var(--line);
     border-left: 0;
     border-radius: 0 1rem 1rem 0;
-    background:
-      radial-gradient(circle at top right, rgba(245, 181, 27, 0.14), transparent 14rem),
-      rgba(7, 7, 7, 0.98);
+    background: #111111;
     box-shadow: 24px 0 70px rgba(0, 0, 0, 0.58);
-    transform: translateX(-105%);
-    transition: transform 180ms ease;
+    transform: translateX(-100%);
+    transition: transform 0.28s ease;
   }
 
-  .manager-drawer-open .manager-workspace .side-nav {
+  .manager-workspace .side-nav.open {
     transform: translateX(0);
   }
 
@@ -4724,8 +4731,8 @@ button.dashboard-metric {
 }
 
 .manager-header .menu-trigger {
-  width: 2.45rem;
-  height: 2.45rem;
+  min-width: 44px;
+  min-height: 44px;
   color: var(--elite-ink);
 }
 
@@ -5204,8 +5211,8 @@ button.dashboard-metric {
 
   .manager-header .menu-trigger,
   .manager-header .notification-button {
-    width: 2.15rem;
-    height: 2.15rem;
+    min-width: 44px;
+    min-height: 44px;
   }
 
   .manager-header .brand-inline {
@@ -5701,5 +5708,127 @@ button.dashboard-metric {
   .dashboard-home {
     gap: 0.7rem !important;
   }
+}
+
+/* =============================================
+   Design System — Classes reutilizáveis globais
+   ============================================= */
+
+/* Botão de ação compacto no cabeçalho */
+.btn-action-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: auto !important;
+  padding: 12px 18px;
+  background: linear-gradient(135deg, #F5C542 0%, #F59E0B 100%);
+  color: #1a1a1a;
+  font-weight: 700;
+  font-size: 14px;
+  border-radius: 14px;
+  border: none;
+  white-space: nowrap;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.btn-action-header:hover {
+  background: linear-gradient(135deg, #f7d06a 0%, #e8920a 100%);
+}
+
+/* Faixa de métricas em linha horizontal */
+.metrics-row {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+
+.metrics-row::-webkit-scrollbar {
+  display: none;
+}
+
+.metrics-row .metric-card {
+  flex: 1;
+  min-width: 105px;
+  padding: 14px;
+  background: #1a1a1a;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.metrics-row .metric-card.is-success { border-color: rgba(16, 185, 129, 0.25); }
+.metrics-row .metric-card.is-warning { border-color: rgba(245, 158, 11, 0.25); }
+.metrics-row .metric-card.is-danger  { border-color: rgba(239, 68, 68, 0.25); }
+
+.metric-card .mc-label {
+  font-size: 11px;
+  color: #9ca3af;
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+
+.metric-card .mc-value {
+  font-size: 26px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.1;
+}
+
+.metric-card .mc-sub {
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.metric-card.is-success .mc-value { color: #10b981; }
+.metric-card.is-warning .mc-value { color: #f59e0b; }
+.metric-card.is-danger  .mc-value { color: #ef4444; }
+
+/* Linha de busca + filtro inline */
+.search-filter-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.search-filter-row .search-input-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
+.filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 11px 16px;
+  white-space: nowrap;
+  background: #1a1a1a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  color: #f59e0b;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.filter-btn:hover {
+  background: #222;
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.filter-btn svg {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  fill: none;
+  flex-shrink: 0;
 }
 
