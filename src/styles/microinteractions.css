@@ -1,0 +1,175 @@
+/* =====================================================
+   Microinterações com propósito — Elite AS
+   Respeita prefers-reduced-motion em todas as seções
+   ===================================================== */
+
+/* --- Barra de progresso do treino --- */
+.execution-progress {
+  display: grid;
+  gap: 0.38rem;
+}
+
+.execution-progress-track {
+  height: 0.42rem;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.09);
+  overflow: hidden;
+}
+
+.execution-progress-fill {
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #f8d477, #f2a91d);
+  transition: width 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);
+  will-change: width;
+}
+
+.execution-progress-label {
+  color: rgba(247, 244, 235, 0.62);
+  font-size: 0.72rem;
+  font-weight: 780;
+}
+
+/* --- Check pop ao concluir uma série --- */
+@keyframes set-check-pop {
+  0%   { transform: scale(0.5); opacity: 0; }
+  55%  { transform: scale(1.22); opacity: 1; }
+  100% { transform: scale(1);    opacity: 1; }
+}
+
+.set-row.just-done .badge {
+  animation: set-check-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* --- Overlay de treino concluído --- */
+.workout-complete-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: rgba(6, 6, 6, 0.86);
+  backdrop-filter: blur(6px);
+  animation: wc-bg-in 0.25s ease forwards;
+}
+
+@keyframes wc-bg-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.workout-complete-card {
+  display: grid;
+  gap: 0.85rem;
+  justify-items: center;
+  width: 100%;
+  max-width: 21rem;
+  padding: 2rem 1.75rem 1.6rem;
+  border-radius: 1.4rem;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.072), rgba(255, 255, 255, 0.028));
+  border: 1px solid rgba(245, 181, 27, 0.24);
+  box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.55);
+  text-align: center;
+  animation: wc-card-in 0.38s cubic-bezier(0.34, 1.48, 0.64, 1) 0.05s both;
+}
+
+@keyframes wc-card-in {
+  from { transform: scale(0.76) translateY(1.5rem); opacity: 0; }
+  to   { transform: scale(1)    translateY(0);      opacity: 1; }
+}
+
+.workout-complete-icon {
+  width: 5rem;
+  height: 5rem;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: rgba(245, 181, 27, 0.1);
+  border: 2px solid rgba(245, 181, 27, 0.32);
+  color: var(--brand-strong);
+  animation: wc-icon-in 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) 0.18s both;
+}
+
+@keyframes wc-icon-in {
+  from { transform: scale(0.4) rotate(-20deg); opacity: 0; }
+  to   { transform: scale(1)   rotate(0deg);   opacity: 1; }
+}
+
+.workout-complete-icon svg {
+  width: 2.6rem;
+  height: 2.6rem;
+  stroke: currentColor;
+}
+
+.workout-complete-title {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.55rem;
+  font-weight: 850;
+  line-height: 1.05;
+}
+
+.workout-complete-sub {
+  color: rgba(247, 244, 235, 0.66);
+  font-size: 0.88rem;
+  line-height: 1.38;
+}
+
+.workout-complete-vol {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  padding: 0.42rem 0.82rem;
+  border-radius: 999px;
+  background: rgba(245, 181, 27, 0.1);
+  border: 1px solid rgba(245, 181, 27, 0.22);
+  color: var(--brand-strong);
+  font-size: 0.82rem;
+  font-weight: 780;
+}
+
+.workout-complete-btn {
+  margin-top: 0.3rem;
+  width: 100%;
+  min-height: 3rem;
+  padding: 0 1.5rem;
+  border-radius: 0.82rem;
+  background: linear-gradient(135deg, #f8d477, #f2a91d);
+  color: #111;
+  font-size: 0.94rem;
+  font-weight: 780;
+  border: 0;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.workout-complete-btn:active {
+  opacity: 0.82;
+}
+
+/* --- Toast de sucesso com destaque dourado --- */
+.toast.is-success {
+  border-left: 3px solid var(--brand-strong);
+}
+
+/* --- prefers-reduced-motion --- */
+@media (prefers-reduced-motion: reduce) {
+  .execution-progress-fill {
+    transition: none;
+  }
+
+  .set-row.just-done .badge {
+    animation: none;
+  }
+
+  .workout-complete-overlay,
+  .workout-complete-card,
+  .workout-complete-icon {
+    animation: none;
+  }
+
+  .workout-complete-btn {
+    transition: none;
+  }
+}

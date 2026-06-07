@@ -75,6 +75,7 @@
     videoObjectUrls: {},
     deferredPrompt: null,
     toastTimer: null,
+    lastDoneKey: null,
     data: {
       students: [],
       exercises: [],
@@ -2037,11 +2038,18 @@
     }
   }
 
-  function showToast(message) {
+  function showToast(message, type = "default") {
     window.clearTimeout(state.toastTimer);
     elements.toast.textContent = fixMojibake(message);
+    elements.toast.classList.toggle("is-success", type === "success");
     elements.toast.classList.add("is-visible");
-    state.toastTimer = window.setTimeout(() => elements.toast.classList.remove("is-visible"), 3200);
+    state.toastTimer = window.setTimeout(() => {
+      elements.toast.classList.remove("is-visible", "is-success");
+    }, 3200);
+  }
+
+  function showSuccessToast(message) {
+    showToast(message, "success");
   }
 
   function showView(viewName) {
@@ -5081,6 +5089,12 @@
           </div>
           <button class="secondary-action" type="button" data-cancel-active-session>Cancelar</button>
         </section>
+        <div class="execution-progress" role="progressbar" aria-valuenow="${doneSets}" aria-valuemin="0" aria-valuemax="${totalSets}" aria-label="Progresso do treino">
+          <div class="execution-progress-track">
+            <div class="execution-progress-fill" style="width:${totalSets > 0 ? Math.round((doneSets / totalSets) * 100) : 0}%"></div>
+          </div>
+          <span class="execution-progress-label">${totalSets > 0 ? Math.round((doneSets / totalSets) * 100) : 0}% concluído</span>
+        </div>
         ${state.rest ? renderRestBanner() : ""}
         ${session.exercises.map((exercise, index) => renderExecutionExercise(exercise, index)).join("")}
         <section class="panel">
@@ -5124,8 +5138,9 @@
     const done = set.status === "done";
     const actionAvailable = isSetActionAvailable(exerciseIndex, setIndex);
     const inputsDisabled = done || (!running && !actionAvailable);
+    const justDone = done && state.lastDoneKey === `${exerciseIndex}:${setIndex}`;
     return `
-      <article class="set-row ${done ? "is-done" : running ? "is-running" : ""}">
+      <article class="set-row ${done ? "is-done" : running ? "is-running" : ""}${justDone ? " just-done" : ""}">
         <div>
           <strong>Série ${setIndex + 1}</strong>
           <span>Alvo: ${escapeHtml(exercise.targetReps)} reps · Sugestão: ${escapeHtml(exercise.suggestedLoad || "-")} · Descanso: ${exercise.restSeconds}s</span>
@@ -6653,7 +6668,8 @@
       state.managerMenu = "workouts";
       renderApp();
     }
-    showToast(workout.studentId ? (status === "published" ? "Treino publicado para o aluno." : "Treino salvo.") : "Padrão de treino salvo.");
+    if (workout.studentId && status === "published") showSuccessToast("Treino publicado para o aluno.");
+    else showToast(workout.studentId ? "Treino salvo." : "Padrão de treino salvo.");
   }
 
   function handleApplyPatternForm(form) {
@@ -6672,7 +6688,8 @@
     closeModal();
     state.profileTab = "workouts";
     openStudentProfile(studentId);
-    showToast(status === "published" ? "Treino criado e publicado para o aluno." : "Treino criado como rascunho do aluno.");
+    if (status === "published") showSuccessToast("Treino criado e publicado para o aluno.");
+    else showToast("Treino criado como rascunho do aluno.");
   }
 
   function handleStudentPatternWorkoutForm(form) {
@@ -6693,7 +6710,8 @@
     closeModal();
     state.profileTab = "workouts";
     openStudentProfile(student.id);
-    showToast(status === "published" ? "Treino criado e publicado para o aluno." : "Treino criado como rascunho do aluno.");
+    if (status === "published") showSuccessToast("Treino criado e publicado para o aluno.");
+    else showToast("Treino criado como rascunho do aluno.");
   }
 
   function handleDietForm(form) {
@@ -6738,7 +6756,8 @@
       state.managerMenu = "diet";
       renderManager();
     }
-    showToast(status === "draft" ? "Plano alimentar salvo como rascunho." : "Plano alimentar salvo.");
+    if (status === "draft") showToast("Plano alimentar salvo como rascunho.");
+    else showSuccessToast("Plano alimentar salvo.");
   }
 
   function sendDietPlanLink(planId) {
@@ -6990,7 +7009,7 @@
     closeModal();
     state.managerMenu = "finance";
     renderManager();
-    showToast(old ? "Pagamento atualizado." : "Pagamento registrado.");
+    showSuccessToast(old ? "Pagamento atualizado." : "Pagamento registrado.");
   }
 
   function chargeFinanceRecord(recordId) {
@@ -7067,9 +7086,14 @@
       set.status = "done";
       set.finishedAt = new Date().toISOString();
       persistActiveSession();
+      state.lastDoneKey = `${exerciseIndex}:${setIndex}`;
+      if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        navigator.vibrate?.(45);
+      }
       const hasNextSet = state.activeSession.exercises.some((item) => item.sets.some((candidate) => candidate.status !== "done"));
       if (hasNextSet && Number(exercise.restSeconds || 0) > 0) startRest(Number(exercise.restSeconds || 0));
       renderStudent();
+      window.setTimeout(() => { state.lastDoneKey = null; }, 600);
     }
   }
 
@@ -7119,7 +7143,39 @@
     persistActiveSession();
     persistData();
     renderStudent();
-    showToast(`Treino finalizado. Volume load total: ${finalSession.totalVolumeLoad}.`);
+    showWorkoutCompleteOverlay(finalSession.totalVolumeLoad);
+  }
+
+  function showWorkoutCompleteOverlay(volume) {
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      navigator.vibrate?.([80, 60, 120]);
+    }
+    const overlay = document.createElement("div");
+    overlay.className = "workout-complete-overlay";
+    overlay.setAttribute("role", "dialog");
+    overlay.setAttribute("aria-modal", "true");
+    overlay.setAttribute("aria-label", "Treino concluído");
+    overlay.innerHTML = `
+      <div class="workout-complete-card">
+        <div class="workout-complete-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20 6 9 17l-5-5"/>
+          </svg>
+        </div>
+        <p class="workout-complete-title">Treino concluído!</p>
+        <p class="workout-complete-sub">Ótimo trabalho. Continue assim e os resultados vão aparecer.</p>
+        ${volume > 0 ? `<span class="workout-complete-vol">Volume load total: ${volume}</span>` : ""}
+        <button class="workout-complete-btn" type="button">Fechar</button>
+      </div>
+    `;
+    overlay.querySelector(".workout-complete-btn").addEventListener("click", () => {
+      overlay.remove();
+    });
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) overlay.remove();
+    });
+    document.body.appendChild(overlay);
+    overlay.querySelector(".workout-complete-btn").focus({ preventScroll: true });
   }
 
   let installSheetCloseTimer = null;
@@ -7727,7 +7783,7 @@
     workout.updatedAt = new Date().toISOString();
     persistData();
     renderApp();
-    showToast("Treino publicado para o aluno.");
+    showSuccessToast("Treino publicado para o aluno.");
   }
 
   function archiveWorkout(id) {
@@ -7866,7 +7922,7 @@
     persistData();
     closeModal();
     renderApp();
-    showToast("Contrato assinado digitalmente dentro do app.");
+    showSuccessToast("Contrato assinado digitalmente.");
   }
 
   function cancelContract(id) {
