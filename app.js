@@ -2225,8 +2225,9 @@
     return `<article class="metric-card${cls}"><span class="mc-label">${escapeHtml(label)}</span><strong class="mc-value">${escapeHtml(String(value))}</strong>${sub ? `<small class="mc-sub">${escapeHtml(sub)}</small>` : ""}</article>`;
   }
 
-  function emptyState(title, description) {
-    return `<div class="empty-state"><strong>${escapeHtml(title)}</strong><span>${escapeHtml(description)}</span></div>`;
+  function emptyState(title, description, icon = "") {
+    const iconHtml = icon ? `<span class="empty-state-icon">${icon}</span>` : "";
+    return `<div class="empty-state">${iconHtml}<strong>${escapeHtml(title)}</strong><span>${escapeHtml(description)}</span></div>`;
   }
 
   function renderOperationalItem(item) {
@@ -2541,7 +2542,7 @@
           ${
             filteredConversations.length
               ? `<div class="conversation-list">${filteredConversations.map(renderConversationCard).join("")}</div>`
-              : emptyState(conversations.length ? "Nenhuma conversa encontrada" : "Nenhuma conversa ainda", conversations.length ? "Tente ajustar a busca ou os filtros." : "Abra o perfil de um aluno para iniciar uma conversa.")
+              : emptyState(conversations.length ? "Nenhuma conversa encontrada" : "Nenhuma conversa ainda", conversations.length ? "Tente ajustar a busca ou os filtros." : "Abra o perfil de um aluno para iniciar uma conversa.", icons.messages)
           }
         </section>
 
@@ -2553,7 +2554,7 @@
             </div>
             <button class="text-action message-see-all" type="button" data-message-show-all>Ver todas</button>
           </div>
-          ${recent.length ? `<div class="recent-message-list">${recent.map(renderRecentMessageCard).join("")}</div>` : emptyState("Nenhuma mensagem recente", "As novas interações dos alunos aparecerão aqui.")}
+          ${recent.length ? `<div class="recent-message-list">${recent.map(renderRecentMessageCard).join("")}</div>` : emptyState("Nenhuma mensagem recente", "As novas interações dos alunos aparecerão aqui.", icons.messages)}
         </section>
       </div>
     `;
@@ -2693,7 +2694,7 @@
               <span class="small-text">${contracts.length} contrato(s) encontrado(s)</span>
             </div>
           </div>
-          ${contracts.length ? `<div class="contract-card-list">${contracts.map(renderContractCard).join("")}</div>` : emptyState("Nenhum contrato encontrado", "Tente ajustar os filtros ou crie um contrato para formalizar o plano do aluno.")}
+          ${contracts.length ? `<div class="contract-card-list">${contracts.map(renderContractCard).join("")}</div>` : emptyState("Nenhum contrato encontrado", "Tente ajustar os filtros ou crie um contrato para formalizar o plano do aluno.", icons.contracts)}
           ${renderNewContractCard()}
         </section>
       </div>
@@ -2845,7 +2846,7 @@
             </div>
             <button class="text-action" type="button" data-finance-show-all>Ver todas</button>
           </div>
-          ${records.length ? `<div class="finance-record-list">${records.map(renderFinanceRecordCard).join("")}</div>` : emptyState(allRecords.length ? "Nenhum pagamento encontrado" : "Nenhuma mensalidade configurada", allRecords.length ? "Tente ajustar os filtros ou buscar outro aluno." : "Vincule contratos assinados ou registre pagamentos para acompanhar o financeiro.")}
+          ${records.length ? `<div class="finance-record-list">${records.map(renderFinanceRecordCard).join("")}</div>` : emptyState(allRecords.length ? "Nenhum pagamento encontrado" : "Nenhuma mensalidade configurada", allRecords.length ? "Tente ajustar os filtros ou buscar outro aluno." : "Vincule contratos assinados ou registre pagamentos para acompanhar o financeiro.", icons.finance)}
         </section>
 
         <section class="finance-insights-panel">
@@ -3066,7 +3067,7 @@
           ${
             plans.length
               ? `<div class="diet-plan-list">${plans.map(renderDietPlanCard).join("")}</div>`
-              : emptyState(allPlans.length ? "Nenhum plano encontrado" : "Nenhum plano alimentar criado", allPlans.length ? "Tente ajustar os filtros ou criar um novo plano." : "Crie planos alimentares para organizar o acompanhamento dos alunos.")
+              : emptyState(allPlans.length ? "Nenhum plano encontrado" : "Nenhum plano alimentar criado", allPlans.length ? "Tente ajustar os filtros ou criar um novo plano." : "Crie planos alimentares para organizar o acompanhamento dos alunos.", icons.diet)
           }
         </section>
 
@@ -3255,7 +3256,7 @@
               <span class="small-text">${students.length} aluno(s) encontrado(s). Abra o perfil para detalhes.</span>
             </div>
           </div>
-          ${students.length ? `<div class="student-card-list">${students.map(renderStudentRow).join("")}</div>` : emptyState("Nenhum aluno encontrado", state.search ? "Ajuste a busca ou os filtros para ver mais alunos." : "Crie um aluno para publicar treinos e acompanhar evolução.")}
+          ${students.length ? `<div class="student-card-list">${students.map(renderStudentRow).join("")}</div>` : emptyState("Nenhum aluno encontrado", state.search ? "Ajuste a busca ou os filtros para ver mais alunos." : "Crie um aluno para publicar treinos e acompanhar evolução.", icons.students)}
         </section>
       </div>
     `;
@@ -3448,7 +3449,7 @@
         </section>
         <section class="panel">
           <div class="section-title"><h3>Exercícios cadastrados</h3><span class="small-text">Editar, inativar ou excluir com segurança</span></div>
-          ${exercises.length ? `<div class="entity-list">${exercises.map(renderExerciseCard).join("")}</div>` : emptyState("Nenhum exercício encontrado", "Ajuste os filtros ou cadastre um novo exercício.")}
+          ${exercises.length ? `<div class="entity-list">${exercises.map(renderExerciseCard).join("")}</div>` : emptyState("Nenhum exercício encontrado", "Ajuste os filtros ou cadastre um novo exercício.", icons.library)}
         </section>
       </div>
     `;
@@ -3512,7 +3513,7 @@
           </details>
         </section>
 
-        ${exercises.length ? `<section class="library-card-list">${exercises.map(renderPremiumExerciseCard).join("")}</section>` : emptyState("Nenhum exercício encontrado", "Ajuste os filtros ou cadastre um novo exercício.")}
+        ${exercises.length ? `<section class="library-card-list">${exercises.map(renderPremiumExerciseCard).join("")}</section>` : emptyState("Nenhum exercício encontrado", "Ajuste os filtros ou cadastre um novo exercício.", icons.library)}
       </div>
     `;
   }
@@ -3804,8 +3805,8 @@
             </div>
             <span class="badge">${workouts.length} padrão(s)</span>
           </div>
-          ${state.data.exercises.some((exercise) => exercise.status === "active") ? "" : emptyState("Biblioteca vazia", "Cadastre exercícios ativos antes de montar um padrão.")}
-          ${workouts.length ? `<div class="pattern-card-list">${workouts.map(renderPatternCard).join("")}</div>` : emptyState(allPatterns.length ? "Nenhum padrão encontrado" : "Nenhum padrão criado ainda", allPatterns.length ? "Tente ajustar os filtros ou criar um novo modelo." : "Crie modelos base para agilizar a montagem dos treinos dos alunos.")}
+          ${state.data.exercises.some((exercise) => exercise.status === "active") ? "" : emptyState("Biblioteca vazia", "Cadastre exercícios ativos antes de montar um padrão.", icons.library)}
+          ${workouts.length ? `<div class="pattern-card-list">${workouts.map(renderPatternCard).join("")}</div>` : emptyState(allPatterns.length ? "Nenhum padrão encontrado" : "Nenhum padrão criado ainda", allPatterns.length ? "Tente ajustar os filtros ou criar um novo modelo." : "Crie modelos base para agilizar a montagem dos treinos dos alunos.", icons.workouts)}
         </section>
       </div>
     `;
@@ -3927,7 +3928,7 @@
   }
 
   function renderWorkoutExercisePreview(workout) {
-    if (!workout.exercises.length) return emptyState("Nenhum exercício", "Adicione exercícios para montar este treino.");
+    if (!workout.exercises.length) return emptyState("Nenhum exercício", "Adicione exercícios para montar este treino.", icons.workouts);
     const rows = [...workout.exercises].sort((a, b) => a.order - b.order);
     const visibleRows = rows.slice(0, 4);
     const extra = rows.length - visibleRows.length;
@@ -4013,7 +4014,7 @@
         ${pageHeader("Treinos", "Escolha um treino publicado pelo personal")}
         <section class="panel">
           <div class="section-title"><h3>Treinos publicados</h3><span class="small-text">${workouts.length} treino(s)</span></div>
-          ${workouts.length ? `<div class="workout-list">${workouts.map((workout) => renderWorkoutCard(workout, false)).join("")}</div>` : emptyState("Nenhum treino publicado", "Quando o personal publicar um treino, ele aparece aqui.")}
+          ${workouts.length ? `<div class="workout-list">${workouts.map((workout) => renderWorkoutCard(workout, false)).join("")}</div>` : emptyState("Nenhum treino publicado", "Quando o personal publicar um treino, ele aparece aqui.", icons.workouts)}
         </section>
       </div>
     `;
@@ -4296,7 +4297,7 @@
     const items = getAgendaItemsForDate(state.agendaDate, studentId);
     return `
       <div class="day-schedule agenda-day-schedule">
-        ${items.length ? renderAgendaList(items, state.currentUser?.role === "manager") : emptyState("Nenhum item na agenda", "Treinos, avaliações e atualizações aparecerão aqui.")}
+        ${items.length ? renderAgendaList(items, state.currentUser?.role === "manager") : emptyState("Nenhum item na agenda", "Treinos, avaliações e atualizações aparecerão aqui.", icons.agenda)}
       </div>
     `;
   }
@@ -4312,7 +4313,7 @@
   }
 
   function renderAgendaList(items, manager) {
-    if (!items.length) return emptyState("Nenhum item na agenda", "Treinos, avaliações e atualizações aparecerão aqui.");
+    if (!items.length) return emptyState("Nenhum item na agenda", "Treinos, avaliações e atualizações aparecerão aqui.", icons.agenda);
     return `
       <div class="agenda-list">
         ${items
@@ -4465,11 +4466,11 @@
         ${pageHeader("Atualizações", "Peso, fotos e observações quinzenais")}
         <section class="panel">
           <div class="section-title"><h3>Atualização quinzenal</h3><span class="small-text">${pending ? `Pendente para ${formatDate(pending.dueDate)}` : "Sem pendência"}</span></div>
-          ${pending ? `<button class="primary-action" type="button" data-open-update-form="${pending.id}">Enviar atualização</button>` : emptyState("Nenhuma atualização pendente", "A próxima pendência será criada automaticamente.")}
+          ${pending ? `<button class="primary-action" type="button" data-open-update-form="${pending.id}">Enviar atualização</button>` : emptyState("Nenhuma atualização pendente", "A próxima pendência será criada automaticamente.", icons.updates)}
         </section>
         <section class="panel">
           <div class="section-title"><h3>Histórico de atualizações</h3><span class="small-text">${updates.length} registro(s)</span></div>
-          ${updates.length ? `<div class="entity-list">${updates.map(renderUpdateRow).join("")}</div>` : emptyState("Nenhum histórico", "Suas atualizações enviadas aparecerão aqui.")}
+          ${updates.length ? `<div class="entity-list">${updates.map(renderUpdateRow).join("")}</div>` : emptyState("Nenhum histórico de atualizações", "Suas atualizações enviadas aparecerão aqui.", icons.updates)}
         </section>
       </div>
     `;
@@ -4526,7 +4527,7 @@
               <span class="small-text">${updates.length} registro(s) encontrado(s)</span>
             </div>
           </div>
-          ${updates.length ? `<div class="update-card-list">${updates.map(renderUpdateCard).join("")}</div>` : emptyState("Nenhuma atualização encontrada", "As atualizações dos alunos aparecerão aqui. Ajuste os filtros ou aguarde novos envios.")}
+          ${updates.length ? `<div class="update-card-list">${updates.map(renderUpdateCard).join("")}</div>` : emptyState("Nenhuma atualização encontrada", "As atualizações dos alunos aparecerão aqui. Ajuste os filtros ou aguarde novos envios.", icons.updates)}
         </section>
       </div>
     `;
@@ -4806,15 +4807,15 @@
         </section>
         <section class="panel">
           <div class="section-title"><h3>Ãšltimos treinos</h3><span class="small-text">Volume load</span></div>
-          ${sessions.length ? `<div class="entity-list">${sessions.slice(0, 8).map(renderSessionRow).join("")}</div>` : emptyState("Nenhum treino finalizado", "Finalize um treino para gerar histórico e evolução.")}
+          ${sessions.length ? `<div class="entity-list">${sessions.slice(0, 8).map(renderSessionRow).join("")}</div>` : emptyState("Nenhum treino finalizado", "Finalize um treino para gerar histórico e evolução.", icons.progress)}
         </section>
         <section class="panel">
           <div class="section-title"><h3>Evolução por exercício</h3><span class="small-text">Maior carga registrada</span></div>
-          ${exerciseProgress.length ? `<div class="entity-list">${exerciseProgress.map((item) => `<article class="entity-row"><div class="entity-main"><strong>${escapeHtml(item.name)}</strong><span>Maior carga: ${item.maxLoad} Â· Volume acumulado: ${item.volume}</span></div></article>`).join("")}</div>` : emptyState("Nenhum dado de carga", "Registre carga e repetições durante a execução do treino.")}
+          ${exerciseProgress.length ? `<div class="entity-list">${exerciseProgress.map((item) => `<article class="entity-row"><div class="entity-main"><strong>${escapeHtml(item.name)}</strong><span>Maior carga: ${item.maxLoad} Â· Volume acumulado: ${item.volume}</span></div></article>`).join("")}</div>` : emptyState("Nenhum dado de carga", "Registre carga e repetições durante a execução do treino.", icons.progress)}
         </section>
         <section class="panel">
           <div class="section-title"><h3>Peso corporal</h3><span class="small-text">Atualizações</span></div>
-          ${updateWeights.length ? `<div class="entity-list">${updateWeights.map((item) => `<article class="entity-row"><div class="entity-main"><strong>${escapeHtml(item.weight)} kg</strong><span>${formatDate(item.dueDate)}</span></div></article>`).join("")}</div>` : emptyState("Nenhum peso registrado", "O peso informado nas atualizações aparecerá aqui.")}
+          ${updateWeights.length ? `<div class="entity-list">${updateWeights.map((item) => `<article class="entity-row"><div class="entity-main"><strong>${escapeHtml(item.weight)} kg</strong><span>${formatDate(item.dueDate)}</span></div></article>`).join("")}</div>` : emptyState("Nenhum peso registrado", "O peso informado nas atualizações aparecerá aqui.", icons.updates)}
         </section>
       </div>
     `;
@@ -4942,7 +4943,7 @@
 
   function renderConversation(studentId, compact = false) {
     const messages = getStudentMessages(studentId);
-    if (!messages.length) return emptyState("Nenhuma mensagem", "Use o campo abaixo para iniciar a conversa.");
+    if (!messages.length) return emptyState("Nenhuma mensagem", "Use o campo abaixo para iniciar a conversa.", icons.messages);
     const visible = compact ? messages.slice(-4) : messages;
     return `
       <div class="chat-list ${compact ? "is-compact" : ""}">
@@ -4995,12 +4996,12 @@
           ${
             diet
               ? renderStudentDietOverview(diet)
-              : emptyState("Plano alimentar nao disponivel", "Quando o personal liberar um plano, ele aparecera aqui.")
+              : emptyState("Plano alimentar não disponível", "Quando o personal liberar um plano, ele aparecerá aqui.", icons.diet)
           }
         </section>
         <section class="panel">
           <div class="section-title"><h3>Contratos</h3><span class="small-text">${pendingContracts.length} pendente(s)</span></div>
-          ${contracts.length ? `<div class="entity-list">${contracts.map((contract) => renderContractRow(contract, false)).join("")}</div>` : emptyState("Nenhum contrato", "Contratos enviados pelo personal aparecerão aqui.")}
+          ${contracts.length ? `<div class="entity-list">${contracts.map((contract) => renderContractRow(contract, false)).join("")}</div>` : emptyState("Nenhum contrato", "Contratos enviados pelo personal aparecerão aqui.", icons.contracts)}
         </section>
         <section class="panel">
           <div class="section-title"><h3>Dados da conta</h3><span class="small-text">Informações principais</span></div>
@@ -5220,7 +5221,7 @@
             <label class="field"><span>Objetivo</span><input name="goal" type="text" value="${escapeHtml(student.goal || "Condicionamento")}" /></label>
             <label class="field"><span>Status</span><select name="status"><option value="active" ${student.status !== "inactive" ? "selected" : ""}>Ativo</option><option value="inactive" ${student.status === "inactive" ? "selected" : ""}>Inativo</option></select></label>
           </div>
-          <div class="empty-state">
+          <div class="empty-state compact-note">
             <strong>${student.id ? access.label : "Convite de acesso"}</strong>
             <span>${student.id ? escapeHtml(access.detail) : "Ao salvar, o sistema gera um link para o aluno criar a propria senha. O gestor nao define nem visualiza senha de aluno."}</span>
           </div>
@@ -5240,7 +5241,7 @@
       return `
         <div class="content-stack">
           ${pageHeader("Aluno", "Perfil não encontrado", '<button class="secondary-action" type="button" data-manager-nav="students">Voltar para alunos</button>')}
-          ${emptyState("Aluno não encontrado", "Volte para a lista de alunos e abra um cadastro válido.")}
+          ${emptyState("Aluno não encontrado", "Volte para a lista de alunos e abra um cadastro válido.", icons.students)}
         </div>
       `;
     }
@@ -5428,7 +5429,7 @@
             <button class="quick-link" type="button" data-open-workout-form data-prefill-student="${student.id}"><strong>Novo treino</strong><span>Monte com exercícios da biblioteca</span></button>
             <button class="quick-link" type="button" data-open-student-pattern-workout="${student.id}" ${availablePatterns.length ? "" : "disabled"}><strong>Aplicar padrão</strong><span>${availablePatterns.length ? `${availablePatterns.length} padrão(s) disponível(is)` : "Nenhum padrão disponível"}</span></button>
           </div>
-          ${workouts.length ? `<div class="workout-list">${workouts.map((workout) => renderWorkoutCard(workout, true)).join("")}</div>` : emptyState("Nenhum treino publicado", "Crie um treino do zero ou aplique um padrão.")}
+          ${workouts.length ? `<div class="workout-list">${workouts.map((workout) => renderWorkoutCard(workout, true)).join("")}</div>` : emptyState("Nenhum treino publicado", "Crie um treino do zero ou aplique um padrão.", icons.workouts)}
         </section>
       `;
     }
@@ -5447,27 +5448,27 @@
           ${
             diet
               ? `<div class="diet-plan-list">${renderDietPlanCard(diet)}</div>`
-              : emptyState("Aluno sem plano alimentar", "Crie um plano para iniciar o acompanhamento alimentar.")
+              : emptyState("Aluno sem plano alimentar", "Crie um plano para iniciar o acompanhamento alimentar.", icons.diet)
           }
         </section>
       `;
     }
 
     if (tab === "history") {
-      return `<section class="panel"><div class="section-title"><h3>Histórico de treinos</h3><span class="small-text">${sessions.length} treino(s)</span></div>${sessions.length ? `<div class="entity-list">${sessions.map(renderSessionRow).join("")}</div>` : emptyState("Sem histórico", "Treinos finalizados pelo aluno aparecerão aqui.")}</section>`;
+      return `<section class="panel"><div class="section-title"><h3>Histórico de treinos</h3><span class="small-text">${sessions.length} treino(s)</span></div>${sessions.length ? `<div class="entity-list">${sessions.map(renderSessionRow).join("")}</div>` : emptyState("Nenhum histórico", "Treinos finalizados pelo aluno aparecerão aqui.", icons.progress)}</section>`;
     }
 
     if (tab === "progress") return renderStudentEvolutionPanel(student.id, true);
 
     if (tab === "updates") {
-      return `<section class="panel"><div class="section-title"><h3>Atualizações quinzenais</h3><span class="small-text">${updates.length} registro(s)</span></div>${updates.length ? `<div class="entity-list">${updates.map(renderUpdateRow).join("")}</div>` : emptyState("Sem atualizações", "O histórico de atualizações aparecerá aqui.")}</section>`;
+      return `<section class="panel"><div class="section-title"><h3>Atualizações quinzenais</h3><span class="small-text">${updates.length} registro(s)</span></div>${updates.length ? `<div class="entity-list">${updates.map(renderUpdateRow).join("")}</div>` : emptyState("Nenhuma atualização", "O histórico de atualizações aparecerá aqui.", icons.updates)}</section>`;
     }
 
     if (tab === "contracts") {
       return `
         <section class="panel">
           <div class="section-title"><h3>Contrato</h3><button class="mini-button" type="button" data-open-contract-form="${student.id}">Novo contrato</button></div>
-          ${contracts.length ? `<div class="entity-list">${contracts.map((contract) => renderContractRow(contract, true)).join("")}</div>` : emptyState("Sem contratos", "Crie um contrato para o aluno aceitar dentro do app.")}
+          ${contracts.length ? `<div class="entity-list">${contracts.map((contract) => renderContractRow(contract, true)).join("")}</div>` : emptyState("Nenhum contrato", "Crie um contrato para o aluno aceitar dentro do app.", icons.contracts)}
         </section>
       `;
     }
@@ -5502,16 +5503,16 @@
           ${
             nextActivity
               ? `<div class="entity-list">${renderAgendaCompact(nextActivity, true)}</div>`
-              : emptyState("Sem próxima atividade", "Agende um treino ou atualização para este aluno.")
+              : emptyState("Nenhuma atividade programada", "Agende um treino ou atualização para este aluno.", icons.agenda)
           }
         </article>
         <article class="panel">
           <div class="section-title"><h3>Ãšltimos treinos</h3><span class="small-text">${sessions.length} registro(s)</span></div>
-          ${sessions.length ? `<div class="entity-list">${sessions.slice(0, 3).map(renderSessionRow).join("")}</div>` : emptyState("Sem histórico", "Treinos finalizados aparecerão aqui.")}
+          ${sessions.length ? `<div class="entity-list">${sessions.slice(0, 3).map(renderSessionRow).join("")}</div>` : emptyState("Nenhum histórico", "Treinos finalizados aparecerão aqui.", icons.progress)}
         </article>
         <article class="panel">
           <div class="section-title"><h3>Atualizações recentes</h3><span class="small-text">${updates.length} registro(s)</span></div>
-          ${updates.length ? `<div class="entity-list">${updates.slice(0, 3).map(renderUpdateRow).join("")}</div>` : emptyState("Sem atualizações", "Atualizações quinzenais aparecerão aqui.")}
+          ${updates.length ? `<div class="entity-list">${updates.slice(0, 3).map(renderUpdateRow).join("")}</div>` : emptyState("Nenhuma atualização", "Atualizações quinzenais aparecerão aqui.", icons.updates)}
         </article>
         <article class="panel">
           <div class="section-title"><h3>Pendências</h3><span class="small-text">${stats.pendingCount} item(ns)</span></div>
@@ -5519,7 +5520,7 @@
             <article class="profile-card"><span>Atualização</span><strong>${pending ? formatDate(pending.dueDate) : "Em dia"}</strong></article>
             <article class="profile-card"><span>Contrato</span><strong>${escapeHtml(stats.contract.label)}</strong></article>
           </div>
-          ${stats.pendingCount ? "" : emptyState("Sem pendências críticas", "Nada exige ação imediata neste momento.")}
+          ${stats.pendingCount ? "" : emptyState("Nenhuma pendência crítica", "Nada exige ação imediata neste momento.", icons.updates)}
         </article>
       </section>
       <section class="panel">
@@ -5647,7 +5648,7 @@
         ${
           rows.length
             ? `<div class="profile-pending-list">${rows.slice(0, 3).join("")}</div>`
-            : emptyState("Nenhuma ação pendente", "Este aluno está em dia no momento.")
+            : emptyState("Nenhuma ação pendente", "Este aluno está em dia no momento.", icons.updates)
         }
       </section>
     `;
@@ -5993,7 +5994,7 @@
             ${
               plan.meals.length
                 ? plan.meals.map((meal) => `<article><strong>${escapeHtml(meal.name)}</strong><span>${escapeHtml(meal.time || "Horário livre")}</span><p>${escapeHtml(meal.items || "Itens não informados")}</p>${meal.notes ? `<small>${escapeHtml(meal.notes)}</small>` : ""}</article>`).join("")
-                : emptyState("Refeições não detalhadas", "Use Editar plano para adicionar refeições e orientações.")
+                : emptyState("Refeições não detalhadas", "Use Editar plano para adicionar refeições e orientações.", icons.diet)
             }
           </section>
           <section class="update-notes-grid">
@@ -6160,7 +6161,7 @@
                 <p class="small-text">Selecione o aluno para criar um contrato com plano, valor e vigência próprios.</p>
                 <button class="primary-action" type="submit">Continuar</button>
               `
-              : emptyState("Nenhum aluno ativo", "Cadastre ou ative um aluno antes de criar contratos.")
+              : emptyState("Nenhum aluno ativo", "Cadastre ou ative um aluno antes de criar contratos.", icons.students)
           }
         </form>
       `
