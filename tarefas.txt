@@ -43,7 +43,8 @@
      Resultado: You've hit your session limit ┬À resets 6:30am (America/Sao_Paulo)
 
 
-[ ] ALVOS DE TOQUE E LEGIBILIDADE. Garanta que todos os botoes e icones clicaveis tenham area minima de 44x44px seguindo o padrao de acessibilidade mobile. O texto secundario nunca deve ficar abaixo de #9CA3AF sobre fundo escuro para manter contraste adequado. Itens de lista clicaveis devem ter no minimo 12px de padding vertical para evitar toques acidentais em itens vizinhos. Depois faca git add . && git commit -m "alvos de toque acessiveis e legibilidade" && git push origin main.
+[OK] ALVOS DE TOQUE E LEGIBILIDADE. Garanta que todos os botoes e icones clicaveis tenham area minima de 44x44px seguindo o padrao de acessibilidade mobile. O texto secundario nunca deve ficar abaixo de #9CA3AF sobre fundo escuro para manter contraste adequado. Itens de lista clicaveis devem ter no minimo 12px de padding vertical para evitar toques acidentais em itens vizinhos. Depois faca git add . && git commit -m "alvos de toque acessiveis e legibilidade" && git push origin main.
+     Resultado: Commit `ab06e56` pushed. The conflicting `1.42rem !important` override was split so `.mini-button` now correctly enforces `2.75rem` while the non-interactive `.badge` keeps its compact size.
      
 
 
