@@ -2046,6 +2046,8 @@
     elements.loginView.hidden = viewName !== "login";
     elements.managerView.hidden = viewName !== "manager";
     elements.studentView.hidden = viewName !== "student";
+    elements.managerBottomNav.hidden = viewName !== "manager";
+    elements.studentBottomNav.hidden = viewName !== "student";
     elements.body.classList.toggle("is-manager-view", viewName === "manager");
     elements.body.classList.toggle("is-student-view", viewName === "student");
     closeManagerDrawer();

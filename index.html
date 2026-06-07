@@ -111,7 +111,6 @@
           <main class="content-area" id="managerContent" aria-live="polite"></main>
         </div>
 
-        <nav class="bottom-nav" aria-label="Menu inferior do gestor" id="managerBottomNav"></nav>
       </section>
 
       <section class="workspace view" id="studentView" hidden>
@@ -134,9 +133,11 @@
           <main class="content-area" id="studentContent" aria-live="polite"></main>
         </div>
 
-        <nav class="bottom-nav" aria-label="Menu inferior do aluno" id="studentBottomNav"></nav>
       </section>
     </div>
+
+    <nav class="bottom-nav" aria-label="Menu inferior do gestor" id="managerBottomNav" hidden></nav>
+    <nav class="bottom-nav" aria-label="Menu inferior do aluno" id="studentBottomNav" hidden></nav>
 
     <div class="modal" id="formModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" hidden>
       <div class="modal-backdrop" data-close-modal></div>
