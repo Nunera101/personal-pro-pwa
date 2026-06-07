@@ -5780,10 +5780,10 @@ button.dashboard-metric {
 .btn-action-header {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   width: auto !important;
-  min-height: 44px;
-  padding: 12px 18px;
+  min-height: 40px;
+  padding: 10px 14px;
   background: linear-gradient(135deg, #F5C542 0%, #F59E0B 100%);
   color: #1a1a1a;
   font-weight: 700;

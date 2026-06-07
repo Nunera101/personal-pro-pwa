@@ -210,23 +210,29 @@
 }
 
 .student-goal {
-  display: inline-flex;
+  display: flex;
   min-width: 0;
+  max-width: 100%;
   align-items: center;
   gap: 0.4rem;
   color: var(--muted);
   font-size: 0.92rem;
-  white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
-.student-goal svg {
+.student-goal > svg {
   width: 1.05rem;
   height: 1.05rem;
   flex: 0 0 auto;
   color: var(--brand-strong);
   stroke: currentColor;
+}
+
+.student-goal > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .student-card-info {
@@ -811,9 +817,15 @@
   color: rgba(247, 244, 235, 0.74) !important;
   font-size: clamp(0.76rem, 3.15vw, 0.9rem) !important;
   line-height: 1.15 !important;
-  white-space: nowrap !important;
+  display: flex !important;
+  overflow: hidden !important;
+}
+
+.student-goal > span {
   overflow: hidden !important;
   text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  min-width: 0 !important;
 }
 
 .student-goal svg {

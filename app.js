@@ -517,7 +517,10 @@
     ["\u00c2\u00b7", "\u00b7"],
     ["\u00e2\u20ac\u201c", "\u2013"],
     ["\u00e2\u20ac\u201d", "\u2014"],
-    ["\u00e2\u20ac\u00a2", "\u2022"]
+    ["\u00e2\u20ac\u00a2", "\u2022"],
+    ["\u00e2\u2020\u2018", "\u2191"],
+    ["\u00e2\u2020\u2019", "\u2192"],
+    ["\u00e2\u2020\u201c", "\u2193"]
   ]
 
   function fixMojibake(value) {
@@ -3416,7 +3419,7 @@
           ${studentAvatar(student)}
           <div class="student-card-main">
             <strong>${escapeHtml(student.name)}</strong>
-            <span class="student-goal">${icons.goal}${escapeHtml(student.goal || "Sem objetivo")}</span>
+            <span class="student-goal">${icons.goal}<span>${escapeHtml(student.goal || "Sem objetivo")}</span></span>
           </div>
           <div class="student-card-side">
             ${statusBadge(status.label, status.tone)}
@@ -3529,7 +3532,7 @@
         </section>
 
         <section class="library-stat-grid" aria-label="Resumo da biblioteca">
-          ${renderLibraryStatCard(icons.workouts, "Exercícios cadastrados", total, createdThisMonth ? `â†‘ ${createdThisMonth} este mês` : "Na biblioteca")}
+          ${renderLibraryStatCard(icons.workouts, "Exercícios cadastrados", total, createdThisMonth ? `↑ ${createdThisMonth} este mês` : "Na biblioteca")}
           ${renderLibraryStatCard(icons.agenda, "Com vídeo", withVideo, `${videoPercent}% do total`)}
           ${renderLibraryStatCard(icons.more, "Categorias", categoryCount, "Ativas")}
         </section>
