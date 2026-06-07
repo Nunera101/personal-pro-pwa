@@ -2058,6 +2058,18 @@
   }
 
   function showView(viewName) {
+    // Pre-populate nav before unhiding it — prevents the "empty nav flash" on first entry
+    if (viewName === "manager") {
+      const active = state.managerMenu === "studentProfile"
+        ? "students"
+        : managerBottomMenus.some((i) => i.id === state.managerMenu)
+          ? state.managerMenu
+          : "more";
+      renderNav(elements.managerBottomNav, managerBottomMenus, active, "data-manager-nav");
+    } else if (viewName === "student") {
+      const active = studentBottomMenus.some((i) => i.id === state.studentMenu) ? state.studentMenu : "profile";
+      renderNav(elements.studentBottomNav, studentBottomMenus, active, "data-student-nav");
+    }
     elements.loginView.hidden = viewName !== "login";
     elements.managerView.hidden = viewName !== "manager";
     elements.studentView.hidden = viewName !== "student";
@@ -2067,10 +2079,13 @@
     elements.body.classList.toggle("is-student-view", viewName === "student");
     closeManagerDrawer();
     window.scrollTo({ top: 0, behavior: "auto" });
-    const incoming = viewName === "login" ? elements.loginView : viewName === "manager" ? elements.managerView : elements.studentView;
-    incoming.classList.remove("is-entering");
-    void incoming.offsetWidth;
-    incoming.classList.add("is-entering");
+    // Animate only the login view; manager/student content is animated by renderManager/renderStudent.
+    // Keeping the transform off the whole .view prevents any reflow side-effect on the fixed bottom nav.
+    if (viewName === "login") {
+      elements.loginView.classList.remove("is-entering");
+      void elements.loginView.offsetWidth;
+      elements.loginView.classList.add("is-entering");
+    }
   }
 
   function renderNav(target, menus, activeId, attribute) {

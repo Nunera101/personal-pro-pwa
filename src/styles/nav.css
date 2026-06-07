@@ -520,3 +520,9 @@
   padding-bottom: 0 !important;
 }
 
+/* Promote to own compositor layer — isolates the nav from page reflows and content repaints */
+#managerBottomNav,
+#studentBottomNav {
+  will-change: transform;
+}
+
