@@ -4100,22 +4100,22 @@
     const isManager = state.currentUser?.role === "manager";
     const title = agendaPeriodLabel();
     const selectedDayItems = getAgendaItemsForDate(state.agendaDate, studentId);
+    const isDayView = state.agendaView === "day";
     return `
       <div class="content-stack agenda-workspace">
         <section class="agenda-hero">
           <div>
-            <span class="eyebrow">Elite AS</span>
             <h3>Agenda</h3>
             <p>${isManager ? "Planeje treinos, avaliações e retornos." : "Acompanhe suas atividades e treinos."}</p>
           </div>
-          ${isManager ? `<button class="primary-action" type="button" data-open-activity-form>${icons.agenda}<span>Agendar atividade</span></button>` : ""}
+          ${isManager ? `<button class="btn-action-header" type="button" data-open-activity-form>${icons.agenda}<span>Agendar atividade</span></button>` : ""}
         </section>
 
         <section class="agenda-control-panel">
           <div class="agenda-view-tabs" aria-label="Visualização da agenda">
-            <button class="${state.agendaView === "day" ? "is-active" : ""}" type="button" data-agenda-view="day">Dia</button>
-            <button class="${state.agendaView === "week" ? "is-active" : ""}" type="button" data-agenda-view="week">Semana</button>
-            <button class="${state.agendaView === "month" ? "is-active" : ""}" type="button" data-agenda-view="month">Mês</button>
+            <button class="${state.agendaView === 'day' ? 'is-active' : ''}" type="button" data-agenda-view="day">Dia</button>
+            <button class="${state.agendaView === 'week' ? 'is-active' : ''}" type="button" data-agenda-view="week">Semana</button>
+            <button class="${state.agendaView === 'month' ? 'is-active' : ''}" type="button" data-agenda-view="month">Mês</button>
           </div>
 
           <div class="agenda-period-nav">
@@ -4123,7 +4123,6 @@
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
             </button>
             <div class="agenda-period-label">
-              ${icons.agenda}
               <strong>${escapeHtml(title)}</strong>
             </div>
             <button class="icon-button" type="button" data-agenda-shift="1" aria-label="Próximo período">
@@ -4133,16 +4132,12 @@
           </div>
         </section>
 
-        <section class="panel agenda-calendar-panel" aria-label="Calendario da agenda">
-          <div class="section-title">
-            <div>
-              <h3>${escapeHtml(title)}</h3>
-              <span class="small-text">${items.length} item(ns) neste período</span>
-            </div>
-          </div>
-          ${state.agendaView === "month" ? renderMonthCalendar(studentId) : state.agendaView === "week" ? renderWeekCalendar(studentId) : renderDaySchedule(studentId)}
+        ${isDayView ? "" : `
+        <section class="panel agenda-calendar-panel" aria-label="Calendário da agenda">
+          ${state.agendaView === 'week' ? renderWeekCalendar(studentId) : renderMonthCalendar(studentId)}
           ${renderAgendaLegend()}
         </section>
+        `}
 
         <section class="panel agenda-day-panel">
           <div class="section-title">
@@ -4150,7 +4145,7 @@
               <h3>Itens do dia</h3>
               <span class="small-text">${formatLongDate(state.agendaDate)} · ${selectedDayItems.length} item(ns)</span>
             </div>
-            ${state.agendaView !== "day" ? `<button class="mini-button" type="button" data-agenda-view="day">Ver dia</button>` : ""}
+            ${!isDayView ? `<button class="mini-button" type="button" data-agenda-view="day">Ver dia</button>` : ""}
           </div>
           ${renderAgendaList(selectedDayItems, isManager)}
         </section>
@@ -4285,31 +4280,36 @@
   }
 
   function renderAgendaList(items, manager) {
-    if (!items.length) return emptyState("Nenhum item na agenda", "Treinos, avaliações e atualizações aparecerão aqui.", icons.agenda);
+    if (!items.length) return emptyState("Nenhuma atividade neste dia", "Treinos, avaliações e atualizações aparecerão aqui.", icons.agenda);
     return `
       <div class="agenda-list">
         ${items
-          .map(
-            (item) => `
+          .map((item) => {
+            const studentName = getStudentName(item.studentId);
+            const canWA = manager && canEditAgendaItem(item);
+            const canStart = item.type === "workout" && item.workoutId && state.currentUser?.role === "student" && item.status !== "done";
+            return `
               <article class="agenda-item ${agendaItemClass(item)}">
-                <div class="agenda-avatar">${escapeHtml(initialsFromName(getStudentName(item.studentId)))}</div>
+                <button class="agenda-item-overlay" type="button"
+                  data-open-agenda-detail="${escapeHtml(item.id)}"
+                  data-agenda-date="${escapeHtml(item.date)}"
+                  data-agenda-student="${escapeHtml(item.studentId)}"
+                  aria-label="Ver detalhes"></button>
+                <div class="agenda-avatar">${escapeHtml(initialsFromName(studentName))}</div>
                 <span class="agenda-type-dot ${agendaItemClass(item)}" aria-hidden="true"></span>
                 <div class="agenda-time">${escapeHtml(item.time || "--:--")}</div>
                 <div class="agenda-main">
                   <strong>${escapeHtml(activityLabel(item.type))}</strong>
-                  <span>${escapeHtml(getStudentName(item.studentId))}</span>
-                  <small>${escapeHtml(item.title)}${item.duration ? ` · ${escapeHtml(item.duration)} min` : ""}</small>
-                  ${item.notes ? `<span class="agenda-note">${escapeHtml(item.notes)}</span>` : ""}
+                  <span>${escapeHtml(studentName)}</span>
                 </div>
                 <div class="agenda-status">${statusBadge(agendaStatusLabel(item.status), agendaStatusTone(item.status))}</div>
-                <div class="row-actions">
-                  ${manager && canEditAgendaItem(item) ? whatsappButton(item.id, item.studentId) : ""}
-                  <button class="mini-button" type="button" data-open-agenda-detail="${escapeHtml(item.id)}" data-agenda-date="${escapeHtml(item.date)}" data-agenda-student="${escapeHtml(item.studentId)}">Detalhes</button>
-                  ${item.type === "workout" && item.workoutId && state.currentUser?.role === "student" && item.status !== "done" ? `<button class="mini-button" type="button" data-start-workout="${item.workoutId}" data-activity-id="${item.id}">Iniciar treino</button>` : ""}
+                <div class="agenda-item-actions">
+                  ${canWA ? whatsappButton(item.id, item.studentId) : ""}
+                  ${canStart ? `<button class="mini-button" type="button" data-start-workout="${escapeHtml(item.workoutId)}" data-activity-id="${escapeHtml(item.id)}">Iniciar</button>` : ""}
                 </div>
               </article>
-            `
-          )
+            `;
+          })
           .join("")}
       </div>
     `;
