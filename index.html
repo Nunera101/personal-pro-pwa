@@ -20,18 +20,37 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
     <link rel="preload" href="./assets/logo-oficial.svg" as="image" type="image/svg+xml" />
-    <link rel="stylesheet" href="./styles.css?v=54" />
-    <link rel="stylesheet" href="./src/styles/base.css" />
-    <link rel="stylesheet" href="./src/styles/nav.css" />
-    <link rel="stylesheet" href="./src/styles/financeiro.css" />
-    <link rel="stylesheet" href="./src/styles/agenda.css" />
-    <link rel="stylesheet" href="./src/styles/treinos.css" />
-    <link rel="stylesheet" href="./src/styles/alunos.css" />
-    <link rel="stylesheet" href="./src/styles/dieta.css" />
-    <link rel="stylesheet" href="./src/styles/chat.css" />
-    <link rel="stylesheet" href="./src/styles/contratos.css" />
-    <link rel="stylesheet" href="./src/styles/atualizacoes.css" />
-    <link rel="stylesheet" href="./src/styles/microinteractions.css" />
+
+    <!-- CSS crítico inline: splash visível imediatamente, sem depender de rede -->
+    <style>
+      html,body{margin:0;background:#0d0d0d}
+      .startup-splash{
+        position:fixed;inset:0;z-index:100;
+        display:grid;place-items:center;gap:1rem;
+        background:#0d0d0d;color:#fff;
+        transition:opacity 260ms ease,visibility 260ms ease
+      }
+      .startup-splash img{
+        width:min(42vw,8.5rem);height:min(42vw,8.5rem);
+        border-radius:24%;object-fit:contain
+      }
+      .startup-splash strong{font-size:1rem;font-weight:800}
+      body.app-ready .startup-splash{opacity:0;visibility:hidden;pointer-events:none}
+    </style>
+
+    <!-- CSS externo carregado de forma não-bloqueante: splash aparece antes de baixar esses arquivos -->
+    <link rel="stylesheet" href="./styles.css?v=54" media="print" onload="this.media='all'" />
+    <link rel="stylesheet" href="./src/styles/base.css" media="print" onload="this.media='all'" />
+    <link rel="stylesheet" href="./src/styles/nav.css" media="print" onload="this.media='all'" />
+    <link rel="stylesheet" href="./src/styles/financeiro.css" media="print" onload="this.media='all'" />
+    <link rel="stylesheet" href="./src/styles/agenda.css" media="print" onload="this.media='all'" />
+    <link rel="stylesheet" href="./src/styles/treinos.css" media="print" onload="this.media='all'" />
+    <link rel="stylesheet" href="./src/styles/alunos.css" media="print" onload="this.media='all'" />
+    <link rel="stylesheet" href="./src/styles/dieta.css" media="print" onload="this.media='all'" />
+    <link rel="stylesheet" href="./src/styles/chat.css" media="print" onload="this.media='all'" />
+    <link rel="stylesheet" href="./src/styles/contratos.css" media="print" onload="this.media='all'" />
+    <link rel="stylesheet" href="./src/styles/atualizacoes.css" media="print" onload="this.media='all'" />
+    <link rel="stylesheet" href="./src/styles/microinteractions.css" media="print" onload="this.media='all'" />
   </head>
   <body>
     <div class="startup-splash" id="startupSplash" aria-hidden="true">
