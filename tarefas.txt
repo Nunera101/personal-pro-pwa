@@ -48,6 +48,7 @@
      
 
 
-[ ] RELATORIO FINAL. Gere um arquivo RELATORIO-POLISH.md na raiz listando: o que foi alterado em cada uma das partes anteriores, qualquer ajuste que voce nao conseguiu aplicar e o motivo, e uma lista de pontos que ainda podem divergir das telas de referencia de design para revisao manual. Depois faca git add . && git commit -m "relatorio da rodada de acabamento" && git push origin main.
+[OK] RELATORIO FINAL. Gere um arquivo RELATORIO-POLISH.md na raiz listando: o que foi alterado em cada uma das partes anteriores, qualquer ajuste que voce nao conseguiu aplicar e o motivo, e uma lista de pontos que ainda podem divergir das telas de referencia de design para revisao manual. Depois faca git add . && git commit -m "relatorio da rodada de acabamento" && git push origin main.
+     Resultado: `RELATORIO-POLISH.md` criado e commitado (`be6aa4d`). O relat├│rio cobre: | - **6 partes documentadas** com commits, arquivos e o que foi feito em cada uma | - **4 ajustes n├úo aplicados** com motivo t├®cnico (anima├º├...
    
 

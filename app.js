@@ -120,10 +120,11 @@
   };
 
   const icons = {
-    home: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11.5 12 5l8 6.5V20a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1z"/></svg>',
+    home: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>',
     students: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 11a4 4 0 1 0-8 0M4 21a8 8 0 0 1 16 0"/></svg>',
     agenda: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v4M17 3v4M4 8h16M5 5h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/></svg>',
     workouts: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12"/></svg>',
+    layers: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 2 7l10 5 10-5-10-5ZM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>',
     library: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v18H6a2 2 0 0 1-2-1.5ZM8 7h7M8 11h5"/></svg>',
     updates: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM8 9h8M8 13h5M18 17l3 3"/></svg>',
     progress: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5M4 19h16M8 16v-5M13 16V8M18 16v-9"/></svg>',
@@ -181,7 +182,7 @@
     { id: "home", label: "Dashboard", icon: icons.home },
     { id: "students", label: "Alunos", icon: icons.students },
     { id: "agenda", label: "Agenda", icon: icons.agenda },
-    { id: "workouts", label: "Padrões", icon: icons.workouts },
+    { id: "workouts", label: "Padrões", icon: icons.layers },
     { id: "more", label: "Mais", icon: icons.more }
   ];
 
@@ -506,7 +507,10 @@
     ["\u00c3\u0094", "\u00d4"],
     ["\u00c3\u009a", "\u00da"],
     ["\u00c3\u0082", "\u00c2"],
-    ["\u00c2\u00b7", "\u00b7"]
+    ["\u00c2\u00b7", "\u00b7"],
+    ["\u00e2\u20ac\u201c", "\u2013"],
+    ["\u00e2\u20ac\u201d", "\u2014"],
+    ["\u00e2\u20ac\u00a2", "\u2022"]
   ]
 
   function fixMojibake(value) {
@@ -2225,8 +2229,10 @@
     const navAttr = nav ? ` type="button" data-manager-nav="${escapeHtml(nav)}"` : "";
     return `
       <${tag} class="metric-card dashboard-metric ${tone ? `is-${tone}` : ""}"${navAttr}>
-        <span class="metric-icon">${icon}</span>
-        <span class="metric-label">${escapeHtml(label)}</span>
+        <div class="metric-top-row">
+          <span class="metric-icon">${icon}</span>
+          <span class="metric-label">${escapeHtml(label)}</span>
+        </div>
         <strong>${escapeHtml(String(value))}</strong>
         ${subtext ? `<small>${escapeHtml(subtext)}</small>` : ""}
       </${tag}>
@@ -2276,80 +2282,54 @@
     const overduePayments = buildFinanceRecords(today.slice(0, 7)).filter((record) => financeStatusKey(record) === "overdue");
     const dietReviewPlans = state.data.diets.filter((plan) => getStudent(plan.studentId) && dietStatusKey(plan) === "review_pending");
     const studentsWithoutDiet = state.data.students.filter((student) => student.status === "active" && !getCurrentDietPlanForStudent(student.id));
-    const pendingItems = [
-      ...overduePayments.map((record) => ({
-        title: "Pagamento em atraso",
-        context: getStudentName(record.studentId),
-        meta: `${currencyExact(record.amount)} · vencimento ${record.dueDate ? formatShortDate(record.dueDate) : "não definido"}`,
-        clickAttr: 'data-manager-nav="finance"',
+    // Pendências agrupadas por categoria (não individualmente)
+    const aggregatedPending = [];
+    if (overduePayments.length) {
+      aggregatedPending.push({
+        title: "Pagamentos em atraso",
+        context: `${overduePayments.length} ${overduePayments.length === 1 ? "aluno" : "alunos"} com pagamento atrasado`,
+        icon: icons.finance,
         tone: "danger",
-        icon: icons.finance
-      })),
-      ...dietReviewPlans.map((plan) => ({
-        title: "Revisão de dieta pendente",
-        context: getStudentName(plan.studentId),
-        meta: plan.nextReviewDate ? `Revisão ${formatShortDate(plan.nextReviewDate)}` : plan.protocol || "Plano alimentar",
-        clickAttr: `data-open-diet-detail="${escapeHtml(plan.id)}"`,
-        tone: plan.nextReviewDate && plan.nextReviewDate < today ? "danger" : "warning",
-        icon: icons.diet
-      })),
-      ...overdueUpdates.map((update) => ({
-        title: "Atualização atrasada",
-        context: getStudentName(update.studentId),
-        meta: `Vencimento ${formatDate(update.dueDate)}`,
-        clickAttr: 'data-manager-nav="updates"',
-        tone: "danger",
-        icon: icons.updates
-      })),
-      ...unsignedContracts.map((contract) => ({
-        title: "Contrato pendente",
-        context: getStudentName(contract.studentId),
-        meta: contract.title,
-        clickAttr: `data-open-student-profile="${escapeHtml(contract.studentId)}"`,
+        clickAttr: 'data-manager-nav="finance"'
+      });
+    }
+    if (pendingUpdates > 0) {
+      aggregatedPending.push({
+        title: "Atualizações de treino",
+        context: `${pendingUpdates} ${pendingUpdates === 1 ? "aluno" : "alunos"} com treinos para atualizar`,
+        icon: icons.updates,
+        tone: overdueUpdates.length ? "danger" : "warning",
+        clickAttr: 'data-manager-nav="updates"'
+      });
+    }
+    if (studentsWithoutWorkout.length) {
+      aggregatedPending.push({
+        title: "Novos alunos sem treino",
+        context: `${studentsWithoutWorkout.length} ${studentsWithoutWorkout.length === 1 ? "cadastro" : "cadastros"} aguardando avaliação`,
+        icon: icons.students,
         tone: "warning",
-        icon: icons.contracts
-      })),
-      ...studentsWithoutWorkout.map((student) => ({
-        title: "Aluno sem treino publicado",
-        context: student.name,
-        meta: student.goal || "Sem objetivo definido",
-        clickAttr: `data-open-student-profile="${escapeHtml(student.id)}"`,
+        clickAttr: 'data-manager-nav="students"'
+      });
+    }
+    if (unsignedContracts.length) {
+      aggregatedPending.push({
+        title: "Contratos pendentes",
+        context: `${unsignedContracts.length} ${unsignedContracts.length === 1 ? "contrato" : "contratos"} aguardando assinatura`,
+        icon: icons.contracts,
+        tone: "warning",
+        clickAttr: 'data-manager-nav="students"'
+      });
+    }
+    if (unreadMessageTotal > 0) {
+      aggregatedPending.push({
+        title: "Mensagens não lidas",
+        context: `${unreadMessageTotal} ${unreadMessageTotal === 1 ? "nova mensagem" : "novas mensagens"} de alunos`,
+        icon: icons.messages,
         tone: "info",
-        icon: icons.workouts
-      })),
-      ...studentsWithoutDiet.slice(0, 2).map((student) => ({
-        title: "Aluno sem plano alimentar",
-        context: student.name,
-        meta: student.goal || "Sem objetivo definido",
-        clickAttr: `data-open-diet-form data-prefill-student="${escapeHtml(student.id)}"`,
-        tone: "warning",
-        icon: icons.diet
-      })),
-      ...studentsWithoutAccess.map((student) => ({
-        title: "Acesso do aluno pendente",
-        context: student.name,
-        meta: getStudentAccessState(student).detail,
-        clickAttr: `data-open-student-profile="${escapeHtml(student.id)}"`,
-        tone: "warning",
-        icon: icons.students
-      })),
-      ...unansweredMessages.map(({ student }) => ({
-        title: "Mensagem sem resposta",
-        context: student.name,
-        meta: "Última mensagem enviada pelo aluno",
-        clickAttr: `data-open-messages="${escapeHtml(student.id)}"`,
-        tone: "warning",
-        icon: icons.messages
-      })),
-      ...draftWorkouts.slice(0, 2).map((workout) => ({
-        title: "Treino em rascunho",
-        context: workout.title,
-        meta: workout.studentId ? getStudentName(workout.studentId) : "Padrão de treino",
-        clickAttr: `data-open-workout-form="${escapeHtml(workout.id)}"`,
-        tone: "info",
-        icon: icons.workouts
-      }))
-    ].slice(0, 3);
+        clickAttr: 'data-manager-nav="messages"'
+      });
+    }
+    const pendingItems = aggregatedPending.slice(0, 4);
 
     return `
       <div class="content-stack dashboard-home">
@@ -2376,9 +2356,8 @@
           <div class="section-title">
             <div>
               <h3>Pendências</h3>
-              <span class="small-text">Itens que precisam de atenção</span>
             </div>
-            <button class="mini-button" type="button" data-manager-nav="updates">Ver todas</button>
+            <button class="section-link" type="button" data-manager-nav="updates">Ver todas ›</button>
           </div>
           ${pendingItems.length ? `<div class="entity-list dashboard-pending-list">${pendingItems.map(renderDashboardPendingItem).join("")}</div>` : emptyState("Nenhuma pendência", "Tudo certo por enquanto.")}
         </section>
@@ -2388,25 +2367,23 @@
             <div class="section-title">
               <div>
                 <h3>Agenda de hoje</h3>
-                <span class="small-text">${formatLongDate(today)}</span>
               </div>
-              <button class="mini-button" type="button" data-manager-nav="agenda">Abrir agenda</button>
+              <button class="section-link" type="button" data-manager-nav="agenda">Ver agenda ›</button>
             </div>
-            ${agendaToday.length ? `<div class="entity-list dashboard-agenda-list">${agendaToday.slice(0, 3).map(renderDashboardAgendaItem).join("")}</div>` : emptyState("Agenda livre hoje", "Novos treinos e atualizações aparecerão aqui.")}
+            ${agendaToday.length ? `<div class="dashboard-agenda-list">${agendaToday.slice(0, 3).map(renderDashboardAgendaItem).join("")}</div>` : emptyState("Agenda livre hoje", "Novos treinos e atualizações aparecerão aqui.")}
           </div>
 
           <div class="panel dashboard-panel">
             <div class="section-title">
               <div>
-                <h3>Acesso rápido</h3>
-                <span class="small-text">Atalhos operacionais</span>
+                <h3>Ações rápidas</h3>
               </div>
             </div>
             <div class="quick-grid dashboard-quick-grid">
               <button class="quick-link dashboard-quick-link" type="button" data-open-student-form>${icons.students}<strong>Novo aluno</strong><span>Cadastrar e liberar acesso</span></button>
-              <button class="quick-link dashboard-quick-link" type="button" data-open-workout-form>${icons.workouts}<strong>Novo padrão</strong><span>Criar modelo base</span></button>
-              <button class="quick-link dashboard-quick-link" type="button" data-open-exercise-form>${icons.library}<strong>Novo exercício</strong><span>Adicionar Ã  biblioteca</span></button>
-              <button class="quick-link dashboard-quick-link" type="button" data-manager-nav="messages">${icons.messages}<strong>Mensagens</strong><span>${recentMessages.length ? "Conversas recentes" : "Conversa direta"}</span></button>
+              <button class="quick-link dashboard-quick-link" type="button" data-open-workout-form>${icons.workouts}<strong>Criar treino</strong><span>Criar padrão de treino</span></button>
+              <button class="quick-link dashboard-quick-link" type="button" data-manager-nav="messages">${icons.messages}<strong>Enviar mensagem</strong><span>Conversa direta com aluno</span></button>
+              <button class="quick-link dashboard-quick-link" type="button" data-manager-nav="finance">${icons.progress}<strong>Relatórios</strong><span>Resultados e finanças</span></button>
             </div>
           </div>
         </section>
@@ -2417,7 +2394,7 @@
   }
 
   function renderDashboardPendingItem(item) {
-    const priorityLabel = item.tone === "danger" ? "Alta" : item.tone === "warning" ? "Média" : "Baixa";
+    const priorityLabel = item.tone === "danger" ? "Alta prioridade" : item.tone === "warning" ? "Média prioridade" : "Baixa prioridade";
     const priorityTone = item.tone === "danger" ? "danger" : item.tone === "warning" ? "warning" : "success";
     return `
       <button class="entity-row compact-row dashboard-pending-item" type="button" ${item.clickAttr || ""}>
@@ -2425,7 +2402,6 @@
         <div class="entity-main">
           <strong>${escapeHtml(item.title)}</strong>
           <span>${escapeHtml(item.context || "")}</span>
-          <small>${escapeHtml(item.meta || "")}</small>
         </div>
         <div class="dashboard-pending-actions">
           ${statusBadge(priorityLabel, priorityTone)}
@@ -2436,18 +2412,13 @@
 
   function renderDashboardAgendaItem(item) {
     return `
-      <article class="dashboard-agenda-item ${agendaItemClass(item)}">
-        <div class="dashboard-agenda-time">${escapeHtml(item.time || "--:--")}</div>
-        <div class="dashboard-agenda-main">
+      <button class="dashboard-timeline-item" type="button" data-open-agenda-detail="${escapeHtml(item.id)}" data-agenda-date="${escapeHtml(item.date)}" data-agenda-student="${escapeHtml(item.studentId)}">
+        <div class="timeline-time">${escapeHtml(item.time || "--:--")}</div>
+        <div class="timeline-body">
           <strong>${escapeHtml(activityLabel(item.type))}</strong>
           <span>${escapeHtml(getStudentName(item.studentId))}</span>
-          <small>${escapeHtml(item.title)}</small>
         </div>
-        <div class="dashboard-agenda-status">${statusBadge(agendaStatusLabel(item.status), agendaStatusTone(item.status))}</div>
-        <div class="dashboard-agenda-actions">
-          <button class="mini-button" type="button" data-open-agenda-detail="${escapeHtml(item.id)}" data-agenda-date="${escapeHtml(item.date)}" data-agenda-student="${escapeHtml(item.studentId)}">Abrir</button>
-        </div>
-      </article>
+      </button>
     `;
   }
 
@@ -2475,6 +2446,8 @@
     const linePoints = chartPoints.map((point) => `${point.x.toFixed(1)},${point.y.toFixed(1)}`).join(" ");
     const areaPoints = `${linePoints} 92,74 8,74`;
 
+    const deltaSign = delta >= 0 ? "↑" : "↓";
+    const deltaClass = delta >= 0 ? "is-up" : "is-down";
     return `
       <section class="panel dashboard-panel weekly-summary">
         <div class="section-title">
@@ -2482,7 +2455,6 @@
             <h3>Resumo semanal</h3>
             <span class="small-text">${formatDate(start)} a ${formatDate(addDays(start, 6))}</span>
           </div>
-          <span class="badge ${delta >= 0 ? "is-success" : "is-warning"}">${delta >= 0 ? "+" : ""}${delta} vs. semana anterior</span>
         </div>
         <div class="weekly-summary-body">
           <div class="weekly-chart-card" aria-label="Treinos concluídos na semana">
@@ -2500,7 +2472,8 @@
           </div>
           <div class="weekly-kpi">
             <strong>${adherence}%</strong>
-            <span>adesão média</span>
+            <span>Adesão média</span>
+            <span class="kpi-delta-badge ${deltaClass}">${deltaSign} ${Math.abs(delta)} vs. sem. anterior</span>
             <small>${escapeHtml(weeklyCaption)}</small>
           </div>
         </div>
@@ -7920,6 +7893,11 @@
     try {
       if (await handleAppRefreshRequest()) return;
       document.body.classList.toggle("demo-mode", new URLSearchParams(window.location.search).has("demo"));
+      // Verificação síncrona: oculta login imediatamente se há sessão salva, evitando flash
+      const preCheck = getStoredUserSession();
+      if (preCheck) {
+        elements.loginView.hidden = true;
+      }
       await loadData();
       bindEvents();
       updateInstallUi();

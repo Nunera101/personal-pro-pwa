@@ -464,4 +464,62 @@
   .manager-workspace .workspace-layout {
     padding: 0.62rem 0.64rem calc(var(--bottom-nav-height) + 1.15rem + var(--safe-bottom)) !important;
   }
+}
+
+/* ─── OVERRIDE v54: barra inferior chapada, borda-a-borda ─── */
+#managerBottomNav,
+#studentBottomNav,
+.bottom-nav {
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  height: auto !important;
+  max-width: 100% !important;
+  margin-inline: 0 !important;
+  padding: 6px 8px !important;
+  padding-bottom: max(6px, env(safe-area-inset-bottom, 8px)) !important;
+  border-radius: 0 !important;
+  border: none !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background: #111111 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  z-index: 200 !important;
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  overflow: hidden !important;
+}
+
+.nav-button {
+  min-height: 52px !important;
+  padding: 6px 4px !important;
+  border-radius: 10px !important;
+  font-size: 11px !important;
+  gap: 4px !important;
+  color: #9CA3AF !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.nav-button svg {
+  width: 22px !important;
+  height: 22px !important;
+}
+
+.nav-button.is-active {
+  color: #F59E0B !important;
+  background: rgba(245, 159, 11, 0.1) !important;
+  box-shadow: none !important;
+}
+
+.manager-workspace,
+.student-workspace {
+  padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+.manager-workspace .workspace-layout,
+.student-workspace .workspace-layout {
+  padding-bottom: 0 !important;
+}
 
