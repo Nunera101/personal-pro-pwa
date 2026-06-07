@@ -3739,7 +3739,7 @@
           <div>
             <span class="eyebrow">Elite AS</span>
             <h3>Padrões de treino</h3>
-            <p>Monte modelos base reutilizáveis com exercícios da biblioteca.</p>
+            <p>Modelos</p>
           </div>
           <button class="primary-action" type="button" data-open-workout-form>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
@@ -3777,23 +3777,12 @@
               <h3>Padrões cadastrados</h3>
               <span class="small-text">Crie modelos base, aplique em alunos e ajuste individualmente no perfil.</span>
             </div>
-            <span class="badge">${workouts.length} padrão(s)</span>
+            <span class="small-text">${workouts.length} padrão(s) encontrado(s)</span>
           </div>
           ${state.data.exercises.some((exercise) => exercise.status === "active") ? "" : emptyState("Biblioteca vazia", "Cadastre exercícios ativos antes de montar um padrão.", icons.library)}
           ${workouts.length ? `<div class="pattern-card-list">${workouts.map(renderPatternCard).join("")}</div>` : emptyState(allPatterns.length ? "Nenhum padrão encontrado" : "Nenhum padrão criado ainda", allPatterns.length ? "Tente ajustar os filtros ou criar um novo modelo." : "Crie modelos base para agilizar a montagem dos treinos dos alunos.", icons.workouts)}
         </section>
       </div>
-    `;
-  }
-
-  function patternMetricCard(icon, title, value, subtitle) {
-    return `
-      <article class="pattern-summary-card">
-        <span class="pattern-summary-icon">${icon}</span>
-        <span>${escapeHtml(title)}</span>
-        <strong>${escapeHtml(value)}</strong>
-        <small>${escapeHtml(subtitle)}</small>
-      </article>
     `;
   }
 
@@ -3836,7 +3825,7 @@
           ${patternMetaItem(icons.progress, "Objetivo", goal)}
           ${patternMetaItem(icons.workouts, "Nível", workoutLevelLabel(workout.level))}
           ${patternMetaItem(icons.library, "Exercícios", `${exerciseCount} exercício(s)`)}
-          ${patternMetaItem(icons.agenda, "Ãšltima edição", updatedAt)}
+          ${patternMetaItem(icons.agenda, "Última edição", updatedAt)}
         </div>
         ${renderPatternExercisePreview(workout)}
         <div class="pattern-card-actions">
