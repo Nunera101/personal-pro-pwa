@@ -7607,6 +7607,20 @@ button.dashboard-metric {
   line-height: 1;
 }
 
+.wa-conv-card--new {
+  border-left: 2px solid rgba(245, 181, 27, 0.45);
+}
+
+.wa-new-label {
+  flex-shrink: 0;
+  font-size: 0.74rem;
+  font-weight: 720;
+  color: var(--brand-strong);
+  border: 1px solid rgba(245, 181, 27, 0.4);
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+}
+
 /* ── WhatsApp-style thread (inside modal) ─────────────────── */
 .modal-panel:has(.wa-thread) {
   overflow: hidden;

@@ -2542,6 +2542,14 @@
     const filteredConversations = conversations.filter((conversation) => messageMatchesFilters(conversation, filters));
     const unreadTotal = conversations.reduce((total, conversation) => total + conversation.unreadCount, 0);
 
+    // Alunos sem conversa que batem com a busca
+    const query = normalizeFilterText(filters.q || "");
+    const existingIds = new Set(conversations.map((c) => c.student.id));
+    const newStudents = query
+      ? state.data.students.filter((s) => s.trainerId === TRAINER_ID && !existingIds.has(s.id) && normalizeFilterText(`${s.name} ${s.email} ${s.goal}`).includes(query))
+      : [];
+
+    const hasResults = filteredConversations.length > 0 || newStudents.length > 0;
     return `
       <div class="wa-inbox">
         <div class="wa-inbox-header">
@@ -2550,18 +2558,36 @@
         </div>
         <label class="wa-inbox-search">
           <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
-          <input type="search" data-message-filter="q" placeholder="Buscar conversa..." value="${escapeHtml(filters.q)}" />
+          <input type="search" data-message-filter="q" placeholder="Buscar ou iniciar conversa..." value="${escapeHtml(filters.q)}" />
         </label>
-        ${
-          filteredConversations.length
-            ? `<div class="wa-conv-list">${filteredConversations.map(renderConversationCard).join("")}</div>`
-            : emptyState(
-                conversations.length ? "Nenhuma conversa encontrada" : "Nenhuma conversa ainda",
-                conversations.length ? "Tente ajustar a busca." : "Abra o perfil de um aluno para iniciar uma conversa.",
-                icons.messages
-              )
-        }
+        ${hasResults
+          ? `<div class="wa-conv-list">
+              ${filteredConversations.map(renderConversationCard).join("")}
+              ${newStudents.map(renderNewConversationCard).join("")}
+             </div>`
+          : emptyState(
+              conversations.length ? "Nenhuma conversa encontrada" : "Nenhuma conversa ainda",
+              conversations.length ? "Tente buscar pelo nome do aluno para iniciar uma conversa." : "Busque pelo nome do aluno para enviar a primeira mensagem.",
+              icons.messages
+            )}
       </div>
+    `;
+  }
+
+  function renderNewConversationCard(student) {
+    return `
+      <button class="wa-conv-card wa-conv-card--new" type="button" data-open-messages="${escapeHtml(student.id)}">
+        ${studentAvatar(student)}
+        <span class="wa-conv-body">
+          <span class="wa-conv-top">
+            <strong>${escapeHtml(student.name)}</strong>
+            <span class="wa-new-label">Iniciar conversa</span>
+          </span>
+          <span class="wa-conv-bottom">
+            <small>${escapeHtml(student.goal || student.email || "Aluno cadastrado")}</small>
+          </span>
+        </span>
+      </button>
     `;
   }
 
