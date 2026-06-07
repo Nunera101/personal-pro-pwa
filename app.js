@@ -53,6 +53,7 @@
     workoutFilters: { q: "", status: "all", goal: "all", level: "all" },
     updateFilters: { studentId: "", status: "all", period: "all", date: "" },
     contractFilters: { status: "all", studentId: "", plan: "all" },
+    contractFilterOpen: false,
     messageFilters: { q: "", status: "all" },
     financeFilters: { q: "", status: "all", month: todayISO().slice(0, 7) },
     dietFilters: { q: "", status: "all", objective: "all" },
@@ -2651,6 +2652,9 @@
     const signed = allContracts.filter((contract) => contractStatusMeta(contract).key === "signed" || contractStatusMeta(contract).key === "upcoming");
     const upcoming = allContracts.filter((contract) => contractStatusMeta(contract).key === "upcoming");
     const plans = [...new Set(allContracts.map((contract) => contract.plan).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+    const hasActiveFilters = filters.status !== "all" || filters.studentId !== "" || filters.plan !== "all";
+    const activeFilterCount = [filters.status !== "all", filters.studentId !== "", filters.plan !== "all"].filter(Boolean).length;
+    const filterPanelOpen = state.contractFilterOpen || hasActiveFilters;
     return `
       <div class="content-stack contracts-workspace">
         <section class="contracts-hero">
@@ -2660,23 +2664,31 @@
             <p>Aceites digitais e planos</p>
           </div>
         </section>
-        <section class="metrics-row metrics-row--3">
-          ${stdMetricCard("Pendentes", pending.length, "Aguardando assinatura", "warning")}
-          ${stdMetricCard("Assinados", signed.length, "Ativos", "success")}
-          ${stdMetricCard("Próx. vencimentos", upcoming.length, "30 dias", upcoming.length ? "warning" : "")}
+        <section class="contracts-summary-grid">
+          ${contractMetricCard({ icon: icons.updates, title: "Pendentes", value: String(pending.length), subtitle: "Aguardando assinatura", tone: "warning" })}
+          ${contractMetricCard({ icon: icons.contracts, title: "Assinados", value: String(signed.length), subtitle: "Ativos", tone: "success" })}
+          ${contractMetricCard({ icon: icons.agenda, title: "Próx. vencimentos", value: String(upcoming.length), subtitle: "30 dias", tone: upcoming.length ? "warning" : "" })}
         </section>
-        <div class="search-filter-row contracts-filter-panel">
-          ${contractFilterSelect("status", "Filtrar contratos", icons.updates, [
-            ["all", "Todos os contratos"],
-            ["pending", "Pendentes"],
-            ["signed", "Assinados"],
-            ["upcoming", "Próximos vencimentos"],
-            ["expired", "Vencidos"],
-            ["canceled", "Cancelados"]
-          ], filters.status)}
-          ${contractFilterSelect("studentId", "Aluno", icons.students, [["", "Todos os alunos"], ...state.data.students.map((student) => [student.id, student.name])], filters.studentId)}
-          ${contractFilterSelect("plan", "Plano", icons.contracts, [["all", "Todos os planos"], ...plans.map((plan) => [plan, plan])], filters.plan)}
-        </div>
+        <details class="contracts-filter-details" ${filterPanelOpen ? "open" : ""}>
+          <summary class="contracts-filter-toggle">
+            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+            <span>Filtrar</span>
+            ${hasActiveFilters ? `<span class="filter-active-pill">${activeFilterCount}</span>` : ""}
+            <svg class="filter-chevron" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+          </summary>
+          <div class="contract-filter-grid">
+            ${contractFilterSelect("status", "Status", icons.updates, [
+              ["all", "Todos os contratos"],
+              ["pending", "Pendentes"],
+              ["signed", "Assinados"],
+              ["upcoming", "Próximos vencimentos"],
+              ["expired", "Vencidos"],
+              ["canceled", "Cancelados"]
+            ], filters.status)}
+            ${contractFilterSelect("studentId", "Aluno", icons.students, [["", "Todos os alunos"], ...state.data.students.map((student) => [student.id, student.name])], filters.studentId)}
+            ${contractFilterSelect("plan", "Plano", icons.contracts, [["all", "Todos os planos"], ...plans.map((plan) => [plan, plan])], filters.plan)}
+          </div>
+        </details>
         <section class="contracts-list-panel">
           <div class="section-title">
             <div>
@@ -2725,7 +2737,7 @@
           <div class="contract-student-info">
             <strong>${escapeHtml(getStudentName(contract.studentId))}</strong>
             <span>${escapeHtml(contract.plan || contract.title || "Plano não informado")}</span>
-            <b>${escapeHtml(contract.value || "Valor não informado")}</b>
+            <b>${contract.value ? escapeHtml(currencyExact(contract.value) + "/mês") : "Valor não informado"}</b>
           </div>
           <div class="contract-validity">
             <span>${icons.agenda}</span>
@@ -7439,8 +7451,11 @@
     });
     document.addEventListener("change", (event) => {
       const target = event.target;
-      if (target.matches("[data-contract-filter]")) { state.contractFilters[target.dataset.contractFilter] = target.value; renderManager(); }
+      if (target.matches("[data-contract-filter]")) { state.contractFilters[target.dataset.contractFilter] = target.value; state.contractFilterOpen = true; renderManager(); }
     });
+    document.addEventListener("toggle", (event) => {
+      if (event.target.matches(".contracts-filter-details")) state.contractFilterOpen = event.target.open;
+    }, true);
     document.addEventListener("submit", async (event) => {
       event.preventDefault();
       const form = event.target;
