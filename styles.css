@@ -7612,6 +7612,16 @@ button.dashboard-metric {
   border-left: 2px solid rgba(245, 181, 27, 0.45);
 }
 
+.wa-section-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #9CA3AF;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  padding: 1rem 0 0.35rem;
+  margin: 0;
+}
+
 .wa-new-label {
   flex-shrink: 0;
   font-size: 0.74rem;

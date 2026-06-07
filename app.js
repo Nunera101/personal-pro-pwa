@@ -2570,16 +2570,17 @@
           <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
           <input type="search" data-message-filter="q" placeholder="Buscar ou iniciar conversa..." value="${escapeHtml(filters.q)}" />
         </label>
-        ${hasResults
-          ? `<div class="wa-conv-list">
-              ${filteredConversations.map(renderConversationCard).join("")}
-              ${newStudents.map(renderNewConversationCard).join("")}
-             </div>`
-          : emptyState(
+        ${!hasResults
+          ? emptyState(
               conversations.length ? "Nenhuma conversa encontrada" : "Nenhuma conversa ainda",
               conversations.length ? "Tente buscar pelo nome do aluno para iniciar uma conversa." : "Busque pelo nome do aluno para enviar a primeira mensagem.",
               icons.messages
-            )}
+            )
+          : ""}
+        ${filteredConversations.length ? `<div class="wa-conv-list">${filteredConversations.map(renderConversationCard).join("")}</div>` : ""}
+        ${newStudents.length
+          ? `<p class="wa-section-label">Iniciar nova conversa</p><div class="wa-conv-list">${newStudents.map(renderNewConversationCard).join("")}</div>`
+          : ""}
       </div>
     `;
   }
