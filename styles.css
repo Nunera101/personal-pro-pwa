@@ -780,6 +780,7 @@ p {
   display: grid;
   place-items: center;
   gap: 1rem;
+  background: #0b6b57; /* fallback direto para não depender de var() no primeiro paint */
   background: var(--brand);
   color: #fff;
   transition: opacity 260ms ease, visibility 260ms ease;

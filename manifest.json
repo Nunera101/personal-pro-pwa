@@ -10,8 +10,8 @@
   "display": "standalone",
   "display_override": ["standalone", "fullscreen", "browser"],
   "orientation": "portrait-primary",
-  "theme_color": "#050505",
-  "background_color": "#050505",
+  "theme_color": "#0b6b57",
+  "background_color": "#0b6b57",
   "categories": ["fitness", "health", "productivity"],
   "icons": [
     {
