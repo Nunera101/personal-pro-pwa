@@ -2344,12 +2344,12 @@
           <button class="primary-action" type="button" data-open-activity-form>${icons.agenda}<span>Agendar atividade</span></button>
         </section>
 
-        <div class="metrics-row" aria-label="Indicadores principais">
+        <div class="metrics-row metrics-row--3" aria-label="Indicadores principais">
           ${dashboardMetricCard({ label: "Alunos ativos", value: activeStudents, subtext: "Cadastros em acompanhamento", icon: icons.students, nav: "students" })}
           ${dashboardMetricCard({ label: "Treinos hoje", value: todayWorkoutActivities.length, subtext: "Atividades programadas", icon: icons.workouts, nav: "agenda" })}
           ${dashboardMetricCard({ label: "Concluídos hoje", value: completedToday, subtext: completedToday ? "Sessões finalizadas" : "Nenhum treino finalizado", icon: icons.today, nav: "agenda", tone: "success" })}
         </div>
-        <div class="metrics-row">
+        <div class="metrics-row metrics-row--2">
           ${dashboardMetricCard({ label: "Atualizações pendentes", value: pendingUpdates, subtext: overdueUpdates.length ? `${overdueUpdates.length} atrasada(s)` : "Aguardando envio", icon: icons.updates, nav: "updates", tone: overdueUpdates.length ? "warning" : "" })}
           ${dashboardMetricCard({ label: "Mensagens não lidas", value: unreadMessageTotal, subtext: unreadMessageTotal ? "Novas mensagens" : "Conversas em dia", icon: icons.messages, nav: "messages" })}
         </div>

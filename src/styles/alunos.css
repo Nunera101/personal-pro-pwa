@@ -1960,3 +1960,99 @@
   }
 }
 
+
+
+/* ═══════════════════════════════════════════════════════════════
+   BUG FIXES — divisórias de alunos, menu do perfil
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Bug #3: student-info-block — layout simples, sem duplicação ── */
+.student-card-info {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 0 !important;
+  padding-top: 10px !important;
+  margin-top: 10px !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+.student-info-block {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+  padding: 0 8px !important;
+  border-left: 0 !important;
+  min-width: 0 !important;
+  /* Remove grid-template-areas herdado */
+  grid-template-columns: unset !important;
+  grid-template-areas: none !important;
+  grid-template-rows: unset !important;
+  align-items: unset !important;
+}
+
+.student-info-block:first-child {
+  padding-left: 0 !important;
+}
+
+.student-info-block:not(:first-child) {
+  border-left: 1px solid rgba(255, 255, 255, 0.07) !important;
+  padding-left: 8px !important;
+}
+
+/* Oculta o ícone (muito pequeno e cria falsa separação visual) */
+.student-info-icon {
+  display: none !important;
+}
+
+.student-info-block > span:not(.student-info-icon) {
+  grid-area: unset !important;
+  color: #9CA3AF !important;
+  font-size: 10px !important;
+  font-weight: 500 !important;
+  line-height: 1.25 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.student-info-block > strong {
+  grid-area: unset !important;
+  color: #fff !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  line-height: 1.25 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* ── Bug #4: hero ... menu — posição top-right, sem overflow:hidden ── */
+.student-profile-hero,
+.student-profile-hero .student-hero-main {
+  overflow: visible !important;
+}
+
+/* Alinhar itens ao topo para o botão ... ficar no canto superior */
+.student-profile-hero .student-hero-main {
+  align-items: flex-start !important;
+}
+
+/* Menu dropdown do perfil: não cortado pela borda */
+.student-hero-menu {
+  position: relative !important;
+  align-self: flex-start !important;
+}
+
+.student-hero-menu > div,
+.student-hero-menu [class*=menu-list] {
+  position: absolute !important;
+  right: 0 !important;
+  top: 100% !important;
+  z-index: 300 !important;
+  min-width: 180px !important;
+  background: #1E1E1E !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+  overflow: visible !important;
+}

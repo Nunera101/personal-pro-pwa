@@ -6454,3 +6454,87 @@ body::before {
   max-width: calc(50% - 5px);
 }
 
+
+
+/* ═══════════════════════════════════════════════════════════════
+   BUG FIXES — barra inferior, métricas, glow residual
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Bug #1: .view.is-entering NÃO pode usar transform
+   (transform no ancestral quebra position:fixed do bottom nav)
+   Apenas .content-area.is-entering usa translateY — ela não
+   contém o nav, portanto está seguro.                          ── */
+@keyframes view-fade-only {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.view.is-entering {
+  animation: view-fade-only 200ms ease both !important;
+}
+
+/* ── Bug #2: métricas do Dashboard usam CSS Grid, não flex
+   metrics-row--3: 3 colunas iguais
+   metrics-row--2: 2 colunas iguais                            ── */
+.metrics-row.metrics-row--3,
+.metrics-row.metrics-row--2 {
+  display: grid !important;
+  overflow-x: visible !important;
+  overflow: visible !important;
+}
+.metrics-row.metrics-row--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+.metrics-row.metrics-row--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+/* Remove min-width que causava overflow em flex */
+.metrics-row--3 .metric-card,
+.metrics-row--3 .dashboard-metric,
+.metrics-row--2 .metric-card,
+.metrics-row--2 .dashboard-metric {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  flex: none !important;
+}
+/* Remove a regra 50% anterior */
+.metrics-row + .metrics-row .dashboard-metric {
+  max-width: 100% !important;
+}
+
+/* ── Bug #5: Remove glow dourado residual de cards e botões  ── */
+/* Primary / secondary actions: sem halo */
+.primary-action,
+.primary-action:hover,
+.primary-action:active,
+.primary-action:focus-visible,
+.secondary-action,
+.secondary-action:hover {
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+/* Panels e cards: sem glow dourado nas bordas */
+.panel,
+.metric-card,
+.dashboard-metric,
+.entity-card {
+  box-shadow: none !important;
+}
+
+/* Remove pseudo-element radial-gradient glow */
+.panel::before,
+.panel::after,
+.metric-card::before,
+.metric-card::after,
+.dashboard-metric::before,
+.dashboard-metric::after,
+.dashboard-hero::before,
+.dashboard-hero::after,
+.students-hero::before,
+.students-hero::after,
+.primary-action::before,
+.primary-action::after {
+  background: none !important;
+  opacity: 0 !important;
+  display: none !important;
+}
