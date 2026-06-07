@@ -3927,7 +3927,7 @@
   }
 
   function renderWorkoutExercisePreview(workout) {
-    if (!workout.exercises.length) return '<span class="small-text">Sem exercícios cadastrados.</span>';
+    if (!workout.exercises.length) return emptyState("Nenhum exercício", "Adicione exercícios para montar este treino.");
     const rows = [...workout.exercises].sort((a, b) => a.order - b.order);
     const visibleRows = rows.slice(0, 4);
     const extra = rows.length - visibleRows.length;
@@ -4469,7 +4469,7 @@
         </section>
         <section class="panel">
           <div class="section-title"><h3>Histórico de atualizações</h3><span class="small-text">${updates.length} registro(s)</span></div>
-          ${updates.length ? `<div class="entity-list">${updates.map(renderUpdateRow).join("")}</div>` : emptyState("Sem histórico", "Suas atualizações enviadas aparecerão aqui.")}
+          ${updates.length ? `<div class="entity-list">${updates.map(renderUpdateRow).join("")}</div>` : emptyState("Nenhum histórico", "Suas atualizações enviadas aparecerão aqui.")}
         </section>
       </div>
     `;
@@ -4810,11 +4810,11 @@
         </section>
         <section class="panel">
           <div class="section-title"><h3>Evolução por exercício</h3><span class="small-text">Maior carga registrada</span></div>
-          ${exerciseProgress.length ? `<div class="entity-list">${exerciseProgress.map((item) => `<article class="entity-row"><div class="entity-main"><strong>${escapeHtml(item.name)}</strong><span>Maior carga: ${item.maxLoad} Â· Volume acumulado: ${item.volume}</span></div></article>`).join("")}</div>` : emptyState("Sem dados de carga", "Registre carga e repetições durante a execução do treino.")}
+          ${exerciseProgress.length ? `<div class="entity-list">${exerciseProgress.map((item) => `<article class="entity-row"><div class="entity-main"><strong>${escapeHtml(item.name)}</strong><span>Maior carga: ${item.maxLoad} Â· Volume acumulado: ${item.volume}</span></div></article>`).join("")}</div>` : emptyState("Nenhum dado de carga", "Registre carga e repetições durante a execução do treino.")}
         </section>
         <section class="panel">
           <div class="section-title"><h3>Peso corporal</h3><span class="small-text">Atualizações</span></div>
-          ${updateWeights.length ? `<div class="entity-list">${updateWeights.map((item) => `<article class="entity-row"><div class="entity-main"><strong>${escapeHtml(item.weight)} kg</strong><span>${formatDate(item.dueDate)}</span></div></article>`).join("")}</div>` : emptyState("Sem peso registrado", "O peso informado nas atualizações aparecerá aqui.")}
+          ${updateWeights.length ? `<div class="entity-list">${updateWeights.map((item) => `<article class="entity-row"><div class="entity-main"><strong>${escapeHtml(item.weight)} kg</strong><span>${formatDate(item.dueDate)}</span></div></article>`).join("")}</div>` : emptyState("Nenhum peso registrado", "O peso informado nas atualizações aparecerá aqui.")}
         </section>
       </div>
     `;
@@ -4942,7 +4942,7 @@
 
   function renderConversation(studentId, compact = false) {
     const messages = getStudentMessages(studentId);
-    if (!messages.length) return emptyState("Sem mensagens", "Use o campo abaixo para iniciar a conversa.");
+    if (!messages.length) return emptyState("Nenhuma mensagem", "Use o campo abaixo para iniciar a conversa.");
     const visible = compact ? messages.slice(-4) : messages;
     return `
       <div class="chat-list ${compact ? "is-compact" : ""}">
