@@ -2789,17 +2789,15 @@
             <b>${contract.value ? escapeHtml(currencyExact(contract.value) + "/mês") : "Valor não informado"}</b>
           </div>
           <div class="contract-validity">
-            <span>${icons.agenda}</span>
-            <small>Válido até</small>
-            <strong>${escapeHtml(contract.endDate ? formatShortDate(contract.endDate) : "Sem vencimento")}</strong>
-          </div>
-          <div class="contract-card-actions">
             <span class="badge ${meta.badgeClass}">${escapeHtml(meta.label)}</span>
-            <button class="contract-primary-action" type="button" ${primary.attr}>
-              ${primary.icon}
-              <span>${escapeHtml(primary.label)}</span>
-            </button>
+            <small>Válido até ${escapeHtml(contract.endDate ? formatShortDate(contract.endDate) : "Sem vencimento")}</small>
           </div>
+        </div>
+        <div class="contract-card-base">
+          <button class="contract-primary-action" type="button" ${primary.attr}>
+            ${primary.icon}
+            <span>${escapeHtml(primary.label)}</span>
+          </button>
           <details class="action-menu contract-action-menu">
             <summary aria-label="Mais ações">${icons.more}</summary>
             <div>

@@ -281,10 +281,10 @@
 
 .contract-card-main {
   display: grid;
-  grid-template-columns: auto minmax(0, 1.2fr) minmax(8rem, 0.72fr) minmax(10rem, auto) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.78rem;
+  padding: 0.78rem 0.78rem 0.56rem;
 }
 
 .contract-card-main .entity-avatar {
@@ -294,8 +294,7 @@
 }
 
 .contract-student-info,
-.contract-validity,
-.contract-card-actions {
+.contract-validity {
   min-width: 0;
 }
 
@@ -333,45 +332,20 @@
 }
 
 .contract-validity {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 0.1rem 0.5rem;
-  align-items: center;
-}
-
-.contract-validity > span {
-  grid-row: span 2;
-  color: var(--brand-strong);
-}
-
-.contract-validity svg {
-  width: 1.18rem;
-  height: 1.18rem;
-  stroke: currentColor;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
 }
 
 .contract-validity small {
   color: var(--muted);
   font-size: 0.76rem;
   line-height: 1.1;
+  text-align: right;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.contract-validity strong {
-  color: var(--ink);
-  font-size: 0.95rem;
-  line-height: 1.2;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.contract-card-actions {
-  display: grid;
-  justify-items: end;
-  gap: 0.5rem;
 }
 
 .contract-primary-action {
@@ -408,6 +382,19 @@
   width: 1.2rem;
   height: 1.2rem;
   stroke: currentColor;
+}
+
+.contract-card-base {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.52rem 0.78rem 0.68rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.contract-card-base .contract-primary-action {
+  flex: 1;
+  justify-content: center;
 }
 
 .new-contract-card {
@@ -555,27 +542,6 @@
   .contract-detail-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-
-  .contract-card-main {
-    grid-template-columns: auto minmax(0, 1fr) auto;
-  }
-
-  .contract-validity,
-  .contract-card-actions {
-    grid-column: 2 / -1;
-    justify-items: start;
-  }
-
-  .contract-card-actions {
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: center;
-    justify-content: start;
-  }
-
-  .contract-action-menu {
-    grid-row: 1;
-    grid-column: 3;
-  }
 }
 
 @media (max-width: 57.99rem) {
@@ -649,7 +615,6 @@
 }
 
 @media (max-width: 28rem) {
-  .contracts-summary-grid,
   .contract-filter-grid,
   .contract-detail-grid {
     grid-template-columns: 1fr;
