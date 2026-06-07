@@ -7259,33 +7259,97 @@
     return true;
   }
 
-  function bindEvents() {
+  function bindAgendaEvents() {
     document.addEventListener("click", (event) => {
       const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-manager-drawer-backdrop]");
       if (!target) return;
+      if (target.matches("[data-open-agenda-detail]")) openAgendaItemDetail(target.dataset.openAgendaDetail, target.dataset.agendaDate || "", target.dataset.agendaStudent || "");
+      if (target.matches("[data-agenda-today]")) { state.agendaDate = todayISO(); renderApp(); }
+      if (target.dataset.agendaShift) {
+        const direction = Number(target.dataset.agendaShift);
+        state.agendaDate = state.agendaView === "month" ? addMonths(state.agendaDate, direction) : addDays(state.agendaDate, direction * (state.agendaView === "week" ? 7 : 1));
+        renderApp();
+      }
+      if (target.dataset.agendaView) { state.agendaView = target.dataset.agendaView; renderApp(); }
+      if (target.dataset.selectDate) { state.agendaDate = target.dataset.selectDate; renderApp(); }
+    });
+    document.addEventListener("change", (event) => {
+      const target = event.target;
+      if (target.matches("[data-agenda-date]")) { state.agendaDate = target.value || todayISO(); renderApp(); }
+    });
+    document.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const form = event.target;
+      if (form.id === "activityForm") handleActivityForm(form);
+    });
+  }
 
+  function bindWorkoutEvents() {
+    document.addEventListener("click", (event) => {
+      const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-manager-drawer-backdrop]");
+      if (!target) return;
+      if (target.matches("[data-open-workout-form]")) openWorkoutForm(target.dataset.openWorkoutForm || "", target.dataset.prefillStudent || "");
+      if (target.matches("[data-open-apply-pattern-form]")) openApplyPatternForm(target.dataset.openApplyPatternForm);
+      if (target.matches("[data-open-student-pattern-workout]")) openStudentPatternWorkoutForm(target.dataset.openStudentPatternWorkout);
+      if (target.matches("[data-add-workout-row]")) {
+        const container = document.getElementById("workoutRows");
+        container.insertAdjacentHTML("beforeend", workoutRowTemplate(normalizeWorkoutExercise({ order: container.querySelectorAll("[data-workout-row]").length + 1, exerciseId: state.data.exercises.find((e) => e.status === "active")?.id || "" }), container.querySelectorAll("[data-workout-row]").length));
+      }
+      if (target.matches("[data-remove-workout-row]")) target.closest("[data-workout-row]")?.remove();
+      if (target.matches("[data-duplicate-workout]")) duplicateWorkout(target.dataset.duplicateWorkout);
+      if (target.matches("[data-publish-workout]")) publishWorkout(target.dataset.publishWorkout);
+      if (target.matches("[data-archive-workout]")) archiveWorkout(target.dataset.archiveWorkout);
+      if (target.matches("[data-restore-workout]")) restoreWorkout(target.dataset.restoreWorkout);
+      if (target.matches("[data-delete-workout]")) deleteWorkout(target.dataset.deleteWorkout);
+      if (target.matches("[data-start-workout]")) startWorkout(target.dataset.startWorkout, target.dataset.activityId || "");
+      if (target.matches("[data-series-action]")) handleSeriesAction(target.dataset.seriesAction);
+      if (target.matches("[data-skip-rest]")) { stopRest(); renderStudent(); showToast("Descanso pulado."); }
+      if (target.matches("[data-finish-workout]")) finishWorkout();
+      if (target.matches("[data-cancel-active-session]") && confirm("Cancelar treino em andamento?")) {
+        state.activeSession = null;
+        stopRest();
+        persistActiveSession();
+        renderStudent();
+      }
+    });
+    document.addEventListener("input", (event) => {
+      const target = event.target;
+      if (target.matches("[data-workout-filter]")) { state.workoutFilters[target.dataset.workoutFilter] = target.value; renderManager(); }
+    });
+    document.addEventListener("change", (event) => {
+      const target = event.target;
+      if (target.matches("[data-workout-filter]")) { state.workoutFilters[target.dataset.workoutFilter] = target.value; renderManager(); }
+      if (target.matches("[data-activity-student]")) {
+        const workoutSelect = elements.modalBody.querySelector('[name="workoutId"]');
+        if (workoutSelect) workoutSelect.innerHTML = workoutOptions(target.value);
+      }
+    });
+    document.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const form = event.target;
+      if (form.id === "workoutForm") handleWorkoutForm(form);
+      if (form.id === "applyPatternForm") handleApplyPatternForm(form);
+      if (form.id === "studentPatternWorkoutForm") handleStudentPatternWorkoutForm(form);
+      if (form.id === "useExerciseForm") handleUseExerciseForm(form);
+    });
+  }
+
+  function bindStudentEvents() {
+    document.addEventListener("click", (event) => {
+      const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-manager-drawer-backdrop]");
+      if (!target) return;
       if (target.matches("[data-manager-menu-toggle]")) openManagerDrawer();
       if (target.matches("[data-manager-drawer-backdrop]")) closeManagerDrawer();
-      if (target.matches("[data-install-trigger]")) requestInstall();
-      if (target.matches("[data-close-install]")) closeInstallSheet();
       if (target.matches("[data-close-modal]")) closeModal();
-      if (target.matches("[data-logout]")) logout();
-
       if (target.dataset.managerNav) {
         if (target.dataset.managerNav !== "studentProfile") clearStudentProfileHash();
         state.managerMenu = target.dataset.managerNav;
         closeManagerDrawer();
         renderManager();
       }
-      if (target.dataset.studentNav) {
-        state.studentMenu = target.dataset.studentNav;
-        renderStudent();
-      }
+      if (target.dataset.studentNav) { state.studentMenu = target.dataset.studentNav; renderStudent(); }
       if (target.matches("[data-open-student-form]")) openStudentForm(target.dataset.openStudentForm || "");
-      if (target.matches("[data-open-student-profile]")) {
-        closeModal();
-        openStudentProfile(target.dataset.openStudentProfile);
-      }
+      if (target.matches("[data-open-student-profile]")) { closeModal(); openStudentProfile(target.dataset.openStudentProfile); }
       if (target.matches("[data-send-student-invite]")) sendStudentInvite(target.dataset.sendStudentInvite);
       if (target.matches("[data-copy-invite-link]")) {
         const inviteInput = elements.modalBody.querySelector("[data-invite-url]");
@@ -7295,6 +7359,124 @@
           showToast("Link copiado.");
         }
       }
+      if (target.matches("[data-profile-tab]")) { state.profileTab = target.dataset.profileTab; openStudentProfile(state.activeStudentProfileId, { updateHash: false }); }
+      if (target.matches("[data-delete-student]")) deleteStudent(target.dataset.deleteStudent);
+      if (target.matches("[data-open-activity-form]")) openActivityForm(target.dataset.openActivityForm || "", target.dataset.prefillStudent || "");
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeManagerDrawer();
+    });
+    document.addEventListener("input", (event) => {
+      const target = event.target;
+      if (target.matches("[data-student-search]")) { state.search = target.value; renderManager(); }
+    });
+    document.addEventListener("change", (event) => {
+      const target = event.target;
+      if (target.matches("[data-student-filter]")) { state.studentFilters[target.dataset.studentFilter] = target.value; renderManager(); }
+    });
+    document.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const form = event.target;
+      if (form.id === "studentForm") await handleStudentForm(form);
+      if (form.id === "settingsForm") handleSettingsForm(form);
+    });
+    window.addEventListener("hashchange", () => {
+      if (applyRouteFromHash()) renderManager();
+      else if (state.currentUser?.role === "manager" && state.managerMenu === "studentProfile") {
+        state.managerMenu = "students";
+        state.activeStudentProfileId = "";
+        renderManager();
+      }
+    });
+  }
+
+  function bindExerciseEvents() {
+    document.addEventListener("click", (event) => {
+      const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-manager-drawer-backdrop]");
+      if (!target) return;
+      if (target.matches("[data-open-exercise-form]")) openExerciseForm(target.dataset.openExerciseForm || "");
+      if (target.matches("[data-open-exercise-video]")) openExerciseVideo(target.dataset.openExerciseVideo);
+      if (target.matches("[data-use-exercise-workout]")) openUseExerciseInWorkout(target.dataset.useExerciseWorkout);
+      if (target.matches("[data-toggle-exercise-status]")) {
+        const exercise = getExercise(target.dataset.toggleExerciseStatus);
+        if (exercise) exercise.status = exercise.status === "active" ? "inactive" : "active";
+        persistData();
+        renderApp();
+      }
+      if (target.matches("[data-remove-exercise-video]")) removeExerciseVideo(target.dataset.removeExerciseVideo);
+      if (target.matches("[data-delete-exercise]")) deleteExercise(target.dataset.deleteExercise);
+    });
+    document.addEventListener("input", (event) => {
+      const target = event.target;
+      if (target.matches("[data-exercise-filter]")) { state.exerciseFilters[target.dataset.exerciseFilter] = target.value; renderManager(); }
+    });
+    document.addEventListener("change", (event) => {
+      const target = event.target;
+      if (target.matches("[data-exercise-filter]")) { state.exerciseFilters[target.dataset.exerciseFilter] = target.value; renderManager(); }
+    });
+    document.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const form = event.target;
+      if (form.id === "exerciseForm") await handleExerciseForm(form);
+    });
+  }
+
+  function bindDietEvents() {
+    document.addEventListener("click", (event) => {
+      const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-manager-drawer-backdrop]");
+      if (!target) return;
+      if (target.matches("[data-open-diet-form]")) openDietPlanForm(target.dataset.openDietForm || "", target.dataset.prefillStudent || "");
+      if (target.matches("[data-open-diet-detail]")) openDietPlanDetail(target.dataset.openDietDetail);
+      if (target.matches("[data-send-diet-link]")) sendDietPlanLink(target.dataset.sendDietLink);
+      if (target.matches("[data-duplicate-diet]")) duplicateDietPlan(target.dataset.duplicateDiet);
+      if (target.matches("[data-archive-diet]")) archiveDietPlan(target.dataset.archiveDiet);
+      if (target.matches("[data-diet-show-all]")) { state.dietFilters = { q: "", status: "all", objective: "all" }; renderManager(); }
+    });
+    document.addEventListener("input", (event) => {
+      const target = event.target;
+      if (target.matches("[data-diet-filter]")) { state.dietFilters[target.dataset.dietFilter] = target.value; renderManager(); }
+    });
+    document.addEventListener("change", (event) => {
+      const target = event.target;
+      if (target.matches("[data-diet-filter]")) { state.dietFilters[target.dataset.dietFilter] = target.value; renderManager(); }
+    });
+    document.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const form = event.target;
+      if (form.id === "dietForm") handleDietForm(form);
+    });
+  }
+
+  function bindChatEvents() {
+    document.addEventListener("click", (event) => {
+      const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-manager-drawer-backdrop]");
+      if (!target) return;
+      if (target.matches("[data-open-messages]")) openMessages(target.dataset.openMessages);
+      if (target.matches("[data-message-show-all]")) { state.messageFilters = { q: "", status: "all" }; renderManager(); }
+      if (target.matches("[data-whatsapp-activity]")) openWhatsApp(target.dataset.whatsappActivity, target.dataset.whatsappStudent);
+    });
+    document.addEventListener("input", (event) => {
+      const target = event.target;
+      if (target.matches("[data-message-filter]")) { state.messageFilters[target.dataset.messageFilter] = target.value; renderManager(); }
+    });
+    document.addEventListener("change", (event) => {
+      const target = event.target;
+      if (target.matches("[data-message-filter]")) { state.messageFilters[target.dataset.messageFilter] = target.value; renderManager(); }
+    });
+    document.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const form = event.target;
+      if (form.id === "messageForm") handleMessageForm(form);
+    });
+  }
+
+  function bindContractEvents() {
+    document.addEventListener("click", (event) => {
+      const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-manager-drawer-backdrop]");
+      if (!target) return;
+      if (target.matches("[data-open-contract-form]")) openContractForm(target.dataset.openContractForm, target.dataset.contractId || "");
+      if (target.matches("[data-open-contract]")) openContract(target.dataset.openContract);
+      if (target.matches("[data-send-contract-link]")) sendContractLink(target.dataset.sendContractLink);
       if (target.matches("[data-copy-contract-link]")) {
         const contractInput = elements.modalBody.querySelector("[data-contract-url]");
         if (contractInput) {
@@ -7303,214 +7485,108 @@
           showToast("Link copiado.");
         }
       }
-      if (target.matches("[data-profile-tab]")) {
-        state.profileTab = target.dataset.profileTab;
-        openStudentProfile(state.activeStudentProfileId, { updateHash: false });
-      }
-      if (target.matches("[data-open-exercise-form]")) openExerciseForm(target.dataset.openExerciseForm || "");
-      if (target.matches("[data-open-exercise-video]")) openExerciseVideo(target.dataset.openExerciseVideo);
-      if (target.matches("[data-use-exercise-workout]")) openUseExerciseInWorkout(target.dataset.useExerciseWorkout);
-      if (target.matches("[data-open-workout-form]")) openWorkoutForm(target.dataset.openWorkoutForm || "", target.dataset.prefillStudent || "");
-      if (target.matches("[data-open-apply-pattern-form]")) openApplyPatternForm(target.dataset.openApplyPatternForm);
-      if (target.matches("[data-open-student-pattern-workout]")) openStudentPatternWorkoutForm(target.dataset.openStudentPatternWorkout);
-      if (target.matches("[data-open-activity-form]")) openActivityForm(target.dataset.openActivityForm || "", target.dataset.prefillStudent || "");
-      if (target.matches("[data-open-update-form]")) openUpdateForm(target.dataset.openUpdateForm);
-      if (target.matches("[data-open-update-comment]")) openUpdateComment(target.dataset.openUpdateComment);
-      if (target.matches("[data-open-contract-form]")) openContractForm(target.dataset.openContractForm, target.dataset.contractId || "");
-      if (target.matches("[data-open-contract]")) openContract(target.dataset.openContract);
-      if (target.matches("[data-send-contract-link]")) sendContractLink(target.dataset.sendContractLink);
-      if (target.matches("[data-open-payment-form]")) openPaymentForm(target.dataset.openPaymentForm || "", { recordId: target.dataset.paymentRecord || "" });
-      if (target.matches("[data-open-payment-detail]")) openPaymentDetail(target.dataset.openPaymentDetail);
-      if (target.matches("[data-open-payment-receipt]")) openPaymentReceipt(target.dataset.openPaymentReceipt);
-      if (target.matches("[data-finance-charge]")) chargeFinanceRecord(target.dataset.financeCharge);
-      if (target.matches("[data-open-diet-form]")) openDietPlanForm(target.dataset.openDietForm || "", target.dataset.prefillStudent || "");
-      if (target.matches("[data-open-diet-detail]")) openDietPlanDetail(target.dataset.openDietDetail);
-      if (target.matches("[data-send-diet-link]")) sendDietPlanLink(target.dataset.sendDietLink);
-      if (target.matches("[data-duplicate-diet]")) duplicateDietPlan(target.dataset.duplicateDiet);
-      if (target.matches("[data-archive-diet]")) archiveDietPlan(target.dataset.archiveDiet);
-      if (target.matches("[data-diet-show-all]")) {
-        state.dietFilters = { q: "", status: "all", objective: "all" };
-        renderManager();
-      }
-      if (target.matches("[data-finance-show-all]")) {
-        state.financeFilters.q = "";
-        state.financeFilters.status = "all";
-        renderManager();
-      }
-      if (target.dataset.financeMonthShift) {
-        state.financeFilters.month = Number(target.dataset.financeMonthShift) > 0 ? financeNextMonth(state.financeFilters.month) : financePreviousMonth(state.financeFilters.month);
-        renderManager();
-      }
-      if (target.matches("[data-message-show-all]")) {
-        state.messageFilters = { q: "", status: "all" };
-        renderManager();
-      }
+      if (target.matches("[data-sign-contract]")) signContract(target.dataset.signContract).catch(() => showToast("Nao foi possivel assinar o contrato agora."));
+      if (target.matches("[data-cancel-contract]")) cancelContract(target.dataset.cancelContract);
       if (target.matches("[data-print-contract]")) {
         showToast("Use a opÃ§Ã£o de salvar como PDF na impressÃ£o do navegador.");
         window.print();
       }
-      if (target.matches("[data-open-agenda-detail]")) openAgendaItemDetail(target.dataset.openAgendaDetail, target.dataset.agendaDate || "", target.dataset.agendaStudent || "");
-      if (target.matches("[data-open-messages]")) openMessages(target.dataset.openMessages);
+    });
+    document.addEventListener("change", (event) => {
+      const target = event.target;
+      if (target.matches("[data-contract-filter]")) { state.contractFilters[target.dataset.contractFilter] = target.value; renderManager(); }
+    });
+    document.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const form = event.target;
+      if (form.id === "contractForm") await handleContractForm(form);
+      if (form.id === "contractStudentPickerForm") handleContractStudentPicker(form);
+    });
+  }
+
+  function bindFinanceEvents() {
+    document.addEventListener("click", (event) => {
+      const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-manager-drawer-backdrop]");
+      if (!target) return;
+      if (target.matches("[data-open-payment-form]")) openPaymentForm(target.dataset.openPaymentForm || "", { recordId: target.dataset.paymentRecord || "" });
+      if (target.matches("[data-open-payment-detail]")) openPaymentDetail(target.dataset.openPaymentDetail);
+      if (target.matches("[data-open-payment-receipt]")) openPaymentReceipt(target.dataset.openPaymentReceipt);
+      if (target.matches("[data-finance-charge]")) chargeFinanceRecord(target.dataset.financeCharge);
+      if (target.matches("[data-finance-show-all]")) { state.financeFilters.q = ""; state.financeFilters.status = "all"; renderManager(); }
+      if (target.dataset.financeMonthShift) {
+        state.financeFilters.month = Number(target.dataset.financeMonthShift) > 0 ? financeNextMonth(state.financeFilters.month) : financePreviousMonth(state.financeFilters.month);
+        renderManager();
+      }
+    });
+    document.addEventListener("input", (event) => {
+      const target = event.target;
+      if (target.matches("[data-finance-filter]")) { state.financeFilters[target.dataset.financeFilter] = target.value; renderManager(); }
+    });
+    document.addEventListener("change", (event) => {
+      const target = event.target;
+      if (target.matches("[data-finance-filter]")) { state.financeFilters[target.dataset.financeFilter] = target.value; renderManager(); }
+    });
+    document.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const form = event.target;
+      if (form.id === "paymentForm") handlePaymentForm(form);
+    });
+  }
+
+  function bindUpdateEvents() {
+    document.addEventListener("click", (event) => {
+      const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-manager-drawer-backdrop]");
+      if (!target) return;
+      if (target.matches("[data-open-update-form]")) openUpdateForm(target.dataset.openUpdateForm);
+      if (target.matches("[data-open-update-comment]")) openUpdateComment(target.dataset.openUpdateComment);
+      if (target.matches("[data-mark-update-viewed]")) markUpdateViewed(target.dataset.markUpdateViewed);
       if (target.matches("[data-open-local-video]")) openLocalVideo(target.dataset.openLocalVideo);
-      if (target.matches("[data-whatsapp-activity]")) openWhatsApp(target.dataset.whatsappActivity, target.dataset.whatsappStudent);
-      if (target.matches("[data-add-workout-row]")) {
-        const container = document.getElementById("workoutRows");
-        container.insertAdjacentHTML("beforeend", workoutRowTemplate(normalizeWorkoutExercise({ order: container.querySelectorAll("[data-workout-row]").length + 1, exerciseId: state.data.exercises.find((e) => e.status === "active")?.id || "" }), container.querySelectorAll("[data-workout-row]").length));
-      }
-      if (target.matches("[data-remove-workout-row]")) target.closest("[data-workout-row]")?.remove();
-      if (target.matches("[data-toggle-exercise-status]")) {
-        const exercise = getExercise(target.dataset.toggleExerciseStatus);
-        if (exercise) exercise.status = exercise.status === "active" ? "inactive" : "active";
-        persistData();
-        renderApp();
-      }
-      if (target.matches("[data-duplicate-workout]")) duplicateWorkout(target.dataset.duplicateWorkout);
-      if (target.matches("[data-publish-workout]")) publishWorkout(target.dataset.publishWorkout);
-      if (target.matches("[data-archive-workout]")) archiveWorkout(target.dataset.archiveWorkout);
-      if (target.matches("[data-restore-workout]")) restoreWorkout(target.dataset.restoreWorkout);
-      if (target.matches("[data-delete-workout]")) deleteWorkout(target.dataset.deleteWorkout);
-      if (target.matches("[data-remove-exercise-video]")) removeExerciseVideo(target.dataset.removeExerciseVideo);
-      if (target.matches("[data-delete-exercise]")) deleteExercise(target.dataset.deleteExercise);
-      if (target.matches("[data-delete-student]")) deleteStudent(target.dataset.deleteStudent);
       if (target.matches("[data-delete-activity]")) deleteActivity(target.dataset.deleteActivity);
       if (target.matches("[data-update-activity-status]")) {
         const [id, status] = String(target.dataset.updateActivityStatus || "").split(":");
         updateActivityStatus(id, status);
       }
-      if (target.matches("[data-sign-contract]")) signContract(target.dataset.signContract).catch(() => showToast("Nao foi possivel assinar o contrato agora."));
-      if (target.matches("[data-cancel-contract]")) cancelContract(target.dataset.cancelContract);
-      if (target.matches("[data-agenda-today]")) {
-        state.agendaDate = todayISO();
-        renderApp();
-      }
-      if (target.dataset.agendaShift) {
-        const direction = Number(target.dataset.agendaShift);
-        state.agendaDate = state.agendaView === "month" ? addMonths(state.agendaDate, direction) : addDays(state.agendaDate, direction * (state.agendaView === "week" ? 7 : 1));
-        renderApp();
-      }
-      if (target.dataset.agendaView) {
-        state.agendaView = target.dataset.agendaView;
-        renderApp();
-      }
-      if (target.dataset.selectDate) {
-        state.agendaDate = target.dataset.selectDate;
-        renderApp();
-      }
-      if (target.matches("[data-start-workout]")) startWorkout(target.dataset.startWorkout, target.dataset.activityId || "");
-      if (target.matches("[data-series-action]")) handleSeriesAction(target.dataset.seriesAction);
-      if (target.matches("[data-skip-rest]")) {
-        stopRest();
-        renderStudent();
-        showToast("Descanso pulado.");
-      }
-      if (target.matches("[data-finish-workout]")) finishWorkout();
-      if (target.matches("[data-cancel-active-session]") && confirm("Cancelar treino em andamento?")) {
-        state.activeSession = null;
-        stopRest();
-        persistActiveSession();
-        renderStudent();
-      }
-      if (target.matches("[data-mark-update-viewed]")) markUpdateViewed(target.dataset.markUpdateViewed);
-      if (target.matches("[data-clear-demo-data]") && confirm("Limpar todos os dados locais deste app?")) clearDemoData().catch(() => showToast("Nao foi possivel recarregar os dados."));
     });
-
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") closeManagerDrawer();
-    });
-
-    document.addEventListener("input", (event) => {
-      const target = event.target;
-      if (target.matches("[data-student-search]")) {
-        state.search = target.value;
-        renderManager();
-      }
-      if (target.matches("[data-exercise-filter]")) {
-        state.exerciseFilters[target.dataset.exerciseFilter] = target.value;
-        renderManager();
-      }
-      if (target.matches("[data-workout-filter]")) {
-        state.workoutFilters[target.dataset.workoutFilter] = target.value;
-        renderManager();
-      }
-      if (target.matches("[data-message-filter]")) {
-        state.messageFilters[target.dataset.messageFilter] = target.value;
-        renderManager();
-      }
-      if (target.matches("[data-finance-filter]")) {
-        state.financeFilters[target.dataset.financeFilter] = target.value;
-        renderManager();
-      }
-      if (target.matches("[data-diet-filter]")) {
-        state.dietFilters[target.dataset.dietFilter] = target.value;
-        renderManager();
-      }
-    });
-
     document.addEventListener("change", (event) => {
       const target = event.target;
-      if (target.matches("[data-exercise-filter]")) {
-        state.exerciseFilters[target.dataset.exerciseFilter] = target.value;
-        renderManager();
-      }
-      if (target.matches("[data-workout-filter]")) {
-        state.workoutFilters[target.dataset.workoutFilter] = target.value;
-        renderManager();
-      }
-      if (target.matches("[data-student-filter]")) {
-        state.studentFilters[target.dataset.studentFilter] = target.value;
-        renderManager();
-      }
-      if (target.matches("[data-agenda-date]")) {
-        state.agendaDate = target.value || todayISO();
-        renderApp();
-      }
-      if (target.matches("[data-update-filter]")) {
-        state.updateFilters[target.dataset.updateFilter] = target.value;
-        renderManager();
-      }
-      if (target.matches("[data-contract-filter]")) {
-        state.contractFilters[target.dataset.contractFilter] = target.value;
-        renderManager();
-      }
-      if (target.matches("[data-message-filter]")) {
-        state.messageFilters[target.dataset.messageFilter] = target.value;
-        renderManager();
-      }
-      if (target.matches("[data-finance-filter]")) {
-        state.financeFilters[target.dataset.financeFilter] = target.value;
-        renderManager();
-      }
-      if (target.matches("[data-diet-filter]")) {
-        state.dietFilters[target.dataset.dietFilter] = target.value;
-        renderManager();
-      }
-      if (target.matches("[data-activity-student]")) {
-        const workoutSelect = elements.modalBody.querySelector('[name="workoutId"]');
-        if (workoutSelect) workoutSelect.innerHTML = workoutOptions(target.value);
-      }
+      if (target.matches("[data-update-filter]")) { state.updateFilters[target.dataset.updateFilter] = target.value; renderManager(); }
     });
-
     document.addEventListener("submit", async (event) => {
       event.preventDefault();
       const form = event.target;
-      if (form.id === "studentForm") await handleStudentForm(form);
-      if (form.id === "exerciseForm") await handleExerciseForm(form);
-      if (form.id === "useExerciseForm") handleUseExerciseForm(form);
-      if (form.id === "workoutForm") handleWorkoutForm(form);
-      if (form.id === "applyPatternForm") handleApplyPatternForm(form);
-      if (form.id === "studentPatternWorkoutForm") handleStudentPatternWorkoutForm(form);
-      if (form.id === "dietForm") handleDietForm(form);
-      if (form.id === "activityForm") handleActivityForm(form);
       if (form.id === "updateForm") await handleUpdateForm(form);
       if (form.id === "updateCommentForm") handleUpdateComment(form);
-      if (form.id === "contractStudentPickerForm") handleContractStudentPicker(form);
-      if (form.id === "settingsForm") handleSettingsForm(form);
-      if (form.id === "contractForm") await handleContractForm(form);
-      if (form.id === "messageForm") handleMessageForm(form);
-      if (form.id === "paymentForm") handlePaymentForm(form);
-      if (form.id === "resetPasswordForm") await handleResetPasswordForm(form);
     });
+  }
 
+  function bindPwaEvents() {
+    document.addEventListener("click", (event) => {
+      const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-manager-drawer-backdrop]");
+      if (!target) return;
+      if (target.matches("[data-install-trigger]")) requestInstall();
+      if (target.matches("[data-close-install]")) closeInstallSheet();
+    });
+    elements.retryInstall.addEventListener("click", requestInstall);
+    window.addEventListener("beforeinstallprompt", (event) => {
+      event.preventDefault();
+      state.deferredPrompt = event;
+      updateInstallUi();
+    });
+    window.addEventListener("appinstalled", () => {
+      localStorage.setItem(keys.installed, "true");
+      state.deferredPrompt = null;
+      closeInstallSheet();
+      updateInstallUi();
+    });
+  }
+
+  function bindAuthEvents() {
+    document.addEventListener("click", (event) => {
+      const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-manager-drawer-backdrop]");
+      if (!target) return;
+      if (target.matches("[data-logout]")) logout();
+      if (target.matches("[data-clear-demo-data]") && confirm("Limpar todos os dados locais deste app?")) clearDemoData().catch(() => showToast("Nao foi possivel recarregar os dados."));
+    });
     elements.loginForm.addEventListener("submit", async (event) => {
       event.preventDefault();
       const remember = Boolean(elements.rememberMe?.checked);
@@ -7527,39 +7603,36 @@
       applyRouteFromHash();
       renderApp();
       openPendingContractAfterLogin();
-      showToast(user.role === "manager" ? "Painel do gestor aberto." : "Ãrea do aluno aberta.");
+      showToast(user.role === "manager" ? "Painel do gestor aberto." : "Ã¡rea do aluno aberta.");
       } catch (error) {
         showToast(error.message || getLoginAccessMessage(elements.email.value) || "E-mail ou senha invÃ¡lidos.");
       }
     });
-
     elements.fillAdminDemo.addEventListener("click", () => {
       elements.email.value = ADMIN.email;
       elements.password.value = "Admin@2026";
       elements.password.focus();
     });
     elements.forgotPassword.addEventListener("click", requestPasswordReset);
-    elements.retryInstall.addEventListener("click", requestInstall);
-
-    window.addEventListener("beforeinstallprompt", (event) => {
+    document.addEventListener("submit", async (event) => {
       event.preventDefault();
-      state.deferredPrompt = event;
-      updateInstallUi();
+      const form = event.target;
+      if (form.id === "resetPasswordForm") await handleResetPasswordForm(form);
     });
-    window.addEventListener("appinstalled", () => {
-      localStorage.setItem(keys.installed, "true");
-      state.deferredPrompt = null;
-      closeInstallSheet();
-      updateInstallUi();
-    });
-    window.addEventListener("hashchange", () => {
-      if (applyRouteFromHash()) renderManager();
-      else if (state.currentUser?.role === "manager" && state.managerMenu === "studentProfile") {
-        state.managerMenu = "students";
-        state.activeStudentProfileId = "";
-        renderManager();
-      }
-    });
+  }
+
+  function bindEvents() {
+    bindAgendaEvents();
+    bindWorkoutEvents();
+    bindStudentEvents();
+    bindExerciseEvents();
+    bindDietEvents();
+    bindChatEvents();
+    bindContractEvents();
+    bindFinanceEvents();
+    bindUpdateEvents();
+    bindPwaEvents();
+    bindAuthEvents();
   }
 
   function duplicateWorkout(id) {
