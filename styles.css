@@ -7414,6 +7414,415 @@ button.dashboard-metric {
   }
 }
 
+/* ── WhatsApp-style inbox ─────────────────────────────────── */
+.wa-inbox {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-height: 0;
+}
+
+.wa-inbox-header {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.6rem 0 0.9rem;
+}
+
+.wa-inbox-header h3 {
+  color: var(--ink);
+  font-size: clamp(1.7rem, 5.5vw, 2.4rem);
+  font-weight: 850;
+  line-height: 1;
+}
+
+.wa-inbox-badge {
+  display: inline-grid;
+  min-width: 1.55rem;
+  height: 1.55rem;
+  place-items: center;
+  padding: 0 0.42rem;
+  border-radius: 999px;
+  background: var(--brand);
+  color: #070707;
+  font-size: 0.8rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.wa-inbox-search {
+  display: flex;
+  align-items: center;
+  gap: 0.56rem;
+  height: 3rem;
+  margin-bottom: 0.5rem;
+  padding: 0 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 2rem;
+  background: rgba(255, 255, 255, 0.055);
+  transition: border-color 150ms ease, background 150ms ease;
+}
+
+.wa-inbox-search:focus-within {
+  border-color: rgba(245, 181, 27, 0.55);
+  background: rgba(245, 181, 27, 0.07);
+}
+
+.wa-inbox-search svg {
+  flex-shrink: 0;
+  width: 1.15rem;
+  height: 1.15rem;
+  stroke: var(--muted);
+}
+
+.wa-inbox-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 0.95rem;
+}
+
+.wa-inbox-search input::placeholder {
+  color: rgba(247, 244, 235, 0.36);
+}
+
+.wa-conv-list {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 0.95rem;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.wa-conv-card {
+  display: flex;
+  align-items: center;
+  gap: 0.78rem;
+  width: 100%;
+  padding: 0.72rem 0.9rem;
+  border: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 140ms ease;
+}
+
+.wa-conv-card:last-child {
+  border-bottom: 0;
+}
+
+.wa-conv-card:hover,
+.wa-conv-card:focus-visible {
+  background: rgba(245, 181, 27, 0.07);
+  outline: none;
+}
+
+.wa-conv-card .entity-avatar {
+  flex-shrink: 0;
+  width: 3.3rem;
+  height: 3.3rem;
+  border-color: rgba(245, 181, 27, 0.4);
+}
+
+.wa-conv-card.has-unread .entity-avatar {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 2px rgba(245, 181, 27, 0.28);
+}
+
+.wa-conv-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.22rem;
+  min-width: 0;
+}
+
+.wa-conv-top {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.wa-conv-top strong {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 1rem;
+  font-weight: 760;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wa-conv-time {
+  flex-shrink: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1;
+}
+
+.wa-conv-card.has-unread .wa-conv-time {
+  color: var(--brand-strong);
+  font-weight: 700;
+}
+
+.wa-conv-bottom {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.wa-conv-bottom small {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wa-unread-badge {
+  flex-shrink: 0;
+  display: inline-grid;
+  min-width: 1.4rem;
+  height: 1.4rem;
+  place-items: center;
+  padding: 0 0.34rem;
+  border-radius: 999px;
+  background: var(--brand);
+  color: #070707;
+  font-size: 0.74rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+/* ── WhatsApp-style thread (inside modal) ─────────────────── */
+.modal-panel:has(.wa-thread) {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+.modal-panel:has(.wa-thread) .modal-head {
+  flex-shrink: 0;
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.modal-panel:has(.wa-thread) #modalBody {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.wa-thread {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.wa-thread-header {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.72rem;
+  padding: 0.82rem 1rem;
+  border-bottom: 1px solid var(--line);
+  background: rgba(18, 18, 18, 0.97);
+}
+
+.wa-thread-header .entity-avatar {
+  flex-shrink: 0;
+  width: 2.85rem;
+  height: 2.85rem;
+  border-color: rgba(245, 181, 27, 0.42);
+}
+
+.wa-thread-info {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.18rem;
+  min-width: 0;
+}
+
+.wa-thread-info strong {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 1.05rem;
+  font-weight: 760;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wa-thread-info span {
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.15;
+}
+
+.wa-thread-profile-btn {
+  flex-shrink: 0;
+  min-height: 2.1rem;
+  padding: 0 0.72rem;
+  border-radius: 0.6rem;
+  font-size: 0.84rem;
+}
+
+.wa-thread-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow-y: auto;
+  padding: 1rem 0.9rem;
+  background:
+    radial-gradient(ellipse at 20% 80%, rgba(245, 181, 27, 0.045) 0%, transparent 60%),
+    rgba(8, 8, 8, 0.97);
+  scroll-behavior: smooth;
+}
+
+.wa-bubble-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.38rem;
+}
+
+.wa-bubble {
+  display: flex;
+  flex-direction: column;
+  gap: 0.22rem;
+  width: fit-content;
+  max-width: min(78%, 28rem);
+  padding: 0.58rem 0.82rem 0.44rem;
+  border-radius: 1rem;
+}
+
+.wa-bubble.is-student {
+  align-self: flex-start;
+  border-bottom-left-radius: 0.2rem;
+  background: rgba(255, 255, 255, 0.085);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.wa-bubble.is-manager {
+  align-self: flex-end;
+  border-bottom-right-radius: 0.2rem;
+  background: linear-gradient(145deg, rgba(245, 181, 27, 0.24), rgba(245, 181, 27, 0.1));
+  border: 1px solid rgba(245, 181, 27, 0.32);
+}
+
+.wa-bubble p {
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.94rem;
+  line-height: 1.45;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.wa-bubble time {
+  align-self: flex-end;
+  color: rgba(247, 244, 235, 0.46);
+  font-size: 0.72rem;
+  line-height: 1;
+}
+
+.wa-bubble.is-manager time {
+  color: rgba(245, 181, 27, 0.65);
+}
+
+.wa-bubble-list.is-compact {
+  gap: 0.3rem;
+}
+
+.wa-bubble-list.is-compact .wa-bubble {
+  max-width: 100%;
+}
+
+.wa-compose {
+  display: flex;
+  flex-shrink: 0;
+  align-items: flex-end;
+  gap: 0.55rem;
+  padding: 0.7rem 0.85rem;
+  border-top: 1px solid var(--line);
+  background: rgba(18, 18, 18, 0.97);
+}
+
+.wa-compose-input {
+  flex: 1;
+  min-width: 0;
+  height: 2.75rem;
+  max-height: 8rem;
+  padding: 0.6rem 0.82rem;
+  border: 1px solid var(--line);
+  border-radius: 1.5rem;
+  background: rgba(255, 255, 255, 0.065);
+  color: var(--ink);
+  font-size: 0.95rem;
+  line-height: 1.45;
+  resize: none;
+  overflow-y: auto;
+  transition: border-color 150ms ease, background 150ms ease;
+}
+
+.wa-compose-input:focus {
+  outline: none;
+  border-color: rgba(245, 181, 27, 0.5);
+  background: rgba(245, 181, 27, 0.06);
+}
+
+.wa-compose-input::placeholder {
+  color: rgba(247, 244, 235, 0.36);
+}
+
+.wa-send-btn {
+  flex-shrink: 0;
+  display: inline-grid;
+  width: 2.8rem;
+  height: 2.8rem;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: var(--brand);
+  color: #070707;
+  cursor: pointer;
+  transition: background 150ms ease, transform 120ms ease;
+}
+
+.wa-send-btn:hover {
+  background: var(--brand-strong);
+}
+
+.wa-send-btn:active {
+  transform: scale(0.92);
+}
+
+.wa-send-btn svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
 /* Alunos e perfil do aluno - visual Elite AS */
 .students-workspace,
 .student-page {

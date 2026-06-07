@@ -2491,63 +2491,27 @@
     const filters = state.messageFilters;
     const conversations = buildMessageConversations();
     const filteredConversations = conversations.filter((conversation) => messageMatchesFilters(conversation, filters));
-    const recent = getRecentMessages(6).filter((message) => getStudent(message.studentId));
     const unreadTotal = conversations.reduce((total, conversation) => total + conversation.unreadCount, 0);
 
     return `
-      <div class="content-stack messages-workspace">
-        <section class="messages-hero">
-          <div>
-            <span class="eyebrow">Elite AS</span>
-            <h3>Mensagens</h3>
-            <p>Conversa direta com os alunos</p>
-          </div>
-        </section>
-
-        <section class="messages-summary-grid">
-          ${messageMetricCard({ icon: icons.messages, title: "Mensagens não lidas", value: unreadTotal, subtitle: unreadTotal ? "Novas mensagens" : "Conversas em dia", tone: unreadTotal ? "warning" : "success" })}
-          ${messageMetricCard({ icon: icons.students, title: "Conversas ativas", value: conversations.length, subtitle: conversations.length ? "Em andamento" : "Nenhuma conversa", tone: "warning" })}
-        </section>
-
-        <div class="search-filter-row" aria-label="Busca e filtros de mensagens">
-          <label class="message-search-field search-input-wrap">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 21l-4.3-4.3M10.8 18a7.2 7.2 0 1 1 0-14.4 7.2 7.2 0 0 1 0 14.4Z"/></svg>
-            <input type="search" data-message-filter="q" placeholder="Buscar conversa..." value="${escapeHtml(filters.q)}" />
-          </label>
-          ${messageFilterSelect("status", "Filtrar", icons.settings, [
-            ["all", "Todas"],
-            ["unread", "Não lidas"],
-            ["waiting", "Aguardando resposta"],
-            ["answered", "Respondidas"],
-            ["recent", "Recentes"]
-          ], filters.status)}
+      <div class="wa-inbox">
+        <div class="wa-inbox-header">
+          <h3>Mensagens</h3>
+          ${unreadTotal ? `<span class="wa-inbox-badge">${unreadTotal}</span>` : ""}
         </div>
-
-        <section class="messages-list-panel">
-          <div class="section-title">
-            <div>
-              <h3>Conversas ativas</h3>
-              <span class="small-text">${filteredConversations.length} conversa(s) encontrada(s)</span>
-            </div>
-            <button class="text-action message-see-all" type="button" data-message-show-all>Ver todas</button>
-          </div>
-          ${
-            filteredConversations.length
-              ? `<div class="conversation-list">${filteredConversations.map(renderConversationCard).join("")}</div>`
-              : emptyState(conversations.length ? "Nenhuma conversa encontrada" : "Nenhuma conversa ainda", conversations.length ? "Tente ajustar a busca ou os filtros." : "Abra o perfil de um aluno para iniciar uma conversa.", icons.messages)
-          }
-        </section>
-
-        <section class="messages-list-panel messages-recent-panel">
-          <div class="section-title">
-            <div>
-              <h3>Mensagens recentes</h3>
-              <span class="small-text">${recent.length} mensagem(ns)</span>
-            </div>
-            <button class="text-action message-see-all" type="button" data-message-show-all>Ver todas</button>
-          </div>
-          ${recent.length ? `<div class="recent-message-list">${recent.map(renderRecentMessageCard).join("")}</div>` : emptyState("Nenhuma mensagem recente", "As novas interações dos alunos aparecerão aqui.", icons.messages)}
-        </section>
+        <label class="wa-inbox-search">
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="search" data-message-filter="q" placeholder="Buscar conversa..." value="${escapeHtml(filters.q)}" />
+        </label>
+        ${
+          filteredConversations.length
+            ? `<div class="wa-conv-list">${filteredConversations.map(renderConversationCard).join("")}</div>`
+            : emptyState(
+                conversations.length ? "Nenhuma conversa encontrada" : "Nenhuma conversa ainda",
+                conversations.length ? "Tente ajustar a busca." : "Abra o perfil de um aluno para iniciar uma conversa.",
+                icons.messages
+              )
+        }
       </div>
     `;
   }
@@ -2612,15 +2576,17 @@
   function renderConversationCard(conversation) {
     const last = conversation.last;
     return `
-      <button class="conversation-card ${conversation.unreadCount ? "has-unread" : ""}" type="button" data-open-messages="${escapeHtml(conversation.student.id)}">
+      <button class="wa-conv-card ${conversation.unreadCount ? "has-unread" : ""}" type="button" data-open-messages="${escapeHtml(conversation.student.id)}">
         ${studentAvatar(conversation.student)}
-        <span class="conversation-copy">
-          <strong>${escapeHtml(conversation.student.name)}</strong>
-          <small>${escapeHtml(last?.body || "Sem mensagem registrada.")}</small>
-        </span>
-        <span class="conversation-meta">
-          <time>${escapeHtml(messageMomentLabel(last?.createdAt))}</time>
-          ${conversation.unreadCount ? `<b>${escapeHtml(conversation.unreadCount)}</b>` : ""}
+        <span class="wa-conv-body">
+          <span class="wa-conv-top">
+            <strong>${escapeHtml(conversation.student.name)}</strong>
+            <time class="wa-conv-time">${escapeHtml(messageMomentLabel(last?.createdAt))}</time>
+          </span>
+          <span class="wa-conv-bottom">
+            <small>${escapeHtml(last?.body || "Sem mensagem registrada.")}</small>
+            ${conversation.unreadCount ? `<b class="wa-unread-badge">${escapeHtml(String(conversation.unreadCount))}</b>` : ""}
+          </span>
         </span>
       </button>
     `;
@@ -4923,15 +4889,14 @@
     if (!messages.length) return emptyState("Nenhuma mensagem", "Use o campo abaixo para iniciar a conversa.", icons.messages);
     const visible = compact ? messages.slice(-4) : messages;
     return `
-      <div class="chat-list ${compact ? "is-compact" : ""}">
+      <div class="wa-bubble-list ${compact ? "is-compact" : ""}">
         ${visible
           .map(
             (message) => `
-              <article class="chat-message ${message.senderRole === "manager" ? "is-manager" : "is-student"}">
-                <strong>${message.senderRole === "manager" ? "Personal" : getStudentName(message.studentId)}</strong>
-                <span>${escapeHtml(messageMomentLabel(message.createdAt))}</span>
+              <div class="wa-bubble ${message.senderRole === "manager" ? "is-manager" : "is-student"}">
                 <p>${escapeHtml(message.body)}</p>
-              </article>
+                <time>${escapeHtml(messageMomentLabel(message.createdAt))}</time>
+              </div>
             `
           )
           .join("")}
@@ -6216,31 +6181,31 @@
     openModal(
       `Mensagens · ${student.name}`,
       `
-        <div class="message-detail">
-          <section class="message-detail-hero">
+        <div class="wa-thread">
+          <div class="wa-thread-header">
             ${studentAvatar(student)}
-            <div>
-              <span class="eyebrow">Conversa</span>
-              <h3>${escapeHtml(student.name)}</h3>
-              <p>${escapeHtml(student.goal || "Aluno Elite AS")} · ${state.socketReady ? "tempo real ativo" : "modo local"}</p>
+            <div class="wa-thread-info">
+              <strong>${escapeHtml(student.name)}</strong>
+              <span>${escapeHtml(student.goal || "Aluno Elite AS")}${state.socketReady ? " · tempo real" : ""}</span>
             </div>
-            ${state.currentUser?.role === "manager" ? `<button class="secondary-action" type="button" data-open-student-profile="${escapeHtml(student.id)}">Abrir perfil</button>` : ""}
-          </section>
-          <section class="message-thread-panel">
+            ${state.currentUser?.role === "manager" ? `<button class="ghost-button wa-thread-profile-btn" type="button" data-open-student-profile="${escapeHtml(student.id)}">Perfil</button>` : ""}
+          </div>
+          <div class="wa-thread-body" id="waMsgBody">
             ${renderConversation(student.id)}
-          </section>
-          <form class="message-compose" id="messageForm" data-student-id="${student.id}">
-            <label class="field">
-              <span>Nova mensagem</span>
-              <textarea name="body" maxlength="800" required placeholder="Escreva uma orientação ou resposta para o aluno..."></textarea>
-            </label>
-            <div class="form-actions">
-              <button class="primary-action" type="submit">Enviar mensagem</button>
-            </div>
+          </div>
+          <form class="wa-compose" id="messageForm" data-student-id="${escapeHtml(student.id)}">
+            <textarea class="wa-compose-input" name="body" maxlength="800" required placeholder="Mensagem..." rows="1"></textarea>
+            <button class="wa-send-btn" type="submit" aria-label="Enviar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/></svg>
+            </button>
           </form>
         </div>
       `
     );
+    requestAnimationFrame(() => {
+      const body = document.getElementById("waMsgBody");
+      if (body) body.scrollTop = body.scrollHeight;
+    });
   }
 
   function openPaymentForm(paymentId = "", defaults = {}) {
