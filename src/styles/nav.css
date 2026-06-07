@@ -202,7 +202,7 @@
 }
 
 .nav-group {
-  color: rgba(247, 244, 235, 0.46);
+  color: var(--muted);
   letter-spacing: 0;
 }
 
@@ -330,7 +330,7 @@
 
   .workout-row .row-actions .mini-button:nth-child(n + 3),
   .library-row .row-actions .mini-button:nth-child(n + 3) {
-    min-height: 1.95rem;
+    min-height: 2.75rem;
     font-size: 0.75rem;
   }
 
