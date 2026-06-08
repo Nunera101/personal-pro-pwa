@@ -1011,7 +1011,8 @@
   max-width: 52rem;
   margin-inline: auto;
   gap: 0.88rem;
-  padding-bottom: 0.5rem;
+  /* espaço para o rodapé fixo + bottom nav + folga */
+  padding-bottom: calc(var(--bottom-nav-height, 4.22rem) + 0.6rem + 5rem + var(--safe-bottom, 0px));
 }
 
 .evaluate-topbar {
@@ -1409,19 +1410,22 @@
   height: 1rem;
 }
 
+/* Rodapé fixo: sempre visível independente de conteúdo ou scroll */
 .evaluate-footer {
-  position: sticky;
+  position: fixed;
+  left: 0;
+  right: 0;
   bottom: calc(var(--bottom-nav-height, 4.22rem) + 0.6rem + var(--safe-bottom, 0px));
-  z-index: 10;
+  z-index: 26;
   display: grid;
   grid-template-columns: 1fr 1.6fr;
   gap: 0.65rem;
   padding: 0.78rem 1rem;
+  margin: 0;
   border-top: 1px solid rgba(255, 255, 255, 0.07);
   background: rgba(10, 10, 10, 0.96);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-  margin: 0 -1rem -1rem;
 }
 
 .evaluate-footer-btn {
@@ -1445,9 +1449,18 @@
   stroke-width: 2.2;
 }
 
+/* Desktop: sidebar à esquerda + bottom nav ausente → sticky simples */
 @media (min-width: 57rem) {
+  .evaluate-page {
+    padding-bottom: 2rem;
+  }
+
   .evaluate-footer {
-    left: var(--sidebar-width, 0px);
+    position: sticky;
+    left: auto;
+    right: auto;
+    bottom: 0;
+    margin: 0 -1.25rem -1.25rem;
     padding-inline: clamp(1rem, 4vw, 2.4rem);
   }
 
@@ -1465,6 +1478,5 @@
     grid-template-columns: 1fr 1.4fr;
     gap: 0.5rem;
     padding: 0.65rem 0.75rem;
-    bottom: calc(var(--bottom-nav-height, 4.22rem) + 0.6rem + var(--safe-bottom, 0px));
   }
 }

@@ -5641,13 +5641,6 @@
           <section class="evaluate-card evaluate-feedback-card">
             <h3>Feedback do personal</h3>
             <form id="evaluateUpdateForm" data-id="${escapeHtml(update.id)}">
-              <div class="evaluate-chips">
-                ${suggestChips.map((chip) => `<button class="evaluate-chip" type="button" data-insert-suggestion="${escapeHtml(chip)}">${escapeHtml(chip)}</button>`).join("")}
-              </div>
-              <label class="field">
-                <span>Avaliação</span>
-                <textarea name="trainerComment" id="evaluateCommentArea" rows="5" placeholder="Registre orientações, ajustes de treino ou observações para o aluno.">${escapeHtml(update.trainerComment || "")}</textarea>
-              </label>
               <div class="evaluate-rating-row">
                 <span>Nota da evolução</span>
                 <div class="evaluate-stars" id="evaluateStars">
@@ -5671,6 +5664,13 @@
                   </button>
                 </div>
               ` : ""}
+              <div class="evaluate-chips">
+                ${suggestChips.map((chip) => `<button class="evaluate-chip" type="button" data-insert-suggestion="${escapeHtml(chip)}">${escapeHtml(chip)}</button>`).join("")}
+              </div>
+              <label class="field">
+                <span>Avaliação</span>
+                <textarea name="trainerComment" id="evaluateCommentArea" rows="5" placeholder="Registre orientações, ajustes de treino ou observações para o aluno.">${escapeHtml(update.trainerComment || "")}</textarea>
+              </label>
             </form>
           </section>
 
