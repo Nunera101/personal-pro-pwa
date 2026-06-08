@@ -1,8 +1,8 @@
 # DIVERGÊNCIAS-GESTOR — Auditoria Visual do Painel do Gestor
 
-**Data inicial:** 2026-06-08 | **Última revisão:** 2026-06-08  
+**Data inicial:** 2026-06-08 | **Última revisão:** 2026-06-08 (pós-fechamento)  
 **Branch:** main  
-**Método:** Análise estática + revisão de código pós-correções das Levas 1–4.
+**Método:** Análise estática + revisão de código pós-correções das Levas 1–4 + fechamento.
 
 ---
 
@@ -64,11 +64,7 @@
 
 ### 4. Padrões de Treino
 
-| ID | Severidade | Elemento | Problema |
-|----|-----------|----------|----------|
-| P-02 | 🟡 | Subtítulo do hero | Atual: "Modelos reutilizáveis para treinos" (`app.js:4720`). Referência: "Modelos base reutilizáveis" |
-| P-06 | 🟢 | Ícone no card | Tamanho e alinhamento do ícone de haltere pode divergir do mockup (ícone maior à esquerda em fundo `#2A2A2A` arredondado) |
-| P-07 | 🟢 | Eyebrow "Elite AS" | `app.js:4718` — eyebrow presente no hero de Padrões; referência não exibe |
+*(Sem pendências — P-01 a P-07 todos resolvidos.)*
 
 ---
 
@@ -104,8 +100,6 @@
 
 | ID | Severidade | Elemento | Problema |
 |----|-----------|----------|----------|
-| DI-01 | 🟠 | Sheet "Plano alimentar" — rodapé | Rodapé Cancelar / Salvar pode desaparecer atrás da bottom nav em mobile |
-| DI-02 | 🟠 | Inputs de busca no montador | `.mp-food-search-input` sem `aria-label` (label ausente em DOM dinâmico) |
 | DI-04 | 🟡 | Card — truncagem de protocolo | `.diet-plan-grid strong` pode truncar protocolo longo sem tooltip |
 
 ---
@@ -114,7 +108,6 @@
 
 | ID | Severidade | Elemento | Problema |
 |----|-----------|----------|----------|
-| M-03 | 🟠 | Compose bar em iOS com teclado | `env(keyboard-inset-height)` pode deslocar a compose bar quando teclado virtual sobe |
 | M-07 | 🟡 | Contadores de não lidas | Badges de contagem não validados ao filtrar |
 
 ---
@@ -124,11 +117,11 @@
 | ID | Severidade | Elemento | Problema |
 |----|-----------|----------|----------|
 | PA-01 | 🟠 | Menu "..." overflow | Em ancestral com `overflow:hidden`, menu contextual ainda pode ser cortado |
-| PA-02 | 🟠 | Cards de métricas — labels longas | Em 320 px, "Última atualização" e "Próximo treino" colapsam o valor |
-| PA-03 | 🟡 | Grade 3×2 em 320 px | `repeat(3, minmax(0,1fr))` pode produzir cards excessivamente estreitos |
 | PA-04 | 🟡 | Aba "Histórico" — banco vazio | Estado vazio sem sessões mock para demonstrar layout da lista |
 | PA-05 | 🟡 | Aba "Métricas" — gráficos | Gráficos de progresso peso/volume ainda não implementados |
 | PA-06 | 🟢 | Avatar — cor fixa | Cor de fundo `#2d9d78` independente do aluno; referência usa cor por hash do nome |
+| PA-02 | 🟢 | Cards de métricas — labels longas | Em 320 px, "Última atualização" e "Próximo treino" colapsam o valor *(cosmético — 320 px é breakpoint legado)* |
+| PA-03 | 🟢 | Grade 3×2 em 320 px | `repeat(3, minmax(0,1fr))` pode produzir cards excessivamente estreitos *(cosmético — 320 px é breakpoint legado)* |
 
 ---
 
@@ -140,30 +133,40 @@
 
 ---
 
-## Resumo das pendências (pós-Levas 1–4)
+## Resumo das pendências
 
-### Prioridade 1 — 🟠 Alto
+### 🟠 Real — bloqueia ou distorce uso (1 item)
 
-- DI-01/DI-02: Sheet plano alimentar — rodapé e aria-label
-- M-03: Compose bar iOS com teclado
-- PA-01/PA-02: Perfil — menu "..." e labels longas
+| ID | Tela | Problema |
+|----|------|----------|
+| PA-01 | Perfil do Aluno | Menu "..." cortado por `overflow:hidden` no ancestral |
 
-### Prioridade 2 — 🟡 Médio
+---
 
-- D-02/D-03: Dashboard — CTA hero e KPIs zerados
-- U-03: Fotos sem alt text
-- P-02: Subtítulo de Padrões
-- DI-04: Truncagem de protocolo
-- M-07: Contadores de não lidas
-- PA-03/PA-04/PA-05: Perfil — grade 320px, histórico, gráficos
-- G-05: VAPID
+### 🟡 Médio — divergência visível, não bloqueia (8 itens)
 
-### Prioridade 3 — 🟢 Baixo
+| ID | Tela | Problema |
+|----|------|----------|
+| D-02 | Dashboard | CTA hero único; padrão pede dourado só em telas de lista |
+| D-03 | Dashboard | KPIs zerados sem skeleton/estado vazio |
+| U-03 | Check-ins | Fotos sem `alt` text e sem contador de total |
+| DI-04 | Dieta | Protocolo longo truncado sem tooltip |
+| M-07 | Mensagens | Badge de não lidas não atualiza ao filtrar |
+| PA-04 | Perfil | Histórico sem estado vazio ilustrado |
+| PA-05 | Perfil | Gráficos de peso/volume não implementados |
+| G-05 | Global | Push notifications inativas (VAPID não configurado no Railway) |
 
-- A-04: Ícone estado vazio alunos
-- F-06: Formatação de moeda
-- P-06/P-07: Ícone e eyebrow em Padrões
-- PA-06: Cor fixa do avatar
+---
+
+### 🟢 Cosmético — micro-ajuste, baixíssimo impacto (6 itens)
+
+| ID | Tela | Problema |
+|----|------|----------|
+| A-04 | Alunos | Ícone estado vazio genérico (silhueta na referência) |
+| F-06 | Financeiro | Formatação de moeda BRL inconsistente em alguns breakpoints |
+| PA-02 | Perfil | Labels longas colapsam valor **apenas em 320 px** (breakpoint legado) |
+| PA-03 | Perfil | Grade 3×2 estreita **apenas em 320 px** (breakpoint legado) |
+| PA-06 | Perfil | Cor de avatar fixa; referência usa hash do nome |
 
 ---
 
@@ -174,7 +177,7 @@
 | G0 | Auditoria visual (este documento) | ✅ Concluído |
 | G1 | Busca de Mensagens sem auto-submit | ✅ Resolvido |
 | G1 | Mensagens — lista estável e contadores | ✅ Resolvido |
-| G2 | Padrões — refazer conforme mockup | ✅ Resolvido (P-01/P-03/P-04/P-05 ✅; P-02/P-07 pendentes) |
+| G2 | Padrões — refazer conforme mockup | ✅ Resolvido (P-01 a P-07 ✅) |
 | G3 | Contratos — upload de PDF | ✅ Resolvido |
 | G3 | Contratos — viewer de PDF | ✅ Resolvido |
 | G3 | Contratos — aceite com validade | ✅ Resolvido |
@@ -182,11 +185,13 @@
 | G4 | Biblioteca — player de vídeo | ✅ Resolvido |
 | G4 | Biblioteca — upload funcional | ✅ Resolvido |
 | G4 | Biblioteca — card e botões sem corte | ✅ Resolvido |
-| G5 | Sheets secundárias — rodapés visíveis | ✅ Resolvido (Dieta pendente: DI-01) |
+| G5 | Sheets secundárias — rodapés visíveis | ✅ Resolvido (incl. DI-01) |
 | G5 | Avaliar check-in — rolagem e botões | ✅ Resolvido |
 | G5 | Financeiro — dados e layout | ✅ Resolvido |
 | G6 | Agenda — badge sem corte | ✅ Resolvido |
-| G7 | Revisão final + atualizar este doc | ✅ Concluído |
+| G7 | Acessibilidade — aria-labels e focus-visible | ✅ Resolvido (incl. DI-02, M-04, G-03/G-04) |
+| G8 | Mensagens — compose bar iOS com teclado | ✅ Resolvido (M-03) |
+| G9 | Revisão final + atualizar este doc | ✅ Concluído |
 
 ---
 
@@ -212,6 +217,7 @@
 | — | Ícones | finance → cifrão, updates → câmera | `d377cca` |
 | M-01 | Mensagens | Busca sem auto-submit — filtro incremental sem trocar de tela | `4284af8` |
 | M-02 | Mensagens | "Iniciar nova conversa" só ao tocar explicitamente | `4284af8` |
+| M-03 | Mensagens | Compose bar acompanha teclado virtual no iOS (Visual Viewport API) | `07b0594` |
 | C-01 | Contratos | Upload de PDF (conceito correto) | `d6c8440` |
 | C-02 | Contratos | Viewer de PDF embutido | `d6c8440`, `11e5476` |
 | C-03 | Contratos | Aceite com validade jurídica (checkbox + consentAt) | `bfe94a5` |
@@ -230,9 +236,12 @@
 | AG-04 | Agenda | Mini-preview por tipo na visão Mês | `f1512df` |
 | G-02 | Global | Rodapés de sheets secundárias sempre visíveis | `e8b00b2`, `0e04b1e` |
 | P-01 | Padrões | Botão "Novo padrão" full-width dourado com ícones | CSS `treinos.css:28` |
+| P-02 | Padrões | Subtítulo do hero "Modelos base reutilizáveis" | `245f14f` |
 | P-03 | Padrões | Card com informações em linhas limpas (pml-label / pml-value) | `app.js:4798` |
 | P-04 | Padrões | Botão "Aplicar" outline dourado sem ícone de alunos | `treinos.css:425` |
 | P-05 | Padrões | Botão "..." (`details/summary`) visível e funcional em mobile | `app.js:4808` |
+| P-06 | Padrões | Ícone de haltere alinhado em fundo `#2A2A2A` arredondado | `245f14f` |
+| P-07 | Padrões | Eyebrow "Elite AS" removido do hero de Padrões | `245f14f` |
 | A-01 | Alunos | Divisória não aparece após o último card | `10da46d` |
 | A-02 | Alunos | Nome longo trunca com ellipsis sem empurrar badge | `10da46d` |
 | A-03 | Alunos | "Enviar link" não sobrepõe badge em 390 px | `10da46d` |
@@ -250,6 +259,8 @@
 | M-04 | Mensagens | `aria-label="Mensagem"` no textarea da compose | `a1fb8e9` |
 | M-05 | Mensagens | Botões `.thread-attach-btn` e `.thread-send-btn` ≥ 44 px | `a1fb8e9` |
 | M-06 | Mensagens | Foco na busca de chat via `:focus-visible` | `85af7f0` |
+| DI-01 | Dieta | Rodapé do montador (Cancelar/Salvar) visível acima da bottom nav | `3144308` |
+| DI-02 | Dieta | `aria-label="Buscar alimento"` no `.mp-food-search-input` | `82527a5` |
 | DI-03 | Dieta | Foco nos inputs do montador (`:focus-visible` + ring) | `85af7f0` |
 | B-04 | Biblioteca | Badge correto: Publicado / Rascunho / Arquivado | `8a6bab7` |
 | B-05 | Biblioteca | Thumbnail com avatar colorido por grupo muscular | `8a6bab7` |
