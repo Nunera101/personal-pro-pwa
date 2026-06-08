@@ -6123,12 +6123,17 @@
     const student = getCurrentStudent();
     const contracts = getStudentContracts(student?.id);
     const pendingContracts = contracts.filter((contract) => contract.status === "pending" || contract.status === "viewed");
+    const stats = student ? getStudentProfileStats(student) : null;
+    const weekCount = stats ? stats.sessionsWeek.length : 0;
+    const volumeLabel = stats ? `${Number(stats.recentVolume || 0).toLocaleString("pt-BR")} kg` : "0 kg";
+    const nextAct = stats?.nextActivity;
+    const contractSummary = stats?.contract || { label: "Sem contrato", tone: "" };
     const selectedDayItems = getAgendaItemsForDate(state.agendaDate, student?.id);
     const isDayView = state.agendaView === "day";
     const title = agendaPeriodLabel();
     return `
       <div class="content-stack">
-        ${pageHeader("Mais", "Perfil, agenda, mensagens e configurações", '<button class="pill-button" type="button" data-install-trigger>Baixar app</button>')}
+        ${pageHeader("Mais", "Perfil, agenda e configuracoes", '<button class="pill-button" type="button" data-install-trigger>Baixar app</button>')}
         <section class="panel">
           <div class="profile-hero">
             <div>
@@ -6137,23 +6142,29 @@
             </div>
             ${statusBadge(student?.status === "active" ? "Ativo" : "Inativo", student?.status === "active" ? "success" : "danger")}
           </div>
+          <div class="profile-overview-grid student-summary-grid">
+            ${profileSummaryCard(icons.workouts, "Treinos na semana", String(weekCount), weekCount ? "Concluidos esta semana" : "Sem treino concluido")}
+            ${profileSummaryCard(icons.progress, "Volume recente", volumeLabel, "Ultimos 4 treinos")}
+            ${profileSummaryCard(icons.agenda, "Proxima atividade", nextAct ? formatShortDate(nextAct.date) : "Sem agenda", nextAct ? `${activityLabel(nextAct.type)} - ${nextAct.time || "--:--"}` : "Nenhuma marcada")}
+            ${profileSummaryCard(icons.contracts, "Contrato", contractSummary.label, contractSummary.contract?.endDate ? `Ate ${formatShortDate(contractSummary.contract.endDate)}` : "Status do contrato", contractSummary.tone)}
+          </div>
           <button class="quick-link" type="button" data-open-messages="${escapeHtml(student?.id || "")}"><strong>Mensagens</strong><span>${state.socketReady ? "Tempo real ativo" : "Modo local"}</span></button>
         </section>
 
         <section class="agenda-control-panel">
-          <div class="agenda-view-tabs" aria-label="Visualização da agenda">
+          <div class="agenda-view-tabs" aria-label="Visualizacao da agenda">
             <button class="${state.agendaView === 'day' ? 'is-active' : ''}" type="button" data-agenda-view="day">Dia</button>
             <button class="${state.agendaView === 'week' ? 'is-active' : ''}" type="button" data-agenda-view="week">Semana</button>
-            <button class="${state.agendaView === 'month' ? 'is-active' : ''}" type="button" data-agenda-view="month">Mês</button>
+            <button class="${state.agendaView === 'month' ? 'is-active' : ''}" type="button" data-agenda-view="month">Mes</button>
           </div>
           <div class="agenda-period-nav">
-            <button class="icon-button" type="button" data-agenda-shift="-1" aria-label="Período anterior">
+            <button class="icon-button" type="button" data-agenda-shift="-1" aria-label="Periodo anterior">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
             </button>
             <div class="agenda-period-label">
               <strong>${escapeHtml(title)}</strong>
             </div>
-            <button class="icon-button" type="button" data-agenda-shift="1" aria-label="Próximo período">
+            <button class="icon-button" type="button" data-agenda-shift="1" aria-label="Proximo periodo">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
             </button>
             <button class="mini-button agenda-today-button" type="button" data-agenda-today>Hoje</button>
@@ -6161,7 +6172,7 @@
         </section>
 
         ${isDayView ? "" : `
-        <section class="panel agenda-calendar-panel" aria-label="Calendário da agenda">
+        <section class="panel agenda-calendar-panel" aria-label="Calendario da agenda">
           ${state.agendaView === 'week' ? renderWeekCalendar(student?.id || "") : renderMonthCalendar(student?.id || "")}
           ${renderAgendaLegend()}
         </section>
@@ -6171,7 +6182,7 @@
           <div class="section-title">
             <div>
               <h3>Itens do dia</h3>
-              <span class="small-text">${formatLongDate(state.agendaDate)} · ${selectedDayItems.length} item(ns)</span>
+              <span class="small-text">${formatLongDate(state.agendaDate)} - ${selectedDayItems.length} item(ns)</span>
             </div>
           </div>
           ${renderStudentAgendaRows(selectedDayItems)}
@@ -6179,10 +6190,10 @@
 
         <section class="panel">
           <div class="section-title"><h3>Contratos</h3><span class="small-text">${pendingContracts.length} pendente(s)</span></div>
-          ${contracts.length ? `<div class="entity-list">${contracts.map((contract) => renderContractRow(contract, false)).join("")}</div>` : emptyState("Nenhum contrato", "Contratos enviados pelo personal aparecerão aqui.", icons.contracts)}
+          ${contracts.length ? `<div class="entity-list">${contracts.map((contract) => renderContractRow(contract, false)).join("")}</div>` : emptyState("Nenhum contrato", "Contratos enviados pelo personal aparecerao aqui.", icons.contracts)}
         </section>
         <section class="panel">
-          <div class="section-title"><h3>Configurações</h3><span class="small-text">Conta e preferências</span></div>
+          <div class="section-title"><h3>Conta</h3><span class="small-text">E-mail e telefone</span></div>
           <div class="profile-grid">
             <article class="profile-card"><span>E-mail</span><strong>${escapeHtml(student?.email || "-")}</strong></article>
             <article class="profile-card"><span>Telefone</span><strong>${escapeHtml(student?.phone || "-")}</strong></article>
