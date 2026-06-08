@@ -4292,34 +4292,61 @@
     elements.videoModalTitle.textContent = exercise.name || "Exercício";
     const body = elements.videoModalBody;
     const footer = elements.videoModalFooter;
-    let videoSrc = "";
-    if (hasExerciseVideo(exercise)) {
-      if (exercise.videoStorage === "indexeddb" && exercise.videoKey) {
-        try {
-          const blob = await readLocalVideo(exercise.videoKey);
-          if (blob) {
-            if (state.videoObjectUrls[exerciseId]) URL.revokeObjectURL(state.videoObjectUrls[exerciseId]);
-            const url = URL.createObjectURL(blob);
-            state.videoObjectUrls[exerciseId] = url;
-            videoSrc = url;
-          }
-        } catch {}
-      } else if (exercise.videoUrl) {
-        videoSrc = exercise.videoUrl;
+    const poster = exercise.thumbnailUrl || exercise.coverUrl || "";
+
+    const placeholderHtml = (msg, btnLabel) => `
+      <div class="vm-placeholder">
+        <div class="vm-placeholder-icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m10 9 6 3-6 3V9Z"/></svg>
+        </div>
+        <p class="vm-placeholder-text">${escapeHtml(msg)}</p>
+        <button class="primary-action vm-upload-btn" type="button" data-vm-enviar-video="${escapeHtml(exerciseId)}">${escapeHtml(btnLabel)}</button>
+      </div>`;
+
+    function renderVideoPlayer(src) {
+      body.innerHTML = `<div class="vm-player-wrap"><video class="vm-player" controls playsinline${poster ? ` poster="${escapeHtml(poster)}"` : ""}></video></div>`;
+      const video = body.querySelector(".vm-player");
+      video.addEventListener("error", () => {
+        body.innerHTML = placeholderHtml("Não foi possível carregar o vídeo.", "Reenviar vídeo");
+      });
+      video.src = src;
+    }
+
+    function renderYouTubeEmbed(url) {
+      const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]+)/);
+      if (!match) { renderVideoPlayer(url); return; }
+      const embedUrl = `https://www.youtube.com/embed/${match[1]}?rel=0`;
+      body.innerHTML = `<div class="vm-player-wrap"><iframe class="vm-player" src="${escapeHtml(embedUrl)}" allow="autoplay; encrypted-media" allowfullscreen frameborder="0" title="${escapeHtml(exercise.name || "Vídeo")}"></iframe></div>`;
+    }
+
+    if (!hasExerciseVideo(exercise)) {
+      body.innerHTML = placeholderHtml("Nenhum vídeo cadastrado", "Enviar vídeo");
+    } else if (exercise.videoStorage === "indexeddb" && exercise.videoKey) {
+      try {
+        const blob = await readLocalVideo(exercise.videoKey);
+        if (blob) {
+          if (state.videoObjectUrls[exerciseId]) URL.revokeObjectURL(state.videoObjectUrls[exerciseId]);
+          const url = URL.createObjectURL(blob);
+          state.videoObjectUrls[exerciseId] = url;
+          renderVideoPlayer(url);
+        } else {
+          body.innerHTML = placeholderHtml("Vídeo local não encontrado.", "Reenviar vídeo");
+        }
+      } catch {
+        body.innerHTML = placeholderHtml("Erro ao carregar o vídeo.", "Reenviar vídeo");
       }
-    }
-    if (videoSrc) {
-      body.innerHTML = `<div class="vm-player-wrap"><video class="vm-player" src="${escapeHtml(videoSrc)}" controls playsinline></video></div>`;
+    } else if (exercise.videoStorage === "external" && exercise.videoUrl) {
+      if (/youtube\.com|youtu\.be/.test(exercise.videoUrl)) {
+        renderYouTubeEmbed(exercise.videoUrl);
+      } else {
+        renderVideoPlayer(exercise.videoUrl);
+      }
+    } else if (exercise.videoUrl) {
+      renderVideoPlayer(exercise.videoUrl);
     } else {
-      body.innerHTML = `
-        <div class="vm-placeholder">
-          <div class="vm-placeholder-icon">
-            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m10 9 6 3-6 3V9Z"/></svg>
-          </div>
-          <p class="vm-placeholder-text">Nenhum vídeo cadastrado</p>
-          <button class="primary-action vm-upload-btn" type="button" data-vm-enviar-video="${escapeHtml(exerciseId)}">Enviar vídeo</button>
-        </div>`;
+      body.innerHTML = placeholderHtml("Nenhum vídeo cadastrado", "Enviar vídeo");
     }
+
     footer.innerHTML = `
       <button class="secondary-action" type="button" data-vm-usar-treino="${escapeHtml(exerciseId)}">Usar no treino</button>
       <button class="primary-action" type="button" data-vm-editar="${escapeHtml(exerciseId)}">Editar</button>`;
@@ -4330,6 +4357,8 @@
   function closeVideoModal() {
     const modal = elements.videoModal;
     if (!modal || modal.hidden) return;
+    const video = elements.videoModalBody?.querySelector("video");
+    if (video) { video.pause(); video.src = ""; }
     _closeSheet(modal, () => {
       elements.videoModalBody.innerHTML = "";
       elements.videoModalFooter.innerHTML = "";
