@@ -8641,6 +8641,8 @@
     const bodyEl = elements.pdSheetBody;
     if (!sheet || !bodyEl) return;
 
+    import("./src/services.js").then(({ getMensalidade }) => getMensalidade(record.studentId).catch(() => {}));
+
     const allPaid = state.data.payments
       .filter((p) => p.studentId === record.studentId && financeStatusKey(p) === "paid")
       .sort((a, b) => String(b.referenceMonth || "").localeCompare(String(a.referenceMonth || "")));
@@ -8726,8 +8728,8 @@
             <p>Recibo interno para controle manual. Este documento não representa processamento automático de pagamento.</p>
           </section>
           <div class="form-actions two">
-            <button class="primary-action" type="button" data-print-contract>Imprimir / salvar PDF</button>
-            ${pdfUrl ? `<a class="secondary-action" href="${escapeHtml(pdfUrl)}" target="_blank" rel="noopener noreferrer">Baixar PDF</a>` : (student ? `<button class="secondary-action" type="button" data-open-student-profile="${escapeHtml(student.id)}">Abrir perfil</button>` : "")}
+            ${pdfUrl ? `<a class="primary-action" href="${escapeHtml(pdfUrl)}" download target="_blank" rel="noopener noreferrer">Baixar PDF</a>` : `<button class="primary-action" type="button" data-print-contract>Imprimir / PDF</button>`}
+            <button class="secondary-action" type="button" data-share-receipt="${escapeHtml(record.id)}">Compartilhar</button>
           </div>
         </div>
       `
@@ -10496,6 +10498,28 @@
         window.location.href = `mailto:${encodeURIComponent(student.email)}?subject=${encodeURIComponent("Mensalidade Elite AS")}&body=${encodeURIComponent(msg)}`;
         closeCobrarSheet();
         showSuccessToast("Cobrança registrada por e-mail.");
+      }
+      if (target.matches("[data-share-receipt]")) {
+        const shareRecord = findFinanceRecord(target.dataset.shareReceipt);
+        if (!shareRecord) return;
+        const shareText = [
+          "Recibo Elite AS",
+          `Aluno: ${getStudentName(shareRecord.studentId)}`,
+          `Plano: ${shareRecord.plan || "Plano Elite AS"}`,
+          `Valor: ${currencyExact(shareRecord.amount)}`,
+          `Mês: ${financeMonthLabel(shareRecord.referenceMonth)}`,
+          `Pago em: ${shareRecord.paidAt ? formatShortDate(shareRecord.paidAt.slice(0, 10)) : "—"}`,
+          `Forma: ${shareRecord.paymentMethod || "—"}`,
+          `Código: ${shareRecord.receiptCode || shareRecord.id}`
+        ].join("\n");
+        if (navigator.share) {
+          navigator.share({ title: "Recibo de pagamento", text: shareText }).catch(() => {});
+        } else {
+          navigator.clipboard?.writeText(shareText)
+            .then(() => showSuccessToast("Recibo copiado para a área de transferência."))
+            .catch(() => showToast("Copie o texto do recibo manualmente."));
+        }
+        return;
       }
       if (target.matches("[data-finance-show-all]")) { state.financeFilters.q = ""; state.financeFilters.status = "all"; state.financeFilterOpen = false; renderManager(); }
       if (target.matches("[data-toggle-finance-filter]")) { state.financeFilterOpen = !state.financeFilterOpen; renderManager(); }
