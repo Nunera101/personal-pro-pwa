@@ -915,6 +915,7 @@
     return {
       id: item.id || createId("workout-exercise"),
       exerciseId: item.exerciseId || "",
+      exerciseName: item.exerciseName || "",
       order: Number(item.order || index + 1),
       sets: Number(item.sets || 3),
       targetReps: String(item.targetReps || item.reps || "10"),
@@ -1112,6 +1113,7 @@
   function seedExercises() {
     return [
       normalizeExercise({
+        id: "seed-agachamento-livre",
         name: "Agachamento livre",
         muscle: "Pernas",
         equipment: "Barra",
@@ -1122,6 +1124,7 @@
         status: "active"
       }),
       normalizeExercise({
+        id: "seed-supino-reto",
         name: "Supino reto",
         muscle: "Peito",
         equipment: "Banco e barra",
@@ -1132,6 +1135,7 @@
         status: "active"
       }),
       normalizeExercise({
+        id: "seed-remada-baixa",
         name: "Remada baixa",
         muscle: "Costas",
         equipment: "Máquina",
@@ -4349,7 +4353,7 @@
     const sets = parseInt(form.elements.sets?.value) || 3;
     const reps = (form.elements.reps?.value || "10").trim();
     const rest = parseInt(form.elements.rest?.value) || 60;
-    const exerciseRow = normalizeWorkoutExercise({ exerciseId, sets, targetReps: reps, restSeconds: rest }, 0);
+    const exerciseRow = normalizeWorkoutExercise({ exerciseId, exerciseName: exercise.name, sets, targetReps: reps, restSeconds: rest }, 0);
     if (patternId === "__new__") {
       const newId = createId("workout");
       state.data.workouts.unshift(normalizeWorkout({
@@ -4574,7 +4578,7 @@
           workout.focus,
           workout.goal,
           workoutLevelLabel(workout.level),
-          ...workout.exercises.map((row) => getExercise(row.exerciseId)?.name || "")
+          ...workout.exercises.map((row) => getExercise(row.exerciseId)?.name || row.exerciseName || "")
         ];
         return haystack.some((item) => normalizeFilterText(item).includes(query));
       });
@@ -4699,7 +4703,7 @@
   function patternExercisePreviewLine(workout) {
     if (!workout.exercises.length) return "";
     const rows = [...workout.exercises].sort((a, b) => a.order - b.order);
-    const names = rows.slice(0, 3).map((r) => getExercise(r.exerciseId)?.name || "?").join(" · ");
+    const names = rows.slice(0, 3).map((r) => getExercise(r.exerciseId)?.name || r.exerciseName || "?").join(" · ");
     const extra = rows.length > 3 ? ` +${rows.length - 3}` : "";
     return `<p class="pattern-exercise-preview">${escapeHtml(names + extra)}</p>`;
   }
@@ -4726,8 +4730,9 @@
         ${visibleRows
           .map((row, index) => {
             const exercise = getExercise(row.exerciseId);
+            const name = exercise?.name || row.exerciseName || "Exercício indisponível";
             const target = `${escapeHtml(row.sets)}x${escapeHtml(row.targetReps)} · ${escapeHtml(row.restSeconds)}s${row.suggestedLoad ? ` · ${escapeHtml(row.suggestedLoad)}` : ""}`;
-            return `<span><b>${index + 1}. ${escapeHtml(exercise?.name || "Exercício removido")}</b><small>${target}</small></span>`;
+            return `<span><b>${index + 1}. ${escapeHtml(name)}</b><small>${target}</small></span>`;
           })
           .join("")}
         ${extra > 0 ? `<span class="pattern-preview-extra">+${extra} exercício(s)</span>` : ""}
@@ -4753,7 +4758,8 @@
         ${visibleRows
           .map((row, index) => {
             const exercise = getExercise(row.exerciseId);
-            return `<span>${index + 1}. ${escapeHtml(exercise?.name || "Exercício removido")} · ${escapeHtml(row.sets)}x${escapeHtml(row.targetReps)} · ${escapeHtml(row.restSeconds)}s</span>`;
+            const name = exercise?.name || row.exerciseName || "Exercício indisponível";
+            return `<span>${index + 1}. ${escapeHtml(name)} · ${escapeHtml(row.sets)}x${escapeHtml(row.targetReps)} · ${escapeHtml(row.restSeconds)}s</span>`;
           })
           .join("")}
         ${extra > 0 ? `<span>+${extra} exercício(s)</span>` : ""}
@@ -8885,18 +8891,20 @@
     const old = getWorkout(id);
     const isPattern = form.dataset.scope === "pattern";
     const rows = [...form.querySelectorAll("[data-workout-row]")]
-      .map((row, index) =>
-        normalizeWorkoutExercise({
+      .map((row, index) => {
+        const exerciseId = row.querySelector('[name="exerciseId"]').value;
+        return normalizeWorkoutExercise({
           id: old?.exercises?.[index]?.id || createId("workout-exercise"),
-          exerciseId: row.querySelector('[name="exerciseId"]').value,
+          exerciseId,
+          exerciseName: getExercise(exerciseId)?.name || "",
           order: row.querySelector('[name="order"]').value || index + 1,
           sets: row.querySelector('[name="sets"]').value,
           targetReps: row.querySelector('[name="targetReps"]').value,
           suggestedLoad: row.querySelector('[name="suggestedLoad"]').value,
           restSeconds: row.querySelector('[name="restSeconds"]').value,
           coachNotes: row.querySelector('[name="coachNotes"]').value
-        })
-      )
+        });
+      })
       .filter((row) => row.exerciseId)
       .sort((a, b) => a.order - b.order);
     if (!rows.length) return showToast("Adicione pelo menos um exercício da biblioteca.");
@@ -9380,7 +9388,7 @@
         return {
           workoutExerciseId: item.id,
           exerciseId: item.exerciseId,
-          name: exercise?.name || "Exercício",
+          name: exercise?.name || item.exerciseName || "Exercício indisponível",
           targetReps: item.targetReps,
           suggestedLoad: item.suggestedLoad,
           restSeconds: Number(item.restSeconds || 0),
