@@ -7877,6 +7877,7 @@
       footer.innerHTML = `
         <button class="secondary-action" type="button" data-close-meal-plan-sheet>Fechar</button>
         <div class="ex-footer-right">
+          <button class="secondary-action" type="button" data-diet-pdf="${escapeHtml(plan.id)}">Gerar PDF</button>
           <button class="secondary-action" type="button" data-send-diet-link="${escapeHtml(plan.id)}">Enviar link</button>
           <button class="primary-action" type="button" data-open-diet-form="${escapeHtml(plan.id)}">Editar</button>
         </div>
@@ -10267,6 +10268,14 @@
       if (target.matches("[data-open-diet-form]")) openMealPlanBuilder(target.dataset.openDietForm || "", target.dataset.prefillStudent || "");
       if (target.matches("[data-open-diet-detail]")) openDietPlanView(target.dataset.openDietDetail);
       if (target.matches("[data-close-meal-plan-sheet]")) closeMealPlanSheet();
+      if (target.matches("[data-diet-pdf]")) {
+        import("./src/services.js").then(({ gerarPdf }) =>
+          gerarPdf(target.dataset.dietPdf).then(() => {
+            showToast("Use a opção de salvar como PDF na impressão do navegador.");
+            window.print();
+          }).catch(() => showToast("Não foi possível gerar o PDF agora."))
+        );
+      }
       if (target.matches("[data-send-diet-link]")) sendDietPlanLink(target.dataset.sendDietLink);
       if (target.matches("[data-duplicate-diet]")) duplicateDietPlan(target.dataset.duplicateDiet);
       if (target.matches("[data-archive-diet]")) archiveDietPlan(target.dataset.archiveDiet);
