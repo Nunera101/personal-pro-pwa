@@ -2732,10 +2732,10 @@
             <p>Aceites digitais e planos</p>
           </div>
         </section>
-        <section class="contracts-summary-grid">
-          ${contractMetricCard({ icon: icons.updates, title: "Pendentes", value: String(pending.length), subtitle: "Aguardando assinatura", tone: "warning" })}
-          ${contractMetricCard({ icon: icons.contracts, title: "Assinados", value: String(signed.length), subtitle: "Ativos", tone: "success" })}
-          ${contractMetricCard({ icon: icons.agenda, title: "Próx. vencimentos", value: String(upcoming.length), subtitle: "30 dias", tone: upcoming.length ? "warning" : "" })}
+        <section class="metrics-row metrics-row--3">
+          ${stdMetricCard("Pendentes", pending.length, "Aguardando assinatura", "warning")}
+          ${stdMetricCard("Assinados", signed.length, "Ativos", "success")}
+          ${stdMetricCard("Próx. vencimentos", upcoming.length, "30 dias", upcoming.length ? "warning" : "")}
         </section>
         <details class="contracts-filter-details" ${filterPanelOpen ? "open" : ""}>
           <summary class="contracts-filter-toggle">
@@ -2797,7 +2797,8 @@
   function renderContractCard(contract) {
     const student = getStudent(contract.studentId);
     const meta = contractStatusMeta(contract);
-    const primary = contractPrimaryAction(contract, meta);
+    const canResend = contract.status !== "signed" && contract.status !== "canceled";
+    const canPDF = contract.status === "signed";
     return `
       <article class="contract-card ${meta.className}">
         <div class="contract-card-main">
@@ -2812,20 +2813,16 @@
             <small>Válido até ${escapeHtml(contract.endDate ? formatShortDate(contract.endDate) : "Sem vencimento")}</small>
           </div>
         </div>
-        <div class="contract-card-base">
-          <button class="contract-primary-action" type="button" ${primary.attr}>
-            ${primary.icon}
-            <span>${escapeHtml(primary.label)}</span>
+        <div class="contract-card-actions">
+          <button class="contract-action-btn" type="button" data-open-contract="${escapeHtml(contract.id)}">
+            ${icons.contracts}<span>Visualizar</span>
           </button>
-          <details class="action-menu contract-action-menu">
-            <summary aria-label="Mais ações">${icons.more}</summary>
-            <div>
-              <button class="mini-button" type="button" data-open-contract="${escapeHtml(contract.id)}">Visualizar contrato</button>
-              ${student ? `<button class="mini-button" type="button" data-open-student-profile="${escapeHtml(student.id)}">Abrir perfil do aluno</button>` : ""}
-              ${contract.status !== "signed" && contract.status !== "canceled" ? `<button class="mini-button" type="button" data-open-contract-form="${escapeHtml(contract.studentId)}" data-contract-id="${escapeHtml(contract.id)}">Editar contrato</button><button class="mini-button" type="button" data-send-contract-link="${escapeHtml(contract.id)}">Reenviar contrato</button><button class="mini-button is-danger" type="button" data-cancel-contract="${escapeHtml(contract.id)}">Cancelar</button>` : ""}
-              ${contract.status === "signed" ? `<button class="mini-button" type="button" data-open-contract="${escapeHtml(contract.id)}">Gerar PDF</button>` : ""}
-            </div>
-          </details>
+          ${canResend ? `<button class="contract-action-btn is-brand" type="button" data-send-contract-link="${escapeHtml(contract.id)}">
+            ${icons.messages}<span>Reenviar</span>
+          </button>` : ""}
+          ${canPDF ? `<button class="contract-action-btn is-brand" type="button" data-open-contract="${escapeHtml(contract.id)}">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6ZM14 2v6h6M8 13h8M8 17h4"/></svg><span>Gerar PDF</span>
+          </button>` : ""}
         </div>
       </article>
     `;

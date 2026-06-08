@@ -348,53 +348,41 @@
   text-overflow: ellipsis;
 }
 
-.contract-primary-action {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.42rem;
-  min-height: 2.42rem;
-  padding: 0 0.86rem;
-  border: 1px solid rgba(245, 181, 27, 0.5);
-  border-radius: 0.72rem;
-  background: rgba(245, 181, 27, 0.065);
-  color: var(--brand-strong);
-  font-size: 0.82rem;
-  font-weight: 850;
-  white-space: nowrap;
-}
-
-.contract-primary-action svg {
-  width: 1rem;
-  height: 1rem;
-  stroke: currentColor;
-}
-
-.contract-action-menu summary {
-  display: inline-grid;
-  width: 2.45rem;
-  height: 2.45rem;
-  place-items: center;
-  border-radius: 0.72rem;
-}
-
-.contract-action-menu summary svg {
-  width: 1.2rem;
-  height: 1.2rem;
-  stroke: currentColor;
-}
-
-.contract-card-base {
+.contract-card-actions {
   display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.52rem 0.78rem 0.68rem;
+  gap: 0.5rem;
+  padding: 0.5rem 0.78rem 0.7rem;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.contract-card-base .contract-primary-action {
-  flex: 1;
+.contract-action-btn {
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
+  gap: 0.38rem;
+  flex: 1;
+  min-height: 2.3rem;
+  padding: 0 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 0.7rem;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--ink);
+  font-size: 0.8rem;
+  font-weight: 720;
+  white-space: nowrap;
+}
+
+.contract-action-btn.is-brand {
+  border-color: rgba(245, 181, 27, 0.5);
+  background: rgba(245, 181, 27, 0.065);
+  color: var(--brand-strong);
+}
+
+.contract-action-btn svg {
+  width: 0.92rem;
+  height: 0.92rem;
+  stroke: currentColor;
+  flex-shrink: 0;
 }
 
 .new-contract-card {
@@ -580,24 +568,8 @@
     grid-template-columns: auto minmax(0, 1fr);
   }
 
-  .contract-validity,
-  .contract-card-actions,
-  .contract-action-menu {
+  .contract-validity {
     grid-column: 1 / -1;
-  }
-
-  .contract-card-actions {
-    grid-template-columns: 1fr;
-    justify-items: stretch;
-  }
-
-  .contract-primary-action {
-    width: 100%;
-  }
-
-  .contract-action-menu,
-  .contract-action-menu summary {
-    width: 100%;
   }
 
   .contract-detail-hero {
