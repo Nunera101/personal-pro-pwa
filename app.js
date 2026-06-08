@@ -3045,11 +3045,11 @@
           <div class="contract-student-info">
             <strong>${escapeHtml(getStudentName(contract.studentId))}</strong>
             <span>${escapeHtml(contract.plan || contract.title || "Plano não informado")}</span>
-            ${contract.value ? `<b>${escapeHtml(currencyExact(contract.value) + "/mês")}</b>` : `<b class="contract-missing-info">Valor a definir</b>`}
+            ${contract.value ? `<b>${escapeHtml(currencyExact(contract.value) + "/mês")}</b>` : `<small class="contract-value-ph">—</small>`}
           </div>
           <div class="contract-validity">
             <span class="badge ${meta.badgeClass}">${escapeHtml(meta.label)}</span>
-            <small>${contract.endDate ? "Válido até " + escapeHtml(formatShortDate(contract.endDate)) : "Sem vencimento"}</small>
+            <small>${contract.endDate && /^\d{4}-\d{2}-\d{2}$/.test(String(contract.endDate)) ? "Válido até " + escapeHtml(formatShortDate(contract.endDate)) : "Sem vencimento"}</small>
           </div>
         </div>
         <div class="contract-card-actions">
@@ -9740,8 +9740,20 @@
     const valueRaw = String(data.get("value") || "").trim();
     const endDateRaw = String(data.get("endDate") || "").trim();
     if (!isDraft && !pdfUrl) return showToast("Adicione o PDF do contrato antes de enviar.");
-    if (!isDraft && !valueRaw) return showToast("Informe o valor mensal do contrato.");
-    if (!isDraft && !endDateRaw) return showToast("Informe a data de vigência (fim) do contrato.");
+    const valueInput = form.querySelector('[name="value"]');
+    const endInput = form.querySelector('[name="endDate"]');
+    valueInput?.classList.remove("ns-field-error");
+    endInput?.classList.remove("ns-field-error");
+    if (!isDraft && !valueRaw) {
+      valueInput?.classList.add("ns-field-error");
+      valueInput?.focus();
+      return showToast("Informe o valor mensal do contrato.");
+    }
+    if (!isDraft && !endDateRaw) {
+      endInput?.classList.add("ns-field-error");
+      endInput?.focus();
+      return showToast("Informe a data de vigência (fim) do contrato.");
+    }
     const contract = normalizeContract({
       ...(old || {}),
       id: old?.id || createId("contract"),

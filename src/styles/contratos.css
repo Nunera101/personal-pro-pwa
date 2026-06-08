@@ -337,6 +337,12 @@
   font-style: italic;
 }
 
+.contract-value-ph {
+  color: var(--muted);
+  font-size: 0.8rem;
+  opacity: 0.55;
+}
+
 .contract-validity {
   display: flex;
   flex-direction: column;
