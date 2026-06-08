@@ -272,9 +272,24 @@
       </section>
     </div>
 
+    <!-- Sheet: Montador de treino (Novo / Editar) -->
+    <div class="workout-sheet" id="workoutSheet" role="dialog" aria-modal="true" aria-labelledby="workoutSheetTitle" hidden>
+      <div class="workout-sheet-backdrop" data-close-workout-sheet></div>
+      <section class="workout-sheet-panel">
+        <div class="sheet-handle" aria-hidden="true"></div>
+        <div class="ag-head">
+          <h2 id="workoutSheetTitle" class="ag-title">Novo padrão</h2>
+          <button class="icon-button ag-close-btn" type="button" data-close-workout-sheet aria-label="Fechar">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div id="workoutSheetBody"></div>
+      </section>
+    </div>
+
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-    <script src="./app.js?v=55"></script>
+    <script src="./app.js?v=56"></script>
   </body>
 </html>
 

@@ -125,6 +125,9 @@
     detSheet: document.getElementById("detSheet"),
     detSheetBody: document.getElementById("detSheetBody"),
     detSheetStripe: document.getElementById("detSheetStripe"),
+    workoutSheet: document.getElementById("workoutSheet"),
+    workoutSheetBody: document.getElementById("workoutSheetBody"),
+    workoutSheetTitle: document.getElementById("workoutSheetTitle"),
     installSteps: document.getElementById("installSteps"),
     retryInstall: document.getElementById("retryInstall"),
     toast: document.getElementById("toast"),
@@ -5974,36 +5977,51 @@
   }
 
   function openWorkoutForm(workoutId = "", prefillStudentId = "") {
+    const sheet = elements.workoutSheet;
+    const body = elements.workoutSheetBody;
+    const titleEl = elements.workoutSheetTitle;
+    if (!sheet || !body) return;
+
     const workout = getWorkout(workoutId) || {};
     const isStudentWorkout = Boolean(workout.studentId || prefillStudentId);
     const selectedStudentId = isStudentWorkout ? workout.studentId || prefillStudentId || state.data.students[0]?.id || "" : "";
     const rows = Array.isArray(workout.exercises) && workout.exercises.length ? workout.exercises : [normalizeWorkoutExercise({ order: 1, exerciseId: state.data.exercises.find((e) => e.status === "active")?.id || "" })];
-    openModal(
-      workout.id ? (isStudentWorkout ? "Editar treino do aluno" : "Editar padrão de treino") : isStudentWorkout ? "Novo treino do aluno" : "Novo padrão de treino",
-      `
-        <form class="form-grid" id="workoutForm" data-id="${workout.id || ""}" data-scope="${isStudentWorkout ? "student" : "pattern"}">
-          <div class="form-grid two">
-            ${
-              isStudentWorkout
-                ? `<label class="field"><span>Aluno</span><select name="studentId" required>${studentOptions(selectedStudentId)}</select></label>`
-                : `<input type="hidden" name="studentId" value="" /><div class="empty-state compact-note"><strong>Modelo base</strong><span>Este padrão fica na área global de treino e não é vinculado a um aluno.</span></div>`
-            }
-            <label class="field"><span>Status</span><select name="status">${workoutStatusOptions(workout.status || "draft", !isStudentWorkout)}</select></label>
-          </div>
-          <label class="field"><span>Título</span><input name="title" type="text" value="${escapeHtml(workout.title || "")}" required /></label>
-          <label class="field"><span>Descrição</span><textarea name="description">${escapeHtml(workout.description || "")}</textarea></label>
-          <div class="form-grid two">
-            <label class="field"><span>Foco/objetivo</span><input name="focus" type="text" value="${escapeHtml(workout.focus || "")}" /></label>
-            <label class="field"><span>Nível</span><select name="level">${workoutLevelOptions(workout.level || "")}</select></label>
-          </div>
-          <section class="workout-builder">
-            <div class="section-title"><h3>Exercícios do ${isStudentWorkout ? "treino" : "padrão"}</h3><button class="mini-button" type="button" data-add-workout-row>Adicionar exercício</button></div>
-            <div id="workoutRows">${rows.map((row, index) => workoutRowTemplate(row, index)).join("")}</div>
-          </section>
-          <button class="primary-action" type="submit">${isStudentWorkout ? "Salvar treino" : "Salvar padrão"}</button>
-        </form>
-      `
-    );
+
+    if (titleEl) titleEl.textContent = workout.id ? (isStudentWorkout ? "Editar treino do aluno" : "Editar padrão de treino") : isStudentWorkout ? "Novo treino do aluno" : "Novo padrão de treino";
+
+    body.innerHTML = `
+      <form class="form-grid" id="workoutForm" data-id="${workout.id || ""}" data-scope="${isStudentWorkout ? "student" : "pattern"}">
+        <div class="form-grid two">
+          ${
+            isStudentWorkout
+              ? `<label class="field"><span>Aluno</span><select name="studentId" required>${studentOptions(selectedStudentId)}</select></label>`
+              : `<input type="hidden" name="studentId" value="" /><div class="empty-state compact-note"><strong>Modelo base</strong><span>Este padrão fica na área global de treino e não é vinculado a um aluno.</span></div>`
+          }
+          <label class="field"><span>Status</span><select name="status">${workoutStatusOptions(workout.status || "draft", !isStudentWorkout)}</select></label>
+        </div>
+        <label class="field"><span>Título</span><input name="title" type="text" value="${escapeHtml(workout.title || "")}" required /></label>
+        <label class="field"><span>Descrição</span><textarea name="description">${escapeHtml(workout.description || "")}</textarea></label>
+        <div class="form-grid two">
+          <label class="field"><span>Foco/objetivo</span><input name="focus" type="text" value="${escapeHtml(workout.focus || "")}" /></label>
+          <label class="field"><span>Nível</span><select name="level">${workoutLevelOptions(workout.level || "")}</select></label>
+        </div>
+        <section class="workout-builder">
+          <div class="section-title"><h3>Exercícios do ${isStudentWorkout ? "treino" : "padrão"}</h3><button class="mini-button" type="button" data-add-workout-row>Adicionar exercício</button></div>
+          <div id="workoutRows">${rows.map((row, index) => workoutRowTemplate(row, index)).join("")}</div>
+        </section>
+        <button class="primary-action" type="submit">${isStudentWorkout ? "Salvar treino" : "Salvar padrão"}</button>
+      </form>
+    `;
+
+    sheet.hidden = false;
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeWorkoutSheet() {
+    const sheet = elements.workoutSheet;
+    if (!sheet || sheet.hidden) return;
+    sheet.hidden = true;
+    document.body.style.overflow = "";
   }
 
   function openApplyPatternForm(workoutId) {
@@ -7150,7 +7168,7 @@
     if (index >= 0) state.data.workouts[index] = workout;
     else state.data.workouts.unshift(workout);
     persistData();
-    closeModal();
+    closeWorkoutSheet();
     if (workout.studentId) {
       state.managerMenu = "students";
       state.profileTab = "workouts";
@@ -7890,8 +7908,9 @@
 
   function bindWorkoutEvents() {
     document.addEventListener("click", (event) => {
-      const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-manager-drawer-backdrop]");
+      const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-close-workout-sheet], [data-manager-drawer-backdrop]");
       if (!target) return;
+      if (target.matches("[data-close-workout-sheet]")) closeWorkoutSheet();
       if (target.matches("[data-toggle-workout-filter]")) { state.workoutFilterOpen = !state.workoutFilterOpen; renderManager(); }
       if (target.matches("[data-open-workout-form]")) openWorkoutForm(target.dataset.openWorkoutForm || "", target.dataset.prefillStudent || "");
       if (target.matches("[data-open-apply-pattern-form]")) openApplyPatternForm(target.dataset.openApplyPatternForm);
