@@ -1334,6 +1334,81 @@ svg {
   line-height: 1.45;
 }
 
+/* ---- card destaque: próximo treino (tela Início do aluno) ---- */
+.next-workout-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.1rem 1.2rem;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, var(--brand-strong) 0%, #0d7a94 100%);
+  color: #fff;
+  box-shadow: var(--shadow);
+}
+
+.next-workout-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+  min-width: 0;
+}
+
+.next-workout-card__label {
+  font-size: 0.7rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.72;
+}
+
+.next-workout-card__name {
+  font-size: clamp(1.05rem, 4vw, 1.35rem);
+  font-weight: 800;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.next-workout-card__meta {
+  font-size: 0.82rem;
+  opacity: 0.8;
+  margin-top: 0.1rem;
+}
+
+.next-workout-card .primary-action {
+  flex-shrink: 0;
+  min-width: 6.5rem;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  border: 1.5px solid rgba(255, 255, 255, 0.38);
+  box-shadow: none;
+}
+
+.next-workout-card--empty {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: none;
+  color: var(--ink);
+}
+
+.next-workout-card--empty .next-workout-card__label {
+  color: var(--muted);
+}
+
+.next-workout-card--empty .next-workout-card__name {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.next-workout-card--empty .primary-action {
+  background: var(--brand);
+  color: #fff;
+  border: none;
+}
+
 .metric-grid {
   display: flex;
   flex-direction: row;

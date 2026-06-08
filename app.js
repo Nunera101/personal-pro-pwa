@@ -4843,21 +4843,35 @@
     const workouts = getStudentWorkouts(student?.id, { publishedOnly: true });
     const sessions = getStudentSessions(student?.id);
     const nextWorkout = agenda.find((item) => item.type === "workout" && item.workoutId && item.status !== "done") || null;
+    const nextWorkoutData = nextWorkout ? getWorkout(nextWorkout.workoutId) : null;
     const nextUpdate = state.data.updates.find((item) => item.studentId === student?.id && item.status === "pending") || null;
+
+    const nextWorkoutCard = nextWorkout
+      ? `<section class="next-workout-card">
+          <div class="next-workout-card__info">
+            <span class="next-workout-card__label">Próximo treino</span>
+            <strong class="next-workout-card__name">${escapeHtml(nextWorkoutData?.title || nextWorkout.title || "Treino")}</strong>
+            <span class="next-workout-card__meta">${formatDate(nextWorkout.date)} · ${nextWorkout.time}</span>
+          </div>
+          <button class="primary-action" type="button" data-start-workout="${nextWorkout.workoutId}" data-activity-id="${nextWorkout.id}">Iniciar</button>
+        </section>`
+      : `<section class="next-workout-card next-workout-card--empty">
+          <div class="next-workout-card__info">
+            <span class="next-workout-card__label">Próximo treino</span>
+            <strong class="next-workout-card__name">Nenhum treino agendado para hoje</strong>
+          </div>
+          <button class="primary-action" type="button" data-student-nav="workouts">Ver treinos</button>
+        </section>`;
+
     return `
       <div class="content-stack">
-        <section class="hero-panel">
+        <section class="dashboard-hero">
           <div>
-            <p>Hoje</p>
-            <h3>${escapeHtml(student?.name || "Aluno")}</h3>
-            <span>${agenda.length} item(ns) na agenda · ${workouts.length} treino(s) publicado(s)</span>
+            <h3>Início</h3>
+            <p>${escapeHtml(student?.name || "Aluno")} · ${agenda.length} item(ns) na agenda hoje</p>
           </div>
-          ${
-            nextWorkout
-              ? `<button class="primary-action" type="button" data-start-workout="${nextWorkout.workoutId}" data-activity-id="${nextWorkout.id}">Iniciar treino de hoje</button>`
-              : `<button class="primary-action" type="button" data-student-nav="workouts">Ver treinos</button>`
-          }
         </section>
+        ${nextWorkoutCard}
         <section class="metric-grid">
           ${metricCard("Treinos na semana", sessionsThisWeek(student?.id).length)}
           ${metricCard("Treinos no mês", sessionsThisMonth(student?.id).length)}
