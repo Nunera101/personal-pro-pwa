@@ -4717,7 +4717,7 @@
           <div class="patterns-hero-text">
             <span class="eyebrow">Elite AS</span>
             <h3>Padrões de treino</h3>
-            <p>Modelos reutilizáveis para treinos</p>
+            <p>Modelos base reutilizáveis</p>
           </div>
           <button class="patterns-new-btn" type="button" data-open-workout-form>
             <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
