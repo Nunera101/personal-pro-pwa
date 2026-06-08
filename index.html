@@ -324,6 +324,22 @@
       </section>
     </div>
 
+    <!-- Sheet: Montador de plano alimentar (Novo / Editar / Visualizar) -->
+    <div class="workout-sheet" id="mealPlanSheet" role="dialog" aria-modal="true" aria-labelledby="mealPlanSheetTitle" hidden>
+      <div class="workout-sheet-backdrop" data-close-meal-plan-sheet></div>
+      <section class="workout-sheet-panel ex-sheet-panel mp-sheet-panel">
+        <div class="sheet-handle" aria-hidden="true"></div>
+        <div class="ag-head">
+          <h2 id="mealPlanSheetTitle" class="ag-title">Novo plano alimentar</h2>
+          <button class="icon-button ag-close-btn" type="button" data-close-meal-plan-sheet aria-label="Fechar">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div id="mealPlanSheetBody" class="ex-sheet-body mp-sheet-body"></div>
+        <div class="ex-sheet-footer mp-sheet-footer" id="mpSheetFooter"></div>
+      </section>
+    </div>
+
     <!-- Modal: Ver vídeo -->
     <div class="video-modal" id="videoModal" role="dialog" aria-modal="true" aria-labelledby="videoModalTitle" hidden>
       <div class="video-modal-backdrop" data-close-video-modal></div>

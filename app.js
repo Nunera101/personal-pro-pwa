@@ -135,6 +135,10 @@
     exerciseSheet: document.getElementById("exerciseSheet"),
     exerciseSheetBody: document.getElementById("exerciseSheetBody"),
     exerciseSheetTitle: document.getElementById("exerciseSheetTitle"),
+    mealPlanSheet: document.getElementById("mealPlanSheet"),
+    mealPlanSheetBody: document.getElementById("mealPlanSheetBody"),
+    mealPlanSheetTitle: document.getElementById("mealPlanSheetTitle"),
+    mpSheetFooter: document.getElementById("mpSheetFooter"),
     videoModal: document.getElementById("videoModal"),
     videoModalTitle: document.getElementById("videoModalTitle"),
     videoModalBody: document.getElementById("videoModalBody"),
@@ -170,6 +174,33 @@
     link: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>',
     logout: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>'
   };
+
+  const FOOD_DB = [
+    { name: "Ovo inteiro", qty: "1 unidade", kcal: 70, protein: 6, carbs: 0, fat: 5 },
+    { name: "Clara de ovo", qty: "1 unidade", kcal: 17, protein: 4, carbs: 0, fat: 0 },
+    { name: "Frango grelhado", qty: "100g", kcal: 165, protein: 31, carbs: 0, fat: 4 },
+    { name: "Arroz branco cozido", qty: "100g", kcal: 130, protein: 3, carbs: 28, fat: 0 },
+    { name: "Feijão cozido", qty: "100g", kcal: 77, protein: 5, carbs: 14, fat: 0 },
+    { name: "Batata doce cozida", qty: "100g", kcal: 86, protein: 2, carbs: 20, fat: 0 },
+    { name: "Aveia em flocos", qty: "40g", kcal: 148, protein: 5, carbs: 27, fat: 3 },
+    { name: "Banana", qty: "1 unidade (100g)", kcal: 89, protein: 1, carbs: 23, fat: 0 },
+    { name: "Maçã", qty: "1 unidade (150g)", kcal: 78, protein: 0, carbs: 21, fat: 0 },
+    { name: "Leite desnatado", qty: "200ml", kcal: 68, protein: 7, carbs: 10, fat: 0 },
+    { name: "Iogurte grego", qty: "100g", kcal: 97, protein: 9, carbs: 4, fat: 5 },
+    { name: "Queijo cottage", qty: "100g", kcal: 98, protein: 11, carbs: 3, fat: 4 },
+    { name: "Pão integral", qty: "1 fatia (30g)", kcal: 79, protein: 3, carbs: 14, fat: 1 },
+    { name: "Whey protein", qty: "30g", kcal: 120, protein: 24, carbs: 3, fat: 1 },
+    { name: "Amendoim", qty: "30g", kcal: 176, protein: 7, carbs: 5, fat: 15 },
+    { name: "Azeite de oliva", qty: "1 col. sopa (10g)", kcal: 88, protein: 0, carbs: 0, fat: 10 },
+    { name: "Salmão", qty: "100g", kcal: 208, protein: 20, carbs: 0, fat: 13 },
+    { name: "Atum em lata (escorrido)", qty: "100g", kcal: 109, protein: 24, carbs: 0, fat: 1 },
+    { name: "Brócolis cozido", qty: "100g", kcal: 34, protein: 3, carbs: 5, fat: 0 },
+    { name: "Carne moída cozida", qty: "100g", kcal: 218, protein: 26, carbs: 0, fat: 13 },
+    { name: "Mamão", qty: "100g", kcal: 43, protein: 1, carbs: 11, fat: 0 },
+    { name: "Castanha-do-pará", qty: "3 unidades (15g)", kcal: 98, protein: 2, carbs: 2, fat: 10 }
+  ];
+
+  let _mpDraft = null;
 
   const MUSCLE_GROUPS = [
     "Peito",
@@ -986,12 +1017,25 @@
     };
   }
 
+  function normalizeFoodItem(item = {}, index = 0) {
+    return {
+      id: item.id || createId("fi"),
+      name: String(item.name || `Alimento ${index + 1}`).trim(),
+      qty: String(item.qty || "").trim(),
+      kcal: Number(item.kcal) || 0,
+      protein: Number(item.protein) || 0,
+      carbs: Number(item.carbs) || 0,
+      fat: Number(item.fat) || 0
+    };
+  }
+
   function normalizeDietMeal(meal = {}, index = 0) {
     return {
       id: meal.id || createId("meal"),
       name: meal.name || `Refeição ${index + 1}`,
       time: meal.time || "",
       items: meal.items || "",
+      foodItems: Array.isArray(meal.foodItems) ? meal.foodItems.map(normalizeFoodItem) : [],
       notes: meal.notes || ""
     };
   }
@@ -3294,7 +3338,7 @@
           <details class="action-menu">
             <summary aria-label="Mais ações">${icons.more}</summary>
             <div>
-              <button class="mini-button" type="button" data-open-diet-form="${escapeHtml(plan.id)}">Editar plano</button>
+              <button class="mini-button" type="button" data-open-diet-form="${escapeHtml(plan.id)}" data-prefill-student="${escapeHtml(plan.studentId)}">Editar plano</button>
               <button class="mini-button" type="button" data-duplicate-diet="${escapeHtml(plan.id)}">Duplicar</button>
               <button class="mini-button" type="button" data-open-student-profile="${escapeHtml(plan.studentId)}">Abrir perfil</button>
               <button class="mini-button" type="button" data-archive-diet="${escapeHtml(plan.id)}">Arquivar</button>
@@ -3308,7 +3352,7 @@
           <article>${icons.agenda}<span>Próxima revisão</span><strong>${escapeHtml(nextReview)}</strong></article>
         </div>
         <div class="diet-plan-actions">
-          <button class="diet-secondary-action" type="button" data-open-diet-detail="${escapeHtml(plan.id)}">${icons.contracts}<span>Abrir plano</span></button>
+          <button class="diet-secondary-action" type="button" data-open-diet-detail="${escapeHtml(plan.id)}">${icons.diet}<span>Visualizar</span></button>
           <button class="diet-primary-action" type="button" data-send-diet-link="${escapeHtml(plan.id)}">${icons.messages}<span>Enviar link</span></button>
         </div>
       </article>
@@ -7021,6 +7065,395 @@
     );
   }
 
+  // ─── MEAL PLAN BUILDER ───────────────────────────────────────────
+
+  function _mpDefaultMeal(index = 0) {
+    return normalizeDietMeal({ name: `Refeição ${index + 1}`, time: "", foodItems: [] }, index);
+  }
+
+  function _mpTotals() {
+    if (!_mpDraft) return { kcal: 0, protein: 0, carbs: 0, fat: 0 };
+    let kcal = 0, protein = 0, carbs = 0, fat = 0;
+    for (const meal of _mpDraft.meals) {
+      for (const fi of meal.foodItems) {
+        kcal += Number(fi.kcal) || 0;
+        protein += Number(fi.protein) || 0;
+        carbs += Number(fi.carbs) || 0;
+        fat += Number(fi.fat) || 0;
+      }
+    }
+    return { kcal: Math.round(kcal), protein: Math.round(protein), carbs: Math.round(carbs), fat: Math.round(fat) };
+  }
+
+  function _mpTotalsCardHtml(goalKcal = 0) {
+    const t = _mpTotals();
+    const pct = goalKcal > 0 ? Math.min(100, Math.round((t.kcal / goalKcal) * 100)) : 0;
+    const color = t.kcal > goalKcal && goalKcal > 0 ? "var(--erro)" : "var(--ok)";
+    return `
+      <div class="mp-totals-card" id="mpTotalsCard">
+        <div class="mp-totals-head">
+          <strong>Total do dia</strong>
+          ${goalKcal > 0 ? `<span class="small-text" style="color:var(--muted)">${pct}%</span>` : ""}
+        </div>
+        <div class="mp-kcal-row">
+          <span class="mp-kcal-actual" style="color:${color}">${t.kcal}</span>
+          <span class="mp-kcal-sep">kcal</span>
+          ${goalKcal > 0 ? `<span class="mp-kcal-meta">/ ${goalKcal} meta</span>` : ""}
+        </div>
+        ${goalKcal > 0 ? `<div class="mp-progress-bar"><div class="mp-progress-fill" style="width:${pct}%;background:${color}"></div></div>` : ""}
+        <div class="mp-macros-row">
+          <div class="mp-macro"><span>P</span><strong>${t.protein}g</strong></div>
+          <div class="mp-macro"><span>C</span><strong>${t.carbs}g</strong></div>
+          <div class="mp-macro"><span>G</span><strong>${t.fat}g</strong></div>
+        </div>
+      </div>
+    `;
+  }
+
+  function _mpUpdateTotals() {
+    const wrap = document.getElementById("mpTotalsWrap");
+    if (!wrap || !_mpDraft) return;
+    const goalInput = document.querySelector("#mealPlanBuilderForm [name='calories']");
+    const goal = Number(goalInput?.value) || 0;
+    wrap.innerHTML = _mpTotalsCardHtml(goal);
+  }
+
+  function _mpFoodItemHtml(fi, mealId) {
+    return `
+      <div class="mp-food-item" data-mp-food-id="${escapeHtml(fi.id)}">
+        <span class="mp-food-name" title="${escapeHtml(fi.name)}">${escapeHtml(fi.name)}</span>
+        <input class="mp-food-qty-input" type="text" value="${escapeHtml(fi.qty)}" placeholder="qtd" data-mp-sync="qty" aria-label="Quantidade" />
+        <input class="mp-food-kcal-input" type="number" min="0" value="${fi.kcal || ""}" placeholder="kcal" data-mp-sync="kcal" aria-label="Kcal" />
+        <button class="mp-food-remove-btn" type="button" data-mp-remove-food="${escapeHtml(fi.id)}" data-mp-meal-ref="${escapeHtml(mealId)}" aria-label="Remover">×</button>
+      </div>
+    `;
+  }
+
+  function _mpMealCardHtml(meal, index) {
+    const mealKcal = meal.foodItems.reduce((s, fi) => s + (Number(fi.kcal) || 0), 0);
+    return `
+      <div class="mp-meal-card" data-mp-meal-id="${escapeHtml(meal.id)}">
+        <div class="mp-meal-head">
+          <input class="mp-meal-name-input" type="text" value="${escapeHtml(meal.name)}" placeholder="Nome da refeição" data-mp-sync="name" aria-label="Nome da refeição" />
+          <input class="mp-meal-time-input" type="time" value="${escapeHtml(meal.time)}" data-mp-sync="time" aria-label="Horário" />
+          <details class="action-menu">
+            <summary class="mp-meal-menu-btn" aria-label="Opções">${icons.more}</summary>
+            <div>
+              <button class="mini-button" type="button" data-mp-duplicate-meal="${escapeHtml(meal.id)}">Duplicar</button>
+              <button class="mini-button is-danger" type="button" data-mp-remove-meal="${escapeHtml(meal.id)}">Remover</button>
+            </div>
+          </details>
+        </div>
+        <div class="mp-food-list" id="mpFoodList_${escapeHtml(meal.id)}">
+          ${meal.foodItems.length ? meal.foodItems.map((fi) => _mpFoodItemHtml(fi, meal.id)).join("") : ""}
+        </div>
+        <div class="mp-meal-foot">
+          <span class="mp-meal-kcal-sum">${mealKcal > 0 ? `${mealKcal} kcal` : "Sem alimentos"}</span>
+          <button class="mp-add-food-btn" type="button" data-mp-add-food="${escapeHtml(meal.id)}">+ Adicionar alimento</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function _mpRenderMeals() {
+    const container = document.getElementById("mpMealsContainer");
+    if (!container || !_mpDraft) return;
+    container.innerHTML = _mpDraft.meals.map(_mpMealCardHtml).join("");
+  }
+
+  function _mpSyncFromDom() {
+    if (!_mpDraft) return;
+    document.querySelectorAll("[data-mp-meal-id]").forEach((mealEl) => {
+      const meal = _mpDraft.meals.find((m) => m.id === mealEl.dataset.mpMealId);
+      if (!meal) return;
+      const nameInput = mealEl.querySelector("[data-mp-sync='name']");
+      const timeInput = mealEl.querySelector("[data-mp-sync='time']");
+      if (nameInput) meal.name = nameInput.value;
+      if (timeInput) meal.time = timeInput.value;
+      mealEl.querySelectorAll("[data-mp-food-id]").forEach((fiEl) => {
+        const fi = meal.foodItems.find((f) => f.id === fiEl.dataset.mpFoodId);
+        if (!fi) return;
+        const qtyInput = fiEl.querySelector("[data-mp-sync='qty']");
+        const kcalInput = fiEl.querySelector("[data-mp-sync='kcal']");
+        if (qtyInput) fi.qty = qtyInput.value;
+        if (kcalInput) fi.kcal = Number(kcalInput.value) || 0;
+      });
+    });
+  }
+
+  function openMealPlanBuilder(planId = "", prefillStudentId = "") {
+    const sheet = elements.mealPlanSheet;
+    const body = elements.mealPlanSheetBody;
+    const titleEl = elements.mealPlanSheetTitle;
+    const footer = elements.mpSheetFooter;
+    if (!sheet || !body) return;
+
+    const plan = getDietPlan(planId) || {};
+    const selectedStudentId = plan.studentId || prefillStudentId || state.activeStudentProfileId || state.data.students[0]?.id || "";
+    if (titleEl) titleEl.textContent = plan.id ? "Editar plano alimentar" : "Novo plano alimentar";
+
+    _mpDraft = {
+      planId: plan.id || "",
+      meals: (plan.meals || []).map((m) => ({ ...m, foodItems: Array.isArray(m.foodItems) ? m.foodItems.map((fi) => ({ ...fi })) : [] }))
+    };
+    if (!_mpDraft.meals.length) _mpDraft.meals = [_mpDefaultMeal(0)];
+
+    const goalKcal = Number(plan.calories) || 0;
+
+    body.innerHTML = `
+      <form class="mp-plan-header" id="mealPlanBuilderForm" data-id="${escapeHtml(plan.id || "")}">
+        <div class="form-grid two">
+          <label class="field"><span>Aluno</span><select name="studentId" required>${studentOptions(selectedStudentId)}</select></label>
+          <label class="field"><span>Status</span><select name="status">${dietStatusOptions(plan.status || "active")}</select></label>
+        </div>
+        <label class="field"><span>Título do plano</span><input name="title" type="text" value="${escapeHtml(plan.title || "")}" placeholder="Plano alimentar Elite AS" required /></label>
+        <div class="form-grid two">
+          <label class="field"><span>Objetivo</span><select name="objective">${dietObjectiveOptions(plan.objective || getStudent(selectedStudentId)?.goal || "")}</select></label>
+          <label class="field"><span>Meta kcal/dia</span><input name="calories" type="number" min="0" value="${escapeHtml(plan.calories || "")}" placeholder="2500" /></label>
+          <label class="field"><span>Início</span><input name="startDate" type="date" value="${escapeHtml(plan.startDate || todayISO())}" /></label>
+          <label class="field"><span>Próxima revisão</span><input name="nextReviewDate" type="date" value="${escapeHtml(plan.nextReviewDate || addDays(todayISO(), 15))}" /></label>
+        </div>
+      </form>
+      <div id="mpTotalsWrap">${_mpTotalsCardHtml(goalKcal)}</div>
+      <div class="mp-meals-section">
+        <div class="mp-meals-section-head"><strong>Refeições</strong></div>
+        <div id="mpMealsContainer"></div>
+        <button class="mp-add-meal-btn" type="button" data-mp-add-meal>+ Adicionar refeição</button>
+      </div>
+    `;
+
+    _mpRenderMeals();
+
+    if (footer) {
+      footer.innerHTML = `
+        <button class="secondary-action" type="button" data-close-meal-plan-sheet>Cancelar</button>
+        <div class="ex-footer-right">
+          ${plan.id ? `<button class="secondary-action" type="button" data-send-diet-link="${escapeHtml(plan.id)}">Enviar link</button>` : ""}
+          <button class="primary-action" type="submit" form="mealPlanBuilderForm">Salvar</button>
+        </div>
+      `;
+    }
+
+    sheet.hidden = false;
+    document.body.style.overflow = "hidden";
+  }
+
+  function openDietPlanView(planId) {
+    const plan = getDietPlan(planId);
+    if (!plan) return showToast("Plano alimentar não encontrado.");
+    const sheet = elements.mealPlanSheet;
+    const body = elements.mealPlanSheetBody;
+    const titleEl = elements.mealPlanSheetTitle;
+    const footer = elements.mpSheetFooter;
+    if (!sheet || !body) return;
+
+    _mpDraft = null;
+    const student = getStudent(plan.studentId);
+    const meta = dietStatusMeta(plan);
+    if (titleEl) titleEl.textContent = "Plano alimentar";
+
+    const t = { kcal: 0, protein: 0, carbs: 0, fat: 0 };
+    for (const meal of plan.meals) {
+      for (const fi of (meal.foodItems || [])) {
+        t.kcal += Number(fi.kcal) || 0;
+        t.protein += Number(fi.protein) || 0;
+        t.carbs += Number(fi.carbs) || 0;
+        t.fat += Number(fi.fat) || 0;
+      }
+    }
+    t.kcal = Math.round(t.kcal); t.protein = Math.round(t.protein);
+    t.carbs = Math.round(t.carbs); t.fat = Math.round(t.fat);
+    const goalKcal = Number(plan.calories) || 0;
+    const pct = goalKcal > 0 ? Math.min(100, Math.round((t.kcal / goalKcal) * 100)) : 0;
+
+    const mealsHtml = plan.meals.length
+      ? plan.meals.map((meal) => {
+          const mKcal = (meal.foodItems || []).reduce((s, fi) => s + (Number(fi.kcal) || 0), 0);
+          const itemsHtml = (meal.foodItems || []).length
+            ? meal.foodItems.map((fi) => `
+                <div class="mp-view-meal-item">
+                  <span>${escapeHtml(fi.name)}</span>
+                  <div class="mp-view-meal-item-right">
+                    ${fi.qty ? `<span>${escapeHtml(fi.qty)}</span>` : ""}
+                    ${fi.kcal ? `<span class="mp-view-meal-kcal">${fi.kcal} kcal</span>` : ""}
+                  </div>
+                </div>`).join("")
+            : meal.items
+              ? `<div class="mp-view-meal-item"><span>${escapeHtml(meal.items)}</span></div>`
+              : `<div class="mp-view-meal-item" style="color:var(--muted)"><span>Sem alimentos</span></div>`;
+          return `
+            <div class="mp-view-meal-card">
+              <div class="mp-view-meal-head">
+                <strong>${escapeHtml(meal.name)}</strong>
+                <span>${escapeHtml(meal.time || "Livre")}</span>
+              </div>
+              <div class="mp-view-meal-items">${itemsHtml}</div>
+              ${mKcal > 0 ? `<div class="mp-view-notes">${mKcal} kcal nesta refeição</div>` : ""}
+              ${meal.notes ? `<div class="mp-view-notes">${escapeHtml(meal.notes)}</div>` : ""}
+            </div>
+          `;
+        }).join("")
+      : emptyState("Refeições não cadastradas", "Use Editar para adicionar refeições ao plano.", icons.diet);
+
+    body.innerHTML = `
+      <div class="mp-view-body">
+        <div class="mp-view-hero">
+          ${studentAvatar(student)}
+          <div class="mp-view-hero-info">
+            <h3>${escapeHtml(plan.title || plan.protocol || "Plano alimentar")}</h3>
+            <p>${escapeHtml(getStudentName(plan.studentId))} · ${escapeHtml(plan.objective || student?.goal || "Objetivo não informado")}</p>
+          </div>
+          <span class="badge ${meta.tone ? `is-${meta.tone}` : ""}">${escapeHtml(meta.label)}</span>
+        </div>
+        <div class="mp-view-grid">
+          <article><span>Protocolo</span><strong>${escapeHtml(plan.protocol || "-")}</strong></article>
+          <article><span>Meta kcal</span><strong>${escapeHtml(plan.calories || "-")}</strong></article>
+          <article><span>Refeições</span><strong>${escapeHtml(String(plan.mealCount || plan.meals.length || "-"))}</strong></article>
+          <article><span>Próxima revisão</span><strong>${plan.nextReviewDate ? formatShortDate(plan.nextReviewDate) : "A definir"}</strong></article>
+        </div>
+        ${t.kcal > 0 ? `
+        <div class="mp-totals-card">
+          <div class="mp-totals-head"><strong>Total calculado</strong>${goalKcal > 0 ? `<span class="small-text" style="color:var(--muted)">${pct}%</span>` : ""}</div>
+          <div class="mp-kcal-row">
+            <span class="mp-kcal-actual">${t.kcal}</span>
+            <span class="mp-kcal-sep">kcal</span>
+            ${goalKcal > 0 ? `<span class="mp-kcal-meta">/ ${goalKcal} meta</span>` : ""}
+          </div>
+          ${goalKcal > 0 ? `<div class="mp-progress-bar"><div class="mp-progress-fill" style="width:${pct}%"></div></div>` : ""}
+          <div class="mp-macros-row">
+            <div class="mp-macro"><span>P</span><strong>${t.protein}g</strong></div>
+            <div class="mp-macro"><span>C</span><strong>${t.carbs}g</strong></div>
+            <div class="mp-macro"><span>G</span><strong>${t.fat}g</strong></div>
+          </div>
+        </div>` : ""}
+        <div class="mp-view-meals">
+          <div class="mp-view-meals-head">Refeições</div>
+          ${mealsHtml}
+        </div>
+      </div>
+    `;
+
+    if (footer) {
+      footer.innerHTML = `
+        <button class="secondary-action" type="button" data-close-meal-plan-sheet>Fechar</button>
+        <div class="ex-footer-right">
+          <button class="secondary-action" type="button" data-send-diet-link="${escapeHtml(plan.id)}">Enviar link</button>
+          <button class="primary-action" type="button" data-open-diet-form="${escapeHtml(plan.id)}">Editar</button>
+        </div>
+      `;
+    }
+
+    sheet.hidden = false;
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeMealPlanSheet() {
+    const sheet = elements.mealPlanSheet;
+    if (!sheet || sheet.hidden) return;
+    sheet.hidden = true;
+    document.body.style.overflow = "";
+    _mpDraft = null;
+  }
+
+  function openMpFoodSearch(mealId) {
+    openModal(
+      "Adicionar alimento",
+      `
+        <div class="mp-food-search-wrap">
+          <input class="mp-food-search-input" id="mpFoodSearchInput" type="search" placeholder="Buscar alimento..." autocomplete="off" autofocus />
+          <div class="mp-food-search-list" id="mpFoodSearchList">
+            ${FOOD_DB.map((f, i) => `
+              <div class="mp-food-row" data-mp-pick-food="${i}" role="button" tabindex="0">
+                <strong>${escapeHtml(f.name)}</strong>
+                <span>${f.kcal} kcal · ${escapeHtml(f.qty)}</span>
+              </div>`).join("")}
+          </div>
+        </div>
+      `
+    );
+    const input = document.getElementById("mpFoodSearchInput");
+    const list = document.getElementById("mpFoodSearchList");
+    if (input && list) {
+      input.addEventListener("input", () => {
+        const q = input.value.trim().toLowerCase();
+        list.querySelectorAll("[data-mp-pick-food]").forEach((row) => {
+          row.hidden = q ? !row.querySelector("strong").textContent.toLowerCase().includes(q) : false;
+        });
+      });
+      list.addEventListener("click", (e) => {
+        const row = e.target.closest("[data-mp-pick-food]");
+        if (!row) return;
+        const f = FOOD_DB[Number(row.dataset.mpPickFood)];
+        if (!f || !_mpDraft) return;
+        const meal = _mpDraft.meals.find((m) => m.id === mealId);
+        if (!meal) return;
+        meal.foodItems.push(normalizeFoodItem({ ...f }, meal.foodItems.length));
+        closeModal();
+        const foodListEl = document.getElementById(`mpFoodList_${mealId}`);
+        if (foodListEl) foodListEl.innerHTML = meal.foodItems.map((fi) => _mpFoodItemHtml(fi, mealId)).join("");
+        const mealFootEl = document.querySelector(`[data-mp-meal-id="${CSS.escape(mealId)}"] .mp-meal-kcal-sum`);
+        if (mealFootEl) {
+          const mKcal = meal.foodItems.reduce((s, fi) => s + (Number(fi.kcal) || 0), 0);
+          mealFootEl.textContent = mKcal > 0 ? `${mKcal} kcal` : "Sem alimentos";
+        }
+        _mpUpdateTotals();
+      });
+    }
+  }
+
+  function handleMealPlanBuilderForm(form) {
+    if (!_mpDraft) return;
+    _mpSyncFromDom();
+    const data = new FormData(form);
+    const id = form.dataset.id || createId("diet");
+    const old = getDietPlan(id);
+    const studentId = String(data.get("studentId") || "");
+    if (!getStudent(studentId)) return showToast("Selecione um aluno válido.");
+    const status = String(data.get("status") || "active");
+    const meals = _mpDraft.meals.map((m) => ({
+      ...m,
+      items: m.foodItems.length ? m.foodItems.map((fi) => fi.name + (fi.qty ? ` (${fi.qty})` : "")).join(", ") : m.items
+    }));
+    const plan = normalizeDietPlan({
+      id,
+      trainerId: TRAINER_ID,
+      studentId,
+      title: String(data.get("title") || "").trim(),
+      objective: String(data.get("objective") || "").trim(),
+      protocol: old?.protocol || "",
+      calories: String(data.get("calories") || "").trim(),
+      mealCount: String(meals.length),
+      startDate: String(data.get("startDate") || todayISO()),
+      nextReviewDate: String(data.get("nextReviewDate") || ""),
+      status,
+      notes: old?.notes || "",
+      instructions: old?.instructions || "",
+      meals,
+      linkSentAt: old?.linkSentAt || "",
+      archivedAt: status === "archived" ? old?.archivedAt || new Date().toISOString() : "",
+      createdAt: old?.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      lastUpdatedAt: new Date().toISOString()
+    });
+    const index = state.data.diets.findIndex((item) => item.id === id);
+    if (index >= 0) state.data.diets[index] = plan;
+    else state.data.diets.unshift(plan);
+    ensureDietReviewActivity(plan);
+    persistData();
+    closeMealPlanSheet();
+    if (state.managerMenu === "studentProfile" || state.activeStudentProfileId === studentId) {
+      state.profileTab = "diet";
+      openStudentProfile(studentId, { updateHash: false });
+    } else {
+      state.managerMenu = "diet";
+      renderManager();
+    }
+    if (status === "draft") showToast("Plano alimentar salvo como rascunho.");
+    else showSuccessToast("Plano alimentar salvo.");
+  }
+
+  // ─── END MEAL PLAN BUILDER ────────────────────────────────────────
+
   function openUpdateForm(updateId) {
     const update = state.data.updates.find((item) => item.id === updateId);
     if (!update || update.studentId !== state.currentUser?.studentId) return;
@@ -8762,19 +9195,90 @@
 
   function bindDietEvents() {
     document.addEventListener("click", (event) => {
-      const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-manager-drawer-backdrop]");
+      const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-manager-drawer-backdrop], [data-mp-pick-food]");
       if (!target) return;
-      if (target.matches("[data-open-diet-form]")) openDietPlanForm(target.dataset.openDietForm || "", target.dataset.prefillStudent || "");
-      if (target.matches("[data-open-diet-detail]")) openDietPlanDetail(target.dataset.openDietDetail);
+      if (target.matches("[data-open-diet-form]")) openMealPlanBuilder(target.dataset.openDietForm || "", target.dataset.prefillStudent || "");
+      if (target.matches("[data-open-diet-detail]")) openDietPlanView(target.dataset.openDietDetail);
+      if (target.matches("[data-close-meal-plan-sheet]")) closeMealPlanSheet();
       if (target.matches("[data-send-diet-link]")) sendDietPlanLink(target.dataset.sendDietLink);
       if (target.matches("[data-duplicate-diet]")) duplicateDietPlan(target.dataset.duplicateDiet);
       if (target.matches("[data-archive-diet]")) archiveDietPlan(target.dataset.archiveDiet);
       if (target.matches("[data-diet-show-all]")) { state.dietFilters = { q: "", status: "all", objective: "all" }; state.dietFilterOpen = false; renderManager(); }
       if (target.matches("[data-toggle-diet-filter]")) { state.dietFilterOpen = !state.dietFilterOpen; renderManager(); }
+      if (target.matches("[data-mp-add-meal]")) {
+        if (!_mpDraft) return;
+        _mpSyncFromDom();
+        _mpDraft.meals.push(_mpDefaultMeal(_mpDraft.meals.length));
+        _mpRenderMeals();
+        _mpUpdateTotals();
+      }
+      if (target.matches("[data-mp-remove-meal]")) {
+        if (!_mpDraft) return;
+        _mpSyncFromDom();
+        if (_mpDraft.meals.length <= 1) return showToast("O plano precisa de pelo menos uma refeição.");
+        _mpDraft.meals = _mpDraft.meals.filter((m) => m.id !== target.dataset.mpRemoveMeal);
+        _mpRenderMeals();
+        _mpUpdateTotals();
+      }
+      if (target.matches("[data-mp-duplicate-meal]")) {
+        if (!_mpDraft) return;
+        _mpSyncFromDom();
+        const src = _mpDraft.meals.find((m) => m.id === target.dataset.mpDuplicateMeal);
+        if (!src) return;
+        const copy = { ...src, id: createId("meal"), name: `${src.name} (cópia)`, foodItems: src.foodItems.map((fi) => ({ ...fi, id: createId("fi") })) };
+        const idx = _mpDraft.meals.indexOf(src);
+        _mpDraft.meals.splice(idx + 1, 0, copy);
+        _mpRenderMeals();
+        _mpUpdateTotals();
+      }
+      if (target.matches("[data-mp-add-food]")) {
+        const mealId = target.dataset.mpAddFood;
+        if (!_mpDraft || !mealId) return;
+        _mpSyncFromDom();
+        openMpFoodSearch(mealId);
+      }
+      if (target.matches("[data-mp-remove-food]")) {
+        if (!_mpDraft) return;
+        _mpSyncFromDom();
+        const mealId = target.dataset.mpMealRef;
+        const meal = _mpDraft.meals.find((m) => m.id === mealId);
+        if (!meal) return;
+        meal.foodItems = meal.foodItems.filter((fi) => fi.id !== target.dataset.mpRemoveFood);
+        const foodListEl = document.getElementById(`mpFoodList_${mealId}`);
+        if (foodListEl) foodListEl.innerHTML = meal.foodItems.map((fi) => _mpFoodItemHtml(fi, mealId)).join("");
+        const mealFootEl = document.querySelector(`[data-mp-meal-id="${CSS.escape(mealId)}"] .mp-meal-kcal-sum`);
+        if (mealFootEl) {
+          const mKcal = meal.foodItems.reduce((s, fi) => s + (Number(fi.kcal) || 0), 0);
+          mealFootEl.textContent = mKcal > 0 ? `${mKcal} kcal` : "Sem alimentos";
+        }
+        _mpUpdateTotals();
+      }
     });
     document.addEventListener("input", (event) => {
       const target = event.target;
       if (target.matches("[data-diet-filter]")) { state.dietFilters[target.dataset.dietFilter] = target.value; renderManager(); }
+      if (!_mpDraft) return;
+      if (target.matches("[data-mp-sync]")) {
+        const mealEl = target.closest("[data-mp-meal-id]");
+        const meal = mealEl ? _mpDraft.meals.find((m) => m.id === mealEl.dataset.mpMealId) : null;
+        if (!meal) return;
+        const key = target.dataset.mpSync;
+        if (key === "name" || key === "time") { meal[key] = target.value; return; }
+        const fiEl = target.closest("[data-mp-food-id]");
+        const fi = fiEl ? meal.foodItems.find((f) => f.id === fiEl.dataset.mpFoodId) : null;
+        if (!fi) return;
+        if (key === "qty") { fi.qty = target.value; return; }
+        if (key === "kcal") {
+          fi.kcal = Number(target.value) || 0;
+          const mealFootEl = mealEl?.querySelector(".mp-meal-kcal-sum");
+          if (mealFootEl) {
+            const mKcal = meal.foodItems.reduce((s, f) => s + (Number(f.kcal) || 0), 0);
+            mealFootEl.textContent = mKcal > 0 ? `${mKcal} kcal` : "Sem alimentos";
+          }
+          _mpUpdateTotals();
+        }
+      }
+      if (target.matches("[name='calories']") && target.form?.id === "mealPlanBuilderForm") _mpUpdateTotals();
     });
     document.addEventListener("change", (event) => {
       const target = event.target;
@@ -8784,6 +9288,7 @@
       event.preventDefault();
       const form = event.target;
       if (form.id === "dietForm") handleDietForm(form);
+      if (form.id === "mealPlanBuilderForm") handleMealPlanBuilderForm(form);
     });
   }
 
