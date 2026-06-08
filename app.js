@@ -8028,7 +8028,7 @@
       "Adicionar alimento",
       `
         <div class="mp-food-search-wrap">
-          <input class="mp-food-search-input" id="mpFoodSearchInput" type="search" placeholder="Buscar alimento..." autocomplete="off" autofocus />
+          <input class="mp-food-search-input" id="mpFoodSearchInput" type="search" placeholder="Buscar alimento..." aria-label="Buscar alimento" autocomplete="off" autofocus />
           <div class="mp-food-search-list" id="mpFoodSearchList">
             ${FOOD_DB.map((f, i) => `
               <div class="mp-food-row" data-mp-pick-food="${i}" role="button" tabindex="0">
