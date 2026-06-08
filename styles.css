@@ -5487,6 +5487,8 @@ button.dashboard-metric {
 
 .pattern-search-field input::placeholder {
   color: rgba(247, 244, 235, 0.45);
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .pattern-filter-grid {

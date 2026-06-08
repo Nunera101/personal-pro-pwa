@@ -4738,7 +4738,7 @@
           <div class="search-filter-row" aria-label="Busca e filtros de padrões">
             <label class="pattern-search-field search-input-wrap">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.3-4.3M10.8 18a7.2 7.2 0 1 1 0-14.4 7.2 7.2 0 0 1 0 14.4Z"/></svg>
-              <input type="search" data-workout-filter="q" placeholder="Buscar padrões de treino..." value="${escapeHtml(filters.q)}" />
+              <input type="search" data-workout-filter="q" placeholder="Buscar padrão…" value="${escapeHtml(filters.q)}" />
             </label>
             <button class="filter-btn" type="button" data-toggle-workout-filter>
               <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
