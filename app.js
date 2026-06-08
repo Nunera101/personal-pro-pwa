@@ -2654,7 +2654,6 @@
       <div class="content-stack dashboard-home">
         <section class="dashboard-hero">
           <div>
-            <span class="eyebrow">Elite AS</span>
             <h3>Dashboard</h3>
             <p>Visão geral da operação da sua assessoria.</p>
           </div>
