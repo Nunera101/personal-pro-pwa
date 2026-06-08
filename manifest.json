@@ -1,17 +1,17 @@
-﻿{
-  "name": "Elite AS - Treinos e GestÃ£o",
-  "short_name": "Elite AS",
-  "description": "Aplicativo instalÃ¡vel Elite AS para alunos e gestor acompanharem treinos, agenda, atualizaÃ§Ãµes, contratos e evoluÃ§Ã£o.",
+{
+  "name": "Personal Pro",
+  "short_name": "Personal Pro",
+  "description": "Aplicativo instalável para acompanhamento de treinos, agenda, evolução e gestão do personal trainer.",
   "id": "./",
-  "start_url": "./?v=53&source=pwa",
+  "start_url": "./?v=54&source=pwa",
   "scope": "./",
   "lang": "pt-BR",
   "dir": "ltr",
   "display": "standalone",
   "display_override": ["standalone", "fullscreen", "browser"],
   "orientation": "portrait-primary",
-  "theme_color": "#0b6b57",
-  "background_color": "#0b6b57",
+  "theme_color": "#0D0D0D",
+  "background_color": "#0D0D0D",
   "categories": ["fitness", "health", "productivity"],
   "icons": [
     {
@@ -43,17 +43,16 @@
     {
       "name": "Meu treino",
       "short_name": "Treino",
-      "description": "Abrir a Ã¡rea do aluno",
-      "url": "./?v=53&area=aluno",
+      "description": "Abrir a área do aluno",
+      "url": "./?v=54&area=aluno",
       "icons": [{ "src": "./assets/icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Painel do gestor",
       "short_name": "Gestor",
       "description": "Abrir o painel de acompanhamento",
-      "url": "./?v=53&area=gestor",
+      "url": "./?v=54&area=gestor",
       "icons": [{ "src": "./assets/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }
-

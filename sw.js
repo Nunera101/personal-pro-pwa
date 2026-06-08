@@ -1,4 +1,5 @@
-﻿const CACHE_NAME = "personal-pro-pwa-v54";
+﻿const CACHE_NAME = "personal-pro-pwa-v55";
+const DATA_CACHE_NAME = "personal-pro-data-v55";
 const CRITICAL_ASSETS = new Set(["/", "/index.html", "/app.js", "/styles.css", "/manifest.json"]);
 const APP_SHELL = [
   "./",
@@ -25,10 +26,11 @@ self.addEventListener("install", (event) => {
 });
 
 self.addEventListener("activate", (event) => {
+  const validCaches = new Set([CACHE_NAME, DATA_CACHE_NAME]);
   event.waitUntil(
     caches
       .keys()
-      .then((keys) => Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))))
+      .then((keys) => Promise.all(keys.filter((key) => !validCaches.has(key)).map((key) => caches.delete(key))))
       .then(() => self.clients.claim())
       .then(() => self.clients.matchAll({ type: "window", includeUncontrolled: true }))
       .then((clients) => {
@@ -84,7 +86,24 @@ self.addEventListener("fetch", (event) => {
   }
 
   const requestUrl = new URL(event.request.url);
-  if (requestUrl.pathname.startsWith("/api/") || requestUrl.hostname === "personal-pro-pwa-production.up.railway.app") {
+
+  // API GET requests: network-first, fall back to last cached response (offline-first data)
+  if (requestUrl.pathname.startsWith("/api/")) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const copy = response.clone();
+            caches.open(DATA_CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          }
+          return response;
+        })
+        .catch(() => caches.match(event.request, { cacheName: DATA_CACHE_NAME }))
+    );
+    return;
+  }
+
+  if (requestUrl.hostname === "personal-pro-pwa-production.up.railway.app" && !requestUrl.pathname.startsWith("/api/")) {
     return;
   }
 
