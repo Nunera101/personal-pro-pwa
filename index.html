@@ -256,6 +256,22 @@
       </section>
     </div>
 
+    <!-- Sheet: Detalhe do evento -->
+    <div class="det-sheet" id="detSheet" role="dialog" aria-modal="true" aria-labelledby="detSheetTitle" hidden>
+      <div class="det-backdrop" data-close-det-sheet></div>
+      <section class="det-panel">
+        <div class="sheet-handle" aria-hidden="true"></div>
+        <div id="detSheetStripe" class="det-stripe"></div>
+        <div class="ag-head">
+          <h2 id="detSheetTitle" class="ag-title">Detalhe do evento</h2>
+          <button class="icon-button ag-close-btn" type="button" data-close-det-sheet aria-label="Fechar">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div id="detSheetBody"></div>
+      </section>
+    </div>
+
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
     <script src="./app.js?v=55"></script>

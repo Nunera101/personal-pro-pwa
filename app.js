@@ -122,6 +122,9 @@
     agendarSheet: document.getElementById("agendarSheet"),
     agSheetBody: document.getElementById("agSheetBody"),
     agSheetTitle: document.getElementById("agSheetTitle"),
+    detSheet: document.getElementById("detSheet"),
+    detSheetBody: document.getElementById("detSheetBody"),
+    detSheetStripe: document.getElementById("detSheetStripe"),
     installSteps: document.getElementById("installSteps"),
     retryInstall: document.getElementById("retryInstall"),
     toast: document.getElementById("toast"),
@@ -4594,6 +4597,18 @@
     }[type] || "Atividade";
   }
 
+  function activityTypeColor(type) {
+    return {
+      workout: "var(--treino, #10B981)",
+      assessment: "var(--aval, #8B5CF6)",
+      reassessment: "var(--aval, #8B5CF6)",
+      update: "var(--atualiza, #3B82F6)",
+      return: "var(--retorno, #F97316)",
+      contract: "var(--dourado, #F59E0B)",
+      other: "#6B7280"
+    }[type] || "#6B7280";
+  }
+
   function agendaStatusLabel(status) {
     return { scheduled: "Confirmado", pending: "Pendente", done: "Concluído", sent: "Enviado", canceled: "Cancelado", missed: "Não realizado", contract_pending: "Contrato pendente" }[status] || "Confirmado";
   }
@@ -4626,39 +4641,7 @@
   }
 
   function openAgendaItemDetail(itemId, date = "", studentId = "") {
-    const item = findAgendaItem(itemId, date, studentId);
-    if (!item) return showToast("Item da agenda não encontrado.");
-    const manager = state.currentUser?.role === "manager";
-    const student = getStudent(item.studentId);
-    openModal(
-      item.title,
-      `
-        <div class="content-stack">
-          <section class="panel agenda-detail-panel ${agendaItemClass(item)}">
-            <div class="badge-row">${statusBadge(agendaStatusLabel(item.status), agendaStatusTone(item.status))}${statusBadge(activityLabel(item.type), "info")}</div>
-            <div class="profile-grid">
-              <article class="profile-card"><span>Data</span><strong>${formatLongDate(item.date)}</strong></article>
-              <article class="profile-card"><span>Horário</span><strong>${escapeHtml(item.time || "--:--")}</strong></article>
-              <article class="profile-card"><span>Aluno</span><strong>${escapeHtml(student?.name || "Aluno removido")}</strong></article>
-              <article class="profile-card"><span>Duração</span><strong>${escapeHtml(item.duration ? `${item.duration} min` : "-")}</strong></article>
-            </div>
-            ${item.notes ? `<p class="small-text">${escapeHtml(item.notes)}</p>` : ""}
-          </section>
-          <section class="panel">
-            <div class="section-title"><h3>Ações</h3><span class="small-text">Operações disponíveis para este item</span></div>
-            <div class="form-actions">
-              ${manager && item.studentId ? `<button class="secondary-action" type="button" data-open-student-profile="${escapeHtml(item.studentId)}">Abrir perfil do aluno</button>` : ""}
-              ${manager && canEditAgendaItem(item) ? whatsappButton(item.id, item.studentId) : ""}
-              ${manager && canEditAgendaItem(item) ? `<button class="secondary-action" type="button" data-open-activity-form="${escapeHtml(item.id)}">Editar/remarcar</button><button class="secondary-action" type="button" data-update-activity-status="${escapeHtml(item.id)}:done">Concluir</button><button class="secondary-action" type="button" data-update-activity-status="${escapeHtml(item.id)}:canceled">Cancelar</button><button class="danger-action" type="button" data-delete-activity="${escapeHtml(item.id)}">Remover</button>` : ""}
-              ${item.type === "contract" && item.contractId ? `<button class="secondary-action" type="button" data-open-contract="${escapeHtml(item.contractId)}">Abrir contrato</button>` : ""}
-              ${item.type === "update" && item.updateId && state.currentUser?.role === "student" && item.status === "pending" ? `<button class="primary-action" type="button" data-open-update-form="${escapeHtml(item.updateId)}">Enviar atualização</button>` : ""}
-              ${item.type === "workout" && item.workoutId && state.currentUser?.role === "student" && item.status !== "done" ? `<button class="primary-action" type="button" data-start-workout="${escapeHtml(item.workoutId)}" data-activity-id="${escapeHtml(item.id)}">Iniciar treino</button>` : ""}
-            </div>
-            ${manager && !student?.phone ? `<p class="small-text">Este aluno não possui telefone cadastrado. O WhatsApp fica indisponível até atualizar o cadastro.</p>` : ""}
-          </section>
-        </div>
-      `
-    );
+    openEventDetailSheet(itemId, date, studentId);
   }
 
   function renderStudentUpdates() {
@@ -6136,6 +6119,90 @@
 
   function closeAgendarSheet() {
     const sheet = elements.agendarSheet;
+    if (!sheet || sheet.hidden) return;
+    sheet.hidden = true;
+    document.body.style.overflow = "";
+  }
+
+  function openEventDetailSheet(itemId, date = "", studentId = "") {
+    const item = findAgendaItem(itemId, date, studentId);
+    if (!item) return showToast("Item da agenda não encontrado.");
+    const sheet = elements.detSheet;
+    const body = elements.detSheetBody;
+    const stripe = elements.detSheetStripe;
+    if (!sheet || !body) return;
+
+    const manager = state.currentUser?.role === "manager";
+    const student = getStudent(item.studentId);
+    const typeColor = activityTypeColor(item.type);
+    const canEdit = canEditAgendaItem(item);
+    const isCanceled = item.status === "canceled";
+    const isDone = item.status === "done" || item.status === "sent";
+
+    const titleEl = document.getElementById("detSheetTitle");
+    if (titleEl) titleEl.textContent = item.title || activityLabel(item.type);
+    if (stripe) stripe.style.background = typeColor;
+
+    const initials = student
+      ? student.name.split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase()
+      : "?";
+
+    const studentRow = `
+      <div class="det-info-row">
+        <span class="det-label">Aluno</span>
+        <strong class="det-value">
+          <span class="det-avatar" style="background:${typeColor}22;color:${typeColor}">${escapeHtml(initials)}</span>
+          ${escapeHtml(student?.name || "Aluno removido")}
+        </strong>
+      </div>`;
+
+    const actionsHtml = manager && canEdit ? `
+      <div class="det-actions">
+        <div class="det-actions-row">
+          <button class="secondary-action det-action" type="button" data-det-edit="${escapeHtml(item.id)}">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+            Editar
+          </button>
+          ${!isCanceled ? `<button class="secondary-action det-action${isDone ? "" : " det-action--success"}" type="button" data-det-toggle="${escapeHtml(item.id)}:${isDone ? "scheduled" : "done"}">
+            ${isDone
+              ? `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 4v6h6M23 20v-6h-6M20.5 9A9 9 0 0 0 5 5.6L1 10m22 4-4 4.4A9 9 0 0 1 3.5 15"/></svg> Reabrir`
+              : `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Concluir`}
+          </button>` : ""}
+        </div>
+        ${student?.phone ? whatsappButton(item.id, item.studentId) : ""}
+        ${item.studentId ? `<button class="ghost-button det-ghost" type="button" data-det-open-profile="${escapeHtml(item.studentId)}">Abrir perfil do aluno</button>` : ""}
+        ${!isCanceled ? `<button class="danger-action det-danger" type="button" data-det-cancel="${escapeHtml(item.id)}">Cancelar evento</button>` : ""}
+      </div>
+    ` : "";
+
+    body.innerHTML = `
+      <div class="det-body">
+        <div class="badge-row">
+          ${statusBadge(agendaStatusLabel(item.status), agendaStatusTone(item.status))}
+          ${statusBadge(activityLabel(item.type), "info")}
+        </div>
+        <div class="det-info">
+          ${studentRow}
+          <div class="det-info-row">
+            <span class="det-label">Data</span>
+            <strong class="det-value">${formatLongDate(item.date)}</strong>
+          </div>
+          <div class="det-info-row">
+            <span class="det-label">Horário</span>
+            <strong class="det-value">${escapeHtml(item.time || "--:--")}${item.duration ? ` · ${escapeHtml(item.duration)} min` : ""}</strong>
+          </div>
+        </div>
+        ${item.notes ? `<p class="det-notes">${escapeHtml(item.notes)}</p>` : ""}
+        ${actionsHtml}
+      </div>
+    `;
+
+    sheet.hidden = false;
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeEventDetailSheet() {
+    const sheet = elements.detSheet;
     if (!sheet || sheet.hidden) return;
     sheet.hidden = true;
     document.body.style.overflow = "";
@@ -7874,13 +7941,42 @@
 
   function bindStudentEvents() {
     document.addEventListener("click", (event) => {
-      const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-close-el-sheet], [data-close-ag-sheet], [data-manager-drawer-backdrop]");
+      const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-close-el-sheet], [data-close-ag-sheet], [data-close-det-sheet], [data-manager-drawer-backdrop]");
       if (!target) return;
       if (target.matches("[data-manager-menu-toggle]")) openManagerDrawer();
       if (target.matches("[data-manager-drawer-backdrop]")) closeManagerDrawer();
       if (target.matches("[data-close-modal]")) closeModal();
       if (target.matches("[data-close-el-sheet]")) closeEnviarLinkSheet();
       if (target.matches("[data-close-ag-sheet]")) closeAgendarSheet();
+      if (target.matches("[data-close-det-sheet]")) closeEventDetailSheet();
+      if (target.matches("[data-det-edit]")) { closeEventDetailSheet(); openActivityForm(target.dataset.detEdit); }
+      if (target.matches("[data-det-toggle]")) {
+        const [detId, detStatus] = String(target.dataset.detToggle || "").split(":");
+        const detActivity = state.data.activities.find((a) => a.id === detId);
+        if (detActivity) {
+          detActivity.status = detStatus;
+          detActivity.updatedAt = new Date().toISOString();
+          persistData();
+          closeEventDetailSheet();
+          renderApp();
+          showToast(detStatus === "done" ? "Atividade concluída." : "Status atualizado.");
+          import("./src/services.js").then(({ updateEvento }) => updateEvento(detId, { status: detStatus }).catch(() => {}));
+        }
+      }
+      if (target.matches("[data-det-cancel]")) {
+        if (!confirm("Cancelar este evento?")) return;
+        const detActivity = state.data.activities.find((a) => a.id === target.dataset.detCancel);
+        if (detActivity) {
+          detActivity.status = "canceled";
+          detActivity.updatedAt = new Date().toISOString();
+          persistData();
+          closeEventDetailSheet();
+          renderApp();
+          showToast("Evento cancelado.");
+          import("./src/services.js").then(({ updateEvento }) => updateEvento(target.dataset.detCancel, { status: "canceled" }).catch(() => {}));
+        }
+      }
+      if (target.matches("[data-det-open-profile]")) { closeEventDetailSheet(); openStudentProfile(target.dataset.detOpenProfile); }
       if (target.dataset.managerNav) {
         if (target.dataset.managerNav !== "studentProfile") clearStudentProfileHash();
         state.managerMenu = target.dataset.managerNav;
