@@ -536,6 +536,38 @@
   background-color: rgba(255, 255, 255, 0.035);
 }
 
+/* Cores do badge de status refletem o tipo do item */
+.agenda-item.is-type-workout .agenda-status .badge {
+  background: rgba(72, 215, 100, 0.12) !important;
+  border-color: rgba(72, 215, 100, 0.35) !important;
+  color: #48d764 !important;
+}
+
+.agenda-item.is-type-assessment .agenda-status .badge,
+.agenda-item.is-type-reassessment .agenda-status .badge {
+  background: rgba(155, 109, 255, 0.12) !important;
+  border-color: rgba(155, 109, 255, 0.35) !important;
+  color: #9b6dff !important;
+}
+
+.agenda-item.is-type-update .agenda-status .badge {
+  background: rgba(90, 167, 255, 0.12) !important;
+  border-color: rgba(90, 167, 255, 0.35) !important;
+  color: #5aa7ff !important;
+}
+
+.agenda-item.is-type-return .agenda-status .badge {
+  background: rgba(245, 155, 36, 0.12) !important;
+  border-color: rgba(245, 155, 36, 0.35) !important;
+  color: #f59b24 !important;
+}
+
+.agenda-item.is-type-contract .agenda-status .badge {
+  background: rgba(245, 158, 11, 0.12) !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+  color: var(--brand, #F59E0B) !important;
+}
+
 @media (max-width: 57.99rem) {
   .agenda-hero {
     grid-template-columns: 1fr;
@@ -1120,7 +1152,6 @@ body.is-manager-view {
   }
 
   .agenda-status .badge {
-    max-width: 4.8rem;
     font-size: 0.5rem !important;
   }
 }
@@ -1381,9 +1412,6 @@ box-shadow: none !important;
   white-space: nowrap !important;
   font-size: 10px !important;
   padding: 3px 8px !important;
-  max-width: 96px !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
 }
 
 /* Acoes: acima do overlay */
