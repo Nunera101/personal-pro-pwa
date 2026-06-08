@@ -793,3 +793,30 @@
   stroke-width: 2;
 }
 
+/* ── Modo aluno: ocultar attach, ajustar form ── */
+.thread-sheet.is-student-view .thread-attach-btn {
+  display: none;
+}
+
+/* ── Badge de chat no header do aluno ── */
+.student-chat-btn {
+  position: relative;
+}
+
+.student-chat-badge {
+  position: absolute;
+  top: 0.05rem;
+  right: 0.05rem;
+  min-width: 1.2rem;
+  height: 1.2rem;
+  padding: 0 0.22rem;
+  border-radius: 999px;
+  background: var(--brand);
+  color: #070707;
+  font-size: 0.6rem;
+  font-weight: 900;
+  line-height: 1.2rem;
+  text-align: center;
+  pointer-events: none;
+}
+

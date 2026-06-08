@@ -1867,6 +1867,7 @@
         const form = document.getElementById("threadForm");
         if (sheet && !sheet.hidden && form?.dataset?.studentId === normalized.studentId) {
           _refreshThreadBd(normalized.studentId);
+          if (state.currentUser?.role === "student") _updateStudentChatBadge();
         } else {
           renderApp();
         }
@@ -2466,6 +2467,7 @@
     elements.studentContent.classList.remove("is-entering");
     void elements.studentContent.offsetWidth;
     elements.studentContent.classList.add("is-entering");
+    _updateStudentChatBadge();
   }
 
   function metricCard(label, value) {
@@ -8328,16 +8330,19 @@
     if (!student) return;
     if (state.currentUser?.role === "student" && state.currentUser.studentId !== student.id) return showToast("Conversa indisponível.");
 
-    if (state.currentUser?.role === "manager") {
-      let changed = false;
-      getStudentMessages(student.id).forEach((message) => {
-        if (message.senderRole === "student" && !message.readAt) {
-          message.readAt = new Date().toISOString();
-          changed = true;
-        }
-      });
-      if (changed) persistData();
-    }
+    const isStudentRole = state.currentUser?.role === "student";
+    let changed = false;
+    getStudentMessages(student.id).forEach((message) => {
+      if (state.currentUser?.role === "manager" && message.senderRole === "student" && !message.readAt) {
+        message.readAt = new Date().toISOString();
+        changed = true;
+      }
+      if (isStudentRole && message.senderRole === "manager" && !message.readAt) {
+        message.readAt = new Date().toISOString();
+        changed = true;
+      }
+    });
+    if (changed) persistData();
 
     const form = document.getElementById("threadForm");
     if (form) form.dataset.studentId = studentId;
@@ -8349,6 +8354,7 @@
     const quickEl = document.getElementById("threadQuickChips");
     if (quickEl) quickEl.innerHTML = renderQuickChips();
 
+    sheet.classList.toggle("is-student-view", isStudentRole);
     sheet.hidden = false;
     document.body.style.overflow = "hidden";
 
@@ -8362,8 +8368,10 @@
     const sheet = elements.threadSheet;
     if (!sheet || sheet.hidden) return;
     sheet.hidden = true;
+    sheet.classList.remove("is-student-view");
     document.body.style.overflow = "";
     if (state.currentUser?.role === "manager") renderManager();
+    if (state.currentUser?.role === "student") _updateStudentChatBadge();
   }
 
   function _refreshThreadBd(studentId) {
@@ -8373,25 +8381,51 @@
     requestAnimationFrame(() => { bd.scrollTop = bd.scrollHeight; });
   }
 
+  function _updateStudentChatBadge() {
+    const badge = document.getElementById("studentChatBadge");
+    if (!badge) return;
+    const studentId = state.currentUser?.studentId || "";
+    if (!studentId) { badge.hidden = true; return; }
+    const unread = getStudentMessages(studentId).filter((m) => m.senderRole === "manager" && !m.readAt).length;
+    badge.textContent = unread > 9 ? "9+" : String(unread);
+    badge.hidden = unread === 0;
+  }
+
   function renderThreadHeader(student) {
     const isManager = state.currentUser?.role === "manager";
+    const backBtn = `<button class="thread-back-btn" type="button" data-close-thread-sheet aria-label="Voltar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M19 12H5M12 5l-7 7 7 7"/></svg></button>`;
+    if (!isManager) {
+      const trainerName = state.data.settings?.trainerName || "Personal";
+      const statusLabel = state.socketReady ? "tempo real ativo" : "Personal";
+      return `
+        ${backBtn}
+        <span class="entity-avatar" aria-hidden="true">${escapeHtml(initialsFromName(trainerName))}</span>
+        <div class="thread-hd-info">
+          <strong>${escapeHtml(trainerName)}</strong>
+          <span>${escapeHtml(statusLabel)}</span>
+        </div>
+      `;
+    }
     const statusLabel = state.socketReady ? "tempo real ativo" : (student.goal || "Elite AS");
     return `
-      <button class="thread-back-btn" type="button" data-close-thread-sheet aria-label="Voltar">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-      </button>
+      ${backBtn}
       ${studentAvatar(student)}
       <div class="thread-hd-info">
         <strong>${escapeHtml(student.name)}</strong>
         <span>${escapeHtml(statusLabel)}</span>
       </div>
-      ${isManager ? `<button class="ghost-button thread-profile-btn" type="button" data-open-student-profile="${escapeHtml(student.id)}">Perfil</button>` : ""}
+      <button class="ghost-button thread-profile-btn" type="button" data-open-student-profile="${escapeHtml(student.id)}">Perfil</button>
     `;
   }
 
   function renderThreadBubbles(studentId) {
     const messages = getStudentMessages(studentId);
-    if (!messages.length) return emptyState("Nenhuma mensagem", "Use o campo abaixo para iniciar a conversa.", icons.messages);
+    const isStudentView = state.currentUser?.role === "student";
+    if (!messages.length) {
+      const label = isStudentView ? "Inicie a conversa" : "Nenhuma mensagem";
+      const sub = isStudentView ? "Mande uma mensagem para o seu personal." : "Use o campo abaixo para iniciar a conversa.";
+      return emptyState(label, sub, icons.messages);
+    }
     let html = '<div class="thread-bubbles">';
     let lastDate = "";
     messages.forEach((message) => {
@@ -8401,15 +8435,16 @@
         const label = msgDate === todayISO() ? "Hoje" : msgDate === addDays(todayISO(), -1) ? "Ontem" : formatShortDate(msgDate);
         html += `<span class="thread-date-sep">${escapeHtml(label)}</span>`;
       }
-      const isManager = message.senderRole === "manager";
+      // Student view: aluno (student) = right/gold (is-manager CSS), personal = left/dark (is-student CSS)
+      const isMine = isStudentView ? message.senderRole === "student" : message.senderRole === "manager";
       const isRead = Boolean(message.readAt);
       const timeStr = message.createdAt ? new Date(message.createdAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : "";
       html += `
-        <div class="thread-bubble ${isManager ? "is-manager" : "is-student"}">
+        <div class="thread-bubble ${isMine ? "is-manager" : "is-student"}">
           <p>${escapeHtml(message.body)}</p>
           <div class="thread-bubble-foot">
             <time>${escapeHtml(timeStr)}</time>
-            ${isManager ? `<span class="thread-check ${isRead ? "" : "is-unread"}" aria-label="${isRead ? "Lido" : "Enviado"}">✓✓</span>` : ""}
+            ${isMine ? `<span class="thread-check ${isRead ? "" : "is-unread"}" aria-label="${isRead ? "Lido" : "Enviado"}">✓✓</span>` : ""}
           </div>
         </div>
       `;
@@ -8419,7 +8454,10 @@
   }
 
   function renderQuickChips() {
-    const chips = ["Boa semana! 💪", "Ótimo progresso!", "Vamos lá!", "Continue assim!"];
+    const isStudent = state.currentUser?.role === "student";
+    const chips = isStudent
+      ? ["Obrigado! 💪", "Entendido!", "Tenho uma dúvida", "Vou fazer hoje!"]
+      : ["Boa semana! 💪", "Ótimo progresso!", "Vamos lá!", "Continue assim!"];
     return chips.map((chip) => `<button class="thread-quick-chip" type="button" data-quick-reply="${escapeHtml(chip)}">${escapeHtml(chip)}</button>`).join("");
   }
 
@@ -10275,6 +10313,7 @@
       const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-close-thread-sheet], [data-manager-drawer-backdrop]");
       if (!target) return;
       if (target.matches("[data-open-messages]")) openThreadSheet(target.dataset.openMessages);
+      if (target.matches("[data-open-my-chat]")) { const sid = state.currentUser?.studentId || ""; if (sid) openThreadSheet(sid); }
       if (target.matches("[data-close-thread-sheet]")) closeThreadSheet();
       if (target.matches("[data-thread-attach]")) {
         const form = document.getElementById("threadForm");
