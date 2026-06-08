@@ -1011,7 +1011,7 @@
   max-width: 52rem;
   margin-inline: auto;
   gap: 0.88rem;
-  padding-bottom: calc(var(--bottom-nav-height, 4.8rem) + var(--safe-bottom, 0px) + 5.6rem);
+  padding-bottom: 0.5rem;
 }
 
 .evaluate-topbar {
@@ -1410,19 +1410,18 @@
 }
 
 .evaluate-footer {
-  position: fixed;
-  bottom: calc(var(--bottom-nav-height, 4.8rem) + var(--safe-bottom, 0px));
-  left: 0;
-  right: 0;
-  z-index: 40;
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
   display: grid;
   grid-template-columns: 1fr 1.6fr;
   gap: 0.65rem;
-  padding: 0.78rem 1rem;
+  padding: 0.78rem 1rem calc(0.78rem + var(--safe-bottom, 0px));
   border-top: 1px solid rgba(255, 255, 255, 0.07);
   background: rgba(10, 10, 10, 0.96);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
+  margin: 0 -1rem -1rem;
 }
 
 .evaluate-footer-btn {

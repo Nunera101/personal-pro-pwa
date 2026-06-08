@@ -1,136 +1,52 @@
 ﻿==============================================
- FILA DE TAREFAS - Personal Pro PWA ("Elite AS")
- ARQUIVO UNICO - FILA COMPLETA NA MELHOR ORDEM
- Atualizado em 08/06/2026
-==============================================
- COMO ESTE ARQUIVO FUNCIONA (LEIA):
- - O painel.ps1 SO executa linhas que comecam com  [ ]  (a fazer).
- - Linhas  [OK]  = ja feitas (historico). Nao alterar.
- - Linhas  [--] = TRAVADAS de proposito: NAO rodam. Sao blocos que
-   dependem de validacao ou exigem acompanhamento. Para liberar, troque
-   [--] por [ ] DEPOIS de validar (e, no caso de IA/auth, COM voce junto).
-   >>> CONFIRA UMA VEZ no seu painel.ps1 que linhas [--] sao ignoradas.
-       Se na duvida, apague os blocos travados e me peca pra reenviar
-       quando for a hora.
- - Cada tarefa e UMA linha so. Nao quebrar ao colar.
- - Se aparecer "You've hit your session limit": a tarefa NAO rodou ->
-   trocar [OK] de volta para [ ] e rerodar apos o reset.
- - Limite do plano Pro: ~5h por janela. O bloco LIBERADO abaixo ja enche
-   uma janela; nao adianta soltar mais que isso de uma vez.
-
- Tokens OFICIAIS: dourado #F59E0B, fundo #0D0D0D, card #1A1A1A flat,
+ FILA DE CORRECOES - Personal Pro PWA ("Elite AS")
+ RODADA: pos-validacao de video (08/06/2026) - GESTOR
+ Modelo de tarefas. Cada tarefa = UMA linha. [ ] = a fazer.
+ Achados extraidos do video real + checklist. Ordem: globais primeiro
+ (afetam todas as telas), depois aba por aba.
+ NAO quebrar linha ao colar. Se aparecer "session limit", a tarefa NAO
+ rodou -> voltar [OK] para [ ] e rerodar. ~7-9 por janela no maximo.
+ Tokens: dourado #F59E0B, fundo #0D0D0D, card #1A1A1A flat sem glow,
  borda rgba(255,255,255,0.06), radius 16px, txt2 #9CA3AF, ok #10B981,
  erro #EF4444. Status: Treino=verde, Avaliacao=#8B5CF6, Atualizacao=
  #3B82F6, Retorno=#F97316, Contrato=dourado.
-
- ESTADO ATUAL:
- - Fase 1 (Bloco 1) e tokens/services (Bloco 2): FEITOS -> validar video
- - Bloco 3 (gestor): feito ate "Novo/Editar exercicio"; resto LIBERADO
- - Correcao da barra duplicada do gestor: LIBERADA (rodar agora)
- - Bloco 4 (aluno) e Bloco 5 (inovacoes): TRAVADOS ([--])
 ==============================================
 
+== BACKUP ==
+[OK] git checkout -b backup/correcoes-video && git push origin backup/correcoes-video && git checkout main. NAO altere arquivos. Confirme que o app abre sem erro de sintaxe. (sem commit adicional)
+     Resultado: - **Branch atual:** `main` | - **Sintaxe do servidor:** todos os 13 arquivos `.js` passaram em `node --check` sem erros. | - **HTML:** `index.html` e `acesso.html` com tags `<script>` balanceadas. | O app est├í sem er...
 
-############################################################
-#  HISTORICO - JA FEITO (nao mexer)                        #
-############################################################
+== GRUPO 0 - BUGS GLOBAIS (prioridade maxima, afetam tudo) ==
+[OK] BUG "botoes/elementos que acompanham a tela ao rolar" (sticky indevido): varios botoes e blocos ficam grudados/flutuando sobre o conteudo durante o scroll quando NAO deveriam. Varra o CSS por position:sticky e position:fixed aplicados a botoes de acao, rodapes de card, headers de secao e barras de filtro que deveriam rolar junto com o conteudo. Mantenha fixed/sticky APENAS em: header do topo, barra inferior de navegacao, e rodape de acao DENTRO de sheets/modais abertos. Todo o resto deve rolar normalmente com a pagina. Teste rolando Dashboard, Alunos, Biblioteca, Atualizacoes, Financeiro. git add . && git commit -m "fix(global): remover sticky/fixed indevido de botoes que acompanhavam o scroll" && git push origin main
+[ ] BUG de piscar (flicker) geral ao entrar em telas e ao abrir/fechar sheets: investigue re-render que apaga e redesenha a tela inteira (flash preto/branco), animacoes .is-entering aplicadas no container errado, e reflow forcado (leitura de offset). Garanta transicao suave sem flash; nao re-renderizar a view inteira quando so muda uma parte; sheets abrem/fecham com fade/slide estavel. Teste navegacao entre todas as abas e abertura de 3 sheets diferentes. git add . && git commit -m "fix(global): eliminar flicker ao entrar em telas e abrir sheets" && git push origin main
+[ ] BUG menu lateral "Mais": ao abrir, o painel de modulos cobre a tela mas alguns itens/labels ficam escondidos ou cortados nas bordas e o overlay nao escurece o suficiente. Garanta: painel com largura adequada, todos os itens visiveis e rolaveis, overlay escuro (~55%) atras, fecha ao tocar fora e no X, e o conteudo do menu nao vaza por baixo da barra inferior nem do notch. git add . && git commit -m "fix(menu): itens visiveis, overlay e areas seguras no menu Mais" && git push origin main
+[ ] AUDITORIA VISUAL: gere DIVERGENCIAS-GESTOR.md percorrendo cada tela do gestor e comparando com os mockups de referencia (Dashboard, Alunos, Agenda, Padroes, Biblioteca, Atualizacoes, Contratos, Financeiro, Dieta, Mensagens, Perfil do aluno). Para cada tela liste: divergencias de layout, botoes escondidos/cortados, badges estourando, encoding quebrado, glow remanescente e qualquer elemento fora do padrao. NAO altere codigo nesta tarefa, so documente para guiar as proximas. git add . && git commit -m "docs: auditoria de divergencias do gestor vs referencia" && git push origin main
 
-== BACKUP GERAL ==
-[OK] Crie um branch de backup do estado atual: git checkout -b backup/pre-rodada && git push origin backup/pre-rodada && git checkout main. NAO altere arquivos, apenas crie o branch e volte para main. Confirme que o app abre sem erro de sintaxe. (sem commit adicional)
+== GRUPO 1 - MENSAGENS (bug funcional confirmado no video) ==
+[ ] BUG busca de Mensagens dispara sozinha / "da enter sem pedir": ao digitar 1 letra (ex "G") a tela ja muda para "Iniciar nova conversa" e parece submeter sozinha. Corrija: (1) a busca deve filtrar de forma incremental SEM submit/enter automatico e sem trocar de tela; (2) impedir que o campo dispare um submit de formulario (preventDefault no Enter, ou remover o form/usar type=button); (3) a secao "Iniciar nova conversa" so aparece como sugestao abaixo dos resultados, e so abre a conversa quando o usuario TOCA em "Iniciar conversa", nunca automaticamente; (4) apagar o texto volta ao estado normal. Teste digitando e apagando varias vezes. git add . && git commit -m "fix(mensagens): busca incremental sem enter/submit automatico" && git push origin main
+[ ] Mensagens - polimento da lista: confirmar que conversas existentes aparecem acima e sugestoes de novo contato abaixo, sem sobreposicao; contadores de nao lidas corretos; layout WhatsApp estavel sem piscar ao filtrar. git add . && git commit -m "fix(mensagens): lista estavel e contadores corretos" && git push origin main
 
-== BLOCO 1 - FASE 1 (pendencias A-G) [FEITO - VALIDAR VIDEO] ==
-[OK] BUG Mensagens: ao buscar um aluno sem conversa, mostrar secao "Iniciar nova conversa" com os alunos que batem; tocar abre conversa vazia; primeira mensagem cria a conversa. Estilo WhatsApp. git add . && git commit -m "fix(mensagens): permitir iniciar nova conversa via busca" && git push origin main
-[OK] Barra inferior nao pode piscar ao navegar: position:fixed estavel, sem reanimar por troca de aba, sem flash ao montar; mover .is-entering para wrapper interno que nao contem a barra. git add . && git commit -m "fix(nav): estabilizar barra inferior sem flicker" && git push origin main
-[OK] Splash imediato (logo Elite AS + #0D0D0D) ja no HTML do index antes do app.js; depois skeleton; sem tela preta. git add . && git commit -m "fix(splash): exibir splash imediato e remover tela preta inicial" && git push origin main
-[OK] Aba Padroes: filtros inline (.search-filter-row + .filter-btn); remover header "Padroes cadastrados"; card 2x2 sem caixas; manter icone, badge, Aplicar e menu. git add . && git commit -m "feat(padroes): filtro inline, remover header e card compacto 2x2" && git push origin main
-[OK] Aba Contratos: 3 metricas em 3 colunas; card com avatar + nome/plano/valor + validade + badge + acoes; sem reticencias soltas. git add . && git commit -m "feat(contratos): metricas 3 colunas e card estruturado" && git push origin main
-[OK] Agenda "Itens do dia": badge sem cortar; item simplificado (avatar + horario + tipo/nome + status + WhatsApp); remover "Ver dia". git add . && git commit -m "fix(agenda): badge nao cortado, itens simplificados, remover Ver dia" && git push origin main
-[OK] Polish Fase 1: encoding (↑ ↓ – •); botao "Registrar pagamento" sem cortar; objetivo do aluno sem invadir badge. git add . && git commit -m "fix(polish): encoding setas, botao financeiro e objetivo vs badge alunos" && git push origin main
+== GRUPO 2 - PADROES DE TREINO (refazer conforme a referencia) ==
+[ ] A aba "Padroes de treino" esta COMPLETAMENTE diferente do mockup de referencia. Refaca seguindo a ref PADROES: (1) topo com botao grande dourado "Novo padrao" (linha inteira, com + e seta); (2) tres metricas em linha: Total de padroes / Rascunhos / Publicados (.metrics-row 3 colunas, sem corte); (3) busca + Filtrar inline (.search-filter-row); (4) cada padrao num card chapado com icone de halteres a esquerda, titulo, badge de status (Publicado verde / Rascunho azul), e infos em LINHAS limpas (Objetivo, Nivel, Exercicios, Ultima edicao) - sem caixas grandes; (5) botao "Aplicar" (outline dourado) + menu de 3 pontos no rodape do card. Use os tokens oficiais. Compare lado a lado com o mockup antes de finalizar. git add . && git commit -m "feat(padroes): refazer aba conforme mockup de referencia" && git push origin main
 
-== BLOCO 2 - TOKENS + SERVICES [FEITO] ==
-[OK] Centralizar tokens EXISTENTES em variaveis CSS no :root usando os valores atuais (sem inventar cor, sem mudar visual); substituir hardcoded por var(--token) incremental. Sem TypeScript, sem refatorar tela boa. git add . && git commit -m "chore(tokens): centralizar variaveis CSS existentes sem mudar visual" && git push origin main
-[OK] Camada de servicos MOCK vanilla (services.js) com stubs e ponto de troca por API: createAluno, gerarLink, enviarWhatsApp, createEvento, updateEvento, savePadrao, aplicarPadrao, saveExercicio, uploadVideo, addItemPadrao, savePlano, enviarAssinatura, reenviarAssinatura, gerarPdf, registrarPagamento, getMensalidade, cobrar, gerarRecibo, exportarRelatorio, enviarMensagem. git add . && git commit -m "chore(services): camada mock vanilla para formularios do gestor" && git push origin main
+== GRUPO 3 - CONTRATOS (mudanca de conceito: PDF, nao texto) ==
+[ ] MUDANCA IMPORTANTE no conceito de Contratos: hoje o contrato e um TEXTO escrito dentro do app (com variaveis tipo {aluno}, {cpf}). O correto e: o gestor faz UPLOAD de um arquivo PDF do contrato; o app guarda o PDF e oferece PRE-VISUALIZACAO (viewer de PDF embutido) para o aluno LER antes de assinar. Implemente no fluxo do gestor: na tela "Novo contrato", substituir o textarea de clausulas por uma area de upload de PDF (drop + selecionar, valida .pdf e tamanho, mostra nome + tamanho + [Substituir|Remover]); ao salvar, vincula o arquivo ao contrato (use o service de upload, padrao do uploadVideo). Manter os campos Aluno, Plano, Valor, Inicio/Fim. git add . && git commit -m "feat(contratos): upload de PDF do contrato no lugar de texto" && git push origin main
+[ ] Contratos - visualizacao do PDF: na tela "Visualizar contrato", em vez do documento em texto, embutir um viewer de PDF (iframe/embed ou pdf.js) mostrando o PDF enviado, com botoes Baixar e (se pendente) Reenviar para assinatura. O aluno deve conseguir abrir e ROLAR o PDF inteiro para ler. git add . && git commit -m "feat(contratos): pre-visualizacao do PDF para leitura" && git push origin main
+[ ] Contratos - assinatura legalmente valida: implemente o aceite com validade juridica do lado de quem assina: tela de leitura do PDF + caixa "Li e aceito os termos" + captura de assinatura (nome completo + data/hora + confirmacao), registrando aceite com carimbo de data/hora e identificacao (e-mail/IP se disponivel). Ao assinar, status vira Assinado e gera um PDF final com a pagina de aceite anexada. OBS: a parte de validade juridica/assinatura digital certificada e sensivel - deixe a captura e o registro prontos, mas marque no codigo onde plugar um provedor de assinatura (ex: clicksign/d4sign) depois, COM acompanhamento. git add . && git commit -m "feat(contratos): fluxo de aceite com registro datado" && git push origin main
+[ ] Contratos - dados faltando no card: no video o card mostra "Valor nao informado" e "Valido ate Sem vencimento". Garanta que valor e vigencia sejam obrigatorios ao criar o contrato (validacao inline) e exibidos corretamente no card; se realmente nao houver, mostrar placeholder discreto em vez de texto quebrado. git add . && git commit -m "fix(contratos): validar e exibir valor e vigencia no card" && git push origin main
 
-== BLOCO 3 - FASE 2 GESTOR [PARCIAL - feito ate aqui] ==
-[OK] Tela "Novo aluno": Dados pessoais, Objetivo, Contrato, Nivel, Observacoes; rodape [Cancelar | Salvar] + ghost "Salvar e enviar link"; validacao + mascara BR; createAluno -> lista com Pendente. git add . && git commit -m "feat(gestor): tela Novo aluno" && git push origin main
-[OK] Sheet "Enviar link": chips de destino, linkbox copiar, validade, WhatsApp, [Copiar | Por e-mail], ghost "Gerar novo link"; gerarLink/enviarWhatsApp; toast. git add . && git commit -m "feat(gestor): sheet Enviar link" && git push origin main
-[OK] Perfil do aluno - abas internas: cabecalho fixo (cartao + 3x2 KpiCards) + abas sublinhadas (Visao geral, Treinos, Agenda, Historico, Evolucao, Atualizacoes, Contrato, Mensagens); trocar de aba nao recarrega o cabecalho. git add . && git commit -m "feat(gestor): perfil do aluno com abas internas" && git push origin main
-[OK] Sheet "Agendar atividade": chips de tipo coloridos, Aluno, Data|Hora, Recorrencia, Online/Local, Lembrete, Observacoes; [Cancelar | Agendar] + ghost; detecta conflito; createEvento entra na grade. git add . && git commit -m "feat(gestor): sheet Agendar atividade" && git push origin main
-[OK] Sheet "Detalhe do evento": faixa da cor, aluno, Data/hora, Local/Online + badge; [Editar | alternar status], WhatsApp, ghost Abrir perfil, Cancelar (vermelho); updateEvento. git add . && git commit -m "feat(gestor): sheet Detalhe do evento" && git push origin main
-[OK] Montador "Novo/Editar padrao": cabecalho + blocos com itens (arrastar, thumb, meta inline, remover); Adicionar exercicio/bloco; [Salvar rascunho | Publicar]; savePadrao. git add . && git commit -m "feat(gestor): montador de padrao de treino" && git push origin main
-[OK] Sheet "Aplicar padrao": multi-selecao de alunos (chips), Data, Substituir/Adicionar, Ajustar antes, Aplicar; aplicarPadrao; toast + Enviar link. git add . && git commit -m "feat(gestor): sheet Aplicar padrao" && git push origin main
-[OK] Tela "Novo/Editar exercicio": video 16:9, Nome, Grupo|Equipamento, tags, Parametros (Series/Reps/Descanso), Instrucoes, badge; [Salvar rascunho | Publicar]; saveExercicio. git add . && git commit -m "feat(gestor): tela Novo/Editar exercicio" && git push origin main
+== GRUPO 4 - BIBLIOTECA DE EXERCICIOS (upload + player de video) ==
+[ ] BUG player de video da Biblioteca: ao abrir "Ver video" o player aparece VAZIO (tela preta / icone de play quebrado), sem reproduzir. Corrija para: quando o exercicio TEM video, reproduzir o video de verdade (tag <video> com controls, poster, 16:9); quando NAO tem, mostrar placeholder claro + CTA "Enviar video". Garanta que o modal nao buga ao abrir/fechar e que o video carrega sem travar. git add . && git commit -m "fix(biblioteca): player reproduz video real, sem tela preta" && git push origin main
+[ ] Biblioteca - upload de video funcional: o fluxo "Enviar video" deve permitir selecionar um arquivo (mp4/mov), mostrar progresso, preview, e ao salvar VINCULAR o video ao exercicio de forma que ele apareca no player depois. Use o service uploadVideo; garanta que o video enviado fica acessivel e reproduz no app (sem bugar). Teste: enviar -> ver no player -> reabrir a tela e o video continua la. git add . && git commit -m "feat(biblioteca): upload de video vinculado e reproduzivel" && git push origin main
+[ ] Biblioteca - card e acoes: confirmar que cada card de exercicio mostra thumb/ícone, nome, grupo, equipamento, badge (Publicado/Rascunho), e os 3 botoes (Ver video / Editar / Usar no treino) sem cortar nem sobrepor; o bloco "Envie seu video de execucao" nao deve empurrar/cobrir os botoes. git add . && git commit -m "fix(biblioteca): card e botoes sem corte/sobreposicao" && git push origin main
 
+== GRUPO 5 - TELAS SECUNDARIAS (botoes escondidos / bugados) ==
+[ ] Varredura nas telas/sheets secundarias do gestor (Novo aluno, Enviar link, Agendar atividade, Detalhe do evento, Montador de padrao, Aplicar padrao, Novo/Editar exercicio, Avaliar check-in, Plano alimentar, Novo contrato, Financeiro sheets, Relatorios, Thread de chat): em varias o rodape de acao some atras da barra inferior ou os botoes ficam escondidos/cortados. Para CADA sheet/tela cheia: rodape de acao fixo DENTRO do proprio sheet (nao atras da barra), com padding-bottom respeitando safe-area; conteudo rolavel ate o fim sem esconder botoes; botoes [Cancelar|Salvar] sempre visiveis e clicaveis. Liste o que ajustou em cada uma. git add . && git commit -m "fix(secundarias): rodapes de acao visiveis e botoes nao escondidos" && git push origin main
+[ ] Avaliar check-in (Atualizacoes): garantir que a tela role ate o fim e os botoes "Enviar feedback / Salvar avaliacao" fiquem sempre acessiveis; o seletor de nota (estrelas) e os atalhos Ajustar treino/dieta nao podem cobrir o textarea. git add . && git commit -m "fix(checkin): rodape e campos sem sobreposicao" && git push origin main
+[ ] Financeiro - dados zerados e layout: no video aparece tudo R$ 0 / "0 cobrancas" e o grafico do mes vazio. Confirme se e so falta de dado mock (popular exemplos coerentes) ou bug de calculo; garanta que KPIs, grafico e lista renderizam com dados de exemplo e que o botao "Registrar pagamento" no topo nao corta. git add . && git commit -m "fix(financeiro): dados de exemplo e layout dos KPIs/grafico" && git push origin main
 
-############################################################
-#  >>> RODAR AGORA (sessao da academia) <<<                #
-#  Comeca com a correcao da barra, depois fecha o Bloco 3, #
-#  e termina com fillers seguros de documentacao (so geram #
-#  .md, nao tocam no app -> sem risco rodando sozinho).    #
-############################################################
+== GRUPO 6 - AGENDA (badge ainda cortado) ==
+[ ] Na Agenda, secao "Itens do dia", o badge de tipo AINDA aparece cortado (ex "Contrato pe..."). Corrija definitivamente: o badge deve caber o texto inteiro (ex "Contrato pendente") sem truncar - aumentar largura/quebrar para baixo se preciso, nunca cortar. Reduzir info redundante do item se faltar espaco. Cores por tipo: Treino=verde, Avaliacao=#8B5CF6, Atualizacao=#3B82F6, Retorno=#F97316, Contrato=dourado. git add . && git commit -m "fix(agenda): badge de tipo sem corte nos itens do dia" && git push origin main
 
-[OK] BUG barra duplicada do GESTOR (uma segunda barra fantasma atras/sobre a real). Investigue: (a) #managerBottomNav recriado/anexado a cada render em vez de reutilizado, deixando copias no DOM; (b) markup antigo da nav ainda dentro da .view alem da nav fixa movida para fora; (c) nav do gestor e do aluno (#studentBottomNav) ambas no DOM ao mesmo tempo. CORRECAO: garanta EXATAMENTE UMA barra inferior no DOM por vez (reutilize o mesmo elemento, nunca re-append), remova nav duplicada/antiga, e ao alternar gestor/aluno exiba so a correta. Mantenha position:fixed estavel sem piscar. Teste Dashboard->Alunos->Agenda->Padroes->Mais e confirme via inspecao que ha 1 unico bottom nav. git add . && git commit -m "fix(nav): remover barra inferior duplicada do gestor" && git push origin main
-     Resultado:   pointer-events: none !important; | } | ``` | O seletor `ID + [hidden]` tem especificidade `(1,1,0)` ÔÇö maior que `(1,0,0)` das regras antigas ÔÇö e vem por ├║ltimo no arquivo, garantindo que apenas um nav apare├ºa ...
-[OK] Modal "Ver video" + Sheet "Usar no treino" + Sheet "Enviar video": (a) Ver video = player 16:9, titulo, fechar (X e toque fora), rodape [Usar no treino | Editar]; sem video = placeholder + CTA Enviar video; (b) Usar no treino = lista buscavel de padroes (radio) + Novo padrao, campos opcionais Series/Reps/Descanso, Adicionar (addItemPadrao, abre montador); (c) Enviar video = drop pontilhado, apos selecionar nome + progress bar dourada + preview 16:9 + [Substituir | Remover], Salvar (valida mp4/mov e tamanho, uploadVideo com progresso, erro com tentar de novo, vincula videoUrl). git add . && git commit -m "feat(gestor): modais de video da biblioteca" && git push origin main
-     Resultado: - **Modal "Ver v├¡deo"**: player 16:9, t├¡tulo, fechar por X ou toque fora, rodap├® com [Usar no treino | Editar]; estado sem v├¡deo = placeholder + CTA "Enviar v├¡deo" | - **Sheet "Usar no treino"**: lista busc├ível de...
-[OK] Tela "Avaliar check-in": cartao do aluno (linha + data), Fotos (toggle comparar; grade 3 col Frente/Lado/Costas atual vs anterior, zoom), Variacao de peso (numero grande colorido com seta ↑↓ + Atual/Anterior + medidas opcionais), Feedback (textarea + chips + nota + atalhos Ajustar treino/dieta); rodape [Salvar | Enviar feedback]; ao salvar status vira avaliada e atualiza KPIs Recebidas/Pendentes/Atrasadas. git add . && git commit -m "feat(gestor): tela Avaliar check-in" && git push origin main
-     Resultado: - `evaluate-quick-actions / quick-btn` ÔÇö atalhos Ajustar treino / Ajustar dieta (roxo no hover) | - `evaluate-footer` ÔÇö rodap├® sticky bottom com blur, grid `[Enviar feedback | Salvar avalia├º├úo]` | - `badge.is-ne...
-[OK] Montador "Plano alimentar" + "Visualizar plano": (a) montador = cartao do aluno (meta kcal), refeicoes (titulo editavel + horario; itens alimento+quantidade/kcal; ghost Adicionar alimento com busca mock), Total do dia (atual/meta + barra verde + macros P/C/G recalculados), reordenar e duplicar refeicao, [Enviar link | Salvar] savePlano; (b) visualizar = somente leitura com Gerar PDF, Enviar link, Editar. git add . && git commit -m "feat(gestor): montador e visualizacao de plano alimentar" && git push origin main
-     Resultado: Tarefa conclu├¡da. O **Montador de Plano Alimentar** j├í estava implementado em rodadas anteriores ÔÇö a l├│gica JS em `app.js` (fun├º├Áes `openMealPlanBuilder`, `openDietPlanView`, busca mock de alimentos com `FOOD_DB`)...
-[OK] Tela "Novo contrato" + "Visualizar contrato" + acoes inline: (a) Novo = Aluno, chips de Plano (Elite/Performance/Custom), Valor/mes|Inicio + Fim, Clausulas (textarea template), metodo de assinatura, [Salvar rascunho | Enviar para assinatura] enviarAssinatura; (b) Visualizar = badge, cartao-documento leitura, timeline Criado/Enviado/Assinado, Gerar PDF, Reenviar, Renovar (pre-preenchido); (c) inline na lista = Reenviar (confirma + reenviarAssinatura + toast) e Gerar PDF. git add . && git commit -m "feat(gestor): novo contrato, visualizar e acoes inline" && git push origin main
-     Resultado: - **`.contract-view-hero` / `.contract-view-hero-info`** ÔÇö cabe├ºalho do sheet Visualizar (avatar + nome/plano + badge) | - **`.contract-timeline` / `.contract-tl-item` / `.contract-tl-dot` / `.contract-tl-text`** ÔÇö...
-[OK] Financeiro - sheets e acoes: (a) Registrar pagamento = Aluno, Competencia|Valor, chips de forma (Pix/Cartao/Dinheiro/Transferencia), Data, Salvar registrarPagamento (mensalidade vira Pago, recalcula KPIs e grafico); (b) Detalhe da mensalidade = aluno + plano, Valor/Vencimento/status, historico, [Registrar pagamento | Cobrar | Gerar recibo] getMensalidade; (c) Cobrar = mensagem editavel, WhatsApp + Por e-mail, cobrar + toast; (d) Recibo = gerarRecibo (PDF) + baixar/compartilhar + toast. git add . && git commit -m "feat(gestor): financeiro registrar/detalhe/cobrar/recibo" && git push origin main
-     Resultado: | **(a) Registrar pagamento** | Ô£à j├í pronto | `openPaymentForm` completo: Aluno (datalist), Compet├¬ncia+Valor, chips Pix/Cart├úo/Dinheiro/Transfer├¬ncia, Data, `registrarPagamento` ÔåÆ status Pago, `renderManager` re...
-[OK] Tela "Relatorios": abas de periodo (Semana/Mes/Trimestre), KpiCards (Adesao media, Treinos concluidos, Novos alunos, Faturamento com variacao), graficos Adesao (linha), Faturamento (area), Por objetivo (barras/rosca), Exportar (exportarRelatorio). git add . && git commit -m "feat(gestor): tela de Relatorios" && git push origin main
-[ ] Tela "Thread de chat": cabecalho voltar + aluno compacto + status + Abrir perfil; baloes (aluno esquerda #1A1A1D canto reto; gestor direita dourado canto reto; horario 10px + duplo check); composicao (+ dourado anexo reusa Enviar link, input pill, enviar circular); respostas rapidas em chips; enviarMensagem (otimista), marca lida, scroll. git add . && git commit -m "feat(gestor): thread de chat completa" && git push origin main
-
-# --- FILLERS SEGUROS (so .md, nao tocam o app; rodam se sobrar tempo) ---
-[ ] Gere/atualize README.md do projeto: visao geral do produto, stack, como rodar local, estrutura de pastas, e os tokens de design oficiais. Somente documentacao, NAO altere codigo do app. git add . && git commit -m "docs: README do projeto" && git push origin main
-[ ] Gere RELATORIO-FASE2.md auditando cada tela/sheet secundaria do gestor criada no Bloco 3 (Novo aluno, Enviar link, Perfil abas, Agendar, Detalhe evento, Montador padrao, Aplicar padrao, Novo/Editar exercicio, modais de video, Avaliar check-in, Plano alimentar, Contrato, Financeiro, Relatorios, Chat): para cada uma, o que existe, se segue os tokens, e divergencias vs os mockups de referencia. Somente leitura + markdown, NAO altere codigo. git add . && git commit -m "docs: relatorio de auditoria da Fase 2" && git push origin main
-[ ] Atualize CHANGELOG.md a partir do git log das ultimas rodadas, agrupando por bloco/feature em ordem cronologica. Somente documentacao. git add . && git commit -m "docs: changelog das rodadas recentes" && git push origin main
-[ ] Gere AUDIT-A11Y.md listando problemas de acessibilidade observados no codigo (labels ausentes, contraste de texto, foco visivel, area de toque < 44px, aria em botoes de icone), por tela, SEM alterar codigo - apenas o relatorio com recomendacoes. git add . && git commit -m "docs: auditoria de acessibilidade" && git push origin main
-
-  >>> PARE AQUI. Valide com video o gestor completo + barra unica antes de
-      liberar o Bloco 4. Para liberar: troque [--] por [ ] no Bloco 4. <<<
-
-
-############################################################
-#  TRAVADO ([--]) - NAO RODA. Liberar so APOS validar.     #
-#  BLOCO 4 - FASE 3: LADO DO ALUNO                         #
-#  Depende do Bloco 3 estar 100%. Trocar [--] por [ ].     #
-############################################################
-
-[--] BACKUP do aluno: git checkout -b backup-aluno-v2 && git push origin backup-aluno-v2 && git checkout main. Confirme que o app abre sem erro de sintaxe. (sem commit adicional)
-[--] AUDITORIA em AUDITORIA-ALUNO.md: cada tela do aluno, funcao que renderiza, e o que diverge do gestor. Confirmar: (a) encoding quebrado so no aluno (Ultimos/Ultima); (b) exercicios virando "Exercicio removido" (vinculo/ID com a biblioteca) - investigar origem; (c) eyebrow "AREA DO ALUNO"; (d) "Ver dia" na Agenda; (e) "Mais" repete itens da barra; (f) confirmar se Dieta e Mensagens renderizam. NAO altere codigo. git add . && git commit -m "auditoria do lado do aluno" && git push origin main
-[--] NAVEGACAO + BARRA: nova barra (#studentBottomNav) 5 itens: Inicio, Treinos, Dieta, Progresso, Mais. Dieta sobe; Evolucao funde em Progresso; Agenda vai pro Mais; Mais = Perfil, Agenda, Mensagens, Contrato, Configuracoes. Barra fixa renderizada uma vez, fora de container com transform, sem piscar. Remover eyebrow "AREA DO ALUNO" -> badge "ALUNO" ao lado do logo. Icone de chat no header abre Mensagens. git add . && git commit -m "nav aluno: barra nova + badge ALUNO + chat no header" && git push origin main
-[--] INICIO: "Hoje" vira "Inicio" no padrao do dashboard do gestor (H1 + subtitle, sem eyebrow): card de PROXIMO TREINO (nome/dia/hora/Iniciar); resumo da semana; pendencias com badges de prioridade; atalhos (Ver treino, Enviar progresso, Falar com personal). Metricas em .metrics-row. Corrija mojibake. Estado vazio. git add . && git commit -m "tela Inicio do aluno no padrao do gestor" && git push origin main
-[--] TREINOS: PRIMEIRO corrija "Exercicio removido" (vinculo/ID com a biblioteca; renderize nome/series/reps/carga/descanso; fallback "Exercicio indisponivel"). Lista de treinos publicados em cards; ao abrir: exercicios + video + EXECUCAO (check + vibracao, barra de progresso, overlay de conclusao com volume). Corrija mojibake. Estado vazio. git add . && git commit -m "treinos do aluno: corrigir exercicios e padronizar execucao" && git push origin main
-[--] DIETA (na barra): plano publicado pelo gestor: protocolo (kcal, refeicoes/dia), refeicoes com horarios/alimentos/quantidades/observacoes em cards. Busca/filtro inline se houver multiplos. Marcar refeicao cumprida com check. Estado vazio. Sem glow. git add . && git commit -m "tela de dieta do aluno na barra principal" && git push origin main
-[--] PROGRESSO (funde Atualizacoes + Evolucao) [ESTRUTURAL - validar video]: Secao 1 Enviar atualizacao (peso + fotos frente/lado/costas + observacoes; dispara notificacao ao gestor + toast). Secao 2 Evolucao (volume load, evolucao por exercicio, peso corporal, graficos no padrao). Historico em cards. Remover aba Evolucao antiga apos migrar. git add . && git commit -m "tela Progresso do aluno: envio + evolucao unificados" && git push origin main
-[--] AGENDA (no Mais): padrao da agenda do gestor (Dia/Semana/Mes, blocos coloridos, legenda, itens do dia com badge completo). Remover "Ver dia". So as proprias atividades. Itens abrem detalhe. Sem glow. git add . && git commit -m "agenda do aluno no Mais, sem Ver dia" && git push origin main
-[--] MENSAGENS: layout WhatsApp; abre direto a conversa com o personal (header + bolhas aluno-direita-dourado/personal-esquerda-escuro + compose fixa). Enviar dispara notificacao. Acessivel pelo Mais e pelo chat do header. Estado vazio. git add . && git commit -m "mensagens do aluno no layout WhatsApp" && git push origin main
-[--] PERFIL: dados pessoais, objetivo, status do contrato e metricas (treinos na semana, volume, proximas atividades) em cards compactos no padrao. Mantem aceite/visualizacao do contrato, dados da conta, Sair. Sem glow/encoding quebrado. git add . && git commit -m "perfil do proprio aluno enriquecido" && git push origin main
-[--] CONSISTENCIA FINAL DO ALUNO: paridade com o gestor (mojibake, glow, cards/badges, barra fixa, areas seguras, splash/skeleton, microinteracoes). Gere RELATORIO-ALUNO.md. git add . && git commit -m "consistencia final do lado do aluno" && git push origin main
-
-  >>> Valide o aluno com video antes de liberar o Bloco 5. <<<
-
-
-############################################################
-#  TRAVADO ([--]) - BLOCO 5 - INOVACOES PWA                #
-#  push (VAPID) JA funciona, so estender. IA = sensivel.   #
-############################################################
-
-[--] PWA instalavel: revise manifest (nome, icones, theme-color #0D0D0D, standalone) e o sw.js com cache do app shell e ultimos dados (offline-first). NAO mexer nas chaves VAPID nem no push. git add . && git commit -m "feat(pwa): manifest e cache offline-first" && git push origin main
-[--] Area do aluno via link publico (somente leitura): pagina que o link de "Enviar link" abre, mostrando treino ou plano alimentar, responsiva e instalavel. git add . && git commit -m "feat(pwa): area publica do aluno por link" && git push origin main
-[--] Fila offline de rascunhos: salvar local aluno/treino/dieta/pagamento sem rede e sincronizar ao reconectar, com indicador de "pendente de sincronizacao". git add . && git commit -m "feat(pwa): fila offline com sync" && git push origin main
-[--] EXTENDER notificacoes (push JA funciona): tela de preferencias + gatilhos de check-in pendente e mensalidade vencendo/atrasada, reaproveitando VAPID. NAO recriar o push. git add . && git commit -m "feat(notif): preferencias e novos gatilhos" && git push origin main
-[--] Lembretes automaticos: ao agendar, programar WhatsApp X min antes + confirmacao do aluno; painel de lembretes do dia. git add . && git commit -m "feat(agenda): lembretes automaticos" && git push origin main
-[--] Busca global / command palette: pesquisa alunos, exercicios, padroes, planos e conversas + acesso rapido as acoes. git add . && git commit -m "feat(ux): busca global / command palette" && git push origin main
-[--] [COM ACOMPANHAMENTO - NUNCA NOTURNO] Sugestao com IA: rascunho de treino e de plano alimentar a partir de objetivo/nivel, com revisao do gestor antes de salvar; provedor de IA atras de servico configuravel. git add . && git commit -m "feat(ia): rascunho de treino e dieta" && git push origin main
-
-
-==============================================
- FORA DA FILA (so com acompanhamento, nunca noturno):
-   Fase 6 login seguro/manter logado (auth) | Fase 7 logo + seguranca |
-   Fase 8 Corefy PIX | Fase 9 SaaS multi-personal + painel admin
-==============================================
+== GRUPO 7 - REVISAO FINAL DESTA RODADA ==
+[ ] Revisao final: reabrir cada tela ajustada nesta rodada e confirmar: nenhum botao escondido atras da barra, nenhum elemento grudando no scroll indevidamente, nenhum flicker ao navegar, busca de Mensagens sem auto-enter, Padroes igual a ref, Contratos com PDF, Biblioteca com video reproduzindo. Atualize DIVERGENCIAS-GESTOR.md marcando o que foi resolvido e o que sobrou. git add . && git commit -m "chore: revisao final da rodada de correcoes do gestor" && git push origin main

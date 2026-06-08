@@ -2096,9 +2096,6 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 0 0.75rem;
-  position: sticky;
-  top: 0;
-  z-index: 10;
   background: var(--bg);
   border-bottom: 1px solid var(--borda);
 }
@@ -2273,15 +2270,10 @@
 }
 
 .ns-footer-spacer {
-  height: 5.5rem;
+  height: 1rem;
 }
 
 .ns-footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 20;
   display: flex;
   align-items: center;
   gap: 0.75rem;
