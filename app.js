@@ -2812,7 +2812,7 @@
               icons.messages
             )
           : ""}
-        ${filteredConversations.length ? `<div class="wa-conv-list">${filteredConversations.map(renderConversationCard).join("")}</div>` : ""}
+        ${filteredConversations.length ? `${newStudents.length ? '<p class="wa-section-label">Conversas</p>' : ""}<div class="wa-conv-list">${filteredConversations.map(renderConversationCard).join("")}</div>` : ""}
         ${newStudents.length
           ? `<p class="wa-section-label">Iniciar nova conversa</p><div class="wa-conv-list">${newStudents.map(renderNewConversationCard).join("")}</div>`
           : ""}
@@ -10456,6 +10456,12 @@
         const key = target.dataset.messageFilter;
         const cursor = target.selectionStart;
         state.messageFilters[key] = target.value;
+        if (state.managerMenu === "messages") {
+          elements.managerContent.innerHTML = fixMojibake(renderManagerMessages());
+          const restored = elements.managerContent.querySelector(`[data-message-filter="${key}"]`);
+          if (restored) { restored.focus(); restored.setSelectionRange(cursor, cursor); }
+          return;
+        }
         renderManager();
         const restored = document.querySelector(`[data-message-filter="${key}"]`);
         if (restored) { restored.focus(); restored.setSelectionRange(cursor, cursor); }
@@ -10463,7 +10469,14 @@
     });
     document.addEventListener("change", (event) => {
       const target = event.target;
-      if (target.matches("[data-message-filter]")) { state.messageFilters[target.dataset.messageFilter] = target.value; renderManager(); }
+      if (target.matches("[data-message-filter]")) {
+        state.messageFilters[target.dataset.messageFilter] = target.value;
+        if (state.managerMenu === "messages") {
+          elements.managerContent.innerHTML = fixMojibake(renderManagerMessages());
+          return;
+        }
+        renderManager();
+      }
     });
     document.addEventListener("submit", async (event) => {
       event.preventDefault();
