@@ -128,6 +128,9 @@
     workoutSheet: document.getElementById("workoutSheet"),
     workoutSheetBody: document.getElementById("workoutSheetBody"),
     workoutSheetTitle: document.getElementById("workoutSheetTitle"),
+    apSheet: document.getElementById("apSheet"),
+    apSheetBody: document.getElementById("apSheetBody"),
+    apSheetTitle: document.getElementById("apSheetTitle"),
     installSteps: document.getElementById("installSteps"),
     retryInstall: document.getElementById("retryInstall"),
     toast: document.getElementById("toast"),
@@ -2055,16 +2058,43 @@
 
   function showToast(message, type = "default") {
     window.clearTimeout(state.toastTimer);
-    elements.toast.textContent = fixMojibake(message);
-    elements.toast.classList.toggle("is-success", type === "success");
-    elements.toast.classList.add("is-visible");
+    const el = elements.toast;
+    el.innerHTML = "";
+    el.textContent = fixMojibake(message);
+    el.classList.toggle("is-success", type === "success");
+    el.classList.remove("has-action");
+    el.classList.add("is-visible");
     state.toastTimer = window.setTimeout(() => {
-      elements.toast.classList.remove("is-visible", "is-success");
+      el.classList.remove("is-visible", "is-success");
     }, 3200);
   }
 
   function showSuccessToast(message) {
     showToast(message, "success");
+  }
+
+  function showActionToast(message, actionLabel, onAction) {
+    window.clearTimeout(state.toastTimer);
+    const el = elements.toast;
+    el.innerHTML = "";
+    const span = document.createElement("span");
+    span.textContent = fixMojibake(message);
+    const btn = document.createElement("button");
+    btn.className = "toast-action-btn";
+    btn.type = "button";
+    btn.textContent = actionLabel;
+    btn.onclick = () => { clearToast(); onAction(); };
+    el.append(span, btn);
+    el.classList.remove("is-success");
+    el.classList.add("is-visible", "has-action");
+    state.toastTimer = window.setTimeout(clearToast, 5000);
+  }
+
+  function clearToast() {
+    window.clearTimeout(state.toastTimer);
+    const el = elements.toast;
+    el.classList.remove("is-visible", "is-success", "has-action");
+    el.innerHTML = "";
   }
 
   function showView(viewName) {
@@ -6024,26 +6054,115 @@
     document.body.style.overflow = "";
   }
 
-  function openApplyPatternForm(workoutId) {
+  function openApplyPatternSheet(workoutId) {
     const workout = getWorkout(workoutId);
     if (!workout || !isWorkoutPattern(workout)) return showToast("Padrão não encontrado.");
-    openModal(
-      "Aplicar padrão ao aluno",
-      `
-        <form class="form-grid" id="applyPatternForm" data-id="${workout.id}">
-          <div class="empty-state compact-note">
-            <strong>${escapeHtml(workout.title)}</strong>
-            <span>Uma cópia individual será criada para o aluno. O padrão original não será alterado.</span>
+    const sheet = elements.apSheet;
+    const body = elements.apSheetBody;
+    const titleEl = elements.apSheetTitle;
+    if (!sheet || !body) return;
+    if (titleEl) titleEl.textContent = "Aplicar padrão";
+
+    const today = new Date().toISOString().slice(0, 10);
+    const students = state.data.students.filter((s) => s.status !== "inactive");
+
+    body.innerHTML = `
+      <form class="form-grid" id="applyPatternSheetForm" data-id="${escapeHtml(workout.id)}">
+        <div class="empty-state compact-note">
+          <strong>${escapeHtml(workout.title)}</strong>
+          <span>Uma cópia individual será criada para cada aluno selecionado. O padrão original não será alterado.</span>
+        </div>
+
+        <div class="field">
+          <span>Alunos</span>
+          <div class="ap-student-chips" id="apSelectedChips"></div>
+          <div class="ap-student-search-wrap">
+            <input class="ap-student-search" id="apStudentSearch" type="search" placeholder="Buscar aluno…" autocomplete="off" />
           </div>
-          <div class="form-grid two">
-            <label class="field"><span>Aluno</span><select name="studentId" required>${studentOptions(state.data.students[0]?.id || "")}</select></label>
-            <label class="field"><span>Status do treino</span><select name="status"><option value="draft">Rascunho</option><option value="published">Publicado para o aluno</option></select></label>
+          <div class="ap-student-list" id="apStudentList">
+            ${students.length
+              ? students.map((s) => `
+                <label class="ap-student-row">
+                  <input type="checkbox" name="studentIds" value="${escapeHtml(s.id)}" data-ap-student-name="${escapeHtml(s.name)}" />
+                  <span class="ap-student-avatar">${escapeHtml(s.name.slice(0, 2).toUpperCase())}</span>
+                  <span class="ap-student-label">${escapeHtml(s.name)}</span>
+                </label>`).join("")
+              : `<p class="ap-empty">Nenhum aluno cadastrado.</p>`
+            }
           </div>
-          <label class="field"><span>Título no treino do aluno</span><input name="title" type="text" value="${escapeHtml(workout.title)}" required /></label>
-          <button class="primary-action" type="submit">Criar treino do aluno</button>
-        </form>
-      `
-    );
+        </div>
+
+        <div class="form-grid two">
+          <label class="field"><span>Data de início</span><input name="startDate" type="date" value="${today}" /></label>
+          <label class="field"><span>Status do treino</span><select name="status"><option value="published">Publicado</option><option value="draft">Rascunho</option></select></label>
+        </div>
+
+        <div class="field">
+          <span>Ao aplicar</span>
+          <div class="ap-toggle-row">
+            <label class="ap-toggle-opt">
+              <input type="radio" name="applyMode" value="add" checked />
+              <span>Adicionar ao treino atual</span>
+            </label>
+            <label class="ap-toggle-opt">
+              <input type="radio" name="applyMode" value="replace" />
+              <span>Substituir treino atual</span>
+            </label>
+          </div>
+        </div>
+
+        <button class="ghost-button" type="button" data-ap-adjust="${escapeHtml(workout.id)}">Ajustar antes de aplicar</button>
+
+        <button class="primary-action" type="submit">Aplicar</button>
+      </form>
+    `;
+
+    sheet.hidden = false;
+    document.body.style.overflow = "hidden";
+    _bindApSheetSearch();
+  }
+
+  function _bindApSheetSearch() {
+    const searchInput = document.getElementById("apStudentSearch");
+    const list = document.getElementById("apStudentList");
+    if (!searchInput || !list) return;
+
+    function updateChips() {
+      const checked = list.querySelectorAll('input[name="studentIds"]:checked');
+      const chipsEl = document.getElementById("apSelectedChips");
+      if (!chipsEl) return;
+      if (!checked.length) { chipsEl.innerHTML = ""; return; }
+      chipsEl.innerHTML = Array.from(checked).map((cb) =>
+        `<span class="ap-chip">${escapeHtml(cb.dataset.apStudentName)}<button type="button" data-ap-remove="${escapeHtml(cb.value)}" aria-label="Remover">×</button></span>`
+      ).join("");
+    }
+
+    list.addEventListener("change", updateChips);
+    document.getElementById("apSelectedChips")?.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-ap-remove]");
+      if (!btn) return;
+      const cb = list.querySelector(`input[value="${CSS.escape(btn.dataset.apRemove)}"]`);
+      if (cb) { cb.checked = false; updateChips(); }
+    });
+
+    searchInput.addEventListener("input", () => {
+      const q = searchInput.value.trim().toLowerCase();
+      list.querySelectorAll(".ap-student-row").forEach((row) => {
+        const name = row.querySelector(".ap-student-label")?.textContent.toLowerCase() || "";
+        row.hidden = q && !name.includes(q);
+      });
+    });
+  }
+
+  function closeApplyPatternSheet() {
+    const sheet = elements.apSheet;
+    if (!sheet || sheet.hidden) return;
+    sheet.hidden = true;
+    document.body.style.overflow = "";
+  }
+
+  function openApplyPatternForm(workoutId) {
+    openApplyPatternSheet(workoutId);
   }
 
   function openStudentPatternWorkoutForm(studentId) {
@@ -7182,24 +7301,42 @@
     else showToast(workout.studentId ? "Treino salvo." : "Padrão de treino salvo.");
   }
 
-  function handleApplyPatternForm(form) {
+  async function handleApplyPatternSheetForm(form) {
     const data = new FormData(form);
     const pattern = getWorkout(form.dataset.id);
-    const studentId = String(data.get("studentId") || "");
     if (!pattern || !isWorkoutPattern(pattern)) return showToast("Padrão não encontrado.");
-    if (!getStudent(studentId)) return showToast("Selecione um aluno válido.");
-    const status = String(data.get("status") || "draft");
-    const studentWorkout = buildStudentWorkoutFromPattern(pattern, studentId, {
-      title: String(data.get("title") || pattern.title).trim(),
-      status
-    });
-    state.data.workouts.unshift(studentWorkout);
+    const studentIds = data.getAll("studentIds").map(String).filter(Boolean);
+    if (!studentIds.length) return showToast("Selecione ao menos um aluno.");
+    const status = String(data.get("status") || "published");
+    const applyMode = String(data.get("applyMode") || "add");
+
+    if (applyMode === "replace") {
+      studentIds.forEach((sid) => {
+        const idx = state.data.workouts.findIndex((w) => w.studentId === sid && !isWorkoutPattern(w));
+        if (idx !== -1) state.data.workouts.splice(idx, 1);
+      });
+    }
+
+    const created = studentIds.map((sid) => buildStudentWorkoutFromPattern(pattern, sid, { status }));
+    state.data.workouts.unshift(...created);
     persistData();
-    closeModal();
-    state.profileTab = "workouts";
-    openStudentProfile(studentId);
-    if (status === "published") showSuccessToast("Treino criado e publicado para o aluno.");
-    else showToast("Treino criado como rascunho do aluno.");
+    closeApplyPatternSheet();
+
+    try {
+      const { aplicarPadrao } = await import("./src/services.js");
+      await Promise.all(studentIds.map((sid) => aplicarPadrao(sid, pattern.id)));
+    } catch (_) {}
+
+    const firstName = escapeHtml(getStudent(studentIds[0])?.name || "aluno");
+    const label = studentIds.length === 1
+      ? `Padrão aplicado para ${firstName}.`
+      : `Padrão aplicado para ${studentIds.length} alunos.`;
+
+    showActionToast(label, "Enviar link", () => openEnviarLinkSheet(studentIds[0]));
+  }
+
+  function handleApplyPatternForm(form) {
+    handleApplyPatternSheetForm(form);
   }
 
   function handleStudentPatternWorkoutForm(form) {
@@ -7908,12 +8045,14 @@
 
   function bindWorkoutEvents() {
     document.addEventListener("click", (event) => {
-      const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-close-workout-sheet], [data-manager-drawer-backdrop]");
+      const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-close-workout-sheet], [data-close-ap-sheet], [data-manager-drawer-backdrop]");
       if (!target) return;
       if (target.matches("[data-close-workout-sheet]")) closeWorkoutSheet();
+      if (target.matches("[data-close-ap-sheet]")) closeApplyPatternSheet();
+      if (target.matches("[data-ap-adjust]")) { closeApplyPatternSheet(); openWorkoutForm(target.dataset.apAdjust); }
       if (target.matches("[data-toggle-workout-filter]")) { state.workoutFilterOpen = !state.workoutFilterOpen; renderManager(); }
       if (target.matches("[data-open-workout-form]")) openWorkoutForm(target.dataset.openWorkoutForm || "", target.dataset.prefillStudent || "");
-      if (target.matches("[data-open-apply-pattern-form]")) openApplyPatternForm(target.dataset.openApplyPatternForm);
+      if (target.matches("[data-open-apply-pattern-form]")) openApplyPatternSheet(target.dataset.openApplyPatternForm);
       if (target.matches("[data-open-student-pattern-workout]")) openStudentPatternWorkoutForm(target.dataset.openStudentPatternWorkout);
       if (target.matches("[data-add-workout-row]")) {
         const container = document.getElementById("workoutRows");
@@ -7952,7 +8091,8 @@
       event.preventDefault();
       const form = event.target;
       if (form.id === "workoutForm") handleWorkoutForm(form);
-      if (form.id === "applyPatternForm") handleApplyPatternForm(form);
+      if (form.id === "applyPatternForm") handleApplyPatternSheetForm(form);
+      if (form.id === "applyPatternSheetForm") handleApplyPatternSheetForm(form);
       if (form.id === "studentPatternWorkoutForm") handleStudentPatternWorkoutForm(form);
       if (form.id === "useExerciseForm") handleUseExerciseForm(form);
     });
