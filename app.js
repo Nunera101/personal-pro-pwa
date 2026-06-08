@@ -134,6 +134,14 @@
     exerciseSheet: document.getElementById("exerciseSheet"),
     exerciseSheetBody: document.getElementById("exerciseSheetBody"),
     exerciseSheetTitle: document.getElementById("exerciseSheetTitle"),
+    videoModal: document.getElementById("videoModal"),
+    videoModalTitle: document.getElementById("videoModalTitle"),
+    videoModalBody: document.getElementById("videoModalBody"),
+    videoModalFooter: document.getElementById("videoModalFooter"),
+    usarTreinoSheet: document.getElementById("usarTreinoSheet"),
+    utSheetBody: document.getElementById("utSheetBody"),
+    enviarVideoSheet: document.getElementById("enviarVideoSheet"),
+    evSheetBody: document.getElementById("evSheetBody"),
     installSteps: document.getElementById("installSteps"),
     retryInstall: document.getElementById("retryInstall"),
     toast: document.getElementById("toast"),
@@ -3885,88 +3893,298 @@
     `;
   }
 
-  function openExerciseVideo(exerciseId) {
-    const exercise = getExercise(exerciseId);
-    if (!exercise || !hasExerciseVideo(exercise)) return showToast("Este exercício não tem vídeo cadastrado.");
-    if (exercise.videoStorage === "indexeddb" && exercise.videoKey) return openLocalVideo(exercise.id);
-    if (exercise.videoUrl) {
-      window.open(exercise.videoUrl, "_blank", "noopener,noreferrer");
-      return;
-    }
-    showToast("Vídeo indisponível neste aparelho.");
-  }
+  function openExerciseVideo(exerciseId) { openVideoModal(exerciseId); }
 
-  function openUseExerciseInWorkout(exerciseId) {
+  function openUseExerciseInWorkout(exerciseId) { openUsarTreinoSheet(exerciseId); }
+
+  function handleUseExerciseForm(form) { handleUtForm(form); }
+
+  async function openVideoModal(exerciseId) {
     const exercise = getExercise(exerciseId);
     if (!exercise) return showToast("Exercício não encontrado.");
-    const patterns = getWorkoutPatterns();
-    const activeStudents = state.data.students.filter((student) => student.status !== "inactive");
-    openModal(
-      "Usar no treino",
-      `
-        <form class="form-grid use-exercise-form" id="useExerciseForm" data-exercise-id="${escapeHtml(exercise.id)}">
-          <div class="empty-state compact-note">
-            <strong>${escapeHtml(exercise.name)}</strong>
-            <span>Adicione este exercício a um padrão existente ou crie uma cópia inicial para aluno.</span>
+    const modal = elements.videoModal;
+    if (!modal) return;
+    elements.videoModalTitle.textContent = exercise.name || "Exercício";
+    const body = elements.videoModalBody;
+    const footer = elements.videoModalFooter;
+    let videoSrc = "";
+    if (hasExerciseVideo(exercise)) {
+      if (exercise.videoStorage === "indexeddb" && exercise.videoKey) {
+        try {
+          const blob = await readLocalVideo(exercise.videoKey);
+          if (blob) {
+            if (state.videoObjectUrls[exerciseId]) URL.revokeObjectURL(state.videoObjectUrls[exerciseId]);
+            const url = URL.createObjectURL(blob);
+            state.videoObjectUrls[exerciseId] = url;
+            videoSrc = url;
+          }
+        } catch {}
+      } else if (exercise.videoUrl) {
+        videoSrc = exercise.videoUrl;
+      }
+    }
+    if (videoSrc) {
+      body.innerHTML = `<div class="vm-player-wrap"><video class="vm-player" src="${escapeHtml(videoSrc)}" controls playsinline></video></div>`;
+    } else {
+      body.innerHTML = `
+        <div class="vm-placeholder">
+          <div class="vm-placeholder-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m10 9 6 3-6 3V9Z"/></svg>
           </div>
-          <label class="field"><span>Destino</span><select name="mode">
-            <option value="newPattern">Novo padrão de treino</option>
-            <option value="existingPattern" ${patterns.length ? "" : "disabled"}>Adicionar a padrão existente</option>
-            <option value="studentWorkout" ${activeStudents.length ? "" : "disabled"}>Novo treino individual do aluno</option>
-          </select></label>
-          <label class="field"><span>Padrão existente</span><select name="patternId"><option value="">Selecionar padrão</option>${patterns.map((workout) => `<option value="${escapeHtml(workout.id)}">${escapeHtml(workout.title)}</option>`).join("")}</select></label>
-          <label class="field"><span>Aluno</span><select name="studentId"><option value="">Selecionar aluno</option>${activeStudents.map((student) => `<option value="${escapeHtml(student.id)}">${escapeHtml(student.name)}</option>`).join("")}</select></label>
-          <label class="field"><span>Título do novo treino/padrão</span><input name="title" type="text" value="${escapeHtml(exercise.name)}" /></label>
-          <button class="primary-action" type="submit">Adicionar exercício</button>
-        </form>
-      `
-    );
+          <p class="vm-placeholder-text">Nenhum vídeo cadastrado</p>
+          <button class="primary-action vm-upload-btn" type="button" data-vm-enviar-video="${escapeHtml(exerciseId)}">Enviar vídeo</button>
+        </div>`;
+    }
+    footer.innerHTML = `
+      <button class="secondary-action" type="button" data-vm-usar-treino="${escapeHtml(exerciseId)}">Usar no treino</button>
+      <button class="primary-action" type="button" data-vm-editar="${escapeHtml(exerciseId)}">Editar</button>`;
+    modal.hidden = false;
+    document.body.style.overflow = "hidden";
   }
 
-  function handleUseExerciseForm(form) {
+  function closeVideoModal() {
+    const modal = elements.videoModal;
+    if (!modal || modal.hidden) return;
+    modal.hidden = true;
+    elements.videoModalBody.innerHTML = "";
+    elements.videoModalFooter.innerHTML = "";
+    document.body.style.overflow = "";
+  }
+
+  function openUsarTreinoSheet(exerciseId) {
+    const exercise = getExercise(exerciseId);
+    if (!exercise) return showToast("Exercício não encontrado.");
+    const sheet = elements.usarTreinoSheet;
+    const body = elements.utSheetBody;
+    if (!sheet || !body) return;
+    const patterns = getAvailableWorkoutPatterns();
+    body.innerHTML = `
+      <form class="form-grid ut-form" id="utForm" data-exercise-id="${escapeHtml(exerciseId)}">
+        <div class="ut-exercise-header">
+          <span class="ut-exercise-name">${escapeHtml(exercise.name)}</span>
+        </div>
+        <div class="search-filter-row">
+          <input class="search-input" type="search" id="utSearch" placeholder="Buscar padrão…" autocomplete="off" />
+        </div>
+        <div class="ut-pattern-list" id="utPatternList" role="radiogroup" aria-label="Selecionar padrão">
+          <label class="ut-radio-item">
+            <input type="radio" name="patternId" value="__new__" checked>
+            <span class="ut-radio-label">
+              <span class="ut-radio-name">Novo padrão de treino</span>
+              <span class="ut-radio-sub">Cria um rascunho com este exercício</span>
+            </span>
+          </label>
+          ${patterns.map((p) => `
+            <label class="ut-radio-item" data-pattern-name="${escapeHtml(p.title.toLowerCase())}">
+              <input type="radio" name="patternId" value="${escapeHtml(p.id)}">
+              <span class="ut-radio-label">
+                <span class="ut-radio-name">${escapeHtml(p.title)}</span>
+                <span class="ut-radio-sub">${p.exercises?.length || 0} exercício${(p.exercises?.length || 0) !== 1 ? "s" : ""}</span>
+              </span>
+            </label>`).join("")}
+        </div>
+        <details class="ut-params-details">
+          <summary class="ut-params-summary">Configurar séries e repetições</summary>
+          <div class="ut-params-grid">
+            <label class="field"><span>Séries</span><input type="number" name="sets" min="1" max="20" value="3" /></label>
+            <label class="field"><span>Reps</span><input type="text" name="reps" value="10" placeholder="ex: 8-12" /></label>
+            <label class="field"><span>Descanso (s)</span><input type="number" name="rest" min="10" max="600" value="60" /></label>
+          </div>
+        </details>
+        <div class="ut-footer-row">
+          <button class="secondary-action" type="button" data-close-ut-sheet>Cancelar</button>
+          <button class="primary-action" type="submit">Adicionar</button>
+        </div>
+      </form>`;
+    document.getElementById("utSearch").addEventListener("input", (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      document.querySelectorAll("#utPatternList .ut-radio-item[data-pattern-name]").forEach((item) => {
+        item.hidden = q ? !item.dataset.patternName.includes(q) : false;
+      });
+    });
+    sheet.hidden = false;
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeUsarTreinoSheet() {
+    const sheet = elements.usarTreinoSheet;
+    if (!sheet || sheet.hidden) return;
+    sheet.hidden = true;
+    if (elements.utSheetBody) elements.utSheetBody.innerHTML = "";
+    document.body.style.overflow = "";
+  }
+
+  function handleUtForm(form) {
     const exerciseId = form.dataset.exerciseId;
     const exercise = getExercise(exerciseId);
     if (!exercise) return showToast("Exercício não encontrado.");
-    const mode = form.elements.mode.value;
-    const row = normalizeWorkoutExercise({ exerciseId, sets: 3, targetReps: "10", restSeconds: 60 }, 0);
-
-    if (mode === "existingPattern") {
-      const workout = getWorkout(form.elements.patternId.value);
-      if (!workout) return showToast("Selecione um padrão existente.");
-      workout.exercises = Array.isArray(workout.exercises) ? workout.exercises : [];
-      workout.exercises.push(normalizeWorkoutExercise({ ...row, order: workout.exercises.length + 1 }, workout.exercises.length));
-      workout.updatedAt = new Date().toISOString();
-      persistData();
-      closeModal();
-      showToast("Exercício adicionado ao padrão.");
-      state.managerMenu = "workouts";
-      renderApp();
-      return;
-    }
-
-    const isStudentWorkout = mode === "studentWorkout";
-    const studentId = isStudentWorkout ? form.elements.studentId.value : "";
-    if (isStudentWorkout && !studentId) return showToast("Selecione um aluno.");
-
-    state.data.workouts.unshift(
-      normalizeWorkout({
-        id: createId("workout"),
-        studentId,
-        title: form.elements.title.value.trim() || exercise.name,
-        description: `Criado a partir da biblioteca com ${exercise.name}.`,
+    const patternId = form.elements.patternId?.value;
+    const sets = parseInt(form.elements.sets?.value) || 3;
+    const reps = (form.elements.reps?.value || "10").trim();
+    const rest = parseInt(form.elements.rest?.value) || 60;
+    const exerciseRow = normalizeWorkoutExercise({ exerciseId, sets, targetReps: reps, restSeconds: rest }, 0);
+    if (patternId === "__new__") {
+      const newId = createId("workout");
+      state.data.workouts.unshift(normalizeWorkout({
+        id: newId,
+        trainerId: TRAINER_ID,
+        studentId: "",
+        title: exercise.name,
+        description: `Padrão criado a partir de ${exercise.name}.`,
         focus: getExercisePrimaryMuscle(exercise),
         level: "",
         status: "draft",
-        exercises: [row],
+        exercises: [exerciseRow],
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
-      })
-    );
+      }));
+      persistData();
+      closeUsarTreinoSheet();
+      closeVideoModal();
+      showToast("Padrão criado. Abrindo montador…");
+      openWorkoutForm(newId);
+      return;
+    }
+    const workout = getWorkout(patternId);
+    if (!workout) return showToast("Selecione um padrão.");
+    workout.exercises = Array.isArray(workout.exercises) ? workout.exercises : [];
+    workout.exercises.push(normalizeWorkoutExercise({ ...exerciseRow, order: workout.exercises.length + 1 }, workout.exercises.length));
+    workout.updatedAt = new Date().toISOString();
     persistData();
-    closeModal();
-    showToast(isStudentWorkout ? "Treino individual criado em rascunho." : "Padrão criado em rascunho.");
-    state.managerMenu = isStudentWorkout ? "students" : "workouts";
-    renderApp();
+    closeUsarTreinoSheet();
+    closeVideoModal();
+    showToast("Exercício adicionado ao padrão.");
+    openWorkoutForm(patternId);
+  }
+
+  function openEnviarVideoSheet(exerciseId) {
+    const exercise = getExercise(exerciseId);
+    if (!exercise) return showToast("Exercício não encontrado.");
+    const sheet = elements.enviarVideoSheet;
+    const body = elements.evSheetBody;
+    if (!sheet || !body) return;
+    let selectedFile = null;
+    let previewUrl = null;
+
+    function renderEmpty() {
+      body.innerHTML = `
+        <div class="ev-body">
+          <label class="ev-drop-area">
+            <input type="file" class="ev-file-input" accept="video/mp4,video/webm,video/quicktime" />
+            <div class="ev-drop-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+            </div>
+            <p class="ev-drop-label">Toque para selecionar ou arraste o vídeo</p>
+            <p class="ev-drop-sub">MP4, MOV ou WebM · máx 200 MB</p>
+          </label>
+          <div class="ut-footer-row">
+            <button class="secondary-action" type="button" data-close-ev-sheet>Cancelar</button>
+            <button class="primary-action" type="button" disabled>Salvar</button>
+          </div>
+        </div>`;
+      body.querySelector(".ev-file-input").addEventListener("change", (e) => {
+        if (e.target.files[0]) handleFileSelected(e.target.files[0]);
+      });
+    }
+
+    function renderSelected() {
+      body.innerHTML = `
+        <div class="ev-body">
+          <div class="ev-preview-wrap">
+            <video class="ev-preview-video" src="${previewUrl}" playsinline muted></video>
+          </div>
+          <div class="ev-file-info">
+            <span class="ev-file-name">${escapeHtml(selectedFile.name)}</span>
+            <span class="ev-file-size">${formatFileSize(selectedFile.size)}</span>
+          </div>
+          <div class="ev-progress-wrap" id="evProgressWrap" style="display:none">
+            <div class="ev-progress-bar" id="evProgressBar" style="width:0%"></div>
+          </div>
+          <div class="ev-error" id="evError" style="display:none"></div>
+          <div class="ev-file-actions" id="evFileActions">
+            <label class="secondary-action ev-replace-label">
+              <input type="file" class="ev-file-input" accept="video/mp4,video/webm,video/quicktime" />
+              Substituir
+            </label>
+            <button class="ghost-button" type="button" id="evRemoveBtn">Remover</button>
+          </div>
+          <div class="ut-footer-row">
+            <button class="secondary-action" type="button" data-close-ev-sheet>Cancelar</button>
+            <button class="primary-action" type="button" id="evSaveBtn">Salvar</button>
+          </div>
+        </div>`;
+      body.querySelector(".ev-file-input").addEventListener("change", (e) => {
+        if (e.target.files[0]) handleFileSelected(e.target.files[0]);
+      });
+      document.getElementById("evRemoveBtn").addEventListener("click", () => {
+        if (previewUrl) { URL.revokeObjectURL(previewUrl); previewUrl = null; }
+        selectedFile = null;
+        renderEmpty();
+      });
+      document.getElementById("evSaveBtn").addEventListener("click", handleSave);
+    }
+
+    function handleFileSelected(file) {
+      const allowed = ["video/mp4", "video/webm", "video/quicktime"];
+      if (file.type && !allowed.includes(file.type)) { showToast("Use vídeo MP4, WebM ou MOV."); return; }
+      if (file.size > 200 * 1024 * 1024) { showToast("O vídeo deve ter até 200 MB."); return; }
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      selectedFile = file;
+      previewUrl = URL.createObjectURL(file);
+      renderSelected();
+    }
+
+    async function handleSave() {
+      if (!selectedFile) return;
+      const saveBtn = document.getElementById("evSaveBtn");
+      const progressWrap = document.getElementById("evProgressWrap");
+      const progressBar = document.getElementById("evProgressBar");
+      const errorEl = document.getElementById("evError");
+      const fileActions = document.getElementById("evFileActions");
+      saveBtn.disabled = true;
+      if (fileActions) fileActions.style.display = "none";
+      errorEl.style.display = "none";
+      progressWrap.style.display = "block";
+      let prog = 0;
+      const timer = setInterval(() => {
+        prog = Math.min(prog + (85 - prog) * 0.1, 85);
+        progressBar.style.width = prog + "%";
+      }, 120);
+      try {
+        const videoData = await uploadExerciseVideo(selectedFile, exercise.id);
+        clearInterval(timer);
+        progressBar.style.width = "100%";
+        Object.assign(exercise, videoData);
+        exercise.updatedAt = new Date().toISOString();
+        persistData();
+        showToast("Vídeo salvo.");
+        if (previewUrl) { URL.revokeObjectURL(previewUrl); previewUrl = null; }
+        closeEnviarVideoSheet();
+        setTimeout(() => openVideoModal(exercise.id), 150);
+      } catch (err) {
+        clearInterval(timer);
+        progressBar.style.width = "0%";
+        progressWrap.style.display = "none";
+        if (fileActions) fileActions.style.display = "flex";
+        saveBtn.disabled = false;
+        const msg = err?.message || "Erro ao enviar vídeo.";
+        errorEl.innerHTML = `${escapeHtml(msg)} <button class="ghost-button ev-retry-btn" type="button">Tentar de novo</button>`;
+        errorEl.style.display = "flex";
+        errorEl.querySelector(".ev-retry-btn").addEventListener("click", handleSave);
+      }
+    }
+
+    renderEmpty();
+    sheet.hidden = false;
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeEnviarVideoSheet() {
+    const sheet = elements.enviarVideoSheet;
+    if (!sheet || sheet.hidden) return;
+    sheet.hidden = true;
+    if (elements.evSheetBody) elements.evSheetBody.innerHTML = "";
+    document.body.style.overflow = "";
   }
 
   function renderExerciseCard(exercise) {
@@ -8222,7 +8440,7 @@
       if (form.id === "applyPatternForm") handleApplyPatternSheetForm(form);
       if (form.id === "applyPatternSheetForm") handleApplyPatternSheetForm(form);
       if (form.id === "studentPatternWorkoutForm") handleStudentPatternWorkoutForm(form);
-      if (form.id === "useExerciseForm") handleUseExerciseForm(form);
+      if (form.id === "utForm") handleUtForm(form);
     });
   }
 
@@ -8341,12 +8559,18 @@
 
   function bindExerciseEvents() {
     document.addEventListener("click", (event) => {
-      const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-manager-drawer-backdrop], [data-close-exercise-sheet]");
+      const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-manager-drawer-backdrop], [data-close-exercise-sheet], [data-close-video-modal], [data-close-ut-sheet], [data-close-ev-sheet]");
       if (!target) return;
       if (target.matches("[data-close-exercise-sheet]")) closeExerciseSheet();
+      if (target.matches("[data-close-video-modal]")) closeVideoModal();
+      if (target.matches("[data-close-ut-sheet]")) closeUsarTreinoSheet();
+      if (target.matches("[data-close-ev-sheet]")) closeEnviarVideoSheet();
       if (target.matches("[data-open-exercise-form]")) openExerciseForm(target.dataset.openExerciseForm || "");
-      if (target.matches("[data-open-exercise-video]")) openExerciseVideo(target.dataset.openExerciseVideo);
-      if (target.matches("[data-use-exercise-workout]")) openUseExerciseInWorkout(target.dataset.useExerciseWorkout);
+      if (target.matches("[data-open-exercise-video]")) openVideoModal(target.dataset.openExerciseVideo);
+      if (target.matches("[data-use-exercise-workout]")) openUsarTreinoSheet(target.dataset.useExerciseWorkout);
+      if (target.matches("[data-vm-usar-treino]")) openUsarTreinoSheet(target.dataset.vmUsarTreino);
+      if (target.matches("[data-vm-editar]")) { closeVideoModal(); openExerciseForm(target.dataset.vmEditar); }
+      if (target.matches("[data-vm-enviar-video]")) openEnviarVideoSheet(target.dataset.vmEnviarVideo);
       if (target.matches("[data-toggle-exercise-status]")) {
         const exercise = getExercise(target.dataset.toggleExerciseStatus);
         if (exercise) exercise.status = exercise.status === "active" ? "inactive" : "active";

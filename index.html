@@ -324,9 +324,55 @@
       </section>
     </div>
 
+    <!-- Modal: Ver vídeo -->
+    <div class="video-modal" id="videoModal" role="dialog" aria-modal="true" aria-labelledby="videoModalTitle" hidden>
+      <div class="video-modal-backdrop" data-close-video-modal></div>
+      <section class="video-modal-panel">
+        <div class="sheet-handle" aria-hidden="true"></div>
+        <div class="ag-head">
+          <h2 id="videoModalTitle" class="ag-title"></h2>
+          <button class="icon-button ag-close-btn" type="button" data-close-video-modal aria-label="Fechar">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div id="videoModalBody" class="video-modal-body"></div>
+        <div class="video-modal-footer" id="videoModalFooter"></div>
+      </section>
+    </div>
+
+    <!-- Sheet: Usar no treino -->
+    <div class="ag-sheet" id="usarTreinoSheet" role="dialog" aria-modal="true" aria-labelledby="utSheetTitle" hidden>
+      <div class="ag-backdrop" data-close-ut-sheet></div>
+      <section class="ag-panel">
+        <div class="sheet-handle" aria-hidden="true"></div>
+        <div class="ag-head">
+          <h2 id="utSheetTitle" class="ag-title">Usar no treino</h2>
+          <button class="icon-button ag-close-btn" type="button" data-close-ut-sheet aria-label="Fechar">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div id="utSheetBody"></div>
+      </section>
+    </div>
+
+    <!-- Sheet: Enviar vídeo -->
+    <div class="ag-sheet" id="enviarVideoSheet" role="dialog" aria-modal="true" aria-labelledby="evSheetTitle" hidden>
+      <div class="ag-backdrop" data-close-ev-sheet></div>
+      <section class="ag-panel">
+        <div class="sheet-handle" aria-hidden="true"></div>
+        <div class="ag-head">
+          <h2 id="evSheetTitle" class="ag-title">Enviar vídeo</h2>
+          <button class="icon-button ag-close-btn" type="button" data-close-ev-sheet aria-label="Fechar">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div id="evSheetBody"></div>
+      </section>
+    </div>
+
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-    <script src="./app.js?v=58"></script>
+    <script src="./app.js?v=59"></script>
   </body>
 </html>
 
