@@ -1042,6 +1042,20 @@
   }
 }
 
+/* A-03: a 390px o badge desce para linha própria, sem concorrer com "Enviar link" */
+@media (max-width: 24.5rem) {
+  .student-card-top {
+    grid-template-columns: auto minmax(0, 1fr) !important;
+  }
+
+  .student-card-side {
+    grid-column: 1 / -1 !important;
+    justify-self: start !important;
+    grid-template-columns: auto !important;
+    justify-content: start !important;
+  }
+}
+
 @media (max-width: 23rem) {
   .students-hero {
     grid-template-columns: 1fr !important;
@@ -1049,16 +1063,6 @@
 
   .students-hero .primary-action {
     width: 100% !important;
-  }
-
-  .student-card-top {
-    grid-template-columns: auto minmax(0, 1fr) !important;
-  }
-
-  .student-card-side {
-    grid-column: 1 / -1 !important;
-    grid-template-columns: auto auto !important;
-    justify-content: space-between !important;
   }
 }
 
@@ -1164,6 +1168,8 @@
 .student-card-side .badge {
   font-size: 0.7rem !important;
   padding: 3px 8px !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
 }
 
 /* Goal icon: target circle */
@@ -2075,6 +2081,19 @@
 /* styles.css hides nth-child(2) with higher specificity — override here since alunos.css loads after */
 .student-summary-grid .student-summary-card:nth-child(2) {
   display: grid !important;
+}
+
+/* A-01: especificidade maior (0,2,0) garante que base.css não sobrescreva com background:var(--card) */
+.students-workspace > .students-list-panel {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+/* A-02: badge não quebra linha nem é empurrado pelo nome longo */
+.student-card-side .badge {
+  white-space: nowrap !important;
 }
 
 /* ═══════════════════════════════════════════════
