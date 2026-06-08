@@ -1576,3 +1576,68 @@ box-shadow: none !important;
     max-width: 72px !important;
   }
 }
+
+/* ── AG-03: Destaque coluna do dia atual na grade semanal ── */
+.agenda-week-day.is-today {
+  background: rgba(245, 159, 11, 0.1) !important;
+  border-bottom: 2px solid var(--dourado, #f5b81e) !important;
+}
+.agenda-week-day.is-today strong,
+.agenda-week-day.is-today span {
+  color: var(--dourado, #f5b81e) !important;
+}
+.agenda-week-slot.is-today-col {
+  background: rgba(245, 159, 11, 0.038) !important;
+  border-right-color: rgba(245, 159, 11, 0.2) !important;
+}
+
+/* ── AG-04: Mini-preview de atividades na visão Mês ── */
+.month-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  min-width: 0;
+  margin-top: 2px;
+}
+.month-chip {
+  display: block;
+  overflow: hidden;
+  padding: 1px 3px;
+  border-left: 2px solid var(--dourado, #f5b81e);
+  border-radius: 2px;
+  background: rgba(245, 181, 27, 0.12);
+  color: var(--dourado, #f5b81e);
+  font-size: clamp(0.38rem, 1.4vw, 0.48rem);
+  font-weight: 700;
+  line-height: 1.45;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.month-chip.is-type-workout {
+  background: rgba(72, 215, 100, 0.13);
+  border-left-color: var(--treino, #48d764);
+  color: var(--treino, #48d764);
+}
+.month-chip.is-type-assessment,
+.month-chip.is-type-reassessment {
+  background: rgba(155, 109, 255, 0.13);
+  border-left-color: var(--aval, #9b6dff);
+  color: var(--aval, #9b6dff);
+}
+.month-chip.is-type-update {
+  background: rgba(90, 167, 255, 0.13);
+  border-left-color: var(--atualiza, #5aa7ff);
+  color: var(--atualiza, #5aa7ff);
+}
+.month-chip.is-type-return {
+  background: rgba(245, 155, 36, 0.13);
+  border-left-color: var(--retorno, #f59b24);
+  color: var(--retorno, #f59b24);
+}
+.month-chip.is-overflow {
+  border-left-color: transparent;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--txt2, rgba(247, 244, 235, 0.62));
+  font-weight: 600;
+}

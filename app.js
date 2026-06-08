@@ -5191,7 +5191,7 @@
                   .map((day) => {
                     const items = getAgendaItemsForDate(day, studentId).filter((item) => agendaItemHour(item) === hour);
                     return `
-                    <div class="agenda-week-slot ${day === state.agendaDate ? "is-selected-day" : ""}" data-select-date="${day}">
+                    <div class="agenda-week-slot ${day === state.agendaDate ? "is-selected-day" : ""} ${day === todayISO() ? "is-today-col" : ""}" data-select-date="${day}">
                       ${items.slice(0, 2).map((item) => renderCalendarEventBlock(item, "week")).join("")}
                       ${items.length > 2 ? `<button class="day-event is-more" type="button" data-select-date="${day}">+${items.length - 2}</button>` : ""}
                     </div>
@@ -5235,8 +5235,7 @@
                   <button class="day-select" type="button" data-select-date="${day}">
                     <span class="day-number">${parseISODate(day).getDate()}</span>
                   </button>
-                  <div class="month-dots">${items.slice(0, 4).map((item) => `<span class="agenda-dot ${agendaItemClass(item)}" aria-hidden="true"></span>`).join("")}</div>
-                  ${items.length ? `<button class="month-count" type="button" data-select-date="${day}">${items.length} ${items.length === 1 ? "item" : "itens"}</button>` : ""}
+                  ${items.length ? `<div class="month-preview">${items.slice(0, 2).map((item) => `<span class="month-chip ${agendaItemClass(item)}">${escapeHtml(activityShortLabel(item.type))}</span>`).join("")}${items.length > 2 ? `<span class="month-chip is-overflow">+${items.length - 2}</span>` : ""}</div>` : ""}
                 </div>
               `;
             })
@@ -5376,6 +5375,10 @@
       contract: "Contrato",
       other: "Outro evento"
     }[type] || "Atividade";
+  }
+
+  function activityShortLabel(type) {
+    return { workout: "Treino", assessment: "Aval.", reassessment: "Reaval.", update: "Atual.", return: "Retorno", contract: "Contrato", other: "Outro" }[type] || "Evento";
   }
 
   function activityTypeColor(type) {
