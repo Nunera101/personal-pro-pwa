@@ -1517,6 +1517,8 @@
   flex-shrink: 0;
 }
 
+.ex-sheet-footer:empty { display: none; }
+
 .ex-cancel-btn {
   min-width: 5.5rem;
   flex-shrink: 0;
