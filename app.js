@@ -292,7 +292,6 @@
     { id: "workouts", label: "Treinos", icon: icons.workouts },
     { id: "diet", label: "Dieta", icon: icons.diet },
     { id: "progress", label: "Progresso", icon: icons.progress },
-    { id: "agenda", label: "Agenda", icon: icons.agenda },
     { id: "updates", label: "Atualizações", icon: icons.updates },
     { id: "profile", label: "Mais", icon: icons.profile }
   ];
@@ -4892,7 +4891,7 @@
             : ""
         }
         <section class="panel">
-          <div class="section-title"><h3>Agenda de hoje</h3><button class="mini-button" type="button" data-student-nav="agenda">Abrir agenda</button></div>
+          <div class="section-title"><h3>Agenda de hoje</h3></div>
           ${renderAgendaList(agenda, false)}
         </section>
       </div>
@@ -5189,6 +5188,36 @@
       ["contract", "Contrato"]
     ];
     return `<div class="agenda-legend">${items.map(([type, label]) => `<span><i class="agenda-type-dot is-type-${type}" aria-hidden="true"></i>${label}</span>`).join("")}</div>`;
+  }
+
+  function renderStudentAgendaRows(items) {
+    if (!items.length) return emptyState("Nenhuma atividade neste dia", "Treinos, avaliações e atualizações aparecerão aqui.", icons.agenda);
+    return `
+      <div class="agenda-list">
+        ${items.map((item) => {
+          const canStart = item.type === "workout" && item.workoutId && item.status !== "done";
+          const statusLabel = item.status === "done" ? "Completo" : agendaStatusLabel(item.status);
+          return `
+            <article class="student-agenda-row ${agendaItemClass(item)}">
+              <button class="agenda-item-overlay" type="button"
+                data-open-agenda-detail="${escapeHtml(item.id)}"
+                data-agenda-date="${escapeHtml(item.date)}"
+                data-agenda-student="${escapeHtml(item.studentId)}"
+                aria-label="Ver detalhes"></button>
+              <span class="agenda-type-dot ${agendaItemClass(item)}" aria-hidden="true"></span>
+              <div class="student-agenda-row__info">
+                <strong>${escapeHtml(activityLabel(item.type))}</strong>
+                <span>${escapeHtml(item.time || "--:--")}</span>
+              </div>
+              <div class="student-agenda-row__badge">
+                ${statusBadge(statusLabel, agendaStatusTone(item.status))}
+                ${canStart ? `<button class="mini-button" type="button" data-start-workout="${escapeHtml(item.workoutId)}" data-activity-id="${escapeHtml(item.id)}">Iniciar</button>` : ""}
+              </div>
+            </article>
+          `;
+        }).join("")}
+      </div>
+    `;
   }
 
   function shortName(name = "") {
@@ -6092,6 +6121,9 @@
     const student = getCurrentStudent();
     const contracts = getStudentContracts(student?.id);
     const pendingContracts = contracts.filter((contract) => contract.status === "pending" || contract.status === "viewed");
+    const selectedDayItems = getAgendaItemsForDate(state.agendaDate, student?.id);
+    const isDayView = state.agendaView === "day";
+    const title = agendaPeriodLabel();
     return `
       <div class="content-stack">
         ${pageHeader("Mais", "Perfil, agenda, mensagens e configurações", '<button class="pill-button" type="button" data-install-trigger>Baixar app</button>')}
@@ -6103,11 +6135,46 @@
             </div>
             ${statusBadge(student?.status === "active" ? "Ativo" : "Inativo", student?.status === "active" ? "success" : "danger")}
           </div>
-          <div class="quick-grid more-grid">
-            <button class="quick-link" type="button" data-student-nav="agenda"><strong>Agenda</strong><span>Treinos e pendências</span></button>
-            <button class="quick-link" type="button" data-open-messages="${escapeHtml(student?.id || "")}"><strong>Mensagens</strong><span>${state.socketReady ? "Tempo real ativo" : "Modo local"}</span></button>
+          <button class="quick-link" type="button" data-open-messages="${escapeHtml(student?.id || "")}"><strong>Mensagens</strong><span>${state.socketReady ? "Tempo real ativo" : "Modo local"}</span></button>
+        </section>
+
+        <section class="agenda-control-panel">
+          <div class="agenda-view-tabs" aria-label="Visualização da agenda">
+            <button class="${state.agendaView === 'day' ? 'is-active' : ''}" type="button" data-agenda-view="day">Dia</button>
+            <button class="${state.agendaView === 'week' ? 'is-active' : ''}" type="button" data-agenda-view="week">Semana</button>
+            <button class="${state.agendaView === 'month' ? 'is-active' : ''}" type="button" data-agenda-view="month">Mês</button>
+          </div>
+          <div class="agenda-period-nav">
+            <button class="icon-button" type="button" data-agenda-shift="-1" aria-label="Período anterior">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <div class="agenda-period-label">
+              <strong>${escapeHtml(title)}</strong>
+            </div>
+            <button class="icon-button" type="button" data-agenda-shift="1" aria-label="Próximo período">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+            <button class="mini-button agenda-today-button" type="button" data-agenda-today>Hoje</button>
           </div>
         </section>
+
+        ${isDayView ? "" : `
+        <section class="panel agenda-calendar-panel" aria-label="Calendário da agenda">
+          ${state.agendaView === 'week' ? renderWeekCalendar(student?.id || "") : renderMonthCalendar(student?.id || "")}
+          ${renderAgendaLegend()}
+        </section>
+        `}
+
+        <section class="panel agenda-day-panel">
+          <div class="section-title">
+            <div>
+              <h3>Itens do dia</h3>
+              <span class="small-text">${formatLongDate(state.agendaDate)} · ${selectedDayItems.length} item(ns)</span>
+            </div>
+          </div>
+          ${renderStudentAgendaRows(selectedDayItems)}
+        </section>
+
         <section class="panel">
           <div class="section-title"><h3>Contratos</h3><span class="small-text">${pendingContracts.length} pendente(s)</span></div>
           ${contracts.length ? `<div class="entity-list">${contracts.map((contract) => renderContractRow(contract, false)).join("")}</div>` : emptyState("Nenhum contrato", "Contratos enviados pelo personal aparecerão aqui.", icons.contracts)}

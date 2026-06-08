@@ -5176,6 +5176,75 @@ button.dashboard-metric {
   background-color: rgba(255, 255, 255, 0.035);
 }
 
+/* Agenda do aluno — linhas limpas dentro de Mais */
+.student-agenda-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 3.1rem;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--line);
+  border-left-width: 0.22rem;
+  border-left-color: var(--brand);
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.student-agenda-row .agenda-item-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.student-agenda-row.is-type-workout  { border-left-color: #48d764; }
+.student-agenda-row.is-type-assessment,
+.student-agenda-row.is-type-reassessment { border-left-color: #9b6dff; }
+.student-agenda-row.is-type-update   { border-left-color: #5aa7ff; }
+.student-agenda-row.is-type-return   { border-left-color: #f59b24; }
+.student-agenda-row.is-type-other    { border-left-color: #8a8f96; }
+
+.student-agenda-row__info {
+  display: grid;
+  gap: 0.05rem;
+  min-width: 0;
+}
+
+.student-agenda-row__info strong {
+  color: var(--ink);
+  font-size: 0.93rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.student-agenda-row__info span {
+  color: var(--brand-strong);
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.student-agenda-row__badge {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.36rem;
+  flex-shrink: 0;
+}
+
+.student-agenda-row__badge .badge {
+  white-space: nowrap;
+}
+
+.student-agenda-row__badge .mini-button {
+  white-space: nowrap;
+}
+
 @media (max-width: 57.99rem) {
   .agenda-hero {
     grid-template-columns: 1fr;
