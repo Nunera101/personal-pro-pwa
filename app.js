@@ -60,6 +60,7 @@
     financeFilterOpen: false,
     dietFilters: { q: "", status: "all", objective: "all" },
     dietFilterOpen: false,
+    relatorioFilters: { period: "mes" },
     workoutFilterOpen: false,
     activeSession: null,
     rest: null,
@@ -189,7 +190,8 @@
     more: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM19 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM5 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"/></svg>',
     goal: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
     link: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>',
-    logout: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>'
+    logout: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>',
+    reports: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18M7 16v-5M12 16V8M17 16v-9"/></svg>'
   };
 
   const FOOD_DB = [
@@ -267,6 +269,7 @@
     { id: "messages", label: "Mensagens", icon: icons.messages, group: "Relacionamento" },
     { id: "contracts", label: "Contratos", icon: icons.contracts, group: "Relacionamento" },
     { id: "finance", label: "Financeiro", icon: icons.finance, group: "Relacionamento" },
+    { id: "reports", label: "Relatórios", icon: icons.reports, group: "Análises" },
     { id: "settings", label: "Configurações", icon: icons.settings, group: "Sistema" }
   ];
 
@@ -2381,6 +2384,7 @@
       messages: renderManagerMessages,
       contracts: renderManagerContracts,
       finance: renderManagerFinance,
+      reports: renderManagerRelatorios,
       studentProfile: renderManagerStudentProfile,
       more: renderManagerMore,
       settings: renderSettings
@@ -3073,6 +3077,254 @@
             ${financeInsightCard(icons.today, "Melhor semana", bestFinanceWeek(month), "recebidos", "success")}
             ${financeInsightCard(icons.agenda, "Próximos vencimentos", `${upcomingFinanceRecords(allRecords).length} cobrança(s)`, "nos próximos 7 dias", "warning")}
           </div>
+        </section>
+      </div>
+    `;
+  }
+
+  function relatorioRange(period) {
+    const today = todayISO();
+    const days = period === "semana" ? 7 : period === "trimestre" ? 90 : 30;
+    return { start: addDays(today, -(days - 1)), end: today, days };
+  }
+
+  function relatorioSessions(start, end) {
+    return state.data.sessions.filter((s) => {
+      const d = String(s.finishedAt || "").slice(0, 10);
+      return d >= start && d <= end;
+    });
+  }
+
+  function relatorioActivities(start, end) {
+    return state.data.activities.filter((a) => a.date >= start && a.date <= end);
+  }
+
+  function relatorioPaidPayments(start, end) {
+    return state.data.payments.filter((p) => {
+      const d = String(p.paidAt || "").slice(0, 10);
+      return d >= start && d <= end && p.trainerId === TRAINER_ID;
+    });
+  }
+
+  function relatorioNovosAlunos(start, end) {
+    return state.data.students.filter((s) => {
+      const d = String(s.createdAt || "").slice(0, 10);
+      return d >= start && d <= end && s.trainerId === TRAINER_ID;
+    }).length;
+  }
+
+  function relatorioAdeSaoChartData(period) {
+    const today = todayISO();
+    const points = period === "semana" ? 7 : period === "trimestre" ? 12 : 8;
+    const stepDays = period === "semana" ? 1 : 7;
+    return Array.from({ length: points }, (_, i) => {
+      const end = addDays(today, -(points - 1 - i) * stepDays);
+      const start = stepDays > 1 ? addDays(end, -(stepDays - 1)) : end;
+      const sessions = state.data.sessions.filter((s) => {
+        const d = String(s.finishedAt || "").slice(0, 10);
+        return d >= start && d <= end;
+      }).length;
+      const activities = state.data.activities.filter((a) => a.date >= start && a.date <= end).length;
+      const label = period === "semana" ? `${end.slice(8, 10)}/${end.slice(5, 7)}` : i === points - 1 ? "Hoje" : `S${i + 1}`;
+      return { label, pct: activities ? Math.min(100, Math.round((sessions / activities) * 100)) : 0 };
+    });
+  }
+
+  function relatorioFaturamentoChartData(period) {
+    const today = todayISO();
+    const points = period === "semana" ? 7 : period === "trimestre" ? 12 : 8;
+    const stepDays = period === "semana" ? 1 : 7;
+    return Array.from({ length: points }, (_, i) => {
+      const end = addDays(today, -(points - 1 - i) * stepDays);
+      const start = stepDays > 1 ? addDays(end, -(stepDays - 1)) : end;
+      const total = state.data.payments
+        .filter((p) => {
+          const d = String(p.paidAt || "").slice(0, 10);
+          return d >= start && d <= end && p.trainerId === TRAINER_ID;
+        })
+        .reduce((sum, p) => sum + moneyValue(p.amount), 0);
+      const label = period === "semana" ? `${end.slice(8, 10)}/${end.slice(5, 7)}` : i === points - 1 ? "Hoje" : `S${i + 1}`;
+      return { label, total };
+    });
+  }
+
+  function relatorioByObjetivo() {
+    const counts = {};
+    state.data.students
+      .filter((s) => s.status === "active" && s.trainerId === TRAINER_ID)
+      .forEach((s) => {
+        const goal = s.goal || "Não informado";
+        counts[goal] = (counts[goal] || 0) + 1;
+      });
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 6);
+  }
+
+  function renderRelatorioLineChart(data) {
+    const n = data.length;
+    const W = 560;
+    const H = 180;
+    const pad = 28;
+    const stepX = n > 1 ? (W - 2 * pad) / (n - 1) : 0;
+    const toY = (pct) => H - 12 - Math.round((pct / 100) * (H - 32));
+    const points = data.map((d, i) => `${pad + i * stepX},${toY(d.pct)}`).join(" ");
+    const areaClose = `L${pad + (n - 1) * stepX} ${H - 12} L${pad} ${H - 12} Z`;
+    return `
+      <div class="rpt-chart-wrap">
+        <svg viewBox="0 0 ${W} ${H}" role="img" aria-hidden="true">
+          <path class="rpt-grid" d="M${pad} ${Math.round(H * 0.22)}H${W - pad}M${pad} ${Math.round(H * 0.5)}H${W - pad}M${pad} ${Math.round(H * 0.78)}H${W - pad}"/>
+          <path class="rpt-area rpt-area--green" d="M${points} ${areaClose}"/>
+          <polyline class="rpt-line rpt-line--green" points="${points}"/>
+          ${data.map((d, i) => `<circle class="rpt-dot rpt-dot--green" cx="${pad + i * stepX}" cy="${toY(d.pct)}" r="4"/>`).join("")}
+        </svg>
+        <div class="rpt-chart-labels">${data.map((d) => `<span>${escapeHtml(d.label)}</span>`).join("")}</div>
+      </div>
+    `;
+  }
+
+  function renderRelatorioAreaChart(data) {
+    const n = data.length;
+    const max = Math.max(1, ...data.map((d) => d.total));
+    const W = 560;
+    const H = 180;
+    const pad = 28;
+    const stepX = n > 1 ? (W - 2 * pad) / (n - 1) : 0;
+    const toY = (val) => H - 12 - Math.round((val / max) * (H - 32));
+    const points = data.map((d, i) => `${pad + i * stepX},${toY(d.total)}`).join(" ");
+    const areaClose = `L${pad + (n - 1) * stepX} ${H - 12} L${pad} ${H - 12} Z`;
+    return `
+      <div class="rpt-chart-wrap">
+        <svg viewBox="0 0 ${W} ${H}" role="img" aria-hidden="true">
+          <path class="rpt-grid" d="M${pad} ${Math.round(H * 0.22)}H${W - pad}M${pad} ${Math.round(H * 0.5)}H${W - pad}M${pad} ${Math.round(H * 0.78)}H${W - pad}"/>
+          <path class="rpt-area rpt-area--blue" d="M${points} ${areaClose}"/>
+          <polyline class="rpt-line rpt-line--blue" points="${points}"/>
+          ${data.map((d, i) => `<circle class="rpt-dot rpt-dot--blue" cx="${pad + i * stepX}" cy="${toY(d.total)}" r="4"/>`).join("")}
+        </svg>
+        <div class="rpt-chart-labels">${data.map((d) => `<span>${escapeHtml(d.label)}</span>`).join("")}</div>
+      </div>
+    `;
+  }
+
+  function renderRelatorioObjetivoChart(data) {
+    const maxCount = data.length ? data[0][1] : 1;
+    return `
+      <div class="rpt-objetivo-bars">
+        ${data.map(([goal, count]) => `
+          <div class="rpt-objetivo-row">
+            <span class="rpt-objetivo-label">${escapeHtml(goal)}</span>
+            <div class="rpt-objetivo-track"><div class="rpt-objetivo-fill" style="width:${Math.round((count / maxCount) * 100)}%"></div></div>
+            <span class="rpt-objetivo-count">${count}</span>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  function exportarRelatorio() {
+    const period = state.relatorioFilters?.period || "mes";
+    const { start, end } = relatorioRange(period);
+    const sessions = relatorioSessions(start, end);
+    const activities = relatorioActivities(start, end);
+    const adesao = activities.length ? Math.min(100, Math.round((sessions.length / activities.length) * 100)) : 0;
+    const paidPayments = relatorioPaidPayments(start, end);
+    const faturamento = paidPayments.reduce((sum, p) => sum + moneyValue(p.amount), 0);
+    const novos = relatorioNovosAlunos(start, end);
+    const periodLabel = { semana: "Semana", mes: "Mes", trimestre: "Trimestre" }[period] || period;
+    const rows = [
+      ["Relatorio Elite AS"],
+      ["Periodo", periodLabel, "De", start, "Ate", end],
+      [],
+      ["KPI", "Valor"],
+      ["Adesao media", `${adesao}%`],
+      ["Treinos concluidos", sessions.length],
+      ["Atividades programadas", activities.length],
+      ["Novos alunos", novos],
+      ["Faturamento recebido", currencyExact(faturamento)],
+      [],
+      ["Pagamentos no periodo"],
+      ["Aluno", "Valor", "Data de pagamento"],
+      ...paidPayments.map((p) => [getStudentName(p.studentId), currencyExact(p.amount), p.paidAt ? formatShortDate(p.paidAt.slice(0, 10)) : ""])
+    ];
+    const csv = rows.map((row) => row.map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `relatorio-elite-as-${period}-${start}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast("Relatório exportado com sucesso.");
+  }
+
+  function renderManagerRelatorios() {
+    const period = state.relatorioFilters?.period || "mes";
+    const { start, end, days } = relatorioRange(period);
+    const sessions = relatorioSessions(start, end);
+    const activities = relatorioActivities(start, end);
+    const adesaoMedia = activities.length ? Math.min(100, Math.round((sessions.length / activities.length) * 100)) : 0;
+    const adesaoTone = adesaoMedia >= 75 ? "success" : adesaoMedia >= 50 ? "warning" : "danger";
+    const paidPayments = relatorioPaidPayments(start, end);
+    const faturamento = paidPayments.reduce((sum, p) => sum + moneyValue(p.amount), 0);
+    const prevEnd = addDays(start, -1);
+    const prevStart = addDays(prevEnd, -(days - 1));
+    const prevFaturamento = state.data.payments
+      .filter((p) => {
+        const d = String(p.paidAt || "").slice(0, 10);
+        return d >= prevStart && d <= prevEnd && p.trainerId === TRAINER_ID;
+      })
+      .reduce((sum, p) => sum + moneyValue(p.amount), 0);
+    const faturDelta = prevFaturamento ? Math.round(((faturamento - prevFaturamento) / prevFaturamento) * 100) : faturamento ? 100 : 0;
+    const novosAlunos = relatorioNovosAlunos(start, end);
+    const adeSaoData = relatorioAdeSaoChartData(period);
+    const faturData = relatorioFaturamentoChartData(period);
+    const objetivoData = relatorioByObjetivo();
+    const periodLabels = { semana: "Semana", mes: "Mês", trimestre: "Trimestre" };
+    return `
+      <div class="content-stack reports-workspace">
+        <section class="reports-hero">
+          <div>
+            <h3>Relatórios</h3>
+            <p>Visão consolidada de adesão, treinos e faturamento</p>
+          </div>
+          <button class="reports-export-btn" type="button" data-exportar-relatorio>
+            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            <span>Exportar</span>
+          </button>
+        </section>
+
+        <div class="reports-period-tabs" role="tablist" aria-label="Período do relatório">
+          ${["semana", "mes", "trimestre"].map((p) => `<button class="reports-period-tab${p === period ? " is-active" : ""}" type="button" data-relatorio-period="${p}" role="tab" aria-selected="${p === period}">${escapeHtml(periodLabels[p])}</button>`).join("")}
+        </div>
+
+        <section class="metrics-row">
+          ${stdMetricCard("Adesão média", `${adesaoMedia}%`, `${sessions.length} treino(s) no período`, adesaoTone)}
+          ${stdMetricCard("Treinos concluídos", sessions.length, `de ${activities.length} programado(s)`, sessions.length >= activities.length * 0.75 ? "success" : "warning")}
+          ${stdMetricCard("Novos alunos", novosAlunos, novosAlunos ? "no período" : "nenhum novo", novosAlunos ? "success" : "")}
+          ${stdMetricCard("Faturamento", currencyValue(faturamento), `${faturDelta >= 0 ? "+" : ""}${faturDelta}% vs. período anterior`, faturDelta >= 0 ? "success" : "danger")}
+        </section>
+
+        <div class="reports-chart-row">
+          <section class="reports-chart-section">
+            <div class="reports-chart-title">
+              <h4>Adesão semanal</h4>
+              <small>% de treinos concluídos</small>
+            </div>
+            ${renderRelatorioLineChart(adeSaoData)}
+          </section>
+          <section class="reports-chart-section">
+            <div class="reports-chart-title">
+              <h4>Faturamento</h4>
+              <small>Recebimentos no período</small>
+            </div>
+            ${renderRelatorioAreaChart(faturData)}
+          </section>
+        </div>
+
+        <section class="reports-chart-section">
+          <div class="reports-chart-title">
+            <h4>Alunos por objetivo</h4>
+            <small>${state.data.students.filter((s) => s.status === "active" && s.trainerId === TRAINER_ID).length} aluno(s) ativo(s)</small>
+          </div>
+          ${objetivoData.length ? renderRelatorioObjetivoChart(objetivoData) : emptyState("Sem dados de objetivo", "Cadastre o objetivo dos alunos para visualizar este gráfico.", icons.reports)}
         </section>
       </div>
     `;
@@ -9977,6 +10229,18 @@
     });
   }
 
+  function bindRelatorioEvents() {
+    document.addEventListener("click", (event) => {
+      const target = event.target.closest("button, [data-relatorio-period], [data-exportar-relatorio]");
+      if (!target) return;
+      if (target.dataset.relatorioPeriod) {
+        state.relatorioFilters.period = target.dataset.relatorioPeriod;
+        renderManager();
+      }
+      if (target.matches("[data-exportar-relatorio]")) exportarRelatorio();
+    });
+  }
+
   function bindEvents() {
     bindAgendaEvents();
     bindWorkoutEvents();
@@ -9987,6 +10251,7 @@
     bindContractEvents();
     bindFinanceEvents();
     bindUpdateEvents();
+    bindRelatorioEvents();
     bindPwaEvents();
     bindAuthEvents();
   }

@@ -1,0 +1,231 @@
+/* Relatórios - análises consolidadas de desempenho */
+.reports-workspace {
+  gap: 1rem;
+}
+
+.reports-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 1rem;
+  padding: 0.35rem 0 0.1rem;
+}
+
+.reports-hero h3 {
+  margin-top: 0.15rem;
+  color: var(--ink);
+  font-size: clamp(2rem, 7vw, 3.1rem);
+  font-weight: 850;
+  line-height: 1;
+}
+
+.reports-hero p {
+  margin-top: 0.42rem;
+  max-width: 44rem;
+  color: var(--muted);
+  font-size: clamp(0.94rem, 2.8vw, 1.08rem);
+  line-height: 1.35;
+}
+
+/* Period tabs */
+.reports-period-tabs {
+  display: flex;
+  gap: 0.25rem;
+  background: var(--canvas, #f6f7f2);
+  border-radius: 10px;
+  padding: 0.25rem;
+  border: 1px solid var(--line);
+  align-self: flex-start;
+}
+
+.reports-period-tab {
+  flex: 1;
+  padding: 0.45rem 1rem;
+  border-radius: 7px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: var(--muted);
+  transition: background 140ms, color 140ms, box-shadow 140ms;
+  white-space: nowrap;
+}
+
+.reports-period-tab.is-active {
+  background: var(--surface, #fff);
+  color: var(--brand);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  font-weight: 600;
+}
+
+/* Export button */
+.reports-export-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.1rem;
+  background: var(--brand);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 150ms;
+}
+
+.reports-export-btn:hover {
+  opacity: 0.88;
+}
+
+.reports-export-btn svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+/* Chart sections */
+.reports-chart-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 640px) {
+  .reports-chart-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.reports-chart-section {
+  background: var(--surface, #fff);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 1rem 1.25rem 0.75rem;
+}
+
+.reports-chart-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.reports-chart-title h4 {
+  font-size: 0.9rem;
+  font-weight: 650;
+  color: var(--ink);
+  margin: 0;
+}
+
+.reports-chart-title small {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+/* SVG chart internals */
+.rpt-chart-wrap {
+  overflow: hidden;
+}
+
+.rpt-chart-wrap svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.rpt-grid {
+  stroke: var(--line);
+  stroke-width: 1;
+  fill: none;
+}
+
+.rpt-area--green { fill: rgba(45, 157, 120, 0.12); }
+.rpt-area--blue  { fill: rgba(46, 109, 158, 0.12); }
+
+.rpt-line--green {
+  fill: none;
+  stroke: var(--success, #2d9d78);
+  stroke-width: 2.2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.rpt-line--blue {
+  fill: none;
+  stroke: var(--info, #2e6d9e);
+  stroke-width: 2.2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.rpt-dot--green {
+  fill: var(--success, #2d9d78);
+  stroke: #fff;
+  stroke-width: 2;
+}
+
+.rpt-dot--blue {
+  fill: var(--info, #2e6d9e);
+  stroke: #fff;
+  stroke-width: 2;
+}
+
+.rpt-chart-labels {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.3rem 0.25rem 0;
+}
+
+.rpt-chart-labels span {
+  font-size: 0.68rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* Objetivo bars */
+.rpt-objetivo-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 0.25rem 0 0.25rem;
+}
+
+.rpt-objetivo-row {
+  display: grid;
+  grid-template-columns: minmax(80px, 8rem) 1fr 2rem;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.rpt-objetivo-label {
+  font-size: 0.8rem;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rpt-objetivo-track {
+  height: 8px;
+  background: var(--canvas, #f6f7f2);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.rpt-objetivo-fill {
+  height: 100%;
+  background: var(--brand);
+  border-radius: 99px;
+  transition: width 350ms ease;
+}
+
+.rpt-objetivo-count {
+  font-size: 0.8rem;
+  font-weight: 650;
+  color: var(--muted);
+  text-align: right;
+}
