@@ -166,6 +166,12 @@
   box-shadow: none;
 }
 
+.pattern-search-field input:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(245, 181, 27, 0.5);
+  border-radius: 3px;
+}
+
 .pattern-search-field input::placeholder {
   color: rgba(247, 244, 235, 0.65);
 }
@@ -222,6 +228,12 @@
   font-weight: 820;
   outline: none;
   box-shadow: none;
+}
+
+.pattern-filter select:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(245, 181, 27, 0.5);
+  border-radius: 3px;
 }
 
 .pattern-filter select option {
@@ -622,11 +634,17 @@
   min-height: 2.2rem !important;
   padding: 0 !important;
   border: 0 !important;
-  outline: 0 !important;
+  outline: none !important;
   color: var(--ink) !important;
   background: transparent !important;
   font-size: 0.9rem !important;
   box-shadow: none !important;
+}
+
+.library-search-field input:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(245, 181, 27, 0.5) !important;
+  border-radius: 3px !important;
 }
 
 .library-search-field input::placeholder {

@@ -380,9 +380,9 @@ body.demo-mode .demo-only {
   resize: vertical;
 }
 
-.field input:focus,
-.field select:focus,
-.field textarea:focus {
+.field input:focus-visible,
+.field select:focus-visible,
+.field textarea:focus-visible {
   border-color: var(--brand);
   box-shadow: 0 0 0 4px rgba(11, 107, 87, 0.13);
 }

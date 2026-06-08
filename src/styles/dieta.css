@@ -172,11 +172,18 @@
   width: 100%;
   min-width: 0;
   border: 0;
-  outline: 0;
+  outline: none;
   background: transparent;
   color: var(--ink);
   font: inherit;
   font-weight: 720;
+}
+
+.diet-search-field input:focus-visible,
+.diet-filter select:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(245, 181, 27, 0.5);
+  border-radius: 3px;
 }
 
 .diet-search-field input::placeholder {
@@ -904,7 +911,7 @@
   min-width: 0;
 }
 
-.mp-meal-name-input:focus { background: rgba(255,255,255,0.04); }
+.mp-meal-name-input:focus-visible { background: rgba(255,255,255,0.04); box-shadow: 0 0 0 2px rgba(245, 181, 27, 0.5); }
 
 .mp-meal-time-input {
   width: 5.2rem;
@@ -917,7 +924,7 @@
   text-align: center;
 }
 
-.mp-meal-time-input:focus { border-color: var(--dourado); outline: none; }
+.mp-meal-time-input:focus-visible { border-color: var(--dourado); outline: none; box-shadow: 0 0 0 3px rgba(245, 181, 27, 0.3); }
 
 .mp-meal-menu-btn {
   background: none;
@@ -965,8 +972,8 @@
 
 .mp-food-kcal-input { color: var(--ok); }
 
-.mp-food-qty-input:focus,
-.mp-food-kcal-input:focus { border-color: var(--dourado); outline: none; color: var(--ink); }
+.mp-food-qty-input:focus-visible,
+.mp-food-kcal-input:focus-visible { border-color: var(--dourado); outline: none; color: var(--ink); box-shadow: 0 0 0 3px rgba(245, 181, 27, 0.3); }
 
 .mp-food-remove-btn {
   background: none;
@@ -1032,7 +1039,7 @@
   font-size: 0.88rem;
 }
 
-.mp-food-search-input:focus { border-color: var(--dourado); outline: none; }
+.mp-food-search-input:focus-visible { border-color: var(--dourado); outline: none; box-shadow: 0 0 0 3px rgba(245, 181, 27, 0.3); }
 
 .mp-food-search-list {
   display: flex;

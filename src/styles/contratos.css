@@ -238,11 +238,17 @@
   min-width: 0;
   padding: 0;
   border: 0;
-  outline: 0;
+  outline: none;
   background: transparent;
   color: var(--ink);
   font-size: 0.9rem;
   font-weight: 720;
+}
+
+.contract-filter select:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(245, 181, 27, 0.5);
+  border-radius: 3px;
 }
 
 .contract-filter select option {
@@ -637,8 +643,9 @@
   transition: border-color 0.15s;
 }
 
-.cfs-student-search:focus {
+.cfs-student-search:focus-visible {
   border-color: rgba(245, 158, 11, 0.5);
+  box-shadow: 0 0 0 3px rgba(245, 181, 27, 0.3);
 }
 
 .cfs-student-results {
