@@ -14,7 +14,7 @@
 
 == BACKUP ==
 [OK] git checkout -b backup/gestor-fechamento-2 && git push origin backup/gestor-fechamento-2 && git checkout main. NAO altere arquivos. Confirme que o app abre sem erro de sintaxe. (sem commit adicional)
-     Resultado: Tudo certo: | - Branch `backup/gestor-fechamento-2` criado e pushed para origin | - Retornado para `main` | - **Todos os 40 arquivos JS verificados ÔÇö zero erros de sintaxe**
+     Resultado: Tudo certo: | - Branch `backup/gestor-fechamento-2` criado e pushed para origin | - Retornado para `main` | - **Todos os 40 arquivos JS verificados ÔÇö zero erros de sintaxe**
 
 == RERODAR (falhou com erro de CLI) ==
 [OK] (P-01/P-02/P-03/P-04) Padroes - ajustes finos vs mockup (a execucao anterior FALHOU com erro de CLI, nao rodou): (1) botao "Novo padrao" GRANDE dourado FULL-WIDTH com "+" e "Novo padrao ->" (hoje e botao pequeno no canto); (2) subtitulo do hero "Modelos base reutilizaveis" (verificar app.js, hoje pode estar so "Modelos"); (3) card com infos em LINHAS limpas separadas (Objetivo / Nivel / Exercicios / Ultima edicao), cada label+valor em linha propria, sem caixas; (4) botao "Aplicar" outline DOURADO sem icone de alunos; (5) placeholder da busca sem truncar em 390px. Comparar lado a lado com o mockup PADROES antes de finalizar. git add . && git commit -m "fix(padroes): botao full-width, subtitulo, card em linhas, aplicar dourado, busca" && git push origin main
@@ -29,4 +29,5 @@
      Resultado: **`app.js`** ÔÇö Visual Viewport API como fallback para iOS < 15.4: | - `_installThreadViewport()` ÔÇö registra `resize` + `scroll` no `visualViewport` ao abrir a thread. | - `_applyThreadViewport()` ÔÇö seta `height` ...
 
 == FECHAMENTO ==
-[ ] Atualize DIVERGENCIAS-GESTOR.md: mover Padroes, DI-01, DI-02 e M-03 para "Resolvidos" se confirmados, e deixar listadas APENAS as pendencias remanescentes com prioridade (separar o que e 🟠 real do que e 🟢 cosmetico tipo 320px). git add . && git commit -m "chore: atualizar DIVERGENCIAS-GESTOR apos fechamento" && git push origin main
+[OK] Atualize DIVERGENCIAS-GESTOR.md: mover Padroes, DI-01, DI-02 e M-03 para "Resolvidos" se confirmados, e deixar listadas APENAS as pendencias remanescentes com prioridade (separar o que e 🟠 real do que e 🟢 cosmetico tipo 320px). git add . && git commit -m "chore: atualizar DIVERGENCIAS-GESTOR apos fechamento" && git push origin main
+     Resultado: Feito. P-02/P-06/P-07, DI-01, DI-02, M-03 movidos para Resolvidos. PA-02/PA-03 rebaixados para 🟢 (320px legado). Resumo reestruturado: 1 item 🟠, 8 items 🟡, 5 items 🟢. Commit 0d36dd1 pusado.
