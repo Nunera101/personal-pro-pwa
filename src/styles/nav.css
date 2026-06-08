@@ -527,3 +527,10 @@
   will-change: transform;
 }
 
+/* [hidden] must win over display:grid !important — prevents the inactive nav from ghosting over the active one */
+#managerBottomNav[hidden],
+#studentBottomNav[hidden] {
+  display: none !important;
+  pointer-events: none !important;
+}
+
