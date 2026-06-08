@@ -472,14 +472,6 @@
     grid-template-columns: 1fr;
   }
 
-  .pattern-card-head {
-    grid-template-columns: 1fr;
-  }
-
-  .pattern-card-head > .badge {
-    justify-self: start;
-  }
-
   .pattern-preview span {
     grid-template-columns: 1fr;
     gap: 0.2rem;

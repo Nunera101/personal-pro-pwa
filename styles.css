@@ -5434,10 +5434,21 @@ button.dashboard-metric {
 }
 
 .pattern-card-head {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: start;
-  gap: 0.85rem;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.pattern-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .pattern-title-block {
@@ -5525,6 +5536,35 @@ button.dashboard-metric {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.pattern-meta-inline {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem 1.2rem;
+}
+
+.pattern-meta-inline .pattern-meta-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.05rem 0.38rem;
+  min-height: auto;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.pattern-exercise-preview {
+  font-size: 0.78rem;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--line);
 }
 
 .pattern-preview {
@@ -5662,11 +5702,7 @@ button.dashboard-metric {
   }
 
   .pattern-card-head {
-    grid-template-columns: 1fr;
-  }
-
-  .pattern-card-head > .badge {
-    justify-self: start;
+    flex-wrap: nowrap;
   }
 
   .pattern-preview span {
