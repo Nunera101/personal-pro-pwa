@@ -976,7 +976,7 @@
       contactEmail: settings.contactEmail || "",
       whatsappTemplate:
         settings.whatsappTemplate ||
-        "Olá, {aluno}! Passando para lembrar da atividade {atividade}, marcada para {data} Ã s {hora}.",
+        "Olá, {aluno}! Passando para lembrar da atividade {atividade}, marcada para {data} às {hora}.",
       contractEmailSubject: settings.contractEmailSubject || "Contrato para aceite - Elite AS",
       contractEmailMessage:
         settings.contractEmailMessage ||
@@ -984,7 +984,7 @@
       contractEmailSignature: settings.contractEmailSignature || "Equipe Elite AS",
       contractTemplate:
         settings.contractTemplate ||
-        "CONTRATO DE PRESTAÃ‡ÃƒO DE SERVIÃ‡OS\n\nAluno: {aluno}\nCPF: {cpf}\nTelefone: {telefone}\nE-mail: {email}\nPersonal: {personal}\nPlano: {plano}\nValor: {valor}\nInício: {data_inicio}\nFim: {data_fim}\nQuantidade de aulas: {quantidade_aulas}\n\nDeclaro estar ciente das condições de acompanhamento, treinos, comunicação e orientações definidas pelo personal.\n\nData de aceite: {data_assinatura}"
+        "CONTRATO DE PRESTAÇÃO DE SERVIÇOS\n\nAluno: {aluno}\nCPF: {cpf}\nTelefone: {telefone}\nE-mail: {email}\nPersonal: {personal}\nPlano: {plano}\nValor: {valor}\nInício: {data_inicio}\nFim: {data_fim}\nQuantidade de aulas: {quantidade_aulas}\n\nDeclaro estar ciente das condições de acompanhamento, treinos, comunicação e orientações definidas pelo personal.\n\nData de aceite: {data_assinatura}"
     };
   }
 
@@ -4021,14 +4021,14 @@
           <strong>${escapeHtml(workout.title)}</strong>
           <span>${escapeHtml(ownerLabel)} · ${escapeHtml(workout.focus || "Sem foco")} · ${escapeHtml(levelLabel)} · ${exerciseCount} exercício(s)</span>
           <span>${escapeHtml(workout.description || "Sem descrição.")}</span>
-          <span>Criado em ${escapeHtml(createdLabel)} · Ãšltima execução: ${escapeHtml(executionLabel)} · ${escapeHtml(originLabel)}</span>
+          <span>Criado em ${escapeHtml(createdLabel)} · Última execução: ${escapeHtml(executionLabel)} · ${escapeHtml(originLabel)}</span>
           ${renderWorkoutExercisePreview(workout)}
           <div class="badge-row">
             <span class="badge ${workout.status === "published" ? "is-success" : workout.status === "archived" ? "is-danger" : "is-info"}">${statusWorkout(workout.status, isPattern)}</span>
             ${
               isPattern
                 ? statusBadge("Modelo base", "info")
-                : `<span class="badge">Ãšltima vez: ${lastSession ? formatDate(lastSession.finishedAt.slice(0, 10)) : "nunca"}</span>`
+                : `<span class="badge">Última vez: ${lastSession ? formatDate(lastSession.finishedAt.slice(0, 10)) : "nunca"}</span>`
             }
           </div>
         </div>
@@ -4266,7 +4266,7 @@
 
   function renderWeekCalendar(studentId) {
     const start = startOfWeek(state.agendaDate);
-    const labels = ["SEG", "TER", "QUA", "QUI", "SEX", "SÃB", "DOM"];
+    const labels = ["SEG", "TER", "QUA", "QUI", "SEX", "SÁB", "DOM"];
     const days = Array.from({ length: 7 }, (_, index) => addDays(start, index));
     const hours = agendaHourSlots(days, studentId);
     return `
@@ -4323,7 +4323,7 @@
   }
 
   function renderMonthCalendar(studentId) {
-    const labels = ["SEG", "TER", "QUA", "QUI", "SEX", "SÃB", "DOM"];
+    const labels = ["SEG", "TER", "QUA", "QUI", "SEX", "SÁB", "DOM"];
     const currentMonth = state.agendaDate.slice(0, 7);
     return `
       <div class="calendar-board month-view agenda-month-board">
@@ -4770,16 +4770,16 @@
     const previous = parseWeight(previousUpdate?.weight);
     if (!Number.isFinite(current)) {
       return {
-        deltaLabel: "â€” â€”",
-        currentLabel: "â€”",
-        previousLabel: previousUpdate ? formatWeight(previous) : "â€”",
+        deltaLabel: "— —",
+        currentLabel: "—",
+        previousLabel: previousUpdate ? formatWeight(previous) : "—",
         className: "is-pending",
         hasCurrent: false
       };
     }
     if (!Number.isFinite(previous)) {
       return {
-        deltaLabel: "â€”",
+        deltaLabel: "—",
         currentLabel: formatWeight(current),
         previousLabel: "Sem registro",
         className: "is-neutral",
@@ -4803,7 +4803,7 @@
   }
 
   function formatWeight(value) {
-    if (!Number.isFinite(value)) return "â€”";
+    if (!Number.isFinite(value)) return "—";
     return `${value.toLocaleString("pt-BR", { minimumFractionDigits: Math.abs(value % 1) > 0 ? 1 : 0, maximumFractionDigits: 1 })} kg`;
   }
 
@@ -4866,7 +4866,7 @@
           ${metricCard("Volume total", sessions.reduce((sum, session) => sum + Number(session.totalVolumeLoad || 0), 0))}
         </section>
         <section class="panel">
-          <div class="section-title"><h3>Ãšltimos treinos</h3><span class="small-text">Volume load</span></div>
+          <div class="section-title"><h3>Últimos treinos</h3><span class="small-text">Volume load</span></div>
           ${sessions.length ? `<div class="entity-list">${sessions.slice(0, 8).map(renderSessionRow).join("")}</div>` : emptyState("Nenhum treino finalizado", "Finalize um treino para gerar histórico e evolução.", icons.progress)}
         </section>
         <section class="panel">
@@ -5569,7 +5569,7 @@
           }
         </article>
         <article class="panel">
-          <div class="section-title"><h3>Ãšltimos treinos</h3><span class="small-text">${sessions.length} registro(s)</span></div>
+          <div class="section-title"><h3>Últimos treinos</h3><span class="small-text">${sessions.length} registro(s)</span></div>
           ${sessions.length ? `<div class="entity-list">${sessions.slice(0, 3).map(renderSessionRow).join("")}</div>` : emptyState("Nenhum histórico", "Treinos finalizados aparecerão aqui.", icons.progress)}
         </article>
         <article class="panel">
