@@ -139,6 +139,14 @@
     mealPlanSheetBody: document.getElementById("mealPlanSheetBody"),
     mealPlanSheetTitle: document.getElementById("mealPlanSheetTitle"),
     mpSheetFooter: document.getElementById("mpSheetFooter"),
+    contractFormSheet: document.getElementById("contractFormSheet"),
+    contractFormSheetBody: document.getElementById("contractFormSheetBody"),
+    contractFormTitle: document.getElementById("contractFormTitle"),
+    contractFormSheetFooter: document.getElementById("contractFormSheetFooter"),
+    contractViewSheet: document.getElementById("contractViewSheet"),
+    contractViewSheetBody: document.getElementById("contractViewSheetBody"),
+    contractViewTitle: document.getElementById("contractViewTitle"),
+    contractViewSheetFooter: document.getElementById("contractViewSheetFooter"),
     videoModal: document.getElementById("videoModal"),
     videoModalTitle: document.getElementById("videoModalTitle"),
     videoModalBody: document.getElementById("videoModalBody"),
@@ -2927,7 +2935,7 @@
   function renderContractCard(contract) {
     const student = getStudent(contract.studentId);
     const meta = contractStatusMeta(contract);
-    const canResend = contract.status !== "signed" && contract.status !== "canceled";
+    const canResend = contract.status !== "signed" && contract.status !== "canceled" && contract.status !== "draft";
     const canPDF = contract.status === "signed";
     return `
       <article class="contract-card ${meta.className}">
@@ -2947,10 +2955,10 @@
           <button class="contract-action-btn" type="button" data-open-contract="${escapeHtml(contract.id)}">
             ${icons.contracts}<span>Visualizar</span>
           </button>
-          ${canResend ? `<button class="contract-action-btn is-brand" type="button" data-send-contract-link="${escapeHtml(contract.id)}">
+          ${canResend ? `<button class="contract-action-btn is-brand" type="button" data-contract-resend-inline="${escapeHtml(contract.id)}">
             ${icons.messages}<span>Reenviar</span>
           </button>` : ""}
-          ${canPDF ? `<button class="contract-action-btn is-brand" type="button" data-open-contract="${escapeHtml(contract.id)}">
+          ${canPDF ? `<button class="contract-action-btn is-brand" type="button" data-contract-pdf="${escapeHtml(contract.id)}">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6ZM14 2v6h6M8 13h8M8 17h4"/></svg><span>Gerar PDF</span>
           </button>` : ""}
         </div>
@@ -7494,35 +7502,186 @@
   }
 
   function openContractForm(studentId, contractId = "") {
-    const student = getStudent(studentId);
-    if (!student) return openContractStudentPicker();
-    const contract = contractId ? state.data.contracts.find((item) => item.id === contractId && item.studentId === student.id) : null;
-    const defaults = contract || normalizeContract({ studentId: student.id, ...getContractDefaults(student) });
-    const body = contract?.body || buildContractBody(student, defaults);
-    openModal(
-      contract ? "Editar contrato" : "Novo contrato",
-      `
-        <form class="form-grid" id="contractForm" data-student-id="${student.id}" data-contract-id="${contract?.id || ""}">
-          <label class="field"><span>Aluno</span><input type="text" value="${escapeHtml(student.name)}" disabled /></label>
-          <div class="form-grid two">
-            <label class="field"><span>Título</span><input name="title" type="text" value="${escapeHtml(defaults.title || "Contrato de prestação de serviço")}" required /></label>
-            <label class="field"><span>Versão</span><input name="version" type="text" value="${escapeHtml(defaults.version || "1.0")}" required /></label>
-            <label class="field"><span>CPF</span><input name="cpf" type="text" value="${escapeHtml(defaults.cpf || "")}" placeholder="Opcional" /></label>
-            <label class="field"><span>Plano</span><input name="plan" type="text" value="${escapeHtml(defaults.plan || "")}" /></label>
-            <label class="field"><span>Valor</span><input name="value" type="text" value="${escapeHtml(defaults.value || "")}" placeholder="R$ 0,00" /></label>
-            <label class="field"><span>Quantidade de aulas</span><input name="classCount" type="text" value="${escapeHtml(defaults.classCount || "")}" /></label>
-            <label class="field"><span>Data de início</span><input name="startDate" type="date" value="${escapeHtml(defaults.startDate || todayISO())}" /></label>
-            <label class="field"><span>Data de fim</span><input name="endDate" type="date" value="${escapeHtml(defaults.endDate || "")}" /></label>
+    openContractFormSheet(studentId, contractId);
+  }
+
+  function openContractFormSheet(studentId = "", contractId = "", prefill = {}) {
+    const sheet = elements.contractFormSheet;
+    const bodyEl = elements.contractFormSheetBody;
+    const footerEl = elements.contractFormSheetFooter;
+    const titleEl = elements.contractFormTitle;
+    if (!sheet || !bodyEl) return;
+
+    const student = studentId ? getStudent(studentId) : null;
+    if (!studentId && !student) return openContractStudentPickerModal();
+    const contract = contractId ? state.data.contracts.find((c) => c.id === contractId && c.studentId === studentId) : null;
+    const defaults = contract || normalizeContract({ studentId: student.id, ...getContractDefaults(student), ...prefill });
+    const bodyText = contract?.body || prefill.body || buildContractBody(student, defaults);
+
+    if (titleEl) titleEl.textContent = contract ? "Editar contrato" : "Novo contrato";
+
+    bodyEl.innerHTML = `
+      <form class="ns-form" id="contractSheetForm"
+            data-student-id="${escapeHtml(student.id)}"
+            data-contract-id="${escapeHtml(contract?.id || "")}">
+
+        <section class="ns-section">
+          <h4 class="ns-section-title">Aluno</h4>
+          <div class="cfs-student-field">
+            <input class="cfs-student-search" id="cfsStudentSearch" type="search"
+                   placeholder="Buscar aluno..." autocomplete="off"
+                   value="${escapeHtml(student.name)}" />
+            <div class="cfs-student-results" id="cfsStudentResults" hidden></div>
           </div>
-          <label class="field"><span>Texto do contrato</span><textarea name="body" required>${escapeHtml(body)}</textarea></label>
-          <p class="small-text">Variáveis disponíveis no modelo padrão: {aluno}, {cpf}, {telefone}, {email}, {personal}, {plano}, {valor}, {data_inicio}, {data_fim}, {quantidade_aulas}, {data_assinatura}.</p>
-          <button class="primary-action" type="submit">${contract ? "Salvar contrato" : "Criar e gerar link"}</button>
-        </form>
-      `
-    );
+          <div class="cfs-selected-preview" id="cfsSelectedPreview">
+            ${studentAvatar(student)}
+            <div class="cfs-preview-info">
+              <strong>${escapeHtml(student.name)}</strong>
+              <span>${escapeHtml(student.goal || "Aluno Elite AS")}</span>
+            </div>
+          </div>
+          <input type="hidden" name="studentId" id="cfsStudentId" value="${escapeHtml(student.id)}" />
+        </section>
+
+        <section class="ns-section">
+          <h4 class="ns-section-title">Plano</h4>
+          <div class="ns-chip-group" role="group" aria-label="Plano">
+            ${["Elite", "Performance", "Custom"].map((plan) => `
+              <label class="radio-chip">
+                <input type="radio" name="plan" value="${escapeHtml(plan)}" ${defaults.plan === plan ? "checked" : ""} />
+                <span>${escapeHtml(plan)}</span>
+              </label>
+            `).join("")}
+          </div>
+        </section>
+
+        <section class="ns-section">
+          <div class="ns-row">
+            <label class="field">
+              <span>Valor / mês</span>
+              <input name="value" type="text" inputmode="decimal"
+                     value="${escapeHtml(defaults.value || "")}" placeholder="R$ 0,00" />
+            </label>
+            <label class="field">
+              <span>Início</span>
+              <input name="startDate" type="date" value="${escapeHtml(defaults.startDate || todayISO())}" />
+            </label>
+            <label class="field">
+              <span>Fim</span>
+              <input name="endDate" type="date" value="${escapeHtml(defaults.endDate || "")}" />
+            </label>
+          </div>
+        </section>
+
+        <section class="ns-section">
+          <h4 class="ns-section-title">Cláusulas</h4>
+          <label class="field">
+            <span class="sr-only">Texto do contrato</span>
+            <textarea name="body" rows="12" placeholder="Texto do contrato...">${escapeHtml(bodyText)}</textarea>
+          </label>
+          <p class="small-text">Variáveis: {aluno}, {plano}, {valor}, {data_inicio}, {data_fim}, {personal}</p>
+        </section>
+
+        <section class="ns-section">
+          <h4 class="ns-section-title">Método de assinatura</h4>
+          <div class="ns-chip-group" role="group" aria-label="Método de assinatura">
+            <label class="radio-chip">
+              <input type="radio" name="signatureMethod" value="digital"
+                     ${(contract?.signatureMethod || "digital") === "digital" ? "checked" : ""} />
+              <span>Digital (link)</span>
+            </label>
+            <label class="radio-chip">
+              <input type="radio" name="signatureMethod" value="manual"
+                     ${contract?.signatureMethod === "manual" ? "checked" : ""} />
+              <span>Manual (presencial)</span>
+            </label>
+          </div>
+        </section>
+
+        <div class="ns-footer-spacer"></div>
+      </form>
+    `;
+
+    footerEl.innerHTML = `
+      <button class="secondary-action ex-cancel-btn" type="button" data-close-contract-form-sheet>Cancelar</button>
+      <div class="ex-footer-right">
+        <button class="secondary-action" type="submit" form="contractSheetForm" name="action" value="draft" formnovalidate>Salvar rascunho</button>
+        <button class="primary-action" type="submit" form="contractSheetForm" name="action" value="send">Enviar para assinatura</button>
+      </div>
+    `;
+
+    sheet.hidden = false;
+    document.body.style.overflow = "hidden";
+    _bindContractFormSearch();
+  }
+
+  function closeContractFormSheet() {
+    if (!elements.contractFormSheet || elements.contractFormSheet.hidden) return;
+    elements.contractFormSheet.hidden = true;
+    document.body.style.overflow = "";
+  }
+
+  function _bindContractFormSearch() {
+    const searchInput = document.getElementById("cfsStudentSearch");
+    const resultsList = document.getElementById("cfsStudentResults");
+    const hiddenInput = document.getElementById("cfsStudentId");
+    const previewEl = document.getElementById("cfsSelectedPreview");
+    if (!searchInput || !resultsList || !hiddenInput) return;
+
+    function renderResults(query) {
+      const q = query.trim().toLowerCase();
+      if (!q) { resultsList.hidden = true; return; }
+      const matches = state.data.students
+        .filter((s) => s.status !== "inactive" && (s.name.toLowerCase().includes(q) || (s.email || "").toLowerCase().includes(q)))
+        .slice(0, 8);
+      resultsList.hidden = false;
+      resultsList.innerHTML = matches.length
+        ? matches.map((s) => `
+            <button class="cfs-student-result" type="button" data-cfs-pick="${escapeHtml(s.id)}">
+              <span class="cfs-result-avatar">${escapeHtml(s.name.slice(0, 2).toUpperCase())}</span>
+              <span>${escapeHtml(s.name)}</span>
+            </button>
+          `).join("")
+        : `<p class="cfs-no-results">Nenhum aluno encontrado.</p>`;
+    }
+
+    function selectStudent(studentId) {
+      const student = getStudent(studentId);
+      if (!student) return;
+      hiddenInput.value = studentId;
+      searchInput.value = student.name;
+      resultsList.hidden = true;
+      const form = document.getElementById("contractSheetForm");
+      if (form) form.dataset.studentId = studentId;
+      if (previewEl) {
+        previewEl.hidden = false;
+        previewEl.innerHTML = `
+          ${studentAvatar(student)}
+          <div class="cfs-preview-info">
+            <strong>${escapeHtml(student.name)}</strong>
+            <span>${escapeHtml(student.goal || "Aluno Elite AS")}</span>
+          </div>
+        `;
+      }
+      const bodyTextarea = form?.querySelector('textarea[name="body"]');
+      if (bodyTextarea && !bodyTextarea.value.trim()) {
+        const defs = normalizeContract({ studentId, ...getContractDefaults(student) });
+        bodyTextarea.value = buildContractBody(student, defs);
+      }
+    }
+
+    searchInput.addEventListener("input", (e) => renderResults(e.target.value));
+    resultsList.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-cfs-pick]");
+      if (btn) selectStudent(btn.dataset.cfsPick);
+    });
   }
 
   function openContractStudentPicker() {
+    openContractFormSheet();
+  }
+
+  function openContractStudentPickerModal() {
     const activeStudents = state.data.students.filter((student) => student.status !== "inactive");
     openModal(
       "Novo contrato",
@@ -7532,7 +7691,7 @@
             activeStudents.length
               ? `
                 <label class="field"><span>Aluno</span><select name="studentId" required>${activeStudents.map((student) => `<option value="${escapeHtml(student.id)}">${escapeHtml(student.name)}</option>`).join("")}</select></label>
-                <p class="small-text">Selecione o aluno para criar um contrato com plano, valor e vigência próprios.</p>
+                <p class="small-text">Selecione o aluno para criar um contrato.</p>
                 <button class="primary-action" type="submit">Continuar</button>
               `
               : emptyState("Nenhum aluno ativo", "Cadastre ou ative um aluno antes de criar contratos.", icons.students)
@@ -7543,7 +7702,11 @@
   }
 
   function openContract(contractId) {
-    const contract = state.data.contracts.find((item) => item.id === contractId);
+    openContractViewSheet(contractId);
+  }
+
+  function openContractViewSheet(contractId) {
+    const contract = state.data.contracts.find((c) => c.id === contractId);
     if (!contract) return;
     const isStudent = state.currentUser?.role === "student";
     if (isStudent && contract.studentId !== state.currentUser.studentId) return showToast("Contrato indisponível para este aluno.");
@@ -7552,49 +7715,119 @@
       contract.viewedAt = new Date().toISOString();
       persistData();
     }
-    const student = getStudent(contract.studentId);
+
+    const sheet = elements.contractViewSheet;
+    const bodyEl = elements.contractViewSheetBody;
+    const footerEl = elements.contractViewSheetFooter;
+    const titleEl = elements.contractViewTitle;
+    if (!sheet || !bodyEl) return;
+
     const meta = contractStatusMeta(contract);
-    openModal(
-      contract.title,
-      `
-        <div class="contract-detail">
-          <section class="contract-detail-hero">
+    const student = getStudent(contract.studentId);
+    const isManager = state.currentUser?.role === "manager";
+
+    if (titleEl) titleEl.textContent = contract.title || "Contrato";
+
+    const createdAt = contract.createdAt ? new Date(contract.createdAt).toLocaleString("pt-BR") : null;
+    const sentAt = (contract.emailSentAt || contract.linkSentAt)
+      ? new Date(contract.emailSentAt || contract.linkSentAt).toLocaleString("pt-BR")
+      : null;
+    const signedAt = contract.signedAt ? new Date(contract.signedAt).toLocaleString("pt-BR") : null;
+
+    bodyEl.innerHTML = `
+      <div class="contract-view-content">
+        <section class="ns-section">
+          <div class="contract-view-hero">
             ${studentAvatar(student)}
-            <div class="contract-detail-title">
-              <strong>${escapeHtml(contract.title)}</strong>
-              <span>${escapeHtml(getStudentName(contract.studentId))} • Versão ${escapeHtml(contract.version)}</span>
+            <div class="contract-view-hero-info">
+              <strong>${escapeHtml(getStudentName(contract.studentId))}</strong>
+              <span>${escapeHtml(contract.plan || "Plano não informado")} · ${contract.value ? escapeHtml(contract.value) + "/mês" : "Sem valor"}</span>
             </div>
-            <span class="badge ${meta.badgeClass}">${escapeHtml(meta.label)}</span>
-          </section>
-          <section class="contract-detail-grid">
-            <article><span>Plano</span><strong>${escapeHtml(contract.plan || "Não informado")}</strong></article>
-            <article><span>Valor</span><strong>${escapeHtml(contract.value || "Não informado")}</strong></article>
+            <span class="badge ${escapeHtml(meta.badgeClass)}">${escapeHtml(meta.label)}</span>
+          </div>
+        </section>
+
+        <section class="ns-section">
+          <div class="contract-detail-grid">
             <article><span>Início</span><strong>${escapeHtml(contract.startDate ? formatShortDate(contract.startDate) : "Não definido")}</strong></article>
             <article><span>Vigência</span><strong>${escapeHtml(contract.endDate ? formatShortDate(contract.endDate) : "Sem vencimento")}</strong></article>
-            <article><span>Aulas/Treinos</span><strong>${escapeHtml(contract.classCount || "Não definido")}</strong></article>
-            <article><span>Criado em</span><strong>${escapeHtml(formatShortDate(contract.createdAt.slice(0, 10)))}</strong></article>
-          </section>
-          <section class="contract-detail-section">
-            <div class="section-title">
-              <h3>Documento</h3>
-              <span class="small-text">${escapeHtml(meta.label)}</span>
-            </div>
-            <p class="contract-body premium-contract-body">${escapeHtml(contract.body || "Texto do contrato não informado.")}</p>
-            ${
-              contract.signedAt
-                ? `<p class="small-text">Assinado em ${new Date(contract.signedAt).toLocaleString("pt-BR")} • Versão aceita ${escapeHtml(contract.signedVersion || contract.version)} • ${escapeHtml(contract.technicalId || "identificação técnica não disponível")}${contract.signatureIp ? ` • IP ${escapeHtml(contract.signatureIp)}` : ""}</p>`
-                : `<p class="small-text">${contract.emailSentAt || contract.linkSentAt ? `Link enviado em ${new Date(contract.emailSentAt || contract.linkSentAt).toLocaleString("pt-BR")}` : "Link ainda não enviado."}</p>`
-            }
-          </section>
-          <div class="contract-detail-actions">
-            ${isStudent && contract.status !== "signed" && contract.status !== "canceled" ? `<button class="primary-action" type="button" data-sign-contract="${escapeHtml(contract.id)}">Aceitar e assinar</button>` : ""}
-            ${state.currentUser?.role === "manager" && contract.status !== "signed" && contract.status !== "canceled" ? `<button class="primary-action" type="button" data-send-contract-link="${escapeHtml(contract.id)}">Reenviar contrato</button>` : ""}
-            ${state.currentUser?.role === "manager" && student ? `<button class="secondary-action" type="button" data-open-student-profile="${escapeHtml(student.id)}">Abrir perfil</button>` : ""}
-            <button class="secondary-action" type="button" data-print-contract>Gerar PDF</button>
+            <article><span>Versão</span><strong>${escapeHtml(contract.version || "1.0")}</strong></article>
           </div>
+        </section>
+
+        <section class="ns-section">
+          <h4 class="ns-section-title">Linha do tempo</h4>
+          <div class="contract-timeline">
+            <div class="contract-tl-item${createdAt ? " is-done" : ""}">
+              <span class="contract-tl-dot"></span>
+              <div class="contract-tl-text">
+                <span>Criado</span>
+                <strong>${createdAt ? escapeHtml(createdAt) : "—"}</strong>
+              </div>
+            </div>
+            <div class="contract-tl-item${sentAt ? " is-done" : ""}">
+              <span class="contract-tl-dot"></span>
+              <div class="contract-tl-text">
+                <span>Enviado</span>
+                <strong>${sentAt ? escapeHtml(sentAt) : "Não enviado"}</strong>
+              </div>
+            </div>
+            <div class="contract-tl-item${signedAt ? " is-done" : ""}">
+              <span class="contract-tl-dot"></span>
+              <div class="contract-tl-text">
+                <span>Assinado</span>
+                <strong>${signedAt ? escapeHtml(signedAt) : "Aguardando assinatura"}</strong>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ns-section">
+          <h4 class="ns-section-title">Documento</h4>
+          <div class="contract-doc-body">${escapeHtml(contract.body || "Texto do contrato não informado.")}</div>
+          ${contract.signedAt ? `
+            <p class="small-text">Assinado em ${new Date(contract.signedAt).toLocaleString("pt-BR")} · Versão ${escapeHtml(contract.signedVersion || contract.version)} · ${escapeHtml(contract.technicalId || "sem ID técnico")}${contract.signatureIp ? " · IP " + escapeHtml(contract.signatureIp) : ""}</p>
+          ` : ""}
+        </section>
+
+        <div class="ns-footer-spacer"></div>
+      </div>
+    `;
+
+    footerEl.innerHTML = `
+      ${isStudent && contract.status !== "signed" && contract.status !== "canceled"
+        ? `<button class="primary-action" type="button" data-sign-contract="${escapeHtml(contract.id)}">Aceitar e assinar</button>`
+        : ""}
+      ${isManager ? `
+        <div class="ex-footer-right">
+          <button class="secondary-action" type="button" data-contract-pdf="${escapeHtml(contract.id)}">Gerar PDF</button>
+          ${contract.status !== "signed" && contract.status !== "canceled"
+            ? `<button class="secondary-action" type="button" data-contract-resend="${escapeHtml(contract.id)}">Reenviar</button>`
+            : ""}
+          <button class="primary-action" type="button" data-contract-renew="${escapeHtml(contract.id)}">Renovar</button>
         </div>
-      `
-    );
+      ` : ""}
+    `;
+
+    sheet.hidden = false;
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeContractViewSheet() {
+    if (!elements.contractViewSheet || elements.contractViewSheet.hidden) return;
+    elements.contractViewSheet.hidden = true;
+    document.body.style.overflow = "";
+  }
+
+  function renewContract(contractId) {
+    const contract = state.data.contracts.find((c) => c.id === contractId);
+    if (!contract) return;
+    closeContractViewSheet();
+    openContractFormSheet(contract.studentId, "", {
+      plan: contract.plan,
+      value: contract.value,
+      body: contract.body
+    });
   }
 
   function openMessages(studentId) {
@@ -8498,45 +8731,48 @@
   }
 
   async function handleContractForm(form) {
-    const studentId = form.dataset.studentId;
-    const student = getStudent(studentId);
-    if (!student) return showToast("Aluno não encontrado.");
     const data = new FormData(form);
+    const studentId = String(data.get("studentId") || form.dataset.studentId || "");
+    const student = getStudent(studentId);
+    if (!student) return showToast("Selecione um aluno para continuar.");
     const contractId = form.dataset.contractId || "";
     const old = contractId ? state.data.contracts.find((item) => item.id === contractId && item.studentId === studentId) : null;
+    const action = String(data.get("action") || "send");
+    const isDraft = action === "draft";
     const contract = normalizeContract({
       ...(old || {}),
       id: old?.id || createId("contract"),
       studentId,
-      title: String(data.get("title") || "").trim(),
+      title: old?.title || "Contrato de prestação de serviço",
       body: String(data.get("body") || "").trim(),
-      version: String(data.get("version") || "1.0").trim(),
-      cpf: String(data.get("cpf") || "").trim(),
+      version: old?.version || "1.0",
       plan: String(data.get("plan") || "").trim(),
       value: String(data.get("value") || "").trim(),
       startDate: String(data.get("startDate") || "").trim(),
       endDate: String(data.get("endDate") || "").trim(),
-      classCount: String(data.get("classCount") || "").trim(),
-      status: old?.status || "pending",
+      status: isDraft ? "draft" : (old?.status === "draft" ? "pending" : (old?.status || "pending")),
       createdAt: old?.createdAt || new Date().toISOString()
     });
     const index = state.data.contracts.findIndex((item) => item.id === contract.id);
     if (index >= 0) state.data.contracts[index] = contract;
     else state.data.contracts.unshift(contract);
     persistData();
-    closeModal();
-    openStudentProfile(studentId);
-    showToast(old ? "Contrato salvo." : "Contrato criado para aceite do aluno.");
-    if (!old) {
+    closeContractFormSheet();
+    renderManager();
+    if (!isDraft) {
+      showToast(old ? "Contrato atualizado." : "Contrato criado para aceite do aluno.");
       await flushRemoteSync();
       await sendContractLink(contract.id);
+    } else {
+      showToast("Rascunho salvo.");
     }
   }
 
   function handleContractStudentPicker(form) {
     const studentId = String(new FormData(form).get("studentId") || "");
     if (!getStudent(studentId)) return showToast("Aluno não encontrado.");
-    openContractForm(studentId);
+    closeModal();
+    openContractFormSheet(studentId);
   }
 
   function handleMessageForm(form) {
@@ -9319,9 +9555,29 @@
     document.addEventListener("click", (event) => {
       const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-manager-drawer-backdrop]");
       if (!target) return;
-      if (target.matches("[data-open-contract-form]")) openContractForm(target.dataset.openContractForm, target.dataset.contractId || "");
-      if (target.matches("[data-open-contract]")) openContract(target.dataset.openContract);
+      if (target.matches("[data-close-contract-form-sheet]")) closeContractFormSheet();
+      if (target.matches("[data-close-contract-view-sheet]")) closeContractViewSheet();
+      if (target.matches("[data-open-contract-form]")) openContractFormSheet(target.dataset.openContractForm, target.dataset.contractId || "");
+      if (target.matches("[data-open-contract]")) openContractViewSheet(target.dataset.openContract);
       if (target.matches("[data-send-contract-link]")) sendContractLink(target.dataset.sendContractLink);
+      if (target.matches("[data-contract-resend]")) sendContractLink(target.dataset.contractResend);
+      if (target.matches("[data-contract-resend-inline]")) {
+        const cid = target.dataset.contractResendInline;
+        if (confirm("Reenviar o link do contrato para o aluno?")) {
+          import("./src/services.js").then(({ reenviarAssinatura }) => reenviarAssinatura(cid).catch(() => {}));
+          sendContractLink(cid);
+        }
+      }
+      if (target.matches("[data-contract-pdf]")) {
+        const cid = target.dataset.contractPdf;
+        import("./src/services.js").then(({ gerarPdf }) =>
+          gerarPdf(cid).then(() => {
+            showToast("Use a opção de salvar como PDF na impressão do navegador.");
+            window.print();
+          }).catch(() => showToast("Não foi possível gerar o PDF agora."))
+        );
+      }
+      if (target.matches("[data-contract-renew]")) renewContract(target.dataset.contractRenew);
       if (target.matches("[data-copy-contract-link]")) {
         const contractInput = elements.modalBody.querySelector("[data-contract-url]");
         if (contractInput) {
@@ -9330,7 +9586,11 @@
           showToast("Link copiado.");
         }
       }
-      if (target.matches("[data-sign-contract]")) signContract(target.dataset.signContract).catch(() => showToast("Nao foi possivel assinar o contrato agora."));
+      if (target.matches("[data-sign-contract]")) {
+        signContract(target.dataset.signContract)
+          .then(() => closeContractViewSheet())
+          .catch(() => showToast("Nao foi possivel assinar o contrato agora."));
+      }
       if (target.matches("[data-cancel-contract]")) cancelContract(target.dataset.cancelContract);
       if (target.matches("[data-print-contract]")) {
         showToast("Use a opção de salvar como PDF na impressão do navegador.");
@@ -9347,7 +9607,7 @@
     document.addEventListener("submit", async (event) => {
       event.preventDefault();
       const form = event.target;
-      if (form.id === "contractForm") await handleContractForm(form);
+      if (form.id === "contractSheetForm") await handleContractForm(form);
       if (form.id === "contractStudentPickerForm") handleContractStudentPicker(form);
     });
   }

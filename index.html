@@ -340,6 +340,38 @@
       </section>
     </div>
 
+    <!-- Sheet: Novo / Editar contrato (tela cheia) -->
+    <div class="workout-sheet" id="contractFormSheet" role="dialog" aria-modal="true" aria-labelledby="contractFormTitle" hidden>
+      <div class="workout-sheet-backdrop" data-close-contract-form-sheet></div>
+      <section class="workout-sheet-panel ex-sheet-panel">
+        <div class="sheet-handle" aria-hidden="true"></div>
+        <div class="ag-head">
+          <h2 id="contractFormTitle" class="ag-title">Novo contrato</h2>
+          <button class="icon-button ag-close-btn" type="button" data-close-contract-form-sheet aria-label="Fechar">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div id="contractFormSheetBody" class="ex-sheet-body"></div>
+        <div class="ex-sheet-footer" id="contractFormSheetFooter"></div>
+      </section>
+    </div>
+
+    <!-- Sheet: Visualizar contrato (tela cheia) -->
+    <div class="workout-sheet" id="contractViewSheet" role="dialog" aria-modal="true" aria-labelledby="contractViewTitle" hidden>
+      <div class="workout-sheet-backdrop" data-close-contract-view-sheet></div>
+      <section class="workout-sheet-panel ex-sheet-panel">
+        <div class="sheet-handle" aria-hidden="true"></div>
+        <div class="ag-head">
+          <h2 id="contractViewTitle" class="ag-title">Contrato</h2>
+          <button class="icon-button ag-close-btn" type="button" data-close-contract-view-sheet aria-label="Fechar">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div id="contractViewSheetBody" class="ex-sheet-body"></div>
+        <div class="ex-sheet-footer" id="contractViewSheetFooter"></div>
+      </section>
+    </div>
+
     <!-- Modal: Ver vídeo -->
     <div class="video-modal" id="videoModal" role="dialog" aria-modal="true" aria-labelledby="videoModalTitle" hidden>
       <div class="video-modal-backdrop" data-close-video-modal></div>
@@ -388,7 +420,7 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-    <script src="./app.js?v=59"></script>
+    <script src="./app.js?v=60"></script>
   </body>
 </html>
 
