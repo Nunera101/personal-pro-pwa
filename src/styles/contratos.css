@@ -331,6 +331,12 @@
   white-space: nowrap;
 }
 
+.contract-student-info b.contract-missing-info {
+  color: var(--muted);
+  font-weight: 500;
+  font-style: italic;
+}
+
 .contract-validity {
   display: flex;
   flex-direction: column;

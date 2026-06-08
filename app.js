@@ -3027,11 +3027,11 @@
           <div class="contract-student-info">
             <strong>${escapeHtml(getStudentName(contract.studentId))}</strong>
             <span>${escapeHtml(contract.plan || contract.title || "Plano não informado")}</span>
-            <b>${contract.value ? escapeHtml(currencyExact(contract.value) + "/mês") : "Valor não informado"}</b>
+            ${contract.value ? `<b>${escapeHtml(currencyExact(contract.value) + "/mês")}</b>` : `<b class="contract-missing-info">Valor a definir</b>`}
           </div>
           <div class="contract-validity">
             <span class="badge ${meta.badgeClass}">${escapeHtml(meta.label)}</span>
-            <small>Válido até ${escapeHtml(contract.endDate ? formatShortDate(contract.endDate) : "Sem vencimento")}</small>
+            <small>${contract.endDate ? "Válido até " + escapeHtml(formatShortDate(contract.endDate)) : "Sem vencimento"}</small>
           </div>
         </div>
         <div class="contract-card-actions">
@@ -9654,7 +9654,11 @@
     const action = String(data.get("action") || "send");
     const isDraft = action === "draft";
     const pdfUrl = String(data.get("pdfUrl") || "").trim();
+    const valueRaw = String(data.get("value") || "").trim();
+    const endDateRaw = String(data.get("endDate") || "").trim();
     if (!isDraft && !pdfUrl) return showToast("Adicione o PDF do contrato antes de enviar.");
+    if (!isDraft && !valueRaw) return showToast("Informe o valor mensal do contrato.");
+    if (!isDraft && !endDateRaw) return showToast("Informe a data de vigência (fim) do contrato.");
     const contract = normalizeContract({
       ...(old || {}),
       id: old?.id || createId("contract"),
