@@ -721,9 +721,9 @@
     if (status === "awaiting_activation") {
       return {
         value: "awaiting_activation",
-        label: "Aguardando ativacao",
+        label: "Aguardando ativação",
         tone: "warning",
-        detail: "Aluno ainda nao criou a senha"
+        detail: "Aluno ainda não criou a senha"
       };
     }
 
@@ -2085,12 +2085,12 @@
         timeoutMs: 9000,
         skipAuth: true
       });
-      showToast("Enviamos um link de redefinicao para o e-mail informado.");
+      showToast("Enviamos um link de redefinição para o e-mail informado.");
     } catch (error) {
       const message = String(error.message || "");
-      if (message.includes("404")) return showToast("Esse e-mail ainda nao tem uma conta cadastrada.");
-      if (message.includes("503")) return showToast("Envio de e-mail ainda nao configurado no servidor.");
-      showToast("Nao foi possivel enviar o link agora. Tente novamente.");
+      if (message.includes("404")) return showToast("Esse e-mail ainda não tem uma conta cadastrada.");
+      if (message.includes("503")) return showToast("Envio de e-mail ainda não configurado no servidor.");
+      showToast("Não foi possível enviar o link agora. Tente novamente.");
     }
   }
 
@@ -2100,7 +2100,7 @@
       "Criar senha de acesso",
       `
         <form class="form-grid" id="resetPasswordForm" data-token="${escapeHtml(token)}">
-          <p class="small-text">Digite uma senha segura para acessar sua conta no app. O personal nao visualiza essa senha.</p>
+          <p class="small-text">Digite uma senha segura para acessar sua conta no app. O personal não visualiza essa senha.</p>
           <label class="field"><span>Nova senha</span><input name="password" type="password" autocomplete="new-password" minlength="8" required /></label>
           <label class="field"><span>Confirmar senha</span><input name="confirmPassword" type="password" autocomplete="new-password" minlength="8" required /></label>
           <button class="primary-action" type="submit">Salvar nova senha</button>
@@ -2135,7 +2135,7 @@
       window.history.replaceState({}, "", url.toString());
       showToast("Senha salva. Entre com sua nova senha.");
     } catch (error) {
-      showToast("Link invalido ou expirado. Solicite um novo link.");
+      showToast("Link inválido ou expirado. Solicite um novo link.");
     }
   }
 
@@ -2172,7 +2172,7 @@
       renderStudent();
       openContract(result.contractId);
     } catch (error) {
-      showToast("Link de contrato invalido ou expirado.");
+      showToast("Link de contrato inválido ou expirado.");
     }
   }
 
@@ -2354,6 +2354,7 @@
   }
 
   const SKELETON_TABS = new Set(["students", "agenda", "workouts", "diet", "messages", "contracts"]);
+  const STUDENT_SKELETON_TABS = new Set(["workouts", "diet", "progress", "updates"]);
 
   function buildTabSkeleton(menuId) {
     const card    = (h = "4.5rem") => `<div class="skeleton skeleton-card" style="height:${h}"></div>`;
@@ -2463,11 +2464,26 @@
       progress: renderStudentProgress,
       profile: renderStudentProfile
     };
-    elements.studentContent.innerHTML = fixMojibake((renderers[state.studentMenu] || renderStudentToday)());
-    elements.studentContent.classList.remove("is-entering");
-    void elements.studentContent.offsetWidth;
-    elements.studentContent.classList.add("is-entering");
-    _updateStudentChatBadge();
+
+    const applyStudentContent = () => {
+      elements.studentContent.innerHTML = fixMojibake((renderers[state.studentMenu] || renderStudentToday)());
+      elements.studentContent.classList.remove("is-entering");
+      void elements.studentContent.offsetWidth;
+      elements.studentContent.classList.add("is-entering");
+      _updateStudentChatBadge();
+    };
+
+    if (STUDENT_SKELETON_TABS.has(state.studentMenu) && document.body.classList.contains("app-ready")) {
+      const version = ++skeletonRenderVersion;
+      elements.studentContent.innerHTML = buildTabSkeleton(state.studentMenu);
+      void elements.studentContent.offsetWidth;
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        if (skeletonRenderVersion !== version) return;
+        applyStudentContent();
+      }));
+    } else {
+      applyStudentContent();
+    }
   }
 
   function metricCard(label, value) {
@@ -3772,8 +3788,8 @@
       ["emagrecimento", "Emagrecimento"],
       ["condicionamento", "Condicionamento"],
       ["performance", "Performance"],
-      ["forca", "Forca"],
-      ["reabilitacao", "Reabilitacao"],
+      ["forca", "Força"],
+      ["reabilitacao", "Reabilitação"],
       ["qualidade_de_vida", "Qualidade de vida"]
     ];
     const sexOptions = [
@@ -3876,10 +3892,10 @@
           </section>
 
           <section class="ns-section">
-            <h4 class="ns-section-title">Observacoes internas</h4>
+            <h4 class="ns-section-title">Observações internas</h4>
             <label class="field">
-              <span class="sr-only">Observacoes</span>
-              <textarea name="internalNotes" rows="4" placeholder="Anotacoes privadas sobre o aluno, historico, restricoes..."></textarea>
+              <span class="sr-only">Observações</span>
+              <textarea name="internalNotes" rows="4" placeholder="Anotações privadas sobre o aluno, histórico, restrições..."></textarea>
             </label>
           </section>
 
@@ -6133,7 +6149,7 @@
     const title = agendaPeriodLabel();
     return `
       <div class="content-stack">
-        ${pageHeader("Mais", "Perfil, agenda e configuracoes", '<button class="pill-button" type="button" data-install-trigger>Baixar app</button>')}
+        ${pageHeader("Mais", "Perfil, agenda e configurações", '<button class="pill-button" type="button" data-install-trigger>Baixar app</button>')}
         <section class="panel">
           <div class="profile-hero">
             <div>
@@ -6143,28 +6159,28 @@
             ${statusBadge(student?.status === "active" ? "Ativo" : "Inativo", student?.status === "active" ? "success" : "danger")}
           </div>
           <div class="profile-overview-grid student-summary-grid">
-            ${profileSummaryCard(icons.workouts, "Treinos na semana", String(weekCount), weekCount ? "Concluidos esta semana" : "Sem treino concluido")}
-            ${profileSummaryCard(icons.progress, "Volume recente", volumeLabel, "Ultimos 4 treinos")}
-            ${profileSummaryCard(icons.agenda, "Proxima atividade", nextAct ? formatShortDate(nextAct.date) : "Sem agenda", nextAct ? `${activityLabel(nextAct.type)} - ${nextAct.time || "--:--"}` : "Nenhuma marcada")}
-            ${profileSummaryCard(icons.contracts, "Contrato", contractSummary.label, contractSummary.contract?.endDate ? `Ate ${formatShortDate(contractSummary.contract.endDate)}` : "Status do contrato", contractSummary.tone)}
+            ${profileSummaryCard(icons.workouts, "Treinos na semana", String(weekCount), weekCount ? "Concluídos esta semana" : "Sem treino concluído")}
+            ${profileSummaryCard(icons.progress, "Volume recente", volumeLabel, "Últimos 4 treinos")}
+            ${profileSummaryCard(icons.agenda, "Próxima atividade", nextAct ? formatShortDate(nextAct.date) : "Sem agenda", nextAct ? `${activityLabel(nextAct.type)} · ${nextAct.time || "--:--"}` : "Nenhuma marcada")}
+            ${profileSummaryCard(icons.contracts, "Contrato", contractSummary.label, contractSummary.contract?.endDate ? `Até ${formatShortDate(contractSummary.contract.endDate)}` : "Status do contrato", contractSummary.tone)}
           </div>
           <button class="quick-link" type="button" data-open-messages="${escapeHtml(student?.id || "")}"><strong>Mensagens</strong><span>${state.socketReady ? "Tempo real ativo" : "Modo local"}</span></button>
         </section>
 
         <section class="agenda-control-panel">
-          <div class="agenda-view-tabs" aria-label="Visualizacao da agenda">
+          <div class="agenda-view-tabs" aria-label="Visualização da agenda">
             <button class="${state.agendaView === 'day' ? 'is-active' : ''}" type="button" data-agenda-view="day">Dia</button>
             <button class="${state.agendaView === 'week' ? 'is-active' : ''}" type="button" data-agenda-view="week">Semana</button>
-            <button class="${state.agendaView === 'month' ? 'is-active' : ''}" type="button" data-agenda-view="month">Mes</button>
+            <button class="${state.agendaView === 'month' ? 'is-active' : ''}" type="button" data-agenda-view="month">Mês</button>
           </div>
           <div class="agenda-period-nav">
-            <button class="icon-button" type="button" data-agenda-shift="-1" aria-label="Periodo anterior">
+            <button class="icon-button" type="button" data-agenda-shift="-1" aria-label="Período anterior">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
             </button>
             <div class="agenda-period-label">
               <strong>${escapeHtml(title)}</strong>
             </div>
-            <button class="icon-button" type="button" data-agenda-shift="1" aria-label="Proximo periodo">
+            <button class="icon-button" type="button" data-agenda-shift="1" aria-label="Próximo período">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
             </button>
             <button class="mini-button agenda-today-button" type="button" data-agenda-today>Hoje</button>
@@ -6172,7 +6188,7 @@
         </section>
 
         ${isDayView ? "" : `
-        <section class="panel agenda-calendar-panel" aria-label="Calendario da agenda">
+        <section class="panel agenda-calendar-panel" aria-label="Calendário da agenda">
           ${state.agendaView === 'week' ? renderWeekCalendar(student?.id || "") : renderMonthCalendar(student?.id || "")}
           ${renderAgendaLegend()}
         </section>
@@ -6190,7 +6206,7 @@
 
         <section class="panel">
           <div class="section-title"><h3>Contratos</h3><span class="small-text">${pendingContracts.length} pendente(s)</span></div>
-          ${contracts.length ? `<div class="entity-list">${contracts.map((contract) => renderContractRow(contract, false)).join("")}</div>` : emptyState("Nenhum contrato", "Contratos enviados pelo personal aparecerao aqui.", icons.contracts)}
+          ${contracts.length ? `<div class="entity-list">${contracts.map((contract) => renderContractRow(contract, false)).join("")}</div>` : emptyState("Nenhum contrato", "Contratos enviados pelo personal aparecerão aqui.", icons.contracts)}
         </section>
         <section class="panel">
           <div class="section-title"><h3>Conta</h3><span class="small-text">E-mail e telefone</span></div>
@@ -6494,7 +6510,7 @@
           </div>
           <div class="empty-state compact-note">
             <strong>${student.id ? access.label : "Convite de acesso"}</strong>
-            <span>${student.id ? escapeHtml(access.detail) : "Ao salvar, o sistema gera um link para o aluno criar a propria senha. O gestor nao define nem visualiza senha de aluno."}</span>
+            <span>${student.id ? escapeHtml(access.detail) : "Ao salvar, o sistema gera um link para o aluno criar a própria senha. O gestor não define nem visualiza senha de aluno."}</span>
           </div>
           <label class="field"><span>Observações internas</span><textarea name="internalNotes">${escapeHtml(student.internalNotes)}</textarea></label>
           <div class="form-actions">
@@ -8715,13 +8731,13 @@
             <p class="small-text">
               ${
                 mailConfigured
-                  ? "O aluno recebeu um link seguro para criar a propria senha."
-                  : "O envio de e-mail ainda nao esta configurado no servidor. Use este link para testar o fluxo de criacao de senha agora."
+                  ? "O aluno recebeu um link seguro para criar a própria senha."
+                  : "O envio de e-mail ainda não está configurado no servidor. Use este link para testar o fluxo de criação de senha agora."
               }
             </p>
             ${
               inviteUrl
-                ? `<label class="field"><span>Link de criacao de senha</span><input data-invite-url readonly value="${escapeHtml(inviteUrl)}" /></label>
+                ? `<label class="field"><span>Link de criação de senha</span><input data-invite-url readonly value="${escapeHtml(inviteUrl)}" /></label>
                   <div class="form-actions">
                     <button class="primary-action" type="button" data-copy-invite-link>Copiar link</button>
                     <a class="secondary-action" href="${escapeHtml(inviteUrl)}" target="_blank" rel="noreferrer">Abrir link</a>
@@ -8879,7 +8895,7 @@
               ${
                 mailConfigured
                   ? "O aluno recebeu o link do contrato por e-mail."
-                  : "O envio de e-mail ainda nao esta configurado no servidor. Use este link para testar o aceite do contrato agora."
+                  : "O envio de e-mail ainda não está configurado no servidor. Use este link para testar o aceite do contrato agora."
               }
             </p>
             ${
@@ -8962,7 +8978,7 @@
 
     const id = createId("student");
     const goalRaw = String(data.get("goal") || "").trim();
-    const goalLabels = { hipertrofia: "Hipertrofia", emagrecimento: "Emagrecimento", condicionamento: "Condicionamento", performance: "Performance", forca: "Forca", reabilitacao: "Reabilitacao", qualidade_de_vida: "Qualidade de vida" };
+    const goalLabels = { hipertrofia: "Hipertrofia", emagrecimento: "Emagrecimento", condicionamento: "Condicionamento", performance: "Performance", forca: "Força", reabilitacao: "Reabilitação", qualidade_de_vida: "Qualidade de vida" };
     const goal = goalLabels[goalRaw] || goalRaw || "Condicionamento";
 
     const student = {
