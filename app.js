@@ -4233,6 +4233,8 @@
     const updated = exercise.updatedAt || exercise.createdAt ? formatShortDate(String(exercise.updatedAt || exercise.createdAt).slice(0, 10)) : "-";
     const status = exercise.status === "active"
       ? { label: "Publicado", tone: "success" }
+      : exercise.status === "inactive"
+      ? { label: "Arquivado", tone: "muted" }
       : { label: "Rascunho", tone: "muted" };
     const params = exercise.defaultSets || exercise.defaultReps || exercise.defaultRest
       ? `${escapeHtml(exercise.defaultSets || "3")} séries • ${escapeHtml(exercise.defaultReps || "10-12")} reps • ${escapeHtml(exercise.defaultRest || "60s")} descanso`
@@ -4284,10 +4286,15 @@
   function exerciseMediaHtml(exercise, primaryMuscle) {
     const hasVideo = hasExerciseVideo(exercise);
     const thumbnail = exercise.thumbnailUrl || exercise.coverUrl || "";
+    const initial = (primaryMuscle || "E").slice(0, 1).toUpperCase();
+    const avatarHue = ((primaryMuscle || "E").charCodeAt(0) * 47 + 120) % 360;
+    const thumbStyle = !thumbnail ? `style="--thumb-bg:hsl(${avatarHue},50%,28%)"` : "";
     return `
-      <button class="library-thumbnail ${hasVideo ? "has-video" : "is-placeholder"}" type="button" data-open-exercise-video="${escapeHtml(exercise.id)}" aria-label="Ver vídeo de ${escapeHtml(exercise.name)}">
-        ${thumbnail ? `<img src="${escapeHtml(thumbnail)}" alt="" loading="lazy" />` : `<span class="library-thumbnail-fallback">${escapeHtml(String(primaryMuscle || "Elite").slice(0, 2).toUpperCase())}</span>`}
-        <span class="library-play-badge"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></span>
+      <button class="library-thumbnail ${hasVideo ? "has-video" : "is-placeholder"}" ${thumbStyle} type="button" data-open-exercise-video="${escapeHtml(exercise.id)}" aria-label="${hasVideo ? `Ver vídeo de ${escapeHtml(exercise.name)}` : `Enviar vídeo de ${escapeHtml(exercise.name)}`}">
+        ${thumbnail
+          ? `<img src="${escapeHtml(thumbnail)}" alt="" loading="lazy" />`
+          : `<span class="library-thumbnail-fallback">${escapeHtml(initial)}</span>`}
+        ${hasVideo ? `<span class="library-play-badge"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></span>` : ""}
       </button>
     `;
   }
@@ -4654,7 +4661,7 @@
           </div>
           <span>${escapeHtml(exercise.description || "Sem descrição cadastrada.")}</span>
           <div class="badge-row">
-            <span class="badge ${exercise.status === "active" ? "is-success" : "is-danger"}">${exercise.status === "active" ? "Ativo" : "Inativo"}</span>
+            <span class="badge ${exercise.status === "active" ? "is-success" : "is-muted"}">${exercise.status === "active" ? "Publicado" : exercise.status === "inactive" ? "Arquivado" : "Rascunho"}</span>
             ${statusBadge(videoLabel, hasExerciseVideo(exercise) ? "info" : "")}
             ${used ? statusBadge("Em uso") : ""}
           </div>
