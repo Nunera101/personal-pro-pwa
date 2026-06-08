@@ -6101,11 +6101,10 @@
           </div>
           <p class="contract-body">${escapeHtml(contract.body)}</p>
           <div class="form-actions">
-            <button class="primary-action" type="button" data-sign-contract="${escapeHtml(contract.id)}">Aceitar e assinar</button>
-            <button class="secondary-action" type="button" data-open-contract="${escapeHtml(contract.id)}">Ver em detalhe</button>
+            <button class="primary-action" type="button" data-open-contract="${escapeHtml(contract.id)}">Ler e assinar contrato</button>
             <button class="ghost-button" type="button" data-logout>Sair</button>
           </div>
-          <p class="small-text">O aceite é interno do app e registra data, versão e identificação técnica disponível.</p>
+          <p class="small-text">Leia o contrato completo antes de assinar. O aceite registra data/hora, IP e identificação técnica.</p>
         </section>
       </div>
     `;
@@ -8456,14 +8455,20 @@
     const _canSign = isStudent && contract.status !== "signed" && contract.status !== "canceled";
     const _isPending = contract.status !== "signed" && contract.status !== "canceled";
     footerEl.innerHTML = `
-      ${isStudent
-        ? (contract.pdfUrl || _canSign)
-          ? `<div class="ex-footer-right">
-              ${contract.pdfUrl ? `<a class="secondary-action" href="${escapeHtml(contract.pdfUrl)}" download>Baixar PDF</a>` : ""}
-              ${_canSign ? `<button class="primary-action" type="button" data-sign-contract="${escapeHtml(contract.id)}">Aceitar e assinar</button>` : ""}
-            </div>`
-          : ""
-        : ""}
+      ${isStudent ? `
+        <div class="contract-consent-block">
+          ${_canSign ? `
+            <label class="contract-consent-check-row">
+              <input type="checkbox" data-contract-consent-check="${escapeHtml(contract.id)}">
+              <span>Li e aceito os termos do contrato</span>
+            </label>
+            <button class="primary-action" type="button" data-sign-contract="${escapeHtml(contract.id)}" disabled>Assinar contrato</button>
+            <p class="small-text">O aceite registra data/hora, IP e identificação técnica para fins de comprovação jurídica.</p>
+          ` : contract.pdfUrl ? `
+            <a class="secondary-action" href="${escapeHtml(contract.pdfUrl)}" download>Baixar PDF</a>
+          ` : ""}
+        </div>
+      ` : ""}
       ${isManager ? `
         <div class="ex-footer-right">
           ${contract.pdfUrl
@@ -10635,6 +10640,18 @@
     document.addEventListener("change", (event) => {
       const target = event.target;
       if (target.matches("[data-contract-filter]")) { state.contractFilters[target.dataset.contractFilter] = target.value; state.contractFilterOpen = true; renderManager(); }
+      if (target.matches("[data-contract-consent-check]")) {
+        const contractId = target.dataset.contractConsentCheck;
+        const signBtn = document.querySelector(`[data-sign-contract="${contractId}"]`);
+        if (signBtn) {
+          signBtn.disabled = !target.checked;
+          if (target.checked) {
+            signBtn.dataset.consentAt = new Date().toISOString();
+          } else {
+            delete signBtn.dataset.consentAt;
+          }
+        }
+      }
     });
     document.addEventListener("toggle", (event) => {
       if (event.target.matches(".contracts-filter-details")) state.contractFilterOpen = event.target.open;
@@ -11048,6 +11065,9 @@
   async function signContract(id) {
     const contract = state.data.contracts.find((item) => item.id === id);
     if (!contract || state.currentUser?.role !== "student" || contract.studentId !== state.currentUser.studentId) return showToast("Contrato indisponível.");
+    const signBtn = document.querySelector(`[data-sign-contract="${id}"]`);
+    const consentAt = signBtn?.dataset.consentAt || null;
+    if (!consentAt) return showToast("Confirme que leu o contrato antes de assinar.");
     const meta = await getContractSignatureMeta(contract);
     contract.status = "signed";
     contract.signedAt = new Date().toISOString();
@@ -11057,6 +11077,7 @@
     contract.signatureUserAgent = meta.userAgent || navigator.userAgent || "";
     contract.signatureMeta = JSON.stringify({
       source: "internal_app_acceptance",
+      consentCheckboxAt: consentAt,
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "",
       language: navigator.language || "",
       backendMeta: meta || {}
