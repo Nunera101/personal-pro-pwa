@@ -718,3 +718,210 @@
     height: 9.5rem;
   }
 }
+
+/* ── Sheet: Registrar pagamento ─────────────────────────────────────────── */
+.pf-form {
+  padding: 1rem 1.1rem 1.5rem;
+}
+
+.pf-method-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.38rem;
+}
+
+.pf-footer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+  padding-top: 0.25rem;
+}
+
+/* ── Sheet: Detalhe da mensalidade ──────────────────────────────────────── */
+.pd-content {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1rem 1.1rem 1.5rem;
+}
+
+.pd-hero {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.pd-hero strong {
+  display: block;
+  color: var(--ink);
+  font-size: 1.05rem;
+  line-height: 1.2;
+}
+
+.pd-hero span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.pd-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.52rem;
+}
+
+.pd-grid article {
+  display: grid;
+  gap: 0.18rem;
+  padding: 0.72rem;
+  border: 1px solid var(--line);
+  border-radius: 0.82rem;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.pd-grid article span {
+  color: var(--muted);
+  font-size: 0.74rem;
+  line-height: 1.18;
+}
+
+.pd-grid article strong {
+  color: var(--ink);
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.pd-section-title {
+  margin: 0 0 0.55rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 760;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pd-history {
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.82rem;
+  border: 1px solid var(--line);
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.pd-history-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.pd-history-row:last-child {
+  border-bottom: 0;
+}
+
+.pd-history-month {
+  color: var(--ink);
+  font-size: 0.88rem;
+}
+
+.pd-history-date {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.pd-history-row strong {
+  color: var(--ink);
+  font-size: 0.88rem;
+}
+
+.pd-actions {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.pd-actions .primary-action,
+.pd-actions .secondary-action {
+  width: 100%;
+}
+
+.pd-actions .secondary-action[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Sheet: Cobrar ──────────────────────────────────────────────────────── */
+.cobrar-content {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1rem 1.1rem 1.5rem;
+}
+
+.cobrar-student {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.cobrar-student strong {
+  display: block;
+  color: var(--ink);
+  font-size: 1rem;
+}
+
+.cobrar-student span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.cobrar-msg {
+  width: 100%;
+  min-height: 7rem;
+  padding: 0.72rem;
+  border: 1px solid var(--line);
+  border-radius: 0.82rem;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.92rem;
+  resize: vertical;
+}
+
+.cobrar-msg:focus {
+  outline: none;
+  border-color: rgba(245, 181, 27, 0.5);
+  background: rgba(245, 181, 27, 0.04);
+}
+
+.cobrar-actions {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.cobrar-wa-btn,
+.cobrar-email-btn {
+  width: 100%;
+  justify-content: center;
+  gap: 0.6rem;
+}
+
+.cobrar-wa-btn svg,
+.cobrar-email-btn svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  flex-shrink: 0;
+}
+
+.cobrar-no-contact {
+  padding: 0.72rem;
+  border-radius: 0.72rem;
+  background: rgba(239, 68, 68, 0.08);
+  color: var(--danger);
+  font-size: 0.82rem;
+  text-align: center;
+}

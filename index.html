@@ -372,6 +372,51 @@
       </section>
     </div>
 
+    <!-- Sheet: Registrar / Editar pagamento -->
+    <div class="ag-sheet" id="paymentFormSheet" role="dialog" aria-modal="true" aria-labelledby="pfSheetTitle" hidden>
+      <div class="ag-backdrop" data-close-payment-form-sheet></div>
+      <section class="ag-panel">
+        <div class="sheet-handle" aria-hidden="true"></div>
+        <div class="ag-head">
+          <h2 id="pfSheetTitle" class="ag-title">Registrar pagamento</h2>
+          <button class="icon-button ag-close-btn" type="button" data-close-payment-form-sheet aria-label="Fechar">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div id="pfSheetBody"></div>
+      </section>
+    </div>
+
+    <!-- Sheet: Detalhe da mensalidade -->
+    <div class="ag-sheet" id="paymentDetailSheet" role="dialog" aria-modal="true" aria-labelledby="pdSheetTitle" hidden>
+      <div class="ag-backdrop" data-close-payment-detail-sheet></div>
+      <section class="ag-panel">
+        <div class="sheet-handle" aria-hidden="true"></div>
+        <div class="ag-head">
+          <h2 id="pdSheetTitle" class="ag-title">Mensalidade</h2>
+          <button class="icon-button ag-close-btn" type="button" data-close-payment-detail-sheet aria-label="Fechar">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div id="pdSheetBody"></div>
+      </section>
+    </div>
+
+    <!-- Sheet: Cobrar mensalidade -->
+    <div class="ag-sheet" id="cobrarSheet" role="dialog" aria-modal="true" aria-labelledby="cobrarSheetTitle" hidden>
+      <div class="ag-backdrop" data-close-cobrar-sheet></div>
+      <section class="ag-panel">
+        <div class="sheet-handle" aria-hidden="true"></div>
+        <div class="ag-head">
+          <h2 id="cobrarSheetTitle" class="ag-title">Cobrar mensalidade</h2>
+          <button class="icon-button ag-close-btn" type="button" data-close-cobrar-sheet aria-label="Fechar">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div id="cobrarSheetBody"></div>
+      </section>
+    </div>
+
     <!-- Modal: Ver vídeo -->
     <div class="video-modal" id="videoModal" role="dialog" aria-modal="true" aria-labelledby="videoModalTitle" hidden>
       <div class="video-modal-backdrop" data-close-video-modal></div>

@@ -155,6 +155,15 @@
     utSheetBody: document.getElementById("utSheetBody"),
     enviarVideoSheet: document.getElementById("enviarVideoSheet"),
     evSheetBody: document.getElementById("evSheetBody"),
+    paymentFormSheet: document.getElementById("paymentFormSheet"),
+    pfSheetTitle: document.getElementById("pfSheetTitle"),
+    pfSheetBody: document.getElementById("pfSheetBody"),
+    paymentDetailSheet: document.getElementById("paymentDetailSheet"),
+    pdSheetTitle: document.getElementById("pdSheetTitle"),
+    pdSheetBody: document.getElementById("pdSheetBody"),
+    cobrarSheet: document.getElementById("cobrarSheet"),
+    cobrarSheetTitle: document.getElementById("cobrarSheetTitle"),
+    cobrarSheetBody: document.getElementById("cobrarSheetBody"),
     installSteps: document.getElementById("installSteps"),
     retryInstall: document.getElementById("retryInstall"),
     toast: document.getElementById("toast"),
@@ -7880,48 +7889,127 @@
   function openPaymentForm(paymentId = "", defaults = {}) {
     const payment = paymentId ? state.data.payments.find((item) => item.id === paymentId) : null;
     const record = payment ? { ...payment } : defaults.recordId ? findFinanceRecord(defaults.recordId) : null;
-    const selectedStudentId = defaults.studentId || payment?.studentId || record?.studentId || state.data.students[0]?.id || "";
+    const selectedStudentId = defaults.studentId || payment?.studentId || record?.studentId || "";
     const student = getStudent(selectedStudentId);
     const contract = payment?.contractId ? state.data.contracts.find((item) => item.id === payment.contractId) : getBillableContractForStudent(selectedStudentId, defaults.referenceMonth || state.financeFilters.month);
     const referenceMonth = payment?.referenceMonth || defaults.referenceMonth || record?.referenceMonth || state.financeFilters.month || todayISO().slice(0, 7);
     const amount = payment?.amount || defaults.amount || record?.amount || contract?.value || "";
-    const dueDate = payment?.dueDate || defaults.dueDate || record?.dueDate || (contract ? financeDueDateForContract(contract, referenceMonth) : `${referenceMonth}-05`);
-    const paidAt = payment?.paidAt ? payment.paidAt.slice(0, 10) : defaults.paidAt || (payment?.status === "paid" ? todayISO() : "");
-    const activeContracts = state.data.contracts.filter((item) => item.studentId === selectedStudentId && item.status !== "canceled");
-    openModal(
-      payment ? "Editar pagamento" : "Registrar pagamento",
-      `
-        <form class="form-grid payment-form" id="paymentForm" data-payment-id="${escapeHtml(payment?.id || "")}">
-          <div class="form-grid two">
-            <label class="field"><span>Aluno</span><select name="studentId" required>${studentOptions(selectedStudentId)}</select></label>
-            <label class="field"><span>Contrato/plano</span><select name="contractId"><option value="">Sem contrato vinculado</option>${activeContracts.map((item) => `<option value="${escapeHtml(item.id)}" ${item.id === (payment?.contractId || contract?.id || "") ? "selected" : ""}>${escapeHtml(item.plan || item.title)} · ${escapeHtml(item.value || "sem valor")}</option>`).join("")}</select></label>
-            <label class="field"><span>Mês de referência</span><input name="referenceMonth" type="month" value="${escapeHtml(referenceMonth)}" required /></label>
-            <label class="field"><span>Valor</span><input name="amount" type="text" inputmode="decimal" value="${escapeHtml(amount)}" placeholder="R$ 0,00" required /></label>
-            <label class="field"><span>Vencimento</span><input name="dueDate" type="date" value="${escapeHtml(dueDate)}" /></label>
-            <label class="field"><span>Data de pagamento</span><input name="paidAt" type="date" value="${escapeHtml(paidAt)}" /></label>
-            <label class="field"><span>Status</span><select name="status">
-              ${[
-                ["paid", "Pago"],
-                ["pending", "Pendente"],
-                ["overdue", "Atrasado"],
-                ["partial", "Parcial"],
-                ["exempt", "Isento"],
-                ["canceled", "Cancelado"]
-              ].map(([value, label]) => `<option value="${value}" ${String(payment?.status || defaults.status || record?.status || "paid") === value ? "selected" : ""}>${label}</option>`).join("")}
-            </select></label>
-            <label class="field"><span>Forma de pagamento</span><select name="paymentMethod">
-              ${["Pix", "Dinheiro", "Cartão", "Transferência", "Outro"].map((item) => `<option value="${escapeHtml(item)}" ${String(payment?.paymentMethod || "") === item ? "selected" : ""}>${escapeHtml(item)}</option>`).join("")}
-            </select></label>
-          </div>
-          <label class="field"><span>Observação</span><textarea name="note" placeholder="Anote detalhes internos do pagamento.">${escapeHtml(payment?.note || "")}</textarea></label>
-          <p class="small-text">Controle interno/manual. O app não processa pagamentos online nem envia cobrança automaticamente.</p>
-          <div class="form-actions two">
-            <button class="primary-action" type="submit">${payment ? "Salvar pagamento" : "Registrar pagamento"}</button>
-            ${student ? `<button class="secondary-action" type="button" data-open-student-profile="${escapeHtml(student.id)}">Abrir perfil</button>` : ""}
-          </div>
-        </form>
-      `
-    );
+    const paidAt = payment?.paidAt ? payment.paidAt.slice(0, 10) : defaults.paidAt || todayISO();
+    const paymentMethod = payment?.paymentMethod || defaults.paymentMethod || "";
+
+    const sheet = elements.paymentFormSheet;
+    const bodyEl = elements.pfSheetBody;
+    const titleEl = elements.pfSheetTitle;
+    if (!sheet || !bodyEl) return;
+
+    titleEl.textContent = payment ? "Editar pagamento" : "Registrar pagamento";
+
+    const studentDatalist = state.data.students
+      .map((s) => `<option value="${escapeHtml(s.name)}" data-id="${escapeHtml(s.id)}"></option>`)
+      .join("");
+    const methodChips = ["Pix", "Cartão", "Dinheiro", "Transferência"]
+      .map((m) => `<label class="radio-chip"><input type="radio" name="paymentMethod" value="${escapeHtml(m)}" ${paymentMethod === m ? "checked" : ""}><span>${escapeHtml(m)}</span></label>`)
+      .join("");
+
+    bodyEl.innerHTML = `
+      <form class="pf-form form-grid" id="paymentFormSheetForm" data-payment-id="${escapeHtml(payment?.id || "")}" data-record-id="${escapeHtml(record?.id || defaults.recordId || "")}">
+        <datalist id="pfStudentList">${studentDatalist}</datalist>
+        <label class="field">
+          <span>Aluno</span>
+          <input type="text" id="pfStudentInput" list="pfStudentList" placeholder="Buscar aluno..." value="${escapeHtml(student?.name || "")}" autocomplete="off" />
+          <input type="hidden" name="studentId" id="pfStudentHiddenId" value="${escapeHtml(selectedStudentId)}" />
+        </label>
+        <div class="form-grid two">
+          <label class="field"><span>Competência</span><input name="referenceMonth" type="month" value="${escapeHtml(referenceMonth)}" required /></label>
+          <label class="field"><span>Valor</span><input name="amount" type="text" inputmode="decimal" value="${escapeHtml(String(amount))}" placeholder="R$ 0,00" required /></label>
+        </div>
+        <div class="field">
+          <span>Forma de pagamento</span>
+          <div class="chip-group pf-method-chips" role="group" aria-label="Forma de pagamento">${methodChips}</div>
+        </div>
+        <label class="field"><span>Data do pagamento</span><input name="paidAt" type="date" value="${escapeHtml(paidAt)}" /></label>
+        <div class="pf-footer">
+          <button class="secondary-action" type="button" data-close-payment-form-sheet>Cancelar</button>
+          <button class="primary-action" type="submit" id="pfSubmitBtn">${payment ? "Salvar pagamento" : "Registrar pagamento"}</button>
+        </div>
+      </form>
+    `;
+
+    const searchInput = bodyEl.querySelector("#pfStudentInput");
+    const hiddenId = bodyEl.querySelector("#pfStudentHiddenId");
+    searchInput?.addEventListener("input", () => {
+      const val = searchInput.value.trim().toLowerCase();
+      const match = state.data.students.find((s) => s.name.toLowerCase() === val);
+      if (match) hiddenId.value = match.id;
+      else if (!val) hiddenId.value = "";
+    });
+
+    document.body.style.overflow = "hidden";
+    sheet.hidden = false;
+    searchInput?.focus();
+  }
+
+  function closePaymentFormSheet() {
+    if (!elements.paymentFormSheet || elements.paymentFormSheet.hidden) return;
+    elements.paymentFormSheet.hidden = true;
+    document.body.style.overflow = "";
+  }
+
+  async function handlePaymentFormSheet(form) {
+    if (state.currentUser?.role !== "manager") return showToast("Ação restrita ao gestor.");
+    const data = new FormData(form);
+    const paymentId = form.dataset.paymentId || "";
+    const old = paymentId ? state.data.payments.find((item) => item.id === paymentId) : null;
+    const studentId = String(data.get("studentId") || "");
+    const student = getStudent(studentId);
+    if (!student) return showToast("Selecione um aluno válido.");
+    const referenceMonth = String(data.get("referenceMonth") || todayISO().slice(0, 7));
+    const amount = String(data.get("amount") || "").trim();
+    if (!amount) return showToast("Informe o valor.");
+    const paymentMethod = String(data.get("paymentMethod") || "").trim();
+    const paidAt = String(data.get("paidAt") || todayISO());
+    const recordId = form.dataset.recordId || "";
+    const record = recordId ? findFinanceRecord(recordId) : null;
+    const contract = record?.contractId
+      ? state.data.contracts.find((c) => c.id === record.contractId)
+      : getBillableContractForStudent(studentId, referenceMonth);
+    const dueDate = record?.dueDate || (contract ? financeDueDateForContract(contract, referenceMonth) : `${referenceMonth}-05`);
+
+    const submitBtn = form.querySelector("#pfSubmitBtn");
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "Salvando…"; }
+
+    try {
+      const { registrarPagamento } = await import("./src/services.js");
+      await registrarPagamento({ studentId, referenceMonth, amount, paymentMethod, paidAt, status: "paid" });
+    } catch (_) {}
+
+    const payment = normalizePayment({
+      ...(old || {}),
+      id: old?.id || createId("payment"),
+      studentId,
+      contractId: record?.contractId || contract?.id || "",
+      plan: contract?.plan || student.goal || "Plano Elite AS",
+      referenceMonth,
+      amount,
+      dueDate,
+      paidAt,
+      paymentMethod,
+      status: "paid",
+      note: old?.note || "",
+      receiptCode: old?.receiptCode || `REC-${referenceMonth.replace("-", "")}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
+      createdAt: old?.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+
+    const index = state.data.payments.findIndex((item) => item.id === payment.id);
+    if (index >= 0) state.data.payments[index] = payment;
+    else state.data.payments.unshift(payment);
+    state.financeFilters.month = payment.referenceMonth;
+    persistData();
+    closePaymentFormSheet();
+    state.managerMenu = "finance";
+    renderManager();
+    showSuccessToast(old ? "Pagamento atualizado." : "Pagamento registrado.");
   }
 
   function openPaymentDetail(recordId) {
@@ -7929,45 +8017,79 @@
     if (!record) return showToast("Pagamento não encontrado.");
     const student = getStudent(record.studentId);
     const meta = financeStatusMeta(record);
-    openModal(
-      "Detalhes financeiros",
-      `
-        <div class="finance-detail">
-          <section class="finance-detail-hero">
-            ${studentAvatar(student)}
-            <div>
-              <span class="eyebrow">Financeiro</span>
-              <h3>${escapeHtml(getStudentName(record.studentId))}</h3>
-              <p>${escapeHtml(record.plan || "Plano não informado")} · ${escapeHtml(financeMonthLabel(record.referenceMonth))}</p>
+
+    const sheet = elements.paymentDetailSheet;
+    const bodyEl = elements.pdSheetBody;
+    if (!sheet || !bodyEl) return;
+
+    const allPaid = state.data.payments
+      .filter((p) => p.studentId === record.studentId && financeStatusKey(p) === "paid")
+      .sort((a, b) => String(b.referenceMonth || "").localeCompare(String(a.referenceMonth || "")));
+
+    const historicHtml = allPaid.length
+      ? `<section class="pd-history">
+          <h4 class="pd-section-title">Histórico de pagamentos</h4>
+          ${allPaid.slice(0, 8).map((p) => `
+            <div class="pd-history-row">
+              <span class="pd-history-month">${escapeHtml(financeMonthLabel(p.referenceMonth))}</span>
+              <span class="badge is-success">Pago</span>
+              <strong>${escapeHtml(currencyExact(p.amount))}</strong>
+              <span class="pd-history-date">${p.paidAt ? formatShortDate(p.paidAt.slice(0, 10)) : ""}</span>
             </div>
-            <span class="badge ${meta.tone ? `is-${meta.tone}` : ""}">${escapeHtml(meta.label)}</span>
-          </section>
-          <section class="contract-detail-grid finance-detail-grid">
-            <article><span>Valor</span><strong>${escapeHtml(currencyExact(record.amount))}</strong></article>
-            <article><span>Vencimento</span><strong>${escapeHtml(record.dueDate ? formatShortDate(record.dueDate) : "Sem data")}</strong></article>
-            <article><span>Pagamento</span><strong>${escapeHtml(record.paidAt ? formatShortDate(record.paidAt.slice(0, 10)) : "Não registrado")}</strong></article>
-            <article><span>Origem</span><strong>${escapeHtml(record.virtual ? "Contrato assinado" : "Registro manual")}</strong></article>
-          </section>
-          <section class="contract-detail-section">
-            <div class="section-title"><h3>Observação</h3><span class="small-text">${escapeHtml(record.paymentMethod || "Controle interno")}</span></div>
-            <p class="contract-body premium-contract-body">${escapeHtml(record.note || "Sem observações registradas.")}</p>
-          </section>
-          <div class="contract-detail-actions">
-            <button class="primary-action" type="button" data-open-payment-form="${escapeHtml(record.virtual ? "" : record.id)}" data-payment-record="${escapeHtml(record.id)}">${record.virtual ? "Registrar pagamento" : "Editar pagamento"}</button>
-            ${meta.key === "paid" ? `<button class="secondary-action" type="button" data-open-payment-receipt="${escapeHtml(record.id)}">Ver recibo</button>` : `<button class="secondary-action" type="button" data-finance-charge="${escapeHtml(record.id)}">Cobrar via WhatsApp</button>`}
-            ${student ? `<button class="secondary-action" type="button" data-open-student-profile="${escapeHtml(student.id)}">Abrir perfil</button>` : ""}
+          `).join("")}
+        </section>`
+      : "";
+
+    bodyEl.innerHTML = `
+      <div class="pd-content">
+        <section class="pd-hero">
+          ${studentAvatar(student)}
+          <div>
+            <strong>${escapeHtml(getStudentName(record.studentId))}</strong>
+            <span>${escapeHtml(record.plan || "Plano Elite AS")} · ${escapeHtml(financeMonthLabel(record.referenceMonth))}</span>
           </div>
+          <span class="badge ${meta.tone ? "is-" + meta.tone : ""}">${escapeHtml(meta.label)}</span>
+        </section>
+        <section class="pd-grid">
+          <article><span>Valor</span><strong>${escapeHtml(currencyExact(record.amount))}</strong></article>
+          <article><span>Vencimento</span><strong>${escapeHtml(record.dueDate ? formatShortDate(record.dueDate) : "—")}</strong></article>
+          <article><span>Pago em</span><strong>${escapeHtml(record.paidAt ? formatShortDate(record.paidAt.slice(0, 10)) : "—")}</strong></article>
+          <article><span>Forma</span><strong>${escapeHtml(record.paymentMethod || "—")}</strong></article>
+        </section>
+        ${historicHtml}
+        <div class="pd-actions">
+          <button class="primary-action" type="button" data-open-payment-form="${escapeHtml(record.virtual ? "" : record.id)}" data-payment-record="${escapeHtml(record.id)}">${record.virtual ? "Registrar pagamento" : "Editar pagamento"}</button>
+          <button class="secondary-action" type="button" data-open-cobrar-sheet="${escapeHtml(record.id)}">Cobrar</button>
+          <button class="secondary-action" type="button" data-open-payment-receipt="${escapeHtml(record.id)}" ${meta.key !== "paid" ? "disabled" : ""}>Gerar recibo</button>
         </div>
-      `
-    );
+      </div>
+    `;
+
+    document.body.style.overflow = "hidden";
+    sheet.hidden = false;
   }
 
-  function openPaymentReceipt(recordId) {
+  function closePaymentDetailSheet() {
+    if (!elements.paymentDetailSheet || elements.paymentDetailSheet.hidden) return;
+    elements.paymentDetailSheet.hidden = true;
+    document.body.style.overflow = "";
+  }
+
+  async function openPaymentReceipt(recordId) {
     const record = findFinanceRecord(recordId);
     if (!record || financeStatusKey(record) !== "paid") return showToast("Recibo disponível apenas para pagamentos pagos.");
     const student = getStudent(record.studentId);
+
+    showToast("Gerando recibo…");
+    let pdfUrl = "";
+    try {
+      const { gerarRecibo } = await import("./src/services.js");
+      const result = await gerarRecibo(record.id);
+      pdfUrl = result?.url || "";
+    } catch (_) {}
+
     openModal(
-      "Recibo interno",
+      "Recibo de pagamento",
       `
         <div class="finance-receipt">
           <section class="finance-receipt-card">
@@ -7975,7 +8097,7 @@
             <h3>Recibo de pagamento</h3>
             <div class="finance-receipt-grid">
               <span>Aluno</span><strong>${escapeHtml(getStudentName(record.studentId))}</strong>
-              <span>Plano</span><strong>${escapeHtml(record.plan || "Plano não informado")}</strong>
+              <span>Plano</span><strong>${escapeHtml(record.plan || "Plano Elite AS")}</strong>
               <span>Valor</span><strong>${escapeHtml(currencyExact(record.amount))}</strong>
               <span>Mês</span><strong>${escapeHtml(financeMonthLabel(record.referenceMonth))}</strong>
               <span>Pago em</span><strong>${escapeHtml(record.paidAt ? formatShortDate(record.paidAt.slice(0, 10)) : "Não informado")}</strong>
@@ -7986,11 +8108,12 @@
           </section>
           <div class="form-actions two">
             <button class="primary-action" type="button" data-print-contract>Imprimir / salvar PDF</button>
-            ${student ? `<button class="secondary-action" type="button" data-open-student-profile="${escapeHtml(student.id)}">Abrir perfil</button>` : ""}
+            ${pdfUrl ? `<a class="secondary-action" href="${escapeHtml(pdfUrl)}" target="_blank" rel="noopener noreferrer">Baixar PDF</a>` : (student ? `<button class="secondary-action" type="button" data-open-student-profile="${escapeHtml(student.id)}">Abrir perfil</button>` : "")}
           </div>
         </div>
       `
     );
+    showSuccessToast("Recibo gerado com sucesso.");
   }
 
   function openInviteLinkModal(student, inviteUrl, mailConfigured = false) {
@@ -8838,11 +8961,66 @@
   }
 
   function chargeFinanceRecord(recordId) {
+    openCobrarSheet(recordId);
+  }
+
+  function openCobrarSheet(recordId) {
     const record = findFinanceRecord(recordId);
-    if (!record) return showToast("Pagamento não encontrado.");
-    const url = financeChargeUrl(record);
-    if (!url) return showToast("Este aluno não possui telefone cadastrado.");
-    window.open(url, "_blank", "noopener");
+    if (!record) return showToast("Registro não encontrado.");
+    const student = getStudent(record.studentId);
+    const sheet = elements.cobrarSheet;
+    const bodyEl = elements.cobrarSheetBody;
+    if (!sheet || !bodyEl) return;
+
+    const dueLabel = record.dueDate ? formatShortDate(record.dueDate) : "a combinar";
+    const template =
+      state.data.settings.financeChargeTemplate ||
+      "Olá, {aluno}! Passando para lembrar da mensalidade do plano {plano}, no valor de {valor}, com vencimento em {vencimento}.";
+    const defaultMsg = template
+      .replace("{aluno}", student?.name || "aluno")
+      .replace("{plano}", record.plan || "Elite AS")
+      .replace("{vencimento}", dueLabel)
+      .replace("{valor}", currencyExact(record.amount))
+      .replace("{personal}", state.data.settings.trainerName || "Personal");
+
+    const hasPhone = !!sanitizePhone(student?.phone);
+    const hasEmail = !!student?.email;
+
+    bodyEl.innerHTML = `
+      <div class="cobrar-content">
+        <section class="cobrar-student">
+          ${studentAvatar(student)}
+          <div>
+            <strong>${escapeHtml(student?.name || "Aluno")}</strong>
+            <span>${escapeHtml(record.plan || "Plano Elite AS")} · ${escapeHtml(currencyExact(record.amount))} · ${escapeHtml(dueLabel)}</span>
+          </div>
+        </section>
+        <label class="field">
+          <span>Mensagem</span>
+          <textarea id="cobrarMsg" class="cobrar-msg" rows="5">${escapeHtml(defaultMsg)}</textarea>
+        </label>
+        <div class="cobrar-actions">
+          <button class="whatsapp-button cobrar-wa-btn" type="button" data-cobrar-wa="${escapeHtml(record.id)}" ${!hasPhone ? "disabled" : ""}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zM12 0C5.373 0 0 5.373 0 12c0 2.135.559 4.137 1.532 5.875L0 24l6.267-1.508A11.956 11.956 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>
+            Cobrar pelo WhatsApp
+          </button>
+          <button class="secondary-action cobrar-email-btn" type="button" data-cobrar-email="${escapeHtml(record.id)}" ${!hasEmail ? "disabled" : ""}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            Por e-mail
+          </button>
+        </div>
+        ${!hasPhone && !hasEmail ? `<p class="small-text cobrar-no-contact">Cadastre telefone ou e-mail no perfil do aluno para enviar cobrança.</p>` : ""}
+      </div>
+    `;
+
+    document.body.style.overflow = "hidden";
+    sheet.hidden = false;
+  }
+
+  function closeCobrarSheet() {
+    if (!elements.cobrarSheet || elements.cobrarSheet.hidden) return;
+    elements.cobrarSheet.hidden = true;
+    document.body.style.overflow = "";
   }
 
   function startWorkout(workoutId, activityId = "") {
@@ -9614,12 +9792,37 @@
 
   function bindFinanceEvents() {
     document.addEventListener("click", (event) => {
-      const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-manager-drawer-backdrop]");
+      const target = event.target.closest("button, a, .day-cell, [data-close-modal], [data-close-install], [data-manager-drawer-backdrop], [data-close-payment-form-sheet], [data-close-payment-detail-sheet], [data-close-cobrar-sheet]");
       if (!target) return;
-      if (target.matches("[data-open-payment-form]")) openPaymentForm(target.dataset.openPaymentForm || "", { recordId: target.dataset.paymentRecord || "" });
+      if (target.matches("[data-open-payment-form]")) { closePaymentDetailSheet(); openPaymentForm(target.dataset.openPaymentForm || "", { recordId: target.dataset.paymentRecord || "" }); }
       if (target.matches("[data-open-payment-detail]")) openPaymentDetail(target.dataset.openPaymentDetail);
       if (target.matches("[data-open-payment-receipt]")) openPaymentReceipt(target.dataset.openPaymentReceipt);
       if (target.matches("[data-finance-charge]")) chargeFinanceRecord(target.dataset.financeCharge);
+      if (target.matches("[data-open-cobrar-sheet]")) { closePaymentDetailSheet(); openCobrarSheet(target.dataset.openCobrarSheet); }
+      if (target.matches("[data-close-payment-form-sheet]")) closePaymentFormSheet();
+      if (target.matches("[data-close-payment-detail-sheet]")) closePaymentDetailSheet();
+      if (target.matches("[data-close-cobrar-sheet]")) closeCobrarSheet();
+      if (target.matches("[data-cobrar-wa]")) {
+        const record = findFinanceRecord(target.dataset.cobrarWa);
+        const student = getStudent(record?.studentId);
+        const phone = sanitizePhone(student?.phone);
+        const msg = document.getElementById("cobrarMsg")?.value || "";
+        if (!phone) return showToast("Aluno sem telefone cadastrado.");
+        import("./src/services.js").then(({ cobrar }) => cobrar(record.id, { canal: "whatsapp", mensagem: msg }).catch(() => {}));
+        window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, "_blank", "noopener");
+        closeCobrarSheet();
+        showSuccessToast("Cobrança registrada via WhatsApp.");
+      }
+      if (target.matches("[data-cobrar-email]")) {
+        const record = findFinanceRecord(target.dataset.cobrarEmail);
+        const student = getStudent(record?.studentId);
+        const msg = document.getElementById("cobrarMsg")?.value || "";
+        if (!student?.email) return showToast("Aluno sem e-mail cadastrado.");
+        import("./src/services.js").then(({ cobrar }) => cobrar(record.id, { canal: "email", mensagem: msg }).catch(() => {}));
+        window.location.href = `mailto:${encodeURIComponent(student.email)}?subject=${encodeURIComponent("Mensalidade Elite AS")}&body=${encodeURIComponent(msg)}`;
+        closeCobrarSheet();
+        showSuccessToast("Cobrança registrada por e-mail.");
+      }
       if (target.matches("[data-finance-show-all]")) { state.financeFilters.q = ""; state.financeFilters.status = "all"; state.financeFilterOpen = false; renderManager(); }
       if (target.matches("[data-toggle-finance-filter]")) { state.financeFilterOpen = !state.financeFilterOpen; renderManager(); }
       if (target.dataset.financeMonthShift) {
@@ -9639,6 +9842,7 @@
       event.preventDefault();
       const form = event.target;
       if (form.id === "paymentForm") handlePaymentForm(form);
+      if (form.id === "paymentFormSheetForm") await handlePaymentFormSheet(form);
     });
   }
 
