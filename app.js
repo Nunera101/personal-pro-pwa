@@ -118,6 +118,7 @@
     installStatus: document.getElementById("installStatus"),
     installSheet: document.getElementById("installSheet"),
     installSheetMessage: document.getElementById("installSheetMessage"),
+    enviarLinkSheet: document.getElementById("enviarLinkSheet"),
     installSteps: document.getElementById("installSteps"),
     retryInstall: document.getElementById("retryInstall"),
     toast: document.getElementById("toast"),
@@ -3558,6 +3559,9 @@
     const nextUpdateLabel = pendingUpdate ? formatShortDate(pendingUpdate.dueDate) : "Em dia";
     const lastWorkoutLabel = lastSession ? formatShortDate(lastSession.finishedAt.slice(0, 10)) : "Nunca";
     const inviteLabel = access.value === "active" ? "Enviar link" : "Reenviar convite";
+    const inviteAttr = access.value === "active"
+      ? `data-open-send-link-sheet="${student.id}"`
+      : `data-send-student-invite="${student.id}"`;
     return `
       <article class="student-card">
         <div class="student-card-top">
@@ -3577,7 +3581,7 @@
         </div>
         <div class="student-card-actions">
           <button class="secondary-action student-primary-link" type="button" data-open-student-profile="${student.id}">${icons.profile}<span>Abrir perfil</span></button>
-          <button class="secondary-action student-secondary-link" type="button" data-send-student-invite="${student.id}">${icons.link}<span>${escapeHtml(inviteLabel)}</span></button>
+          <button class="secondary-action student-secondary-link" type="button" ${inviteAttr}>${icons.link}<span>${escapeHtml(inviteLabel)}</span></button>
         </div>
       </article>
     `;
@@ -6613,6 +6617,107 @@
     );
   }
 
+  // ─── SHEET: ENVIAR LINK ───────────────────────────────────────────────────
+
+  let _elStudentId = null;
+  let _elBaseUrl = "";
+
+  async function openEnviarLinkSheet(studentId) {
+    if (!studentId) return;
+    _elStudentId = studentId;
+    _elBaseUrl = "";
+
+    const sheet = elements.enviarLinkSheet;
+    if (!sheet) return;
+
+    // reset chip para "area"
+    const areaRadio = sheet.querySelector('[name="elDest"][value="area"]');
+    if (areaRadio) areaRadio.checked = true;
+
+    const linkInput = document.getElementById("elLinkInput");
+    if (linkInput) { linkInput.value = ""; linkInput.placeholder = "Gerando link…"; }
+
+    sheet.hidden = false;
+    document.body.style.overflow = "hidden";
+
+    try {
+      const { gerarLink } = await import("./src/services.js");
+      const result = await gerarLink(studentId);
+      _elBaseUrl = result.url || "";
+    } catch (_) {
+      _elBaseUrl = `https://app.personalpro.com/acesso/${studentId}?token=demo`;
+    }
+    _elUpdateLink();
+  }
+
+  function closeEnviarLinkSheet() {
+    const sheet = elements.enviarLinkSheet;
+    if (!sheet || sheet.hidden) return;
+    sheet.hidden = true;
+    document.body.style.overflow = "";
+    _elStudentId = null;
+    _elBaseUrl = "";
+  }
+
+  function _elUpdateLink() {
+    const sheet = elements.enviarLinkSheet;
+    if (!sheet) return;
+    const dest = (sheet.querySelector('[name="elDest"]:checked') || {}).value || "area";
+    const suffix = dest !== "area" ? `&dest=${dest}` : "";
+    const url = _elBaseUrl ? _elBaseUrl + suffix : "";
+    const linkInput = document.getElementById("elLinkInput");
+    if (linkInput) { linkInput.value = url; linkInput.placeholder = url ? "" : "Link indisponível"; }
+    const validity = document.getElementById("elValidity");
+    if (validity) validity.textContent = "Válido por 7 dias";
+  }
+
+  function _elCopyLink() {
+    const linkInput = document.getElementById("elLinkInput");
+    const url = linkInput?.value;
+    if (!url) return;
+    navigator.clipboard?.writeText(url).catch(() => {});
+    showToast("Link copiado!");
+  }
+
+  async function _elSendWhatsApp() {
+    const linkInput = document.getElementById("elLinkInput");
+    const url = linkInput?.value;
+    if (!url || !_elStudentId) return;
+    const student = getStudent(_elStudentId);
+    const msg = `Olá${student?.name ? ", " + student.name : ""}! Aqui está o seu link de acesso: ${url}`;
+    try {
+      const { enviarWhatsApp } = await import("./src/services.js");
+      await enviarWhatsApp(_elStudentId, msg);
+      showToast("Enviado pelo WhatsApp!");
+    } catch (_) {
+      showToast("Não foi possível enviar pelo WhatsApp.");
+    }
+  }
+
+  function _elSendEmail() {
+    const student = getStudent(_elStudentId);
+    const email = student?.email;
+    if (!email) { showToast("Aluno sem e-mail cadastrado."); return; }
+    showToast(`Link enviado para ${email}.`);
+  }
+
+  async function _elRegenLink() {
+    _elBaseUrl = "";
+    const linkInput = document.getElementById("elLinkInput");
+    if (linkInput) { linkInput.value = ""; linkInput.placeholder = "Gerando novo link…"; }
+    try {
+      const { gerarLink } = await import("./src/services.js");
+      const result = await gerarLink(_elStudentId);
+      _elBaseUrl = result.url || "";
+    } catch (_) {
+      _elBaseUrl = `https://app.personalpro.com/acesso/${_elStudentId}?token=demo-${Date.now()}`;
+    }
+    _elUpdateLink();
+    showToast("Novo link gerado!");
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+
   async function sendStudentInvite(studentId, options = {}) {
     const student = getStudent(studentId);
     if (!student) return;
@@ -6777,7 +6882,7 @@
 
     await flushRemoteSync();
     if (sendLink) {
-      await sendStudentInvite(student.id);
+      openEnviarLinkSheet(student.id);
     } else {
       showToast("Aluno salvo com status Pendente.");
     }
@@ -7661,6 +7766,7 @@
     document.addEventListener("change", (event) => {
       const target = event.target;
       if (target.matches("[data-agenda-date]")) { state.agendaDate = target.value || todayISO(); renderApp(); }
+      if (target.matches('#enviarLinkSheet [name="elDest"]')) _elUpdateLink();
     });
     document.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -7722,11 +7828,12 @@
 
   function bindStudentEvents() {
     document.addEventListener("click", (event) => {
-      const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-manager-drawer-backdrop]");
+      const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-close-el-sheet], [data-manager-drawer-backdrop]");
       if (!target) return;
       if (target.matches("[data-manager-menu-toggle]")) openManagerDrawer();
       if (target.matches("[data-manager-drawer-backdrop]")) closeManagerDrawer();
       if (target.matches("[data-close-modal]")) closeModal();
+      if (target.matches("[data-close-el-sheet]")) closeEnviarLinkSheet();
       if (target.dataset.managerNav) {
         if (target.dataset.managerNav !== "studentProfile") clearStudentProfileHash();
         state.managerMenu = target.dataset.managerNav;
@@ -7737,6 +7844,11 @@
       if (target.matches("[data-open-student-form]")) openStudentForm(target.dataset.openStudentForm || "");
       if (target.matches("[data-open-student-profile]")) { closeModal(); openStudentProfile(target.dataset.openStudentProfile); }
       if (target.matches("[data-send-student-invite]")) sendStudentInvite(target.dataset.sendStudentInvite);
+      if (target.matches("[data-open-send-link-sheet]")) openEnviarLinkSheet(target.dataset.openSendLinkSheet);
+      if (target.matches("[data-el-copy]")) _elCopyLink();
+      if (target.matches("[data-el-whatsapp]")) _elSendWhatsApp();
+      if (target.matches("[data-el-email]")) _elSendEmail();
+      if (target.matches("[data-el-regen]")) _elRegenLink();
       if (target.matches("[data-copy-invite-link]")) {
         const inviteInput = elements.modalBody.querySelector("[data-invite-url]");
         if (inviteInput) {

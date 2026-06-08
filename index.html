@@ -190,9 +190,60 @@
       </section>
     </div>
 
+    <!-- Sheet: Enviar link de acesso -->
+    <div class="el-sheet" id="enviarLinkSheet" role="dialog" aria-modal="true" aria-labelledby="elSheetTitle" hidden>
+      <div class="el-backdrop" data-close-el-sheet></div>
+      <section class="el-panel">
+        <div class="sheet-handle" aria-hidden="true"></div>
+        <div class="el-head">
+          <h2 id="elSheetTitle" class="el-title">Enviar link</h2>
+          <button class="icon-button el-close-btn" type="button" data-close-el-sheet aria-label="Fechar">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <p class="el-sub">Escolha o destino e compartilhe com o aluno</p>
+        <div class="el-chip-group" role="group" aria-label="Destino do link">
+          <label class="radio-chip">
+            <input type="radio" name="elDest" value="area" checked>
+            <span>Área do aluno</span>
+          </label>
+          <label class="radio-chip">
+            <input type="radio" name="elDest" value="treino">
+            <span>Treino</span>
+          </label>
+          <label class="radio-chip">
+            <input type="radio" name="elDest" value="dieta">
+            <span>Dieta</span>
+          </label>
+        </div>
+        <div class="el-linkbox">
+          <input id="elLinkInput" class="el-link-input" type="text" readonly aria-label="Link de acesso" placeholder="Gerando link…">
+          <button class="el-copy-btn" type="button" data-el-copy aria-label="Copiar link">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+        </div>
+        <p class="el-validity" id="elValidity">Válido por 7 dias</p>
+        <button class="whatsapp-button el-whatsapp-btn" type="button" data-el-whatsapp>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zM12 0C5.373 0 0 5.373 0 12c0 2.135.559 4.137 1.532 5.875L0 24l6.267-1.508A11.956 11.956 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>
+          Enviar pelo WhatsApp
+        </button>
+        <div class="el-action-row">
+          <button class="secondary-action" type="button" data-el-copy>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copiar
+          </button>
+          <button class="secondary-action" type="button" data-el-email>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            Por e-mail
+          </button>
+        </div>
+        <button class="ghost-button el-regen-btn" type="button" data-el-regen>Gerar novo link</button>
+      </section>
+    </div>
+
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-    <script src="./app.js?v=53"></script>
+    <script src="./app.js?v=54"></script>
   </body>
 </html>
 
