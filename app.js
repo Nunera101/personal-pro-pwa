@@ -131,6 +131,9 @@
     apSheet: document.getElementById("apSheet"),
     apSheetBody: document.getElementById("apSheetBody"),
     apSheetTitle: document.getElementById("apSheetTitle"),
+    exerciseSheet: document.getElementById("exerciseSheet"),
+    exerciseSheetBody: document.getElementById("exerciseSheetBody"),
+    exerciseSheetTitle: document.getElementById("exerciseSheetTitle"),
     installSteps: document.getElementById("installSteps"),
     retryInstall: document.getElementById("retryInstall"),
     toast: document.getElementById("toast"),
@@ -182,6 +185,18 @@
     { value: "beginner", label: "Iniciante" },
     { value: "intermediate", label: "Intermediário" },
     { value: "advanced", label: "Avançado" }
+  ];
+
+  const EQUIPMENT_OPTIONS = [
+    "Peso corporal",
+    "Halteres",
+    "Barra",
+    "Cabo",
+    "Máquina",
+    "Elástico",
+    "Kettlebell",
+    "TRX / Suspensão",
+    "Outros"
   ];
 
   const managerMenus = [
@@ -700,6 +715,17 @@
       .join("");
   }
 
+  function equipmentOptions(selected = "Peso corporal") {
+    const all = uniqueOptions([...EQUIPMENT_OPTIONS, ...(selected && !EQUIPMENT_OPTIONS.includes(selected) ? [selected] : [])]);
+    return all.map((opt) => `<option value="${escapeHtml(opt)}" ${opt === selected ? "selected" : ""}>${escapeHtml(opt)}</option>`).join("");
+  }
+
+  function exerciseTagChips(selected = [], primary = "") {
+    const selectedList = normalizeStringList(selected);
+    const values = uniqueOptions([...MUSCLE_GROUPS, ...selectedList, ...state.data.exercises.flatMap(getExerciseMuscleGroups)]).filter((item) => item !== primary);
+    return values.map((item) => `<label class="radio-chip"><input type="checkbox" name="secondaryMuscles" value="${escapeHtml(item)}" ${selectedList.includes(item) ? "checked" : ""} /><span>${escapeHtml(item)}</span></label>`).join("");
+  }
+
   function workoutLevelLabel(level = "") {
     return WORKOUT_LEVELS.find((item) => item.value === level)?.label || "Não definido";
   }
@@ -790,6 +816,10 @@
       videoName: exercise.videoName || "",
       videoSize: Number(exercise.videoSize || 0),
       videoUploadedAt: exercise.videoUploadedAt || "",
+      defaultSets: Number(exercise.defaultSets) || 3,
+      defaultRepsMin: Number(exercise.defaultRepsMin) || 8,
+      defaultRepsMax: Number(exercise.defaultRepsMax) || 12,
+      defaultRestSeconds: Number(exercise.defaultRestSeconds) || 60,
       status: exercise.status || "active",
       createdAt: exercise.createdAt || new Date().toISOString(),
       updatedAt: exercise.updatedAt || new Date().toISOString()
@@ -5968,42 +5998,125 @@
   }
 
   function openExerciseForm(exerciseId = "") {
+    const sheet = elements.exerciseSheet;
+    const body = elements.exerciseSheetBody;
+    const titleEl = elements.exerciseSheetTitle;
+    if (!sheet || !body) return;
+
     const exercise = getExercise(exerciseId) || {};
-    const primaryMuscle = exercise.id ? getExercisePrimaryMuscle(exercise) : "";
+    const isEdit = Boolean(exercise.id);
+    const primaryMuscle = isEdit ? getExercisePrimaryMuscle(exercise) : "";
     const secondaryMuscles = getExerciseSecondaryMuscles(exercise);
+    const hasVideo = hasExerciseVideo(exercise);
     const videoLink = exercise.videoStorage === "indexeddb" ? "" : exercise.videoUrl || "";
-    const currentVideo = hasExerciseVideo(exercise)
-      ? `${escapeHtml(exercise.videoName || exercise.videoUrl || "Vídeo cadastrado")}${exercise.videoStorage === "indexeddb" ? " · vídeo local deste aparelho" : ""}${exercise.videoSize ? ` · ${escapeHtml(formatFileSize(exercise.videoSize))}` : ""}`
-      : "Nenhum vídeo cadastrado.";
-    openModal(
-      exercise.id ? "Editar exercício" : "Novo exercício",
-      `
-        <form class="form-grid" id="exerciseForm" data-id="${exercise.id || ""}">
-          <div class="form-grid two">
-            <label class="field"><span>Nome</span><input name="name" type="text" value="${escapeHtml(exercise.name)}" required /></label>
-            <label class="field"><span>Grupo muscular principal</span><select name="primaryMuscle" required>${exerciseMuscleOptions(primaryMuscle, [primaryMuscle])}</select></label>
-            <label class="field"><span>Equipamento</span><input name="equipment" type="text" value="${escapeHtml(exercise.equipment || "")}" required /></label>
-            <label class="field"><span>Status</span><select name="status"><option value="active" ${exercise.status !== "inactive" ? "selected" : ""}>Ativo</option><option value="inactive" ${exercise.status === "inactive" ? "selected" : ""}>Inativo</option></select></label>
+
+    if (titleEl) titleEl.textContent = isEdit ? "Editar exercício" : "Novo exercício";
+
+    const videoCardHtml = hasVideo
+      ? `<div class="ex-video-card ex-video-card--filled">
+          <div class="ex-video-active">
+            <div class="ex-video-play-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+            <span class="ex-video-name">${escapeHtml(exercise.videoName || exercise.videoUrl || "Vídeo cadastrado")}</span>
+            ${exercise.videoSize ? `<span class="ex-video-meta">${escapeHtml(formatFileSize(exercise.videoSize))}</span>` : ""}
           </div>
-          <fieldset class="field fieldset">
-            <span>Grupos musculares secundários</span>
-            <div class="checkbox-grid">${exerciseSecondaryMuscleChoices(secondaryMuscles, primaryMuscle)}</div>
-          </fieldset>
-          <div class="form-grid two">
-            <label class="field"><span>Link do vídeo</span><input name="videoUrl" type="url" value="${escapeHtml(videoLink)}" placeholder="https://..." /></label>
-            <label class="field"><span>Upload de vídeo</span><input name="videoFile" type="file" accept="video/mp4,video/webm,video/quicktime" /></label>
+          <div class="ex-video-actions">
+            <label class="ex-video-action-btn" title="Substituir vídeo">
+              <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+              Substituir
+              <input name="videoFile" type="file" accept="video/mp4,video/webm,video/quicktime" style="display:none" />
+            </label>
+            ${isEdit ? `<button class="ex-video-action-btn ex-video-action-btn--danger" type="button" data-remove-exercise-video="${escapeHtml(exercise.id)}">Remover</button>` : ""}
           </div>
-          <div class="media-note">
-            <span class="small-text"><strong>Vídeo atual:</strong> ${currentVideo}</span>
-            ${hasExerciseVideo(exercise) ? `<label class="inline-check"><input name="removeVideo" type="checkbox" value="1" /> Remover vídeo atual ao salvar</label>` : ""}
-            <span class="small-text">Aceita MP4, WebM ou MOV até 200 MB. Se a API não estiver disponível, o arquivo fica local neste aparelho para teste.</span>
+        </div>`
+      : `<div class="ex-video-card">
+          <div class="ex-video-placeholder">
+            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m10 9 6 3-6 3V9Z"/></svg>
+            <span class="ex-video-label">Nenhum vídeo adicionado</span>
+            <label class="ex-video-upload-btn">
+              <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" stroke="currentColor" fill="none" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+              Enviar vídeo
+              <input name="videoFile" type="file" accept="video/mp4,video/webm,video/quicktime" style="display:none" />
+            </label>
           </div>
-          <label class="field"><span>Descrição de execução</span><textarea name="description">${escapeHtml(exercise.description)}</textarea></label>
-          <label class="field"><span>Observações técnicas</span><textarea name="technicalNotes">${escapeHtml(exercise.technicalNotes)}</textarea></label>
-          <button class="primary-action" type="submit">Salvar exercício</button>
-        </form>
-      `
-    );
+        </div>`;
+
+    const statusBadgeHtml = isEdit
+      ? `<div class="ex-status-row">
+          <span class="ex-status-label">Status:</span>
+          ${exercise.status === "active"
+            ? `<span class="badge is-success">Publicado</span>`
+            : `<span class="badge" style="background:rgba(59,130,246,0.12);color:#3b82f6;border:1px solid rgba(59,130,246,0.25)">Rascunho</span>`}
+        </div>`
+      : "";
+
+    body.innerHTML = `
+      <form class="ex-form" id="exerciseForm" data-id="${exercise.id || ""}">
+        ${videoCardHtml}
+
+        <label class="field">
+          <span>Nome <span class="ns-required" aria-hidden="true">*</span></span>
+          <input name="name" type="text" value="${escapeHtml(exercise.name || "")}" required placeholder="Ex: Agachamento livre" autocomplete="off" />
+        </label>
+
+        <div class="form-grid two">
+          <label class="field">
+            <span>Grupo muscular</span>
+            <select name="primaryMuscle" required>${exerciseMuscleOptions(primaryMuscle, [primaryMuscle])}</select>
+          </label>
+          <label class="field">
+            <span>Equipamento</span>
+            <select name="equipment">${equipmentOptions(exercise.equipment || "Peso corporal")}</select>
+          </label>
+        </div>
+
+        <div class="field">
+          <span>Grupos secundários</span>
+          <div class="ex-tag-chips">${exerciseTagChips(secondaryMuscles, primaryMuscle)}</div>
+        </div>
+
+        <div class="ex-params-card">
+          <div class="ex-params-title">Parâmetros padrão</div>
+          <div class="form-grid ex-params-grid">
+            <label class="field">
+              <span>Séries</span>
+              <input name="defaultSets" type="number" min="1" max="20" value="${exercise.defaultSets || 3}" />
+            </label>
+            <label class="field">
+              <span>Reps mín.</span>
+              <input name="defaultRepsMin" type="number" min="1" max="100" value="${exercise.defaultRepsMin || 8}" />
+            </label>
+            <label class="field">
+              <span>Reps máx.</span>
+              <input name="defaultRepsMax" type="number" min="1" max="100" value="${exercise.defaultRepsMax || 12}" />
+            </label>
+            <label class="field">
+              <span>Descanso (s)</span>
+              <input name="defaultRestSeconds" type="number" min="0" max="600" value="${exercise.defaultRestSeconds || 60}" />
+            </label>
+          </div>
+        </div>
+
+        <label class="field">
+          <span>Instruções de execução</span>
+          <textarea name="description" rows="4" placeholder="Descreva a técnica e pontos de atenção...">${escapeHtml(exercise.description || "")}</textarea>
+        </label>
+
+        ${statusBadgeHtml}
+        <input type="hidden" name="videoUrl" value="${escapeHtml(videoLink)}" />
+      </form>
+    `;
+
+    sheet.hidden = false;
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeExerciseSheet() {
+    const sheet = elements.exerciseSheet;
+    if (!sheet || sheet.hidden) return;
+    sheet.hidden = true;
+    document.body.style.overflow = "";
   }
 
   function openWorkoutForm(workoutId = "", prefillStudentId = "") {
@@ -7183,24 +7296,27 @@
     showToast("Aluno salvo. A senha continua privada do aluno.");
   }
 
-  async function handleExerciseForm(form) {
+  async function handleExerciseForm(form, action = "publish") {
     const data = new FormData(form);
+    const name = String(data.get("name") || "").trim();
+    if (action === "publish" && !name) {
+      form.querySelector('[name="name"]')?.focus();
+      showToast("Informe o nome do exercício antes de publicar.");
+      return;
+    }
     const id = form.dataset.id || createId("exercise");
     const old = getExercise(id);
-    const removeVideo = data.get("removeVideo") === "1";
     const videoUrl = String(data.get("videoUrl") || "").trim();
-    let videoData = removeVideo
-      ? { videoUrl: "", videoStorage: "", videoKey: "", videoName: "", videoSize: 0, videoUploadedAt: "" }
-      : {
-          videoUrl: old?.videoUrl || "",
-          videoStorage: old?.videoStorage || "",
-          videoKey: old?.videoKey || "",
-          videoName: old?.videoName || "",
-          videoSize: old?.videoSize || 0,
-          videoUploadedAt: old?.videoUploadedAt || ""
-        };
+    let videoData = {
+      videoUrl: old?.videoUrl || "",
+      videoStorage: old?.videoStorage || "",
+      videoKey: old?.videoKey || "",
+      videoName: old?.videoName || "",
+      videoSize: old?.videoSize || 0,
+      videoUploadedAt: old?.videoUploadedAt || ""
+    };
 
-    if (!removeVideo && videoUrl) {
+    if (videoUrl) {
       videoData = {
         videoUrl,
         videoStorage: "external",
@@ -7219,29 +7335,41 @@
         return showToast(error.message || "Não foi possível salvar o vídeo.");
       }
     }
+
     const exercise = normalizeExercise({
       id,
       trainerId: TRAINER_ID,
-      name: String(data.get("name") || "").trim(),
+      name: name || "Exercício",
       muscle: String(data.get("primaryMuscle") || "").trim(),
       primaryMuscle: String(data.get("primaryMuscle") || "").trim(),
       secondaryMuscles: normalizeStringList(data.getAll("secondaryMuscles")),
-      equipment: String(data.get("equipment") || "").trim(),
+      equipment: String(data.get("equipment") || "Peso corporal").trim(),
       description: String(data.get("description") || "").trim(),
-      technicalNotes: String(data.get("technicalNotes") || "").trim(),
+      technicalNotes: "",
+      defaultSets: Number(data.get("defaultSets")) || 3,
+      defaultRepsMin: Number(data.get("defaultRepsMin")) || 8,
+      defaultRepsMax: Number(data.get("defaultRepsMax")) || 12,
+      defaultRestSeconds: Number(data.get("defaultRestSeconds")) || 60,
       ...videoData,
-      status: String(data.get("status") || "active"),
+      status: action === "publish" ? "active" : "draft",
       createdAt: old?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString()
     });
+
     const index = state.data.exercises.findIndex((item) => item.id === id);
     if (index >= 0) state.data.exercises[index] = exercise;
     else state.data.exercises.unshift(exercise);
     persistData();
-    closeModal();
+    closeExerciseSheet();
     state.managerMenu = "library";
     renderApp();
-    showToast(videoFile && exercise.videoStorage === "indexeddb" ? "Exercício salvo. Vídeo ficou local neste aparelho até o backend estar disponível." : removeVideo ? "Exercício salvo sem vídeo." : "Exercício salvo na biblioteca.");
+
+    const toastMsg = action === "draft"
+      ? "Exercício salvo como rascunho."
+      : videoFile && exercise.videoStorage === "indexeddb"
+        ? "Exercício publicado. Vídeo ficou local neste aparelho até o backend estar disponível."
+        : "Exercício publicado na biblioteca.";
+    showToast(toastMsg);
   }
 
   function handleWorkoutForm(form) {
@@ -8213,8 +8341,9 @@
 
   function bindExerciseEvents() {
     document.addEventListener("click", (event) => {
-      const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-manager-drawer-backdrop]");
+      const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-manager-drawer-backdrop], [data-close-exercise-sheet]");
       if (!target) return;
+      if (target.matches("[data-close-exercise-sheet]")) closeExerciseSheet();
       if (target.matches("[data-open-exercise-form]")) openExerciseForm(target.dataset.openExerciseForm || "");
       if (target.matches("[data-open-exercise-video]")) openExerciseVideo(target.dataset.openExerciseVideo);
       if (target.matches("[data-use-exercise-workout]")) openUseExerciseInWorkout(target.dataset.useExerciseWorkout);
@@ -8238,7 +8367,10 @@
     document.addEventListener("submit", async (event) => {
       event.preventDefault();
       const form = event.target;
-      if (form.id === "exerciseForm") await handleExerciseForm(form);
+      if (form.id === "exerciseForm") {
+        const action = event.submitter?.value || "publish";
+        await handleExerciseForm(form, action);
+      }
     });
   }
 
@@ -8561,7 +8693,11 @@
     exercise.videoUploadedAt = "";
     exercise.updatedAt = new Date().toISOString();
     persistData();
-    renderApp();
+    if (elements.exerciseSheet && !elements.exerciseSheet.hidden) {
+      openExerciseForm(id);
+    } else {
+      renderApp();
+    }
     showToast("Vídeo removido do exercício.");
   }
 

@@ -302,9 +302,31 @@
       </section>
     </div>
 
+    <!-- Sheet: Novo / Editar exercício (tela cheia) -->
+    <div class="workout-sheet" id="exerciseSheet" role="dialog" aria-modal="true" aria-labelledby="exerciseSheetTitle" hidden>
+      <div class="workout-sheet-backdrop" data-close-exercise-sheet></div>
+      <section class="workout-sheet-panel ex-sheet-panel">
+        <div class="sheet-handle" aria-hidden="true"></div>
+        <div class="ag-head">
+          <h2 id="exerciseSheetTitle" class="ag-title">Novo exercício</h2>
+          <button class="icon-button ag-close-btn" type="button" data-close-exercise-sheet aria-label="Fechar">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div id="exerciseSheetBody" class="ex-sheet-body"></div>
+        <div class="ex-sheet-footer">
+          <button class="secondary-action ex-cancel-btn" type="button" data-close-exercise-sheet>Cancelar</button>
+          <div class="ex-footer-right">
+            <button class="secondary-action" type="submit" form="exerciseForm" name="action" value="draft" formnovalidate>Salvar rascunho</button>
+            <button class="primary-action" type="submit" form="exerciseForm" name="action" value="publish">Publicar</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-    <script src="./app.js?v=57"></script>
+    <script src="./app.js?v=58"></script>
   </body>
 </html>
 
