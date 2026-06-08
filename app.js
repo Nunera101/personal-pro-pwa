@@ -2253,6 +2253,11 @@
       elements.managerContent.classList.remove("is-entering");
       void elements.managerContent.offsetWidth;
       elements.managerContent.classList.add("is-entering");
+      // Mede altura do manager-header para o offset sticky do cabeçalho do perfil
+      requestAnimationFrame(() => {
+        const mh = elements.managerView.querySelector(".manager-header");
+        if (mh) document.documentElement.style.setProperty("--mgr-header-h", mh.offsetHeight + "px");
+      });
     };
 
     if (SKELETON_TABS.has(state.managerMenu) && document.body.classList.contains("app-ready")) {
@@ -5465,25 +5470,27 @@
     const stats = getStudentProfileStats(student);
     const access = getStudentAccessState(student);
     return `
-      <div class="content-stack student-page">
-        <section class="student-profile-topbar">
-          <button class="icon-button back-button" type="button" data-manager-nav="students" aria-label="Voltar para alunos">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
-          </button>
-          <div>
-            <span class="eyebrow">Elite AS</span>
-            <h3>Perfil do aluno</h3>
-            <p>Acompanhamento completo de agenda, treinos, evolução e relacionamento.</p>
+      <div class="sp-wrapper student-page">
+        <div class="sp-sticky-head" id="profileStickyHead">
+          <div class="sp-topbar">
+            <button class="icon-button back-button" type="button" data-manager-nav="students" aria-label="Voltar para alunos">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <h3 class="sp-title">${escapeHtml(student.name)}</h3>
+            <div class="sp-topbar-actions">
+              <button class="secondary-action sp-send-link-btn" type="button" data-send-student-invite="${student.id}">${access.value === "active" ? "Enviar link" : "Reenviar"}</button>
+              <button class="icon-button sp-edit-btn" type="button" data-open-student-form="${student.id}" aria-label="Editar aluno">
+                <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </button>
+            </div>
           </div>
-          <div class="student-profile-top-actions">
-            <button class="secondary-action" type="button" data-send-student-invite="${student.id}">${access.value === "active" ? "Enviar link" : "Reenviar convite"}</button>
-            <button class="primary-action" type="button" data-open-student-form="${student.id}">Editar aluno</button>
-          </div>
-        </section>
-        ${renderStudentProfileHero(student, stats)}
-        ${renderStudentSummaryCards(student, stats)}
-        ${renderProfileTabs(state.profileTab)}
-        ${renderStudentProfileTab(student, state.profileTab)}
+          ${renderStudentProfileHero(student, stats)}
+          ${renderStudentSummaryCards(student, stats)}
+          ${renderProfileTabs(state.profileTab)}
+        </div>
+        <div class="sp-tab-body" id="profileTabBody">
+          ${renderStudentProfileTab(student, state.profileTab)}
+        </div>
       </div>
     `;
   }
@@ -5497,6 +5504,22 @@
     if (!validTabs.includes(state.profileTab)) state.profileTab = "summary";
     if (options.updateHash !== false) updateStudentProfileHash(student.id);
     renderApp();
+  }
+
+  function switchProfileTab(newTab) {
+    state.profileTab = newTab;
+    const student = getStudent(state.activeStudentProfileId);
+    if (!student) return;
+    // Atualiza apenas o estado visual dos botões de aba
+    document.querySelectorAll("#profileStickyHead [data-profile-tab]").forEach((btn) => {
+      btn.classList.toggle("is-active", btn.dataset.profileTab === newTab);
+    });
+    // Substitui apenas o corpo da aba, sem tocar no cabeçalho
+    const tabBody = document.getElementById("profileTabBody");
+    if (tabBody) {
+      tabBody.innerHTML = fixMojibake(renderStudentProfileTab(student, newTab));
+      scrubVisibleText(tabBody);
+    }
   }
 
   function renderStudentProfileHero(student, providedStats = null) {
@@ -7857,7 +7880,15 @@
           showToast("Link copiado.");
         }
       }
-      if (target.matches("[data-profile-tab]")) { state.profileTab = target.dataset.profileTab; openStudentProfile(state.activeStudentProfileId, { updateHash: false }); }
+      if (target.matches("[data-profile-tab]")) {
+        const newTab = target.dataset.profileTab;
+        if (state.managerMenu === "studentProfile" && document.getElementById("profileTabBody")) {
+          switchProfileTab(newTab);
+        } else {
+          state.profileTab = newTab;
+          openStudentProfile(state.activeStudentProfileId, { updateHash: false });
+        }
+      }
       if (target.matches("[data-delete-student]")) deleteStudent(target.dataset.deleteStudent);
       if (target.matches("[data-open-activity-form]")) openActivityForm(target.dataset.openActivityForm || "", target.dataset.prefillStudent || "");
       if (target.matches("[data-ns-save-and-send]")) {

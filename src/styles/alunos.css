@@ -2550,3 +2550,108 @@
     margin-bottom: 1rem;
   }
 }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   PERFIL TELA CHEIA — cabeçalho fixo, abas sem recarregar
+   ═══════════════════════════════════════════════════════════════ */
+
+.sp-wrapper {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0 !important;
+}
+
+.sp-sticky-head {
+  position: sticky;
+  top: var(--mgr-header-h, 5.85rem);
+  z-index: 9;
+  /* Bleed para cobrir o padding lateral do workspace-layout */
+  margin-inline: -1rem;
+  padding: 0 1rem 0.5rem;
+  background: var(--bg, #0D0D0D);
+  display: flex;
+  flex-direction: column;
+  gap: 0.62rem;
+}
+
+/* Topbar: voltar + título + ações */
+.sp-topbar {
+  display: grid;
+  grid-template-columns: 2.75rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+}
+
+.sp-topbar .sp-title {
+  margin: 0;
+  color: var(--ink, #f7f4eb);
+  font-size: clamp(1rem, 4.2vw, 1.22rem);
+  font-weight: 700;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sp-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.sp-send-link-btn {
+  width: auto !important;
+  min-height: 2.35rem !important;
+  padding: 0 0.72rem !important;
+  border-radius: 0.68rem !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  border-color: rgba(245, 159, 11, 0.4) !important;
+  background: transparent !important;
+  color: var(--dourado, #F59E0B) !important;
+}
+
+.sp-edit-btn {
+  width: 2.35rem !important;
+  height: 2.35rem !important;
+  min-height: 2.35rem !important;
+  color: var(--brand-strong, #ffc447) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 0.68rem !important;
+}
+
+.sp-edit-btn svg {
+  width: 1rem !important;
+  height: 1rem !important;
+}
+
+/* Tab body: conteúdo rolável */
+.sp-tab-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.62rem;
+  padding-top: 0.62rem;
+}
+
+/* Oculta a topbar antiga quando sp-wrapper está ativo */
+.sp-wrapper .student-profile-topbar {
+  display: none !important;
+}
+
+@media (max-width: 32.5rem) {
+  .sp-sticky-head {
+    gap: 0.5rem;
+  }
+
+  .sp-topbar {
+    padding-top: 0.35rem;
+  }
+
+  .sp-send-link-btn {
+    font-size: 0.72rem !important;
+    padding: 0 0.5rem !important;
+  }
+}
