@@ -10452,7 +10452,14 @@
     });
     document.addEventListener("input", (event) => {
       const target = event.target;
-      if (target.matches("[data-message-filter]")) { state.messageFilters[target.dataset.messageFilter] = target.value; renderManager(); }
+      if (target.matches("[data-message-filter]")) {
+        const key = target.dataset.messageFilter;
+        const cursor = target.selectionStart;
+        state.messageFilters[key] = target.value;
+        renderManager();
+        const restored = document.querySelector(`[data-message-filter="${key}"]`);
+        if (restored) { restored.focus(); restored.setSelectionRange(cursor, cursor); }
+      }
     });
     document.addEventListener("change", (event) => {
       const target = event.target;
