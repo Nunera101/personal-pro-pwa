@@ -352,7 +352,7 @@
   display: flex;
   gap: 0.5rem;
   padding: 0.5rem 0.78rem 0.7rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid var(--borda);
 }
 
 .contract-action-btn {

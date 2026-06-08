@@ -494,7 +494,7 @@
   border-radius: 10px !important;
   font-size: 11px !important;
   gap: 4px !important;
-  color: #9CA3AF !important;
+  color: var(--txt2) !important;
   background: transparent !important;
   box-shadow: none !important;
 }
@@ -505,7 +505,7 @@
 }
 
 .nav-button.is-active {
-  color: #F59E0B !important;
+  color: var(--dourado) !important;
   background: rgba(245, 159, 11, 0.1) !important;
   box-shadow: none !important;
 }

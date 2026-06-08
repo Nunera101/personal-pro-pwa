@@ -1183,7 +1183,7 @@ body.is-manager-view {
 
 .agenda-hero p {
   font-size: 13px !important;
-  color: #9CA3AF !important;
+  color: var(--txt2) !important;
   margin-top: 3px !important;
 }
 
@@ -1197,7 +1197,7 @@ body.is-manager-view {
   border-radius: 10px !important;
   border: 1px solid rgba(245, 159, 11, 0.35) !important;
   background: rgba(245, 159, 11, 0.1) !important;
-  color: #F59E0B !important;
+  color: var(--dourado) !important;
   font-size: 13px !important;
   font-weight: 600 !important;
   white-space: nowrap !important;
@@ -1220,7 +1220,7 @@ box-shadow: none !important;
 /* ── Panels: fundo chapado, sem glow ── */
 .agenda-calendar-panel,
 .agenda-day-panel {
-  background: #1A1A1A !important;
+  background: var(--card) !important;
   border: 1px solid rgba(255, 255, 255, 0.07) !important;
   border-radius: 16px !important;
   box-shadow: none !important;
@@ -1241,14 +1241,14 @@ box-shadow: none !important;
 }
 
 .agenda-view-tabs button {
-  color: #9CA3AF !important;
+  color: var(--txt2) !important;
   font-weight: 600 !important;
 }
 
 .agenda-view-tabs button.is-active {
-  color: #F59E0B !important;
+  color: var(--dourado) !important;
   background: rgba(245, 159, 11, 0.08) !important;
-  box-shadow: inset 0 -2px 0 #F59E0B !important;
+  box-shadow: inset 0 -2px 0 var(--dourado) !important;
 }
 
 /* ── Period nav: flat ── */
@@ -1267,7 +1267,7 @@ box-shadow: none !important;
   font-size: clamp(0.74rem, 2.5vw, 0.92rem) !important;
   font-weight: 600 !important;
 }
-.agenda-today-button { color: #F59E0B !important; }
+.agenda-today-button { color: var(--dourado) !important; }
 
 /* ── AGENDA ITEM: flex layout — badge nunca estoura ── */
 .agenda-list .agenda-item,
@@ -1281,7 +1281,7 @@ box-shadow: none !important;
   min-height: 54px !important;
   border-radius: 12px !important;
   background: rgba(255, 255, 255, 0.04) !important;
-  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid var(--borda) !important;
   border-left-width: 3px !important;
   cursor: pointer !important;
   grid-template-columns: unset !important;
@@ -1329,7 +1329,7 @@ box-shadow: none !important;
   min-width: 38px !important;
   font-size: 13px !important;
   font-weight: 700 !important;
-  color: #F59E0B !important;
+  color: var(--dourado) !important;
   position: relative !important;
   z-index: 2 !important;
 }
@@ -1360,7 +1360,7 @@ box-shadow: none !important;
 .agenda-item .agenda-main .agenda-note {
   display: block !important;
   font-size: 11px !important;
-  color: #9CA3AF !important;
+  color: var(--txt2) !important;
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
@@ -1414,59 +1414,59 @@ box-shadow: none !important;
 .day-event { box-shadow: none !important; }
 
 .day-event.is-type-workout {
-  background: rgba(16, 185, 129, 0.18) !important;
-  border-color: rgba(16, 185, 129, 0.4) !important;
-  border-left-color: #10B981 !important;
-  color: #10B981 !important;
+  background: var(--treino-soft) !important;
+  border-color: var(--treino-borda) !important;
+  border-left-color: var(--treino) !important;
+  color: var(--treino) !important;
 }
 .day-event.is-type-assessment,
 .day-event.is-type-reassessment {
-  background: rgba(139, 92, 246, 0.18) !important;
-  border-color: rgba(139, 92, 246, 0.4) !important;
-  border-left-color: #8B5CF6 !important;
-  color: #8B5CF6 !important;
+  background: var(--aval-soft) !important;
+  border-color: var(--aval-borda) !important;
+  border-left-color: var(--aval) !important;
+  color: var(--aval) !important;
 }
 .day-event.is-type-update {
-  background: rgba(59, 130, 246, 0.18) !important;
-  border-color: rgba(59, 130, 246, 0.4) !important;
-  border-left-color: #3B82F6 !important;
-  color: #3B82F6 !important;
+  background: var(--atualiza-soft) !important;
+  border-color: var(--atualiza-borda) !important;
+  border-left-color: var(--atualiza) !important;
+  color: var(--atualiza) !important;
 }
 .day-event.is-type-return {
-  background: rgba(249, 115, 22, 0.18) !important;
-  border-color: rgba(249, 115, 22, 0.4) !important;
-  border-left-color: #F97316 !important;
-  color: #F97316 !important;
+  background: var(--retorno-soft) !important;
+  border-color: var(--retorno-borda) !important;
+  border-left-color: var(--retorno) !important;
+  color: var(--retorno) !important;
 }
 .day-event.is-type-contract,
 .day-event.is-type-other {
-  background: rgba(245, 159, 11, 0.18) !important;
-  border-color: rgba(245, 159, 11, 0.4) !important;
-  border-left-color: #F59E0B !important;
-  color: #F59E0B !important;
+  background: var(--dourado-soft) !important;
+  border-color: var(--dourado-borda) !important;
+  border-left-color: var(--dourado) !important;
+  color: var(--dourado) !important;
 }
 .day-event strong,
 .day-event span { color: inherit !important; }
 
 /* ── Cores bordas e dots por tipo ── */
-.agenda-item.is-type-workout   { border-left-color: #10B981 !important; }
+.agenda-item.is-type-workout   { border-left-color: var(--treino) !important; }
 .agenda-item.is-type-assessment,
-.agenda-item.is-type-reassessment { border-left-color: #8B5CF6 !important; }
-.agenda-item.is-type-update    { border-left-color: #3B82F6 !important; }
-.agenda-item.is-type-return    { border-left-color: #F97316 !important; }
-.agenda-item.is-type-contract  { border-left-color: #F59E0B !important; }
+.agenda-item.is-type-reassessment { border-left-color: var(--aval) !important; }
+.agenda-item.is-type-update    { border-left-color: var(--atualiza) !important; }
+.agenda-item.is-type-return    { border-left-color: var(--retorno) !important; }
+.agenda-item.is-type-contract  { border-left-color: var(--dourado) !important; }
 .agenda-item.is-type-other     { border-left-color: #6B7280 !important; }
 
-.agenda-type-dot.is-type-workout,  .agenda-dot.is-type-workout  { background: #10B981 !important; }
+.agenda-type-dot.is-type-workout,  .agenda-dot.is-type-workout  { background: var(--treino) !important; }
 .agenda-type-dot.is-type-assessment, .agenda-dot.is-type-assessment,
-.agenda-type-dot.is-type-reassessment, .agenda-dot.is-type-reassessment { background: #8B5CF6 !important; }
-.agenda-type-dot.is-type-update,   .agenda-dot.is-type-update   { background: #3B82F6 !important; }
-.agenda-type-dot.is-type-return,   .agenda-dot.is-type-return   { background: #F97316 !important; }
-.agenda-type-dot.is-type-contract, .agenda-dot.is-type-contract { background: #F59E0B !important; }
+.agenda-type-dot.is-type-reassessment, .agenda-dot.is-type-reassessment { background: var(--aval) !important; }
+.agenda-type-dot.is-type-update,   .agenda-dot.is-type-update   { background: var(--atualiza) !important; }
+.agenda-type-dot.is-type-return,   .agenda-dot.is-type-return   { background: var(--retorno) !important; }
+.agenda-type-dot.is-type-contract, .agenda-dot.is-type-contract { background: var(--dourado) !important; }
 
 /* ── Vista mes: circulo dourado no dia atual ── */
 .month-view .day-cell.is-today .day-select {
-  background: #F59E0B !important;
+  background: var(--dourado) !important;
   color: #000 !important;
   border-radius: 999px !important;
   width: 22px !important;
@@ -1486,7 +1486,7 @@ box-shadow: none !important;
 
 /* ── Vista semana: destaques de hoje ── */
 .agenda-week-day.is-today strong,
-.agenda-week-day.is-today span { color: #F59E0B !important; }
+.agenda-week-day.is-today span { color: var(--dourado) !important; }
 .agenda-week-day.is-today { background: rgba(245, 159, 11, 0.06) !important; }
 
 .agenda-week-board {
@@ -1505,7 +1505,7 @@ box-shadow: none !important;
   padding-top: 10px !important;
   border-top: 1px solid rgba(255,255,255,0.06) !important;
   font-size: 11px !important;
-  color: #9CA3AF !important;
+  color: var(--txt2) !important;
   font-weight: 500 !important;
 }
 .agenda-legend span {

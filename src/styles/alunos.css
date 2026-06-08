@@ -436,7 +436,7 @@
   align-content: start;
   border-radius: 0.95rem;
   background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.025)),
+    linear-gradient(145deg, var(--borda), rgba(255, 255, 255, 0.025)),
     rgba(10, 10, 10, 0.86);
 }
 
@@ -1118,7 +1118,7 @@
 
 /* Search field: flat */
 .student-search-field {
-  background: #1A1A1A !important;
+  background: var(--card) !important;
   box-shadow: none !important;
   border-color: rgba(255, 255, 255, 0.08) !important;
 }
@@ -1130,16 +1130,16 @@
 
 /* Filter pills: flat */
 .student-filter {
-  background: #1A1A1A !important;
+  background: var(--card) !important;
   box-shadow: none !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
 /* Student card: flat, no glow, no radial orb */
 .student-card {
-  background: #1A1A1A !important;
+  background: var(--card) !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
-  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid var(--borda) !important;
   border-radius: 16px !important;
   padding: 14px !important;
   gap: 10px !important;
@@ -1173,13 +1173,13 @@
   fill: none !important;
   stroke: currentColor !important;
   stroke-width: 1.5 !important;
-  color: #F59E0B !important;
+  color: var(--dourado) !important;
 }
 
 /* Info blocks: compact */
 .student-card-info {
   padding-top: 10px !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-top: 1px solid var(--borda) !important;
 }
 
 .student-info-block {
@@ -1189,7 +1189,7 @@
 }
 
 .student-info-block:not(:first-child) {
-  border-left: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-left: 1px solid var(--borda) !important;
   padding-left: 0.5rem !important;
 }
 
@@ -1197,7 +1197,7 @@
 .student-card-actions .secondary-action {
   background: transparent !important;
   border: 1px solid rgba(245, 159, 11, 0.4) !important;
-  color: #F59E0B !important;
+  color: var(--dourado) !important;
   font-size: 0.8rem !important;
   min-height: 40px !important;
 }
@@ -1207,7 +1207,7 @@
 }
 
 .student-card-actions .secondary-action svg {
-  color: #F59E0B !important;
+  color: var(--dourado) !important;
 }
 
 /* Flat hero button */
@@ -1238,7 +1238,7 @@
   background:
     linear-gradient(135deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.025)) !important;
   border: 1px solid rgba(255, 255, 255, 0.11) !important;
-  box-shadow: 0 1rem 2.4rem rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+  box-shadow: 0 1rem 2.4rem rgba(0, 0, 0, 0.28), inset 0 1px 0 var(--borda) !important;
   overflow: visible !important;
 }
 
@@ -1771,9 +1771,9 @@
 
 /* Hero card: flat, compact */
 .student-profile-hero {
-  background: #1A1A1A !important;
+  background: var(--card) !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
-  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid var(--borda) !important;
   border-radius: 16px !important;
   padding: 14px !important;
 }
@@ -1802,7 +1802,7 @@
 }
 
 .student-hero-identity p {
-  color: #9CA3AF !important;
+  color: var(--txt2) !important;
   font-size: 0.82rem !important;
   margin: 0 !important;
 }
@@ -1826,8 +1826,8 @@
   gap: 10px !important;
   padding: 12px !important;
   border-radius: 12px !important;
-  background: #1A1A1A !important;
-  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  background: var(--card) !important;
+  border: 1px solid var(--borda) !important;
   box-shadow: none !important;
   min-height: 0 !important;
 }
@@ -1838,7 +1838,7 @@
   height: 34px !important;
   border-radius: 8px !important;
   background: rgba(245, 159, 11, 0.1) !important;
-  color: #F59E0B !important;
+  color: var(--dourado) !important;
   display: grid !important;
   place-items: center !important;
   flex: 0 0 auto !important;
@@ -1856,7 +1856,7 @@
 }
 
 .profile-card-body > span {
-  color: #9CA3AF !important;
+  color: var(--txt2) !important;
   font-size: 10px !important;
   line-height: 1.3 !important;
   font-weight: 500 !important;
@@ -1881,7 +1881,7 @@
 }
 
 .profile-card-body > small {
-  color: #9CA3AF !important;
+  color: var(--txt2) !important;
   font-size: 10px !important;
   line-height: 1.2 !important;
   white-space: nowrap !important;
@@ -1891,7 +1891,7 @@
 
 /* Tone colors for summary cards */
 .student-summary-card.is-success .profile-card-icon { background: rgba(72, 215, 100, 0.12) !important; color: #48d764 !important; }
-.student-summary-card.is-warning .profile-card-icon { background: rgba(245, 159, 11, 0.12) !important; color: #F59E0B !important; }
+.student-summary-card.is-warning .profile-card-icon { background: rgba(245, 159, 11, 0.12) !important; color: var(--dourado) !important; }
 .student-summary-card.is-danger  .profile-card-icon { background: rgba(255, 90, 79, 0.12) !important; color: #ff5a4f !important; }
 
 /* Activity cards side-by-side */
@@ -1906,9 +1906,9 @@
 .profile-activity-card,
 .profile-pending-panel,
 .profile-evolution-panel {
-  background: #1A1A1A !important;
+  background: var(--card) !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
-  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid var(--borda) !important;
   border-radius: 16px !important;
 }
 
@@ -1923,13 +1923,13 @@
   padding: 10px 12px !important;
   border-radius: 10px !important;
   background: rgba(255, 255, 255, 0.03) !important;
-  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid var(--borda) !important;
   cursor: pointer !important;
   transition: background 100ms ease !important;
 }
 
 .profile-pending-row:hover {
-  background: rgba(255, 255, 255, 0.06) !important;
+  background: var(--borda) !important;
 }
 
 .profile-pending-text {
@@ -1949,7 +1949,7 @@
 
 .profile-pending-text span {
   display: block;
-  color: #9CA3AF;
+  color: var(--txt2);
   font-size: 0.72rem;
   margin-top: 2px;
 }
@@ -1957,7 +1957,7 @@
 /* Active tab: clean underline, no glow */
 .student-profile-tabs button.is-active {
   background: rgba(245, 159, 11, 0.08) !important;
-  box-shadow: inset 0 -2px 0 #F59E0B !important;
+  box-shadow: inset 0 -2px 0 var(--dourado) !important;
 }
 
 /* Evolution panel: ↑/↓ indicators */
@@ -1988,7 +1988,7 @@
   gap: 0 !important;
   padding-top: 10px !important;
   margin-top: 10px !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-top: 1px solid var(--borda) !important;
 }
 
 .student-info-block {
@@ -2021,7 +2021,7 @@
 
 .student-info-block > span:not(.student-info-icon) {
   grid-area: unset !important;
-  color: #9CA3AF !important;
+  color: var(--txt2) !important;
   font-size: 10px !important;
   font-weight: 500 !important;
   line-height: 1.25 !important;
