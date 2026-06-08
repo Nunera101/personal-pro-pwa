@@ -719,6 +719,40 @@
   }
 }
 
+@media (max-width: 22.5rem) {
+  .finance-hero {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+
+  .finance-hero .btn-action-header {
+    width: 100% !important;
+    justify-content: center;
+    padding-inline: 0.75rem;
+  }
+}
+
+.finance-demo-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid rgba(245, 181, 27, 0.3);
+  border-radius: 0.82rem;
+  background: rgba(245, 181, 27, 0.06);
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.finance-demo-banner svg {
+  flex-shrink: 0;
+  width: 1.1rem;
+  height: 1.1rem;
+  stroke: var(--brand-strong);
+  color: var(--brand-strong);
+}
+
 /* ── Sheet: Registrar pagamento ─────────────────────────────────────────── */
 .pf-form {
   padding: 1rem 1.1rem 1.5rem;

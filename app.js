@@ -1648,6 +1648,15 @@
     return buildFinanceRecords(state.financeFilters.month).find((record) => record.id === recordId) || null;
   }
 
+  function buildDemoFinanceRecords(month) {
+    return [
+      { id: "demo-r1", trainerId: TRAINER_ID, studentId: "demo-s1", _displayName: "Ana Lima", plan: "Plano Mensal", referenceMonth: month, amount: "350", dueDate: `${month}-05`, paidAt: `${month}-04`, paymentMethod: "Pix", status: "paid", virtual: false, __demo: true },
+      { id: "demo-r2", trainerId: TRAINER_ID, studentId: "demo-s2", _displayName: "Carlos Melo", plan: "Plano Mensal", referenceMonth: month, amount: "350", dueDate: `${month}-10`, paidAt: "", paymentMethod: "", status: "pending", virtual: false, __demo: true },
+      { id: "demo-r3", trainerId: TRAINER_ID, studentId: "demo-s3", _displayName: "Beatriz Souza", plan: "Plano Elite", referenceMonth: month, amount: "500", dueDate: `${month}-08`, paidAt: "", paymentMethod: "", status: "overdue", virtual: false, __demo: true },
+      { id: "demo-r4", trainerId: TRAINER_ID, studentId: "demo-s4", _displayName: "Diego Ferreira", plan: "Plano Semestral", referenceMonth: month, amount: "280", dueDate: `${month}-15`, paidAt: `${month}-14`, paymentMethod: "Cartão", status: "paid", virtual: false, __demo: true }
+    ];
+  }
+
   function financeStats(records = []) {
     const paid = records.filter((record) => financeStatusKey(record) === "paid");
     const pending = records.filter((record) => financeStatusKey(record) === "pending");
@@ -3073,10 +3082,15 @@
     const month = filters.month || todayISO().slice(0, 7);
     const allRecords = buildFinanceRecords(month);
     const records = allRecords.filter((record) => financeRecordMatchesFilters(record, filters));
-    const stats = financeStats(allRecords);
-    const previousStats = financeStats(buildFinanceRecords(financePreviousMonth(month)));
-    const paidDelta = previousStats.paidTotal ? Math.round(((stats.paidTotal - previousStats.paidTotal) / previousStats.paidTotal) * 100) : stats.paidTotal ? 100 : 0;
     const hasActiveFilters = filters.status !== "all";
+    const showDemo = allRecords.length === 0 && !hasActiveFilters && !filters.q;
+    const demoRecords = showDemo ? buildDemoFinanceRecords(month) : null;
+    const statsSource = demoRecords || allRecords;
+    const stats = financeStats(statsSource);
+    const previousStats = financeStats(showDemo ? buildDemoFinanceRecords(financePreviousMonth(month)) : buildFinanceRecords(financePreviousMonth(month)));
+    const paidDelta = previousStats.paidTotal ? Math.round(((stats.paidTotal - previousStats.paidTotal) / previousStats.paidTotal) * 100) : stats.paidTotal ? 100 : 0;
+    const chartOverrideValues = showDemo ? [0, 780, 1050, 920, 1200, stats.expectedTotal] : null;
+    const displayRecords = demoRecords || records;
     const filterPanelOpen = state.financeFilterOpen || hasActiveFilters;
     return `
       <div class="content-stack finance-workspace">
@@ -3087,6 +3101,8 @@
           </div>
           <button class="btn-action-header" type="button" data-open-payment-form>${icons.finance}<span>Registrar pagamento</span></button>
         </section>
+
+        ${showDemo ? `<div class="finance-demo-banner">${icons.updates}<span>Dados de exemplo — vincule contratos assinados para ver seu financeiro real.</span></div>` : ""}
 
         <section class="metrics-row">
           ${stdMetricCard("Recebido no mês", currencyValue(stats.paidTotal), `${paidDelta >= 0 ? "+" : ""}${paidDelta}% vs. mês anterior`, "success")}
@@ -3125,7 +3141,7 @@
             </div>
           </div>
           <div class="finance-month-body">
-            ${renderFinanceChart(month)}
+            ${renderFinanceChart(month, chartOverrideValues)}
             <div class="finance-month-kpis">
               ${financeMonthKpi(icons.finance, "Faturamento", currencyValue(stats.expectedTotal), stats.expectedTotal ? "previsto no mês" : "sem previsão", "success")}
               ${financeMonthKpi(icons.progress, "Ticket médio", currencyValue(stats.ticket), "por mensalidade", "warning")}
@@ -3138,11 +3154,11 @@
           <div class="section-title">
             <div>
               <h3>Mensalidades dos alunos</h3>
-              <span class="small-text">${records.length} registro(s) em ${escapeHtml(financeMonthLabel(month))}</span>
+              <span class="small-text">${displayRecords.length} registro(s) em ${escapeHtml(financeMonthLabel(month))}</span>
             </div>
             <button class="text-action" type="button" data-finance-show-all>Ver todas</button>
           </div>
-          ${records.length ? `<div class="finance-record-list">${records.map(renderFinanceRecordCard).join("")}</div>` : emptyState(allRecords.length ? "Nenhum pagamento encontrado" : "Nenhuma mensalidade configurada", allRecords.length ? "Tente ajustar os filtros ou buscar outro aluno." : "Vincule contratos assinados ou registre pagamentos para acompanhar o financeiro.", icons.finance)}
+          ${displayRecords.length ? `<div class="finance-record-list">${displayRecords.map(renderFinanceRecordCard).join("")}</div>` : emptyState(allRecords.length ? "Nenhum pagamento encontrado" : "Nenhuma mensalidade configurada", allRecords.length ? "Tente ajustar os filtros ou buscar outro aluno." : "Vincule contratos assinados ou registre pagamentos para acompanhar o financeiro.", icons.finance)}
         </section>
 
         <section class="finance-insights-panel">
@@ -3153,8 +3169,8 @@
             </div>
           </div>
           <div class="finance-insights-grid">
-            ${financeInsightCard(icons.today, "Melhor semana", bestFinanceWeek(month), "recebidos", "success")}
-            ${financeInsightCard(icons.agenda, "Próximos vencimentos", `${upcomingFinanceRecords(allRecords).length} cobrança(s)`, "nos próximos 7 dias", "warning")}
+            ${financeInsightCard(icons.today, "Melhor semana", bestFinanceWeek(month, demoRecords), "recebidos", "success")}
+            ${financeInsightCard(icons.agenda, "Próximos vencimentos", `${upcomingFinanceRecords(demoRecords || allRecords).length} cobrança(s)`, "nos próximos 7 dias", "warning")}
           </div>
         </section>
       </div>
@@ -3446,9 +3462,9 @@
     `;
   }
 
-  function renderFinanceChart(month) {
+  function renderFinanceChart(month, overrideValues = null) {
     const months = Array.from({ length: 6 }, (_, index) => addMonths(`${month}-01`, index - 5).slice(0, 7));
-    const values = months.map((item) => financeStats(buildFinanceRecords(item)).expectedTotal);
+    const values = overrideValues || months.map((item) => financeStats(buildFinanceRecords(item)).expectedTotal);
     const max = Math.max(1, ...values);
     const points = values.map((value, index) => `${42 + index * 96},${170 - Math.round((value / max) * 132)}`).join(" ");
     return `
@@ -3481,20 +3497,23 @@
 
   function renderFinanceRecordCard(record) {
     const student = getStudent(record.studentId);
+    const displayStudent = student || (record._displayName ? { name: record._displayName } : null);
     const meta = financeStatusMeta(record);
     const dateLabel = meta.key === "paid" && record.paidAt ? "Pago em" : "Vencimento";
     const dateValue = meta.key === "paid" && record.paidAt ? formatShortDate(record.paidAt.slice(0, 10)) : record.dueDate ? formatShortDate(record.dueDate) : "Sem data";
-    const primaryAction =
-      meta.key === "paid"
+    const primaryAction = record.__demo
+      ? ""
+      : meta.key === "paid"
         ? `<button class="finance-primary-action" type="button" data-open-payment-receipt="${escapeHtml(record.id)}">${icons.contracts}<span>Recibo</span></button>`
         : `<button class="finance-primary-action" type="button" data-finance-charge="${escapeHtml(record.id)}">${icons.messages}<span>Cobrar</span></button>`;
+    const secondaryAction = record.__demo ? "" : `<button class="finance-secondary-action" type="button" data-open-payment-detail="${escapeHtml(record.id)}">${icons.contracts}<span>Visualizar</span></button>`;
     return `
       <article class="finance-record-card ${meta.className}">
-        ${studentAvatar(student)}
+        ${studentAvatar(displayStudent)}
         <div class="finance-record-student">
-          <strong>${escapeHtml(getStudentName(record.studentId))}</strong>
+          <strong>${escapeHtml(record._displayName || getStudentName(record.studentId))}</strong>
           <span>${escapeHtml(record.plan || "Plano não informado")}</span>
-          ${record.virtual ? '<small>Projetado pelo contrato</small>' : '<small>Registro manual</small>'}
+          ${record.__demo ? '<small>Dado de exemplo</small>' : record.virtual ? '<small>Projetado pelo contrato</small>' : '<small>Registro manual</small>'}
         </div>
         <div class="finance-record-amount">
           <span>${icons.finance}</span>
@@ -3508,7 +3527,7 @@
         </div>
         <div class="finance-record-actions">
           <span class="badge ${meta.tone ? `is-${meta.tone}` : ""}">${escapeHtml(meta.label)}</span>
-          <button class="finance-secondary-action" type="button" data-open-payment-detail="${escapeHtml(record.id)}">${icons.contracts}<span>Visualizar</span></button>
+          ${secondaryAction}
           ${primaryAction}
         </div>
       </article>
@@ -3524,8 +3543,8 @@
     });
   }
 
-  function bestFinanceWeek(month) {
-    const records = buildFinanceRecords(month).filter((record) => financeStatusKey(record) === "paid" && record.paidAt);
+  function bestFinanceWeek(month, overrideRecords = null) {
+    const records = (overrideRecords || buildFinanceRecords(month)).filter((record) => financeStatusKey(record) === "paid" && record.paidAt);
     if (!records.length) return "Sem recebimentos";
     const weeks = [0, 0, 0, 0, 0];
     records.forEach((record) => {
