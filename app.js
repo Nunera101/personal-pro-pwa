@@ -4206,7 +4206,7 @@
     const updated = exercise.updatedAt || exercise.createdAt ? formatShortDate(String(exercise.updatedAt || exercise.createdAt).slice(0, 10)) : "-";
     const status = exercise.status === "active"
       ? { label: "Publicado", tone: "success" }
-      : { label: "Arquivado", tone: "muted" };
+      : { label: "Rascunho", tone: "muted" };
     const params = exercise.defaultSets || exercise.defaultReps || exercise.defaultRest
       ? `${escapeHtml(exercise.defaultSets || "3")} séries • ${escapeHtml(exercise.defaultReps || "10-12")} reps • ${escapeHtml(exercise.defaultRest || "60s")} descanso`
       : "Parâmetros definidos no treino";
