@@ -527,6 +527,33 @@
   will-change: transform;
 }
 
+/* ── Badge no botão de nav (ex: mensagens não lidas em Chat) ── */
+.nav-button {
+  position: relative;
+}
+
+.nav-dot-badge {
+  position: absolute;
+  top: 4px;
+  right: calc(50% - 16px);
+  min-width: 1.05rem;
+  height: 1.05rem;
+  padding: 0 0.22rem;
+  border-radius: 999px;
+  background: var(--brand, #f5b51b);
+  color: #070707;
+  font-size: 0.58rem;
+  font-style: normal;
+  font-weight: 900;
+  line-height: 1.05rem;
+  text-align: center;
+  pointer-events: none;
+}
+
+.nav-dot-badge[hidden] {
+  display: none;
+}
+
 /* [hidden] must win over display:grid !important — prevents the inactive nav from ghosting over the active one */
 #managerBottomNav[hidden],
 #studentBottomNav[hidden] {

@@ -294,6 +294,7 @@
     { id: "diet", label: "Dieta", icon: icons.diet },
     { id: "progress", label: "Progresso", icon: icons.progress },
     { id: "updates", label: "Atualizações", icon: icons.updates },
+    { id: "chat", label: "Chat", icon: icons.messages },
     { id: "profile", label: "Mais", icon: icons.profile }
   ];
 
@@ -301,7 +302,7 @@
     { id: "today", label: "Início", icon: icons.today },
     { id: "workouts", label: "Treinos", icon: icons.workouts },
     { id: "diet", label: "Dieta", icon: icons.diet },
-    { id: "progress", label: "Progresso", icon: icons.progress },
+    { id: "chat", label: "Chat", icon: icons.messages },
     { id: "profile", label: "Mais", icon: icons.more }
   ];
 
@@ -2244,7 +2245,7 @@
       renderNav(elements.managerBottomNav, managerBottomMenus, active, "data-manager-nav");
     } else if (viewName === "student") {
       const active = studentBottomMenus.some((i) => i.id === state.studentMenu) ? state.studentMenu : "profile";
-      renderNav(elements.studentBottomNav, studentBottomMenus, active, "data-student-nav");
+      renderNav(elements.studentBottomNav, _buildStudentBottomMenus(), active, "data-student-nav");
     }
     elements.loginView.hidden = viewName !== "login";
     elements.managerView.hidden = viewName !== "manager";
@@ -2267,8 +2268,12 @@
   function renderNav(target, menus, activeId, attribute) {
     const existing = target.querySelectorAll(".nav-button");
     if (existing.length === menus.length) {
-      // Reutiliza botões existentes — apenas altera a classe ativa (sem recriar DOM)
-      existing.forEach((btn, i) => btn.classList.toggle("is-active", menus[i].id === activeId));
+      existing.forEach((btn, i) => {
+        btn.classList.toggle("is-active", menus[i].id === activeId);
+        const badge = btn.querySelector(".nav-dot-badge");
+        if (badge) badge.hidden = !menus[i].badge;
+        if (badge && menus[i].badge) badge.textContent = menus[i].badge > 9 ? "9+" : String(menus[i].badge);
+      });
       return;
     }
     target.innerHTML = menus
@@ -2277,6 +2282,7 @@
           <button class="nav-button ${menu.id === activeId ? "is-active" : ""}" type="button" ${attribute}="${menu.id}">
             ${menu.icon}
             <span>${menu.label}</span>
+            ${menu.badge ? `<b class="nav-dot-badge">${menu.badge > 9 ? "9+" : menu.badge}</b>` : `<b class="nav-dot-badge" hidden></b>`}
           </button>
         `
       )
@@ -2469,7 +2475,7 @@
     elements.studentTitle.textContent = fixMojibake(menu.label);
     renderSideNav(elements.studentSideNav, studentMenus.map((item) => ({ ...item, group: item.id === "today" ? "Aluno" : "" })), state.studentMenu, "data-student-nav");
     const studentBottomActive = studentBottomMenus.some((item) => item.id === state.studentMenu) ? state.studentMenu : "profile";
-    renderNav(elements.studentBottomNav, studentBottomMenus, studentBottomActive, "data-student-nav");
+    renderNav(elements.studentBottomNav, _buildStudentBottomMenus(), studentBottomActive, "data-student-nav");
 
     const renderers = {
       today: renderStudentToday,
@@ -2478,7 +2484,8 @@
       diet: renderStudentDiet,
       updates: renderStudentUpdates,
       progress: renderStudentProgress,
-      profile: renderStudentProfile
+      profile: renderStudentProfile,
+      chat: () => { const s = getCurrentStudent(); if (s) openThreadSheet(s.id); return ""; }
     };
 
     const applyStudentContent = () => {
@@ -8415,7 +8422,15 @@
     sheet.classList.remove("is-student-view");
     document.body.style.overflow = "";
     if (state.currentUser?.role === "manager") renderManager();
-    if (state.currentUser?.role === "student") _updateStudentChatBadge();
+    if (state.currentUser?.role === "student") {
+      if (state.studentMenu === "chat") {
+        state.studentMenu = "today";
+        _updateStudentChatBadge();
+        renderStudent();
+      } else {
+        _updateStudentChatBadge();
+      }
+    }
   }
 
   function _refreshThreadBd(studentId) {
@@ -8425,14 +8440,31 @@
     requestAnimationFrame(() => { bd.scrollTop = bd.scrollHeight; });
   }
 
-  function _updateStudentChatBadge() {
-    const badge = document.getElementById("studentChatBadge");
-    if (!badge) return;
+  function _getStudentChatUnread() {
     const studentId = state.currentUser?.studentId || "";
-    if (!studentId) { badge.hidden = true; return; }
-    const unread = getStudentMessages(studentId).filter((m) => m.senderRole === "manager" && !m.readAt).length;
-    badge.textContent = unread > 9 ? "9+" : String(unread);
-    badge.hidden = unread === 0;
+    if (!studentId) return 0;
+    return getStudentMessages(studentId).filter((m) => m.senderRole === "manager" && !m.readAt).length;
+  }
+
+  function _buildStudentBottomMenus() {
+    const unread = _getStudentChatUnread();
+    return studentBottomMenus.map((m) => m.id === "chat" ? { ...m, badge: unread || null } : m);
+  }
+
+  function _updateStudentChatBadge() {
+    const unread = _getStudentChatUnread();
+    const badge = document.getElementById("studentChatBadge");
+    if (badge) {
+      badge.textContent = unread > 9 ? "9+" : String(unread);
+      badge.hidden = unread === 0;
+    }
+    const navBtn = elements.studentBottomNav?.querySelector("[data-student-nav='chat']");
+    if (navBtn) {
+      let navBadge = navBtn.querySelector(".nav-dot-badge");
+      if (!navBadge) { navBadge = document.createElement("b"); navBadge.className = "nav-dot-badge"; navBtn.appendChild(navBadge); }
+      navBadge.textContent = unread > 9 ? "9+" : String(unread);
+      navBadge.hidden = unread === 0;
+    }
   }
 
   function renderThreadHeader(student) {
