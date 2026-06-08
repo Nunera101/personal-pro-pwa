@@ -2309,6 +2309,15 @@
   function renderManagerSideNav() {
     renderSideNav(elements.managerSideNav, managerMenus, state.managerMenu, "data-manager-nav");
     elements.managerSideNav.insertAdjacentHTML(
+      "afterbegin",
+      `<div class="side-nav-header">
+        <span class="side-nav-title">Módulos</span>
+        <button class="icon-button side-nav-close" type="button" data-manager-drawer-backdrop aria-label="Fechar menu">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>`
+    );
+    elements.managerSideNav.insertAdjacentHTML(
       "beforeend",
       `
         <span class="nav-group nav-group-system">Conta</span>
@@ -10171,6 +10180,10 @@
       }
       if (target.matches("[data-det-open-profile]")) { closeEventDetailSheet(); openStudentProfile(target.dataset.detOpenProfile); }
       if (target.dataset.managerNav) {
+        if (target.dataset.managerNav === "more") {
+          openManagerDrawer();
+          return;
+        }
         if (target.dataset.managerNav !== "studentProfile") clearStudentProfileHash();
         state.managerMenu = target.dataset.managerNav;
         closeManagerDrawer();
