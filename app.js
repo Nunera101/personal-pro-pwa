@@ -8628,6 +8628,7 @@
     sheet.classList.toggle("is-student-view", isStudentRole);
     _openSheet(sheet);
     document.body.style.overflow = "hidden";
+    _installThreadViewport();
 
     requestAnimationFrame(() => {
       const bd = elements.threadSheetBd;
@@ -8638,6 +8639,7 @@
   function closeThreadSheet() {
     const sheet = elements.threadSheet;
     if (!sheet || sheet.hidden) return;
+    _removeThreadViewport();
     _closeSheet(sheet, () => {
       sheet.classList.remove("is-student-view");
       document.body.style.overflow = "";
@@ -8660,6 +8662,40 @@
     bd.innerHTML = renderThreadBubbles(studentId);
     requestAnimationFrame(() => { bd.scrollTop = bd.scrollHeight; });
   }
+
+  // ── Visual Viewport handler (iOS keyboard offset) ────────────
+  let _threadVvHandler = null;
+
+  function _applyThreadViewport() {
+    const sheet = elements.threadSheet;
+    if (!sheet || sheet.hidden) return;
+    const vv = window.visualViewport;
+    // Clamp ao viewport layout para evitar saltos negativos
+    const h = Math.min(vv.height, window.innerHeight);
+    sheet.style.setProperty("height", h + "px", "important");
+    sheet.style.setProperty("top", vv.offsetTop + "px", "important");
+    const bd = elements.threadSheetBd;
+    if (bd) requestAnimationFrame(() => { bd.scrollTop = bd.scrollHeight; });
+  }
+
+  function _installThreadViewport() {
+    if (!window.visualViewport) return;
+    _removeThreadViewport();
+    _threadVvHandler = _applyThreadViewport;
+    window.visualViewport.addEventListener("resize", _threadVvHandler);
+    window.visualViewport.addEventListener("scroll", _threadVvHandler);
+    _applyThreadViewport();
+  }
+
+  function _removeThreadViewport() {
+    if (!window.visualViewport || !_threadVvHandler) return;
+    window.visualViewport.removeEventListener("resize", _threadVvHandler);
+    window.visualViewport.removeEventListener("scroll", _threadVvHandler);
+    _threadVvHandler = null;
+    const sheet = elements.threadSheet;
+    if (sheet) { sheet.style.removeProperty("height"); sheet.style.removeProperty("top"); }
+  }
+  // ─────────────────────────────────────────────────────────────
 
   function _getStudentChatUnread() {
     const studentId = state.currentUser?.studentId || "";
