@@ -45,6 +45,7 @@
     studentMenu: "today",
     profileTab: "summary",
     activeStudentProfileId: "",
+    currentUpdateId: "",
     agendaDate: todayISO(),
     agendaView: "day",
     search: "",
@@ -2295,7 +2296,7 @@
   }
 
   function renderManager() {
-    const menu = managerMenus.find((item) => item.id === state.managerMenu) || { id: "studentProfile", label: "Perfil do aluno" };
+    const menu = managerMenus.find((item) => item.id === state.managerMenu) || (state.managerMenu === "evaluateUpdate" ? { label: "Avaliar check-in" } : null) || { id: "studentProfile", label: "Perfil do aluno" };
     elements.managerTitle.textContent = fixMojibake(menu.label);
     renderManagerSideNav();
     const managerBottomActive =
@@ -2314,6 +2315,7 @@
       workouts: renderManagerWorkouts,
       library: renderExerciseLibrary,
       updates: renderManagerUpdates,
+      evaluateUpdate: renderEvaluateUpdate,
       diet: renderManagerDiet,
       messages: renderManagerMessages,
       contracts: renderManagerContracts,
@@ -5001,6 +5003,235 @@
     `;
   }
 
+  function renderEvaluateUpdate() {
+    const update = state.data.updates.find((item) => item.id === state.currentUpdateId);
+    if (!update) {
+      return `
+        <div class="content-stack evaluate-page">
+          <div class="evaluate-topbar">
+            <button class="evaluate-back-btn" type="button" data-back-to-updates>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+              Atualizações
+            </button>
+          </div>
+          ${emptyState("Atualização não encontrada", "Volte para a lista de atualizações.", icons.updates)}
+        </div>
+      `;
+    }
+    const student = getStudent(update.studentId);
+    const meta = updateStatusMeta(update);
+    const weight = updateWeightMeta(update);
+    const isPending = update.status === "pending";
+    const prevUpdate = previousWeightUpdate(update);
+    const photos = Array.isArray(update.photos) ? update.photos : [];
+    const prevPhotos = Array.isArray(prevUpdate?.photos) ? prevUpdate.photos : [];
+    const photoLabels = ["Frente", "Lado", "Costas"];
+    const suggestChips = [
+      "Ótima evolução! Continue assim.",
+      "Ajuste a hidratação diária.",
+      "Foque na qualidade do sono.",
+      "Intensifique o treino de força.",
+      "Reveja a alimentação pré-treino.",
+      "Excelente comprometimento!",
+      "Reduza o cardio nesta semana.",
+      "Aumente a carga progressivamente."
+    ];
+    const badgeClass = meta.className === "is-late" ? "is-danger" : meta.className === "is-pending" ? "is-warning" : meta.className === "is-viewed" ? "is-neutral" : "is-success";
+    const deltaArrow = weight.className === "is-up" ? "↑" : weight.className === "is-down" ? "↓" : "";
+    const currentRating = update.evaluationRating || 0;
+    return `
+      <div class="content-stack evaluate-page">
+        <div class="evaluate-topbar">
+          <button class="evaluate-back-btn" type="button" data-back-to-updates>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+            Atualizações
+          </button>
+          <span class="badge ${badgeClass}">${escapeHtml(meta.label)}</span>
+        </div>
+
+        <section class="evaluate-card evaluate-student-card">
+          ${studentAvatar(student)}
+          <div class="evaluate-student-info">
+            <strong>${escapeHtml(getStudentName(update.studentId))}</strong>
+            <span>${escapeHtml(updateMomentLabel(update))}</span>
+            ${meta.extra ? `<small>${escapeHtml(meta.extra)}</small>` : ""}
+          </div>
+        </section>
+
+        ${isPending ? `
+          <div class="empty-state compact-note">
+            <strong>Atualização ainda não enviada</strong>
+            <span>Quando o aluno enviar peso, fotos e observações, a avaliação ficará disponível aqui.</span>
+          </div>
+          ${student ? `<button class="secondary-action" type="button" data-open-student-profile="${escapeHtml(student.id)}">Abrir perfil do aluno</button>` : ""}
+        ` : `
+          <section class="evaluate-card">
+            <div class="evaluate-card-head">
+              <div>
+                <h3>Fotos da evolução</h3>
+                <span class="small-text">${photos.length ? `${photos.length} foto(s) enviada(s)` : "Nenhuma foto enviada"}</span>
+              </div>
+              ${prevPhotos.length ? `
+                <button class="evaluate-compare-btn" type="button" data-compare-toggle="photos">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+                  Comparar
+                </button>
+              ` : ""}
+            </div>
+            <div class="evaluate-photos-wrap">
+              <div class="evaluate-photo-row">
+                ${photoLabels.map((label, i) => {
+                  const photo = photos[i];
+                  return `
+                    <div class="evaluate-photo-col">
+                      <span class="evaluate-photo-label">Atual · ${escapeHtml(label)}</span>
+                      <button class="update-photo-frame ${photo ? "has-photo" : "is-empty"}" type="button"${photo ? ` data-zoom-photo="${escapeHtml(photo)}" data-photo-label="${escapeHtml(label)}"` : ""}>
+                        ${photo
+                          ? `<img src="${escapeHtml(photo)}" alt="Foto ${escapeHtml(label)}" loading="lazy" />`
+                          : `<span class="update-photo-placeholder"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h4l2-3h4l2 3h4v12H4z"/><path d="M12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/></svg></span>`}
+                        <small>${escapeHtml(label)}</small>
+                      </button>
+                    </div>
+                  `;
+                }).join("")}
+              </div>
+              ${prevPhotos.length ? `
+                <div class="evaluate-photo-row is-compare-row" hidden>
+                  <div class="evaluate-compare-label">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M2 12h20"/></svg>
+                    Fotos anteriores
+                  </div>
+                  ${photoLabels.map((label, i) => {
+                    const photo = prevPhotos[i];
+                    return `
+                      <div class="evaluate-photo-col">
+                        <span class="evaluate-photo-label">Anterior · ${escapeHtml(label)}</span>
+                        <button class="update-photo-frame ${photo ? "has-photo" : "is-empty"}" type="button"${photo ? ` data-zoom-photo="${escapeHtml(photo)}" data-photo-label="${escapeHtml(label)} (anterior)"` : ""}>
+                          ${photo
+                            ? `<img src="${escapeHtml(photo)}" alt="Foto anterior ${escapeHtml(label)}" loading="lazy" />`
+                            : `<span class="update-photo-placeholder"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h4l2-3h4l2 3h4v12H4z"/><path d="M12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/></svg></span>`}
+                          <small>${escapeHtml(label)}</small>
+                        </button>
+                      </div>
+                    `;
+                  }).join("")}
+                </div>
+              ` : ""}
+            </div>
+          </section>
+
+          <section class="evaluate-card evaluate-weight-card">
+            <h3>Variação de peso</h3>
+            <div class="evaluate-weight-main">
+              <strong class="evaluate-weight-delta ${weight.className}">${deltaArrow} ${escapeHtml(weight.deltaLabel)}</strong>
+            </div>
+            <div class="evaluate-weight-row">
+              <div class="evaluate-weight-col">
+                <span>Atual</span>
+                <strong>${escapeHtml(weight.currentLabel)}</strong>
+              </div>
+              <div class="evaluate-weight-divider"></div>
+              <div class="evaluate-weight-col">
+                <span>Anterior</span>
+                <strong>${escapeHtml(weight.previousLabel)}</strong>
+              </div>
+              ${update.energy ? `
+                <div class="evaluate-weight-divider"></div>
+                <div class="evaluate-weight-col">
+                  <span>Energia</span>
+                  <strong>${escapeHtml(update.energy)}/5</strong>
+                </div>
+              ` : ""}
+              ${update.pain ? `
+                <div class="evaluate-weight-divider"></div>
+                <div class="evaluate-weight-col">
+                  <span>Dor</span>
+                  <strong>${escapeHtml(update.pain)}/5</strong>
+                </div>
+              ` : ""}
+            </div>
+            ${update.trainingNotes || update.dietNotes || update.generalNotes ? `
+              <div class="evaluate-notes-section">
+                ${update.trainingNotes ? `<div class="evaluate-note-item"><span>Treino</span><p>${escapeHtml(update.trainingNotes)}</p></div>` : ""}
+                ${update.dietNotes ? `<div class="evaluate-note-item"><span>Dieta</span><p>${escapeHtml(update.dietNotes)}</p></div>` : ""}
+                ${update.generalNotes ? `<div class="evaluate-note-item"><span>Observações</span><p>${escapeHtml(update.generalNotes)}</p></div>` : ""}
+              </div>
+            ` : ""}
+          </section>
+
+          <section class="evaluate-card evaluate-feedback-card">
+            <h3>Feedback do personal</h3>
+            <form id="evaluateUpdateForm" data-id="${escapeHtml(update.id)}">
+              <div class="evaluate-chips">
+                ${suggestChips.map((chip) => `<button class="evaluate-chip" type="button" data-insert-suggestion="${escapeHtml(chip)}">${escapeHtml(chip)}</button>`).join("")}
+              </div>
+              <label class="field">
+                <span>Avaliação</span>
+                <textarea name="trainerComment" id="evaluateCommentArea" rows="5" placeholder="Registre orientações, ajustes de treino ou observações para o aluno.">${escapeHtml(update.trainerComment || "")}</textarea>
+              </label>
+              <div class="evaluate-rating-row">
+                <span>Nota da evolução</span>
+                <div class="evaluate-stars" id="evaluateStars">
+                  ${[1, 2, 3, 4, 5].map((n) => `
+                    <button class="evaluate-star${currentRating >= n ? " is-active" : ""}" type="button" data-set-rating="${n}" aria-label="${n} estrela${n > 1 ? "s" : ""}">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>
+                    </button>
+                  `).join("")}
+                </div>
+                <input type="hidden" name="evaluationRating" id="evaluateRatingInput" value="${escapeHtml(String(currentRating))}" />
+              </div>
+              ${student ? `
+                <div class="evaluate-quick-actions">
+                  <button class="evaluate-quick-btn" type="button" data-quick-action="workout" data-student-id="${escapeHtml(student.id)}">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5h11M6.5 12h11M6.5 17.5h11"/></svg>
+                    Ajustar treino
+                  </button>
+                  <button class="evaluate-quick-btn" type="button" data-quick-action="diet" data-student-id="${escapeHtml(student.id)}">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 1 0 20 10 10 0 0 1 0-20M12 6v6l4 2"/></svg>
+                    Ajustar dieta
+                  </button>
+                </div>
+              ` : ""}
+            </form>
+          </section>
+
+          <div class="evaluate-footer-spacer"></div>
+        `}
+      </div>
+
+      ${!isPending ? `
+        <div class="evaluate-footer">
+          <button class="secondary-action evaluate-footer-btn" type="button" data-send-feedback="${escapeHtml(update.id)}">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13M22 2 15 22l-4-9-9-4z"/></svg>
+            Enviar feedback
+          </button>
+          <button class="primary-action evaluate-footer-btn" type="button" data-save-evaluation="${escapeHtml(update.id)}">
+            Salvar avaliação
+          </button>
+        </div>
+      ` : ""}
+    `;
+  }
+
+  function handleEvaluateSave(updateId, sendFeedback) {
+    const update = state.data.updates.find((item) => item.id === updateId);
+    if (!update) return;
+    const form = document.getElementById("evaluateUpdateForm");
+    if (!form) return;
+    const data = new FormData(form);
+    update.trainerComment = String(data.get("trainerComment") || "").trim();
+    update.evaluationRating = Number(data.get("evaluationRating") || 0) || 0;
+    if (update.status !== "viewed") {
+      update.status = "viewed";
+      update.viewedAt = new Date().toISOString();
+      ensureUpdateActivity(update);
+    }
+    persistData();
+    state.managerMenu = "updates";
+    renderApp();
+    showToast(sendFeedback ? "Avaliação salva e feedback registrado." : "Avaliação salva.");
+  }
+
   function updateMetricCard({ icon, title, value, subtitle, tone = "" }) {
     return `
       <article class="update-summary-card ${tone ? `is-${tone}` : ""}">
@@ -6815,78 +7046,9 @@
   function openUpdateComment(updateId) {
     const update = state.data.updates.find((item) => item.id === updateId);
     if (!update) return;
-    const student = getStudent(update.studentId);
-    const meta = updateStatusMeta(update);
-    const weight = updateWeightMeta(update);
-    const isPending = update.status === "pending";
-    const title = isPending ? "Atualização pendente" : update.status === "viewed" ? "Atualização avaliada" : "Avaliar atualização";
-    openModal(
-      title,
-      `
-        <div class="update-detail">
-          <section class="update-detail-hero">
-            ${studentAvatar(student)}
-            <div class="update-detail-title">
-              <strong>${escapeHtml(getStudentName(update.studentId))}</strong>
-              <span>${escapeHtml(meta.label)} • ${escapeHtml(updateMomentLabel(update))}</span>
-            </div>
-            <span class="badge ${meta.className === "is-late" ? "is-danger" : meta.className === "is-pending" ? "is-warning" : "is-success"}">${escapeHtml(meta.label)}</span>
-          </section>
-          <section class="update-detail-grid">
-            <article>
-              <span>Peso atual</span>
-              <strong>${escapeHtml(weight.currentLabel)}</strong>
-            </article>
-            <article>
-              <span>Peso anterior</span>
-              <strong>${escapeHtml(weight.previousLabel)}</strong>
-            </article>
-            <article>
-              <span>Variação</span>
-              <strong class="${weight.className}">${escapeHtml(weight.deltaLabel)}</strong>
-            </article>
-            <article>
-              <span>Energia / Dor</span>
-              <strong>${escapeHtml(update.energy || "-")}/5 • ${escapeHtml(update.pain || "-")}/5</strong>
-            </article>
-          </section>
-          <section class="update-detail-section">
-            <div class="section-title">
-              <h3>Fotos da evolução</h3>
-              <span class="small-text">${Array.isArray(update.photos) && update.photos.length ? `${update.photos.length} foto(s)` : "Fotos ainda não enviadas"}</span>
-            </div>
-            ${renderUpdatePhotoStrip(update, true)}
-          </section>
-          <section class="update-notes-grid">
-            ${updateDetailNote("Treino", update.trainingNotes)}
-            ${updateDetailNote("Dieta", update.dietNotes)}
-            ${updateDetailNote("Observações gerais", update.generalNotes)}
-            ${updateDetailNote("Status", meta.extra || (isPending ? "Aguardando envio do aluno" : "Disponível para avaliação"))}
-          </section>
-          ${
-            isPending
-              ? `
-                <div class="empty-state compact-note">
-                  <strong>Atualização ainda não enviada</strong>
-                  <span>Quando o aluno enviar peso, fotos e observações, a avaliação do personal ficará disponível aqui.</span>
-                </div>
-                <div class="form-actions two">
-                  ${student ? `<button class="secondary-action" type="button" data-open-student-profile="${escapeHtml(student.id)}">Abrir perfil do aluno</button>` : ""}
-                </div>
-              `
-              : `
-                <form class="form-grid update-evaluation-form" id="updateCommentForm" data-id="${escapeHtml(update.id)}">
-                  <label class="field"><span>Avaliação do personal</span><textarea name="trainerComment" placeholder="Registre orientações, ajustes de treino ou observações para o aluno.">${escapeHtml(update.trainerComment || "")}</textarea></label>
-                  <div class="form-actions two">
-                    <button class="primary-action" type="submit">Salvar avaliação</button>
-                    ${student ? `<button class="secondary-action" type="button" data-open-student-profile="${escapeHtml(student.id)}">Abrir perfil</button>` : ""}
-                  </div>
-                </form>
-              `
-          }
-        </div>
-      `
-    );
+    state.currentUpdateId = updateId;
+    state.managerMenu = "evaluateUpdate";
+    renderApp();
   }
 
   function updateDetailNote(label, value) {
@@ -8722,6 +8884,48 @@
       if (target.matches("[data-open-update-form]")) openUpdateForm(target.dataset.openUpdateForm);
       if (target.matches("[data-open-update-comment]")) openUpdateComment(target.dataset.openUpdateComment);
       if (target.matches("[data-mark-update-viewed]")) markUpdateViewed(target.dataset.markUpdateViewed);
+      if (target.matches("[data-back-to-updates]")) { state.managerMenu = "updates"; renderApp(); }
+      if (target.matches("[data-zoom-photo]")) {
+        const src = target.dataset.zoomPhoto;
+        const label = target.dataset.photoLabel || "";
+        openModal(label, `<img src="${escapeHtml(src)}" alt="${escapeHtml(label)}" style="width:100%;border-radius:0.75rem;display:block;" />`);
+      }
+      if (target.matches("[data-compare-toggle]")) {
+        const compareRow = document.querySelector(".is-compare-row");
+        const btn = document.querySelector("[data-compare-toggle]");
+        if (compareRow) {
+          compareRow.hidden = !compareRow.hidden;
+          if (btn) btn.classList.toggle("is-active", !compareRow.hidden);
+        }
+      }
+      if (target.matches("[data-insert-suggestion]")) {
+        const textarea = document.getElementById("evaluateCommentArea");
+        if (textarea) {
+          const chip = target.dataset.insertSuggestion;
+          const cur = textarea.value.trim();
+          textarea.value = cur ? `${cur} ${chip}` : chip;
+          textarea.focus();
+        }
+      }
+      if (target.matches("[data-set-rating]")) {
+        const rating = Number(target.dataset.setRating);
+        const input = document.getElementById("evaluateRatingInput");
+        if (input) input.value = rating;
+        document.querySelectorAll(".evaluate-star").forEach((star, i) => star.classList.toggle("is-active", i < rating));
+      }
+      if (target.matches("[data-save-evaluation]")) handleEvaluateSave(target.dataset.saveEvaluation, false);
+      if (target.matches("[data-send-feedback]")) handleEvaluateSave(target.dataset.sendFeedback, true);
+      if (target.matches("[data-quick-action]")) {
+        const studentId = target.dataset.studentId;
+        if (target.dataset.quickAction === "workout") {
+          state.activeStudentProfileId = studentId;
+          state.managerMenu = "studentProfile";
+          state.profileTab = "workouts";
+        } else if (target.dataset.quickAction === "diet") {
+          state.managerMenu = "diet";
+        }
+        renderApp();
+      }
       if (target.matches("[data-open-local-video]")) openLocalVideo(target.dataset.openLocalVideo);
       if (target.matches("[data-delete-activity]")) deleteActivity(target.dataset.deleteActivity);
       if (target.matches("[data-update-activity-status]")) {
