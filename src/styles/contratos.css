@@ -814,3 +814,165 @@
   overflow-y: auto;
 }
 
+/* ─── Contract PDF Upload (form) ─────────────────────────────────────────────── */
+
+.contract-pdf-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 9rem;
+  padding: 1.5rem;
+  border: 2px dashed rgba(245, 181, 27, 0.38);
+  border-radius: 0.88rem;
+  background: rgba(245, 181, 27, 0.025);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 150ms ease, background 150ms ease;
+}
+
+.contract-pdf-dropzone input[type="file"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+}
+
+.contract-pdf-dropzone:hover,
+.contract-pdf-dropzone.is-dragging {
+  border-color: rgba(245, 181, 27, 0.75);
+  background: rgba(245, 181, 27, 0.055);
+}
+
+.contract-pdf-dropzone.is-uploading {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.contract-pdf-dropzone svg {
+  width: 2.6rem;
+  height: 2.6rem;
+  stroke: var(--brand-strong);
+  stroke-width: 1.6;
+  fill: none;
+  margin-bottom: 0.1rem;
+}
+
+.contract-pdf-dropzone strong {
+  color: var(--brand-strong);
+  font-size: 0.97rem;
+  font-weight: 720;
+}
+
+.contract-pdf-dropzone span {
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.3;
+}
+
+.contract-pdf-attached {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.82rem 1rem;
+  border: 1px solid rgba(72, 215, 100, 0.28);
+  border-radius: 0.82rem;
+  background: rgba(72, 215, 100, 0.04);
+}
+
+.contract-pdf-attached[hidden] { display: none; }
+
+.contract-pdf-attached > svg {
+  width: 2rem;
+  height: 2rem;
+  stroke: var(--ok);
+  stroke-width: 1.8;
+  fill: none;
+  flex-shrink: 0;
+}
+
+.contract-pdf-file-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.contract-pdf-file-meta strong {
+  display: block;
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 680;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.contract-pdf-file-meta span {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.contract-pdf-remove-btn {
+  flex-shrink: 0;
+  padding: 0.34rem 0.72rem;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 150ms ease, color 150ms ease;
+}
+
+.contract-pdf-remove-btn:hover {
+  border-color: rgba(255, 90, 79, 0.55);
+  color: var(--danger);
+}
+
+/* ─── Contract PDF Viewer (view sheet) ────────────────────────────────────────── */
+
+.contract-pdf-viewer-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-top: 0.3rem;
+}
+
+.contract-pdf-viewer {
+  width: 100%;
+  height: 26rem;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.contract-pdf-open-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.44rem;
+  align-self: flex-start;
+  padding: 0.46rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 0.6rem;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  font-size: 0.84rem;
+  text-decoration: none;
+  transition: border-color 150ms ease, color 150ms ease;
+}
+
+.contract-pdf-open-btn:hover {
+  border-color: rgba(245, 181, 27, 0.5);
+  color: var(--brand-strong);
+}
+
+.contract-pdf-open-btn svg {
+  width: 0.92rem;
+  height: 0.92rem;
+  stroke: currentColor;
+  fill: none;
+  flex-shrink: 0;
+}
+

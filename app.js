@@ -1006,6 +1006,7 @@
       studentId: contract.studentId || "",
       title: contract.title || "Contrato de prestação de serviço",
       body: contract.body || "",
+      pdfUrl: contract.pdfUrl || "",
       version: contract.version || "1.0",
       status: contract.status || "pending",
       cpf: contract.cpf || "",
@@ -4642,14 +4643,15 @@
     return `
       <div class="content-stack patterns-workspace">
         <section class="patterns-hero">
-          <div>
+          <div class="patterns-hero-text">
             <span class="eyebrow">Elite AS</span>
             <h3>Padrões de treino</h3>
-            <p>Modelos</p>
+            <p>Modelos reutilizáveis para treinos</p>
           </div>
-          <button class="primary-action" type="button" data-open-workout-form>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          <button class="patterns-new-btn" type="button" data-open-workout-form>
+            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
             <span>Novo padrão</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
           </button>
         </section>
         <section class="metrics-row metrics-row--3">
@@ -4717,19 +4719,19 @@
       <article class="pattern-card">
         <div class="pattern-card-head">
           <span class="pattern-icon">${icons.workouts}</span>
-          <h3 class="pattern-name">${escapeHtml(workout.title)}</h3>
-          <span class="badge ${patternStatusClass(workout.status)}">${patternStatusLabel(workout.status)}</span>
+          <div class="pattern-card-title-wrap">
+            <h3 class="pattern-name">${escapeHtml(workout.title)}</h3>
+            <span class="badge ${patternStatusClass(workout.status)}">${patternStatusLabel(workout.status)}</span>
+          </div>
         </div>
-        <div class="pattern-meta-inline">
-          ${patternMetaInline(icons.goal, "Objetivo", goal)}
-          ${patternMetaInline(icons.workouts, "Nível", workoutLevelLabel(workout.level))}
-          ${patternMetaInline(icons.library, "Exercícios", `${exerciseCount}`)}
-          ${patternMetaInline(icons.agenda, "Editado", updatedAt)}
-        </div>
-        ${patternExercisePreviewLine(workout)}
+        <ul class="pattern-meta-lines">
+          <li><span class="pml-label">Objetivo</span><span class="pml-value">${escapeHtml(goal)}</span></li>
+          <li><span class="pml-label">Nível</span><span class="pml-value">${escapeHtml(workoutLevelLabel(workout.level))}</span></li>
+          <li><span class="pml-label">Exercícios</span><span class="pml-value">${exerciseCount}</span></li>
+          <li><span class="pml-label">Última edição</span><span class="pml-value">${escapeHtml(updatedAt)}</span></li>
+        </ul>
         <div class="pattern-card-actions">
           <button class="secondary-action pattern-apply-button" type="button" data-open-apply-pattern-form="${escapeHtml(workout.id)}">
-            ${icons.students}
             <span>Aplicar</span>
           </button>
           <details class="action-menu pattern-action-menu">
@@ -8087,7 +8089,7 @@
     if (!studentId && !student) return openContractStudentPickerModal();
     const contract = contractId ? state.data.contracts.find((c) => c.id === contractId && c.studentId === studentId) : null;
     const defaults = contract || normalizeContract({ studentId: student.id, ...getContractDefaults(student), ...prefill });
-    const bodyText = contract?.body || prefill.body || buildContractBody(student, defaults);
+    const existingPdfUrl = contract?.pdfUrl || prefill.pdfUrl || "";
 
     if (titleEl) titleEl.textContent = contract ? "Editar contrato" : "Novo contrato";
 
@@ -8145,12 +8147,31 @@
         </section>
 
         <section class="ns-section">
-          <h4 class="ns-section-title">Cláusulas</h4>
-          <label class="field">
-            <span class="sr-only">Texto do contrato</span>
-            <textarea name="body" rows="12" placeholder="Texto do contrato...">${escapeHtml(bodyText)}</textarea>
+          <h4 class="ns-section-title">Documento PDF</h4>
+          <input type="hidden" name="pdfUrl" id="cfsPdfUrl" value="${escapeHtml(existingPdfUrl)}" />
+          <label class="contract-pdf-dropzone" id="cfsPdfDropzone" for="cfsPdfInput" ${existingPdfUrl ? "hidden" : ""}>
+            <input type="file" id="cfsPdfInput" accept="application/pdf" />
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" aria-hidden="true">
+              <path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/>
+              <polyline points="16 10 12 6 8 10"/>
+              <line x1="12" y1="6" x2="12" y2="16"/>
+            </svg>
+            <strong>Escolher arquivo PDF</strong>
+            <span>Clique ou arraste o contrato (.pdf, máx. 20 MB)</span>
           </label>
-          <p class="small-text">Variáveis: {aluno}, {plano}, {valor}, {data_inicio}, {data_fim}, {personal}</p>
+          <div class="contract-pdf-attached" id="cfsPdfAttached" ${existingPdfUrl ? "" : "hidden"}>
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" aria-hidden="true">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="9" y1="13" x2="15" y2="13"/>
+              <line x1="9" y1="17" x2="12" y2="17"/>
+            </svg>
+            <div class="contract-pdf-file-meta">
+              <strong id="cfsPdfFileName">${existingPdfUrl ? escapeHtml(existingPdfUrl.split("/").pop()) : ""}</strong>
+              <span>PDF pronto para envio</span>
+            </div>
+            <button type="button" class="contract-pdf-remove-btn" id="cfsPdfRemoveBtn">Remover</button>
+          </div>
         </section>
 
         <section class="ns-section">
@@ -8184,6 +8205,7 @@
     _openSheet(sheet);
     document.body.style.overflow = "hidden";
     _bindContractFormSearch();
+    _bindContractPdfUpload();
   }
 
   function closeContractFormSheet() {
@@ -8233,11 +8255,6 @@
           </div>
         `;
       }
-      const bodyTextarea = form?.querySelector('textarea[name="body"]');
-      if (bodyTextarea && !bodyTextarea.value.trim()) {
-        const defs = normalizeContract({ studentId, ...getContractDefaults(student) });
-        bodyTextarea.value = buildContractBody(student, defs);
-      }
     }
 
     searchInput.addEventListener("input", (e) => renderResults(e.target.value));
@@ -8245,6 +8262,61 @@
       const btn = e.target.closest("[data-cfs-pick]");
       if (btn) selectStudent(btn.dataset.cfsPick);
     });
+  }
+
+  function _bindContractPdfUpload() {
+    const input = document.getElementById("cfsPdfInput");
+    const dropzone = document.getElementById("cfsPdfDropzone");
+    const attached = document.getElementById("cfsPdfAttached");
+    const urlInput = document.getElementById("cfsPdfUrl");
+    const fileNameEl = document.getElementById("cfsPdfFileName");
+    const removeBtn = document.getElementById("cfsPdfRemoveBtn");
+    if (!urlInput) return;
+
+    async function upload(file) {
+      if (!file || file.type !== "application/pdf") { showToast("Selecione um arquivo PDF."); return; }
+      if (dropzone) dropzone.classList.add("is-uploading");
+      const contractId = document.getElementById("contractSheetForm")?.dataset.contractId || "";
+      const fd = new FormData();
+      fd.append("pdf", file);
+      if (contractId) fd.append("contractId", contractId);
+      try {
+        const headers = {};
+        if (state.authToken) headers.Authorization = `Bearer ${state.authToken}`;
+        const resp = await fetch(`${state.apiBase || ""}/api/uploads/contracts`, { method: "POST", body: fd, headers });
+        if (!resp.ok) throw new Error();
+        const data = await resp.json();
+        urlInput.value = data.url;
+        if (fileNameEl) fileNameEl.textContent = file.name;
+        if (dropzone) dropzone.hidden = true;
+        if (attached) attached.hidden = false;
+      } catch {
+        showToast("Erro ao enviar PDF. Tente novamente.");
+      } finally {
+        if (dropzone) dropzone.classList.remove("is-uploading");
+      }
+    }
+
+    if (input) {
+      input.addEventListener("change", () => { if (input.files[0]) upload(input.files[0]); });
+    }
+    if (dropzone) {
+      dropzone.addEventListener("dragover", (e) => { e.preventDefault(); dropzone.classList.add("is-dragging"); });
+      dropzone.addEventListener("dragleave", () => dropzone.classList.remove("is-dragging"));
+      dropzone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropzone.classList.remove("is-dragging");
+        if (e.dataTransfer.files[0]) upload(e.dataTransfer.files[0]);
+      });
+    }
+    if (removeBtn) {
+      removeBtn.addEventListener("click", () => {
+        urlInput.value = "";
+        if (input) input.value = "";
+        if (dropzone) dropzone.hidden = false;
+        if (attached) attached.hidden = true;
+      });
+    }
   }
 
   function openContractStudentPicker() {
@@ -8354,7 +8426,18 @@
 
         <section class="ns-section">
           <h4 class="ns-section-title">Documento</h4>
-          <div class="contract-doc-body">${escapeHtml(contract.body || "Texto do contrato não informado.")}</div>
+          ${contract.pdfUrl
+            ? `
+              <div class="contract-pdf-viewer-wrap">
+                <iframe src="${escapeHtml(contract.pdfUrl)}" class="contract-pdf-viewer" title="Contrato PDF"></iframe>
+                <a class="contract-pdf-open-btn" href="${escapeHtml(contract.pdfUrl)}" target="_blank" rel="noopener noreferrer">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                  Abrir PDF em nova aba
+                </a>
+              </div>
+            `
+            : `<div class="contract-doc-body">${escapeHtml(contract.body || "Texto do contrato não informado.")}</div>`
+          }
           ${contract.signedAt ? `
             <p class="small-text">Assinado em ${new Date(contract.signedAt).toLocaleString("pt-BR")} · Versão ${escapeHtml(contract.signedVersion || contract.version)} · ${escapeHtml(contract.technicalId || "sem ID técnico")}${contract.signatureIp ? " · IP " + escapeHtml(contract.signatureIp) : ""}</p>
           ` : ""}
@@ -8395,7 +8478,7 @@
     openContractFormSheet(contract.studentId, "", {
       plan: contract.plan,
       value: contract.value,
-      body: contract.body
+      pdfUrl: contract.pdfUrl || ""
     });
   }
 
@@ -9550,12 +9633,15 @@
     const old = contractId ? state.data.contracts.find((item) => item.id === contractId && item.studentId === studentId) : null;
     const action = String(data.get("action") || "send");
     const isDraft = action === "draft";
+    const pdfUrl = String(data.get("pdfUrl") || "").trim();
+    if (!isDraft && !pdfUrl) return showToast("Adicione o PDF do contrato antes de enviar.");
     const contract = normalizeContract({
       ...(old || {}),
       id: old?.id || createId("contract"),
       studentId,
       title: old?.title || "Contrato de prestação de serviço",
-      body: String(data.get("body") || "").trim(),
+      body: old?.body || "",
+      pdfUrl,
       version: old?.version || "1.0",
       plan: String(data.get("plan") || "").trim(),
       value: String(data.get("value") || "").trim(),
