@@ -460,6 +460,252 @@
   margin-top: 0.2rem;
 }
 
+/* ——— Student diet protocol hero ——— */
+.student-diet-protocol {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.sdp-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.72rem;
+  align-items: start;
+}
+
+.sdp-label {
+  display: block;
+  margin-bottom: 0.18rem;
+  color: var(--brand-strong);
+  font-size: 0.74rem;
+  font-weight: 820;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.sdp-title {
+  display: block;
+  color: var(--ink);
+  font-size: 1.28rem;
+  line-height: 1.12;
+}
+
+.sdp-objective {
+  display: block;
+  margin-top: 0.16rem;
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.sdp-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.sdp-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 5.2rem;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.04);
+  text-align: center;
+}
+
+.sdp-stat strong {
+  color: var(--ink);
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.sdp-stat > span {
+  margin-top: 0.18rem;
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.sdp-stat.is-kcal {
+  border-color: rgba(245, 181, 27, 0.32);
+  background: rgba(245, 181, 27, 0.07);
+}
+
+.sdp-stat.is-kcal strong {
+  color: var(--brand-strong);
+}
+
+.sdp-notes {
+  padding-top: 0.55rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ——— Student diet plan card ——— */
+.student-diet-plan-card {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.sdpc-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.6rem;
+  align-items: start;
+}
+
+.sdpc-title strong {
+  display: block;
+  color: var(--ink);
+  font-size: 1.06rem;
+  line-height: 1.14;
+}
+
+.sdpc-title span {
+  display: block;
+  margin-top: 0.1rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.sdpc-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.3rem;
+}
+
+/* ——— Student meal cards ——— */
+.student-meal-list {
+  display: grid;
+  gap: 0.52rem;
+}
+
+.student-meal-card {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.72rem;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.03);
+  transition: border-color 200ms ease, background 200ms ease;
+}
+
+.student-meal-card.is-checked {
+  border-color: rgba(72, 215, 100, 0.32);
+  background: rgba(72, 215, 100, 0.045);
+}
+
+.smc-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.smc-info {
+  min-width: 0;
+}
+
+.smc-time {
+  display: block;
+  margin-bottom: 0.1rem;
+  color: var(--brand-strong);
+  font-size: 0.72rem;
+  font-weight: 820;
+}
+
+.smc-name {
+  color: var(--ink);
+  font-size: 0.95rem;
+  display: block;
+}
+
+.meal-check-btn {
+  display: inline-grid;
+  width: 2.1rem;
+  height: 2.1rem;
+  place-items: center;
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
+  border-radius: 50%;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: border-color 180ms ease, background 180ms ease, color 180ms ease, transform 140ms ease;
+  flex-shrink: 0;
+}
+
+.meal-check-btn:hover {
+  border-color: rgba(72, 215, 100, 0.5);
+  color: rgba(72, 215, 100, 0.7);
+}
+
+.meal-check-btn.is-checked {
+  border-color: rgba(72, 215, 100, 0.8);
+  background: rgba(72, 215, 100, 0.14);
+  color: #48d764;
+  transform: scale(1.05);
+}
+
+.meal-check-btn svg {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.smc-food-list {
+  display: grid;
+  gap: 0.28rem;
+  margin: 0;
+  padding: 0.45rem 0 0;
+  list-style: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.smc-food-item {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  font-size: 0.84rem;
+}
+
+.smc-food-item > span:first-child {
+  flex: 1;
+  min-width: 0;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.smc-qty {
+  flex-shrink: 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.smc-kcal {
+  flex-shrink: 0;
+  color: var(--brand-strong);
+  font-size: 0.72rem;
+  font-weight: 820;
+}
+
+.smc-items-text {
+  padding-top: 0.45rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  margin: 0;
+}
+
+.smc-notes {
+  margin: 0;
+  padding: 0.38rem 0.52rem;
+  border-left: 2px solid rgba(245, 181, 27, 0.4);
+  border-radius: 0 4px 4px 0;
+  background: rgba(245, 181, 27, 0.05);
+  color: var(--muted);
+  font-style: italic;
+}
+
 @media (max-width: 68rem) {
   .diet-summary-grid,
   .diet-plan-grid {

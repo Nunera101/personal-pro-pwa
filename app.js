@@ -60,6 +60,8 @@
     financeFilterOpen: false,
     dietFilters: { q: "", status: "all", objective: "all" },
     dietFilterOpen: false,
+    studentDietQ: "",
+    mealChecks: {},
     relatorioFilters: { period: "mes" },
     workoutFilterOpen: false,
     activeSession: null,
@@ -6007,18 +6009,43 @@
 
   function renderStudentDiet() {
     const student = getCurrentStudent();
-    const diet = getCurrentDietPlanForStudent(student?.id);
-    const dietMeta = diet ? dietStatusMeta(diet) : null;
+    const allPlans = getStudentDietPlans(student?.id).filter((p) => !["archived", "draft"].includes(dietStatusKey(p)));
+
+    if (!allPlans.length) {
+      return `
+        <div class="content-stack">
+          ${pageHeader("Dieta", "Plano alimentar publicado pelo personal")}
+          <section class="panel">
+            ${emptyState("Nenhum plano alimentar", "Quando o personal publicar um plano alimentar, ele aparecerá aqui.", icons.diet)}
+          </section>
+        </div>
+      `;
+    }
+
+    const currentPlan = allPlans.find((p) => dietStatusKey(p) === "active") || allPlans[0];
+    const q = (state.studentDietQ || "").toLowerCase().trim();
+    const filteredPlans = allPlans.filter((p) => {
+      if (!q) return true;
+      return [p.title, p.objective, p.protocol, p.notes, p.instructions].join(" ").toLowerCase().includes(q);
+    });
+    const showSearch = allPlans.length > 1;
+
     return `
       <div class="content-stack">
-        ${pageHeader("Dieta", diet ? escapeHtml(dietMeta.label) : "Sem plano ativo")}
-        <section class="panel student-diet-overview">
-          ${
-            diet
-              ? renderStudentDietOverview(diet)
-              : emptyState("Plano alimentar não disponível", "Quando o personal liberar um plano, ele aparecerá aqui.", icons.diet)
-          }
-        </section>
+        ${pageHeader("Dieta", escapeHtml(currentPlan.title || currentPlan.protocol || "Plano alimentar"))}
+        ${renderStudentDietProtocolHero(currentPlan)}
+        ${showSearch ? `
+          <div class="search-filter-row" aria-label="Busca de planos alimentares">
+            <label class="diet-search-field search-input-wrap">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 21l-4.3-4.3M10.8 18a7.2 7.2 0 1 1 0-14.4 7.2 7.2 0 0 1 0 14.4Z"/></svg>
+              <input type="search" data-student-diet-q placeholder="Buscar plano..." value="${escapeHtml(state.studentDietQ || "")}" />
+            </label>
+          </div>
+        ` : ""}
+        ${filteredPlans.length
+          ? filteredPlans.map((plan) => renderStudentDietPlanCard(plan)).join("")
+          : `<section class="panel">${emptyState("Nenhum plano encontrado", "Tente outros termos na busca.", icons.diet)}</section>`
+        }
       </div>
     `;
   }
@@ -6059,28 +6086,89 @@
     `;
   }
 
-  function renderStudentDietOverview(plan) {
-    const meals = Array.isArray(plan.meals) ? plan.meals.filter((meal) => meal.name || meal.items || meal.notes) : [];
+  function renderStudentDietProtocolHero(plan) {
+    const meta = dietStatusMeta(plan);
+    const kcal = plan.calories ? String(plan.calories) : null;
+    const meals = plan.mealCount || (Array.isArray(plan.meals) && plan.meals.length ? String(plan.meals.length) : null);
+    const nextReview = plan.nextReviewDate ? formatShortDate(plan.nextReviewDate) : null;
     return `
-      <div class="student-diet-card">
-        <div class="profile-grid">
-          <article class="profile-card"><span>Protocolo</span><strong>${escapeHtml(plan.protocol || plan.title || "Plano alimentar")}</strong></article>
-          <article class="profile-card"><span>Objetivo</span><strong>${escapeHtml(plan.objective || "Acompanhamento")}</strong></article>
-          <article class="profile-card"><span>Refeicoes</span><strong>${escapeHtml(String(plan.mealCount || meals.length || "-"))}</strong></article>
-          <article class="profile-card"><span>Proxima revisao</span><strong>${plan.nextReviewDate ? formatShortDate(plan.nextReviewDate) : "A definir"}</strong></article>
+      <section class="student-diet-protocol panel">
+        <div class="sdp-head">
+          <div class="sdp-info">
+            <span class="sdp-label">Protocolo atual</span>
+            <strong class="sdp-title">${escapeHtml(plan.protocol || plan.title || "Plano alimentar")}</strong>
+            ${plan.objective ? `<span class="sdp-objective">${escapeHtml(plan.objective)}</span>` : ""}
+          </div>
+          ${statusBadge(meta.label, meta.tone)}
         </div>
-        ${
-          meals.length
-            ? `<div class="diet-meal-list">${meals.slice(0, 6).map((meal) => `
-                <article class="diet-meal-item">
-                  <strong>${escapeHtml(meal.name || "Refeicao")}</strong>
-                  <span>${escapeHtml([meal.time, meal.items].filter(Boolean).join(" - ") || "Orientacao registrada")}</span>
-                  ${meal.notes ? `<small>${escapeHtml(meal.notes)}</small>` : ""}
-                </article>
-              `).join("")}</div>`
-            : `<p class="small-text">${escapeHtml(plan.instructions || plan.notes || "As orientacoes do plano aparecerao aqui.")}</p>`
+        ${(kcal || meals || nextReview) ? `
+          <div class="sdp-stats">
+            ${kcal ? `<span class="sdp-stat is-kcal"><strong>${escapeHtml(kcal)}</strong><span>kcal</span></span>` : ""}
+            ${meals ? `<span class="sdp-stat"><strong>${escapeHtml(meals)}</strong><span>refeições/dia</span></span>` : ""}
+            ${nextReview ? `<span class="sdp-stat"><strong>${escapeHtml(nextReview)}</strong><span>próxima revisão</span></span>` : ""}
+          </div>
+        ` : ""}
+        ${plan.instructions || plan.notes ? `<p class="sdp-notes small-text">${escapeHtml(plan.instructions || plan.notes)}</p>` : ""}
+      </section>
+    `;
+  }
+
+  function renderStudentDietPlanCard(plan) {
+    const meta = dietStatusMeta(plan);
+    const meals = Array.isArray(plan.meals) ? plan.meals.filter((m) => m.name || m.items || (Array.isArray(m.foodItems) && m.foodItems.length)) : [];
+    const checks = state.mealChecks[plan.id] || {};
+    const checkedCount = Object.values(checks).filter(Boolean).length;
+    return `
+      <section class="panel student-diet-plan-card">
+        <div class="sdpc-head">
+          <div class="sdpc-title">
+            <strong>${escapeHtml(plan.title || plan.protocol || "Plano alimentar")}</strong>
+            <span>${escapeHtml(plan.objective || "Acompanhamento")}</span>
+          </div>
+          <div class="sdpc-meta">
+            ${statusBadge(meta.label, meta.tone)}
+            ${meals.length ? `<span class="small-text">${checkedCount}/${meals.length} refeições</span>` : ""}
+          </div>
+        </div>
+        ${meals.length
+          ? `<div class="student-meal-list">${meals.map((meal) => renderStudentMealCard(meal, !!checks[meal.id], plan.id)).join("")}</div>`
+          : `<p class="small-text">${escapeHtml(plan.instructions || plan.notes || "Nenhuma refeição cadastrada neste plano.")}</p>`
         }
-      </div>
+      </section>
+    `;
+  }
+
+  function renderStudentMealCard(meal, isChecked, planId) {
+    const foodItems = Array.isArray(meal.foodItems) && meal.foodItems.length ? meal.foodItems : null;
+    const itemsText = meal.items && !foodItems ? meal.items : null;
+    return `
+      <article class="student-meal-card ${isChecked ? "is-checked" : ""}" data-meal-plan-id="${escapeHtml(planId)}" data-meal-id="${escapeHtml(meal.id)}">
+        <div class="smc-header">
+          <div class="smc-info">
+            ${meal.time ? `<span class="smc-time">${escapeHtml(meal.time)}</span>` : ""}
+            <strong class="smc-name">${escapeHtml(meal.name || "Refeição")}</strong>
+          </div>
+          <button class="meal-check-btn ${isChecked ? "is-checked" : ""}" type="button"
+            data-toggle-meal-check="${escapeHtml(meal.id)}"
+            data-plan-id="${escapeHtml(planId)}"
+            aria-label="${isChecked ? "Desmarcar refeição cumprida" : "Marcar refeição como cumprida"}"
+            aria-pressed="${isChecked}">
+            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+          </button>
+        </div>
+        ${foodItems ? `
+          <ul class="smc-food-list">
+            ${foodItems.map((fi) => `
+              <li class="smc-food-item">
+                <span>${escapeHtml(fi.name)}</span>
+                ${fi.qty ? `<span class="smc-qty">${escapeHtml(fi.qty)}</span>` : ""}
+                ${fi.kcal ? `<span class="smc-kcal">${fi.kcal} kcal</span>` : ""}
+              </li>
+            `).join("")}
+          </ul>
+        ` : itemsText ? `<p class="smc-items-text small-text">${escapeHtml(itemsText)}</p>` : ""}
+        ${meal.notes ? `<p class="smc-notes small-text">${escapeHtml(meal.notes)}</p>` : ""}
+      </article>
     `;
   }
 
@@ -9876,6 +9964,29 @@
         const form = document.getElementById("newStudentForm");
         if (form) handleNewStudentForm(form, true);
       }
+      if (target.matches("[data-toggle-meal-check]")) {
+        const mealId = target.dataset.toggleMealCheck;
+        const planId = target.dataset.planId;
+        if (!mealId || !planId) return;
+        if (!state.mealChecks[planId]) state.mealChecks[planId] = {};
+        state.mealChecks[planId][mealId] = !state.mealChecks[planId][mealId];
+        const isChecked = state.mealChecks[planId][mealId];
+        const card = target.closest("[data-meal-id]");
+        if (card) {
+          card.classList.toggle("is-checked", isChecked);
+          target.classList.toggle("is-checked", isChecked);
+          target.setAttribute("aria-pressed", String(isChecked));
+          target.setAttribute("aria-label", isChecked ? "Desmarcar refeição cumprida" : "Marcar refeição como cumprida");
+          const planCard = card.closest(".student-diet-plan-card");
+          if (planCard) {
+            const checks = state.mealChecks[planId];
+            const checkedCount = Object.values(checks).filter(Boolean).length;
+            const totalMeals = planCard.querySelectorAll(".student-meal-card").length;
+            const counter = planCard.querySelector(".sdpc-meta .small-text");
+            if (counter) counter.textContent = `${checkedCount}/${totalMeals} refeições`;
+          }
+        }
+      }
     });
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape") closeManagerDrawer();
@@ -9883,6 +9994,7 @@
     document.addEventListener("input", (event) => {
       const target = event.target;
       if (target.matches("[data-student-search]")) { state.search = target.value; renderManager(); }
+      if (target.matches("[data-student-diet-q]")) { state.studentDietQ = target.value; renderStudent(); }
       if (target.matches("[data-phone-mask]")) {
         let v = target.value.replace(/\D/g, "").slice(0, 11);
         if (v.length > 10) v = v.replace(/^(\d{2})(\d{5})(\d{4})$/, "($1) $2-$3");
