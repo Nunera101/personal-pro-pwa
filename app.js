@@ -286,19 +286,20 @@
   ];
 
   const studentMenus = [
-    { id: "today", label: "Hoje", icon: icons.today },
+    { id: "today", label: "Início", icon: icons.today },
     { id: "workouts", label: "Treinos", icon: icons.workouts },
+    { id: "diet", label: "Dieta", icon: icons.diet },
+    { id: "progress", label: "Progresso", icon: icons.progress },
     { id: "agenda", label: "Agenda", icon: icons.agenda },
-    { id: "progress", label: "Evolução", icon: icons.progress },
     { id: "updates", label: "Atualizações", icon: icons.updates },
-    { id: "profile", label: "Perfil", icon: icons.profile }
+    { id: "profile", label: "Mais", icon: icons.profile }
   ];
 
   const studentBottomMenus = [
-    { id: "today", label: "Hoje", icon: icons.today },
+    { id: "today", label: "Início", icon: icons.today },
     { id: "workouts", label: "Treinos", icon: icons.workouts },
-    { id: "agenda", label: "Agenda", icon: icons.agenda },
-    { id: "progress", label: "Evolução", icon: icons.progress },
+    { id: "diet", label: "Dieta", icon: icons.diet },
+    { id: "progress", label: "Progresso", icon: icons.progress },
     { id: "profile", label: "Mais", icon: icons.more }
   ];
 
@@ -2451,6 +2452,7 @@
       today: renderStudentToday,
       agenda: () => renderAgendaScreen(getCurrentStudent()?.id),
       workouts: renderStudentWorkouts,
+      diet: renderStudentDiet,
       updates: renderStudentUpdates,
       progress: renderStudentProgress,
       profile: renderStudentProfile
@@ -5820,7 +5822,7 @@
     const exerciseProgress = buildExerciseProgress(studentId);
     return `
       <div class="content-stack">
-        ${state.currentUser?.role === "student" ? pageHeader("Evolução", "Histórico de treinos, cargas e peso") : ""}
+        ${state.currentUser?.role === "student" ? pageHeader("Progresso", "Histórico de treinos, cargas e peso") : ""}
         <section class="metric-grid">
           ${metricCard("Semana", sessionsThisWeek(studentId).length)}
           ${metricCard("Mês", sessionsThisMonth(studentId).length)}
@@ -5983,54 +5985,55 @@
     `;
   }
 
-  function renderStudentProfile() {
+  function renderStudentDiet() {
     const student = getCurrentStudent();
-    const contracts = getStudentContracts(student?.id);
-    const pendingContracts = contracts.filter((contract) => contract.status === "pending" || contract.status === "viewed");
-    const pendingUpdate = state.data.updates.find((update) => update.studentId === student?.id && update.status === "pending");
     const diet = getCurrentDietPlanForStudent(student?.id);
     const dietMeta = diet ? dietStatusMeta(diet) : null;
     return `
       <div class="content-stack">
-        ${pageHeader("Mais", "Conta, contratos, mensagens e app", '<button class="pill-button" type="button" data-install-trigger>Baixar app</button>')}
-        <section class="panel">
-          <div class="profile-hero">
-            <div>
-              <span class="eyebrow">Aluno</span>
-              <h3>${escapeHtml(student?.name || "Aluno")}</h3>
-              <p>${escapeHtml(student?.goal || "Sem objetivo cadastrado")}</p>
-            </div>
-            ${statusBadge(student?.status === "active" ? "Ativo" : "Inativo", student?.status === "active" ? "success" : "danger")}
-          </div>
-          <div class="quick-grid more-grid">
-            <button class="quick-link" type="button" data-student-nav="updates"><strong>Atualizações</strong><span>${pendingUpdate ? `Pendente ${formatDate(pendingUpdate.dueDate)}` : "Histórico quinzenal"}</span></button>
-            <button class="quick-link" type="button" data-open-messages="${escapeHtml(student?.id || "")}"><strong>Mensagens</strong><span>${state.socketReady ? "Tempo real ativo" : "Modo local"}</span></button>
-            <button class="quick-link" type="button" data-student-nav="progress"><strong>Evolução</strong><span>Treinos e volume load</span></button>
-            <button class="quick-link" type="button" data-student-nav="agenda"><strong>Agenda</strong><span>Treinos e pendências</span></button>
-          </div>
-        </section>
+        ${pageHeader("Dieta", diet ? escapeHtml(dietMeta.label) : "Sem plano ativo")}
         <section class="panel student-diet-overview">
-          <div class="section-title">
-            <h3>Dieta</h3>
-            <span class="small-text">${diet ? escapeHtml(dietMeta.label) : "Sem plano ativo"}</span>
-          </div>
           ${
             diet
               ? renderStudentDietOverview(diet)
               : emptyState("Plano alimentar não disponível", "Quando o personal liberar um plano, ele aparecerá aqui.", icons.diet)
           }
         </section>
+      </div>
+    `;
+  }
+
+  function renderStudentProfile() {
+    const student = getCurrentStudent();
+    const contracts = getStudentContracts(student?.id);
+    const pendingContracts = contracts.filter((contract) => contract.status === "pending" || contract.status === "viewed");
+    return `
+      <div class="content-stack">
+        ${pageHeader("Mais", "Perfil, agenda, mensagens e configurações", '<button class="pill-button" type="button" data-install-trigger>Baixar app</button>')}
+        <section class="panel">
+          <div class="profile-hero">
+            <div>
+              <h3>${escapeHtml(student?.name || "Aluno")}</h3>
+              <p>${escapeHtml(student?.goal || "Sem objetivo cadastrado")}</p>
+            </div>
+            ${statusBadge(student?.status === "active" ? "Ativo" : "Inativo", student?.status === "active" ? "success" : "danger")}
+          </div>
+          <div class="quick-grid more-grid">
+            <button class="quick-link" type="button" data-student-nav="agenda"><strong>Agenda</strong><span>Treinos e pendências</span></button>
+            <button class="quick-link" type="button" data-open-messages="${escapeHtml(student?.id || "")}"><strong>Mensagens</strong><span>${state.socketReady ? "Tempo real ativo" : "Modo local"}</span></button>
+          </div>
+        </section>
         <section class="panel">
           <div class="section-title"><h3>Contratos</h3><span class="small-text">${pendingContracts.length} pendente(s)</span></div>
           ${contracts.length ? `<div class="entity-list">${contracts.map((contract) => renderContractRow(contract, false)).join("")}</div>` : emptyState("Nenhum contrato", "Contratos enviados pelo personal aparecerão aqui.", icons.contracts)}
         </section>
         <section class="panel">
-          <div class="section-title"><h3>Dados da conta</h3><span class="small-text">Informações principais</span></div>
+          <div class="section-title"><h3>Configurações</h3><span class="small-text">Conta e preferências</span></div>
           <div class="profile-grid">
             <article class="profile-card"><span>E-mail</span><strong>${escapeHtml(student?.email || "-")}</strong></article>
             <article class="profile-card"><span>Telefone</span><strong>${escapeHtml(student?.phone || "-")}</strong></article>
           </div>
-          <button class="secondary-action" type="button" data-logout>Sair</button>
+          <button class="secondary-action" type="button" data-logout>Sair da conta</button>
         </section>
       </div>
     `;
