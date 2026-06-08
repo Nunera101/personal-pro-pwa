@@ -5837,14 +5837,52 @@
   }
 
   function renderProgressForStudent(studentId) {
+    const isStudentView = state.currentUser?.role === "student";
     const sessions = getStudentSessions(studentId);
     const updateWeights = state.data.updates
       .filter((update) => update.studentId === studentId && update.weight && update.status !== "pending")
       .sort((a, b) => a.dueDate.localeCompare(b.dueDate));
     const exerciseProgress = buildExerciseProgress(studentId);
+
+    const allUpdates = isStudentView
+      ? state.data.updates.filter((item) => item.studentId === studentId).sort((a, b) => b.dueDate.localeCompare(a.dueDate))
+      : [];
+    const pendingUpdate = allUpdates.find((item) => item.status === "pending");
+    const sentUpdates = allUpdates.filter((u) => u.status !== "pending");
+
     return `
       <div class="content-stack">
-        ${state.currentUser?.role === "student" ? pageHeader("Progresso", "Histórico de treinos, cargas e peso") : ""}
+        ${isStudentView ? pageHeader("Progresso", "Atualizações e evolução") : ""}
+
+        ${isStudentView ? `
+          <section class="panel">
+            <div class="section-title">
+              <h3>Enviar</h3>
+              <span class="small-text">${pendingUpdate ? `Vencimento ${formatDate(pendingUpdate.dueDate)}` : "Sem pendência"}</span>
+            </div>
+            ${pendingUpdate
+              ? `<button class="primary-action" type="button" data-open-update-form="${pendingUpdate.id}">Enviar atualização quinzenal</button>`
+              : emptyState("Sem atualização pendente", "A próxima será gerada automaticamente.", icons.updates)
+            }
+          </section>
+
+          <section class="panel">
+            <div class="section-title"><h3>Histórico de envios</h3><span class="small-text">${sentUpdates.length} registro(s)</span></div>
+            ${sentUpdates.length
+              ? `<div class="entity-list">${sentUpdates.map((u) => `
+                  <article class="entity-row">
+                    <div class="entity-main">
+                      <strong>${formatDate(u.dueDate)}</strong>
+                      <span>${u.weight ? `Peso: ${escapeHtml(String(u.weight))} kg · ` : ""}Energia: ${escapeHtml(String(u.energy || "—"))}/5 · Dor: ${escapeHtml(String(u.pain || "—"))}/5</span>
+                      ${u.trainerComment ? `<span>Personal: ${escapeHtml(u.trainerComment)}</span>` : ""}
+                      <div class="badge-row"><span class="badge ${u.status === "viewed" ? "is-success" : "is-info"}">${updateStatusLabel(u.status)}</span></div>
+                    </div>
+                  </article>`).join("")}</div>`
+              : emptyState("Nenhum histórico", "Suas atualizações enviadas aparecerão aqui.", icons.updates)
+            }
+          </section>
+        ` : ""}
+
         <section class="metric-grid">
           ${metricCard("Semana", sessionsThisWeek(studentId).length)}
           ${metricCard("Mês", sessionsThisMonth(studentId).length)}
@@ -5861,7 +5899,7 @@
         </section>
         <section class="panel">
           <div class="section-title"><h3>Peso corporal</h3><span class="small-text">Atualizações</span></div>
-          ${updateWeights.length ? `<div class="entity-list">${updateWeights.map((item) => `<article class="entity-row"><div class="entity-main"><strong>${escapeHtml(item.weight)} kg</strong><span>${formatDate(item.dueDate)}</span></div></article>`).join("")}</div>` : emptyState("Nenhum peso registrado", "O peso informado nas atualizações aparecerá aqui.", icons.updates)}
+          ${updateWeights.length ? `<div class="entity-list">${updateWeights.map((item) => `<article class="entity-row"><div class="entity-main"><strong>${escapeHtml(String(item.weight))} kg</strong><span>${formatDate(item.dueDate)}</span></div></article>`).join("")}</div>` : emptyState("Nenhum peso registrado", "O peso informado nas atualizações aparecerá aqui.", icons.updates)}
         </section>
       </div>
     `;
