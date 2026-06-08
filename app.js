@@ -2433,9 +2433,9 @@
     const html = fixMojibake((renderers[state.managerMenu] || renderManagerHomeV2)());
 
     const applyContent = () => {
-      elements.managerContent.innerHTML = html;
       elements.managerContent.classList.remove("is-entering");
       void elements.managerContent.offsetWidth;
+      elements.managerContent.innerHTML = html;
       elements.managerContent.classList.add("is-entering");
       // Mede altura do manager-header para o offset sticky do cabeçalho do perfil
       requestAnimationFrame(() => {
@@ -2446,8 +2446,9 @@
 
     if (SKELETON_TABS.has(state.managerMenu) && document.body.classList.contains("app-ready")) {
       const version = ++skeletonRenderVersion;
-      elements.managerContent.innerHTML = buildTabSkeleton(state.managerMenu);
+      elements.managerContent.classList.remove("is-entering");
       void elements.managerContent.offsetWidth;
+      elements.managerContent.innerHTML = buildTabSkeleton(state.managerMenu);
       requestAnimationFrame(() => requestAnimationFrame(() => {
         if (skeletonRenderVersion !== version) return;
         applyContent();
@@ -2464,9 +2465,9 @@
       elements.studentTitle.textContent = "Contrato";
       elements.studentSideNav.innerHTML = "";
       elements.studentBottomNav.innerHTML = "";
-      elements.studentContent.innerHTML = fixMojibake(renderStudentContractGate(blockingContract));
       elements.studentContent.classList.remove("is-entering");
       void elements.studentContent.offsetWidth;
+      elements.studentContent.innerHTML = fixMojibake(renderStudentContractGate(blockingContract));
       elements.studentContent.classList.add("is-entering");
       return;
     }
@@ -2489,17 +2490,18 @@
     };
 
     const applyStudentContent = () => {
-      elements.studentContent.innerHTML = fixMojibake((renderers[state.studentMenu] || renderStudentToday)());
       elements.studentContent.classList.remove("is-entering");
       void elements.studentContent.offsetWidth;
+      elements.studentContent.innerHTML = fixMojibake((renderers[state.studentMenu] || renderStudentToday)());
       elements.studentContent.classList.add("is-entering");
       _updateStudentChatBadge();
     };
 
     if (STUDENT_SKELETON_TABS.has(state.studentMenu) && document.body.classList.contains("app-ready")) {
       const version = ++skeletonRenderVersion;
-      elements.studentContent.innerHTML = buildTabSkeleton(state.studentMenu);
+      elements.studentContent.classList.remove("is-entering");
       void elements.studentContent.offsetWidth;
+      elements.studentContent.innerHTML = buildTabSkeleton(state.studentMenu);
       requestAnimationFrame(() => requestAnimationFrame(() => {
         if (skeletonRenderVersion !== version) return;
         applyStudentContent();
@@ -4311,17 +4313,18 @@
     footer.innerHTML = `
       <button class="secondary-action" type="button" data-vm-usar-treino="${escapeHtml(exerciseId)}">Usar no treino</button>
       <button class="primary-action" type="button" data-vm-editar="${escapeHtml(exerciseId)}">Editar</button>`;
-    modal.hidden = false;
+    _openSheet(modal);
     document.body.style.overflow = "hidden";
   }
 
   function closeVideoModal() {
     const modal = elements.videoModal;
     if (!modal || modal.hidden) return;
-    modal.hidden = true;
-    elements.videoModalBody.innerHTML = "";
-    elements.videoModalFooter.innerHTML = "";
-    document.body.style.overflow = "";
+    _closeSheet(modal, () => {
+      elements.videoModalBody.innerHTML = "";
+      elements.videoModalFooter.innerHTML = "";
+      document.body.style.overflow = "";
+    });
   }
 
   function openUsarTreinoSheet(exerciseId) {
@@ -4375,16 +4378,17 @@
         item.hidden = q ? !item.dataset.patternName.includes(q) : false;
       });
     });
-    sheet.hidden = false;
+    _openSheet(sheet);
     document.body.style.overflow = "hidden";
   }
 
   function closeUsarTreinoSheet() {
     const sheet = elements.usarTreinoSheet;
     if (!sheet || sheet.hidden) return;
-    sheet.hidden = true;
-    if (elements.utSheetBody) elements.utSheetBody.innerHTML = "";
-    document.body.style.overflow = "";
+    _closeSheet(sheet, () => {
+      if (elements.utSheetBody) elements.utSheetBody.innerHTML = "";
+      document.body.style.overflow = "";
+    });
   }
 
   function handleUtForm(form) {
@@ -4548,16 +4552,17 @@
     }
 
     renderEmpty();
-    sheet.hidden = false;
+    _openSheet(sheet);
     document.body.style.overflow = "hidden";
   }
 
   function closeEnviarVideoSheet() {
     const sheet = elements.enviarVideoSheet;
     if (!sheet || sheet.hidden) return;
-    sheet.hidden = true;
-    if (elements.evSheetBody) elements.evSheetBody.innerHTML = "";
-    document.body.style.overflow = "";
+    _closeSheet(sheet, () => {
+      if (elements.evSheetBody) elements.evSheetBody.innerHTML = "";
+      document.body.style.overflow = "";
+    });
   }
 
   function renderExerciseCard(exercise) {
@@ -6474,6 +6479,30 @@
   let modalCloseTimer = null;
   let skeletonRenderVersion = 0;
 
+  const _sheetTimers = new Map();
+
+  function _openSheet(sheetEl) {
+    const t = _sheetTimers.get(sheetEl);
+    if (t) { clearTimeout(t); _sheetTimers.delete(sheetEl); }
+    sheetEl.classList.remove("is-closing");
+    sheetEl.hidden = false;
+    void sheetEl.offsetWidth;
+    sheetEl.classList.add("is-open");
+  }
+
+  function _closeSheet(sheetEl, afterFn) {
+    if (!sheetEl || sheetEl.hidden || sheetEl.classList.contains("is-closing")) return;
+    sheetEl.classList.remove("is-open");
+    sheetEl.classList.add("is-closing");
+    const t = setTimeout(() => {
+      sheetEl.hidden = true;
+      sheetEl.classList.remove("is-closing");
+      _sheetTimers.delete(sheetEl);
+      if (afterFn) afterFn();
+    }, 180);
+    _sheetTimers.set(sheetEl, t);
+  }
+
   function openModal(title, body) {
     if (modalCloseTimer) { clearTimeout(modalCloseTimer); modalCloseTimer = null; }
     elements.modal.classList.remove("is-closing", "is-open");
@@ -7148,15 +7177,14 @@
       </form>
     `;
 
-    sheet.hidden = false;
+    _openSheet(sheet);
     document.body.style.overflow = "hidden";
   }
 
   function closeExerciseSheet() {
     const sheet = elements.exerciseSheet;
     if (!sheet || sheet.hidden) return;
-    sheet.hidden = true;
-    document.body.style.overflow = "";
+    _closeSheet(sheet, () => { document.body.style.overflow = ""; });
   }
 
   function openWorkoutForm(workoutId = "", prefillStudentId = "") {
@@ -7196,15 +7224,14 @@
       </form>
     `;
 
-    sheet.hidden = false;
+    _openSheet(sheet);
     document.body.style.overflow = "hidden";
   }
 
   function closeWorkoutSheet() {
     const sheet = elements.workoutSheet;
     if (!sheet || sheet.hidden) return;
-    sheet.hidden = true;
-    document.body.style.overflow = "";
+    _closeSheet(sheet, () => { document.body.style.overflow = ""; });
   }
 
   function openApplyPatternSheet(workoutId) {
@@ -7270,7 +7297,7 @@
       </form>
     `;
 
-    sheet.hidden = false;
+    _openSheet(sheet);
     document.body.style.overflow = "hidden";
     _bindApSheetSearch();
   }
@@ -7310,8 +7337,7 @@
   function closeApplyPatternSheet() {
     const sheet = elements.apSheet;
     if (!sheet || sheet.hidden) return;
-    sheet.hidden = true;
-    document.body.style.overflow = "";
+    _closeSheet(sheet, () => { document.body.style.overflow = ""; });
   }
 
   function openApplyPatternForm(workoutId) {
@@ -7403,15 +7429,14 @@
       </form>
     `;
 
-    sheet.hidden = false;
+    _openSheet(sheet);
     document.body.style.overflow = "hidden";
   }
 
   function closeAgendarSheet() {
     const sheet = elements.agendarSheet;
     if (!sheet || sheet.hidden) return;
-    sheet.hidden = true;
-    document.body.style.overflow = "";
+    _closeSheet(sheet, () => { document.body.style.overflow = ""; });
   }
 
   function openEventDetailSheet(itemId, date = "", studentId = "") {
@@ -7487,15 +7512,14 @@
       </div>
     `;
 
-    sheet.hidden = false;
+    _openSheet(sheet);
     document.body.style.overflow = "hidden";
   }
 
   function closeEventDetailSheet() {
     const sheet = elements.detSheet;
     if (!sheet || sheet.hidden) return;
-    sheet.hidden = true;
-    document.body.style.overflow = "";
+    _closeSheet(sheet, () => { document.body.style.overflow = ""; });
   }
 
   function dietObjectiveOptions(selected = "") {
@@ -7781,7 +7805,7 @@
       `;
     }
 
-    sheet.hidden = false;
+    _openSheet(sheet);
     document.body.style.overflow = "hidden";
   }
 
@@ -7891,16 +7915,14 @@
       `;
     }
 
-    sheet.hidden = false;
+    _openSheet(sheet);
     document.body.style.overflow = "hidden";
   }
 
   function closeMealPlanSheet() {
     const sheet = elements.mealPlanSheet;
     if (!sheet || sheet.hidden) return;
-    sheet.hidden = true;
-    document.body.style.overflow = "";
-    _mpDraft = null;
+    _closeSheet(sheet, () => { document.body.style.overflow = ""; _mpDraft = null; });
   }
 
   function openMpFoodSearch(mealId) {
@@ -8150,15 +8172,14 @@
       </div>
     `;
 
-    sheet.hidden = false;
+    _openSheet(sheet);
     document.body.style.overflow = "hidden";
     _bindContractFormSearch();
   }
 
   function closeContractFormSheet() {
     if (!elements.contractFormSheet || elements.contractFormSheet.hidden) return;
-    elements.contractFormSheet.hidden = true;
-    document.body.style.overflow = "";
+    _closeSheet(elements.contractFormSheet, () => { document.body.style.overflow = ""; });
   }
 
   function _bindContractFormSearch() {
@@ -8349,14 +8370,13 @@
       ` : ""}
     `;
 
-    sheet.hidden = false;
+    _openSheet(sheet);
     document.body.style.overflow = "hidden";
   }
 
   function closeContractViewSheet() {
     if (!elements.contractViewSheet || elements.contractViewSheet.hidden) return;
-    elements.contractViewSheet.hidden = true;
-    document.body.style.overflow = "";
+    _closeSheet(elements.contractViewSheet, () => { document.body.style.overflow = ""; });
   }
 
   function renewContract(contractId) {
@@ -8406,7 +8426,7 @@
     if (quickEl) quickEl.innerHTML = renderQuickChips();
 
     sheet.classList.toggle("is-student-view", isStudentRole);
-    sheet.hidden = false;
+    _openSheet(sheet);
     document.body.style.overflow = "hidden";
 
     requestAnimationFrame(() => {
@@ -8418,19 +8438,20 @@
   function closeThreadSheet() {
     const sheet = elements.threadSheet;
     if (!sheet || sheet.hidden) return;
-    sheet.hidden = true;
-    sheet.classList.remove("is-student-view");
-    document.body.style.overflow = "";
-    if (state.currentUser?.role === "manager") renderManager();
-    if (state.currentUser?.role === "student") {
-      if (state.studentMenu === "chat") {
-        state.studentMenu = "today";
-        _updateStudentChatBadge();
-        renderStudent();
-      } else {
-        _updateStudentChatBadge();
+    _closeSheet(sheet, () => {
+      sheet.classList.remove("is-student-view");
+      document.body.style.overflow = "";
+      if (state.currentUser?.role === "manager") renderManager();
+      if (state.currentUser?.role === "student") {
+        if (state.studentMenu === "chat") {
+          state.studentMenu = "today";
+          _updateStudentChatBadge();
+          renderStudent();
+        } else {
+          _updateStudentChatBadge();
+        }
       }
-    }
+    });
   }
 
   function _refreshThreadBd(studentId) {
@@ -8595,15 +8616,14 @@
       else if (!val) hiddenId.value = "";
     });
 
+    _openSheet(sheet);
     document.body.style.overflow = "hidden";
-    sheet.hidden = false;
     searchInput?.focus();
   }
 
   function closePaymentFormSheet() {
     if (!elements.paymentFormSheet || elements.paymentFormSheet.hidden) return;
-    elements.paymentFormSheet.hidden = true;
-    document.body.style.overflow = "";
+    _closeSheet(elements.paymentFormSheet, () => { document.body.style.overflow = ""; });
   }
 
   async function handlePaymentFormSheet(form) {
@@ -8718,14 +8738,13 @@
       </div>
     `;
 
+    _openSheet(sheet);
     document.body.style.overflow = "hidden";
-    sheet.hidden = false;
   }
 
   function closePaymentDetailSheet() {
     if (!elements.paymentDetailSheet || elements.paymentDetailSheet.hidden) return;
-    elements.paymentDetailSheet.hidden = true;
-    document.body.style.overflow = "";
+    _closeSheet(elements.paymentDetailSheet, () => { document.body.style.overflow = ""; });
   }
 
   async function openPaymentReceipt(recordId) {
@@ -8821,7 +8840,7 @@
     const linkInput = document.getElementById("elLinkInput");
     if (linkInput) { linkInput.value = ""; linkInput.placeholder = "Gerando link…"; }
 
-    sheet.hidden = false;
+    _openSheet(sheet);
     document.body.style.overflow = "hidden";
 
     try {
@@ -8841,10 +8860,7 @@
   function closeEnviarLinkSheet() {
     const sheet = elements.enviarLinkSheet;
     if (!sheet || sheet.hidden) return;
-    sheet.hidden = true;
-    document.body.style.overflow = "";
-    _elStudentId = null;
-    _elBaseUrl = "";
+    _closeSheet(sheet, () => { document.body.style.overflow = ""; _elStudentId = null; _elBaseUrl = ""; });
   }
 
   function _elUpdateLink() {
@@ -9677,14 +9693,13 @@
       </div>
     `;
 
+    _openSheet(sheet);
     document.body.style.overflow = "hidden";
-    sheet.hidden = false;
   }
 
   function closeCobrarSheet() {
     if (!elements.cobrarSheet || elements.cobrarSheet.hidden) return;
-    elements.cobrarSheet.hidden = true;
-    document.body.style.overflow = "";
+    _closeSheet(elements.cobrarSheet, () => { document.body.style.overflow = ""; });
   }
 
   function startWorkout(workoutId, activityId = "") {
