@@ -34,6 +34,10 @@ function createServer() {
 
   configureRealtime(io);
 
+  app.get("/acesso", (_request, response) => {
+    response.sendFile(path.join(rootDir, "acesso.html"));
+  });
+
   app.use(
     express.static(rootDir, {
       setHeaders(response, filePath) {

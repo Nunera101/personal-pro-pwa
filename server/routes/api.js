@@ -33,6 +33,7 @@ const PASSWORD_RESETS_KEY = "personal-pro-password-resets-v1";
 const PASSWORD_RESET_TTL_MS = 60 * 60 * 1000;
 const STUDENT_INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const CONTRACT_LINK_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const STUDENT_AREA_LINK_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const COLLECTION_ALLOWLIST = new Set([
   STUDENTS_KEY,
   EXERCISES_KEY,
@@ -111,6 +112,17 @@ function buildContractUrl(request, token) {
   const fallbackBase = sanitizeBaseUrl(process.env.APP_PUBLIC_URL || origin) || origin;
   const url = new URL(requestedBase || fallbackBase);
   url.searchParams.set("contract", token);
+  return url.toString();
+}
+
+function buildStudentAreaUrl(request, token) {
+  const requestedBase = sanitizeBaseUrl(request.body?.appUrl);
+  const origin = `${request.protocol}://${request.get("host")}`;
+  const fallbackBase = sanitizeBaseUrl(process.env.APP_PUBLIC_URL || origin) || origin;
+  const url = new URL(requestedBase || fallbackBase);
+  url.pathname = "/acesso";
+  url.search = "";
+  url.searchParams.set("token", token);
   return url.toString();
 }
 
@@ -361,6 +373,7 @@ async function createAccountToken(account, ttlMs, type = "password_reset", extra
     if (item.expiresAt <= now.toISOString() || item.usedAt) return false;
     if (type === "student_invite" && item.type === "student_invite" && item.studentId === account.studentId) return false;
     if (type === "contract_view" && item.type === "contract_view" && item.contractId === extra.contractId) return false;
+    if (type === "student_area_view" && item.type === "student_area_view" && item.studentId === account.studentId) return false;
     return true;
   });
   activeResets.push(reset);
@@ -720,6 +733,98 @@ function createApiRouter() {
         studentId: reset.studentId,
         contractId: reset.contractId,
         email: reset.email
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post("/auth/student-area-link", requireManager, async (request, response, next) => {
+    try {
+      const studentId = String(request.body?.studentId || "");
+      const students = await readCollection(STUDENTS_KEY, []);
+      const student = students.find((item) => item.id === studentId && item.status !== "inactive");
+      if (!student) {
+        response.status(404).json({ error: "Aluno nao encontrado." });
+        return;
+      }
+      const account = {
+        role: "student",
+        email: normalizeEmail(student.email),
+        name: student.name || "Aluno",
+        studentId: student.id || ""
+      };
+      const { token } = await createAccountToken(account, STUDENT_AREA_LINK_TTL_MS, "student_area_view");
+      const areaUrl = buildStudentAreaUrl(request, token);
+      response.json({ ok: true, url: areaUrl });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post("/auth/student-area-view", async (request, response, next) => {
+    try {
+      const token = String(request.body?.token || "");
+      if (!token) {
+        response.status(400).json({ error: "Token nao informado." });
+        return;
+      }
+      const tokenHash = hashToken(token);
+      const resets = await readCollection(PASSWORD_RESETS_KEY, []);
+      const now = new Date().toISOString();
+      const reset = resets.find(
+        (item) => item.type === "student_area_view" && item.tokenHash === tokenHash && !item.usedAt && item.expiresAt > now
+      );
+      if (!reset?.studentId) {
+        response.status(400).json({ error: "Link invalido ou expirado." });
+        return;
+      }
+
+      const [students, workouts, exercises, diets, updates, sessions] = await Promise.all([
+        readCollection(STUDENTS_KEY, []),
+        readCollection(WORKOUTS_KEY, []),
+        readCollection(EXERCISES_KEY, []),
+        readCollection(DIETS_KEY, []),
+        readCollection(UPDATES_KEY, []),
+        readCollection(SESSIONS_KEY, [])
+      ]);
+
+      const student = students.find((item) => item.id === reset.studentId);
+      if (!student || student.status === "inactive") {
+        response.status(404).json({ error: "Aluno nao encontrado." });
+        return;
+      }
+
+      const { passwordHash, ...safeStudent } = student;
+
+      const studentWorkouts = workouts
+        .filter((w) => w.studentId === reset.studentId && w.status === "published")
+        .sort((a, b) => new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0));
+
+      const activeExercises = exercises.filter((e) => e.status !== "inactive");
+
+      const studentDiets = diets
+        .filter((d) => d.studentId === reset.studentId)
+        .sort((a, b) => new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0));
+
+      const studentUpdates = updates
+        .filter((u) => u.studentId === reset.studentId)
+        .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+        .slice(0, 5);
+
+      const studentSessions = sessions
+        .filter((s) => s.studentId === reset.studentId && s.status === "completed")
+        .sort((a, b) => new Date(b.finishedAt || b.createdAt || 0) - new Date(a.finishedAt || a.createdAt || 0))
+        .slice(0, 5);
+
+      response.json({
+        ok: true,
+        student: safeStudent,
+        workouts: studentWorkouts,
+        exercises: activeExercises,
+        diets: studentDiets,
+        updates: studentUpdates,
+        sessions: studentSessions
       });
     } catch (error) {
       next(error);

@@ -8774,11 +8774,15 @@
     document.body.style.overflow = "hidden";
 
     try {
-      const { gerarLink } = await import("./src/services.js");
-      const result = await gerarLink(studentId);
+      const result = await fetchJsonFromApi("/auth/student-area-link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ studentId, appUrl: `${window.location.origin}/acesso` }),
+        timeoutMs: 9000
+      });
       _elBaseUrl = result.url || "";
     } catch (_) {
-      _elBaseUrl = `https://app.personalpro.com/acesso/${studentId}?token=demo`;
+      _elBaseUrl = `${window.location.origin}/acesso?token=demo`;
     }
     _elUpdateLink();
   }
@@ -8839,11 +8843,15 @@
     const linkInput = document.getElementById("elLinkInput");
     if (linkInput) { linkInput.value = ""; linkInput.placeholder = "Gerando novo link…"; }
     try {
-      const { gerarLink } = await import("./src/services.js");
-      const result = await gerarLink(_elStudentId);
+      const result = await fetchJsonFromApi("/auth/student-area-link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ studentId: _elStudentId, appUrl: `${window.location.origin}/acesso` }),
+        timeoutMs: 9000
+      });
       _elBaseUrl = result.url || "";
     } catch (_) {
-      _elBaseUrl = `https://app.personalpro.com/acesso/${_elStudentId}?token=demo-${Date.now()}`;
+      _elBaseUrl = `${window.location.origin}/acesso?token=demo-${Date.now()}`;
     }
     _elUpdateLink();
     showToast("Novo link gerado!");
