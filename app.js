@@ -2231,6 +2231,7 @@
     const renderers = {
       home: renderManagerHomeV2,
       students: renderStudentsScreen,
+      newStudent: renderNewStudentScreen,
       agenda: () => renderAgendaScreen(),
       workouts: renderManagerWorkouts,
       library: renderExerciseLibrary,
@@ -2460,7 +2461,7 @@
               </div>
             </div>
             <div class="quick-grid dashboard-quick-grid">
-              <button class="quick-link dashboard-quick-link" type="button" data-open-student-form>${icons.students}<strong>Novo aluno</strong><span>Cadastrar e liberar acesso</span></button>
+              <button class="quick-link dashboard-quick-link" type="button" data-manager-nav="newStudent">${icons.students}<strong>Novo aluno</strong><span>Cadastrar e liberar acesso</span></button>
               <button class="quick-link dashboard-quick-link" type="button" data-open-workout-form>${icons.workouts}<strong>Criar treino</strong><span>Criar padrão de treino</span></button>
               <button class="quick-link dashboard-quick-link" type="button" data-manager-nav="messages">${icons.messages}<strong>Enviar mensagem</strong><span>Conversa direta com aluno</span></button>
               <button class="quick-link dashboard-quick-link" type="button" data-manager-nav="finance">${icons.progress}<strong>Relatórios</strong><span>Resultados e finanças</span></button>
@@ -3288,7 +3289,7 @@
             <h3>Alunos</h3>
             <p>Gerencie alunos, treinos e evolução.</p>
           </div>
-          <button class="primary-action" type="button" data-open-student-form>${icons.students}<span>Novo aluno</span></button>
+          <button class="primary-action" type="button" data-manager-nav="newStudent">${icons.students}<span>Novo aluno</span></button>
         </section>
 
         <section class="student-search-panel" aria-label="Busca e filtros de alunos">
@@ -3345,6 +3346,137 @@
           ${options.map(([value, optionLabel]) => `<option value="${escapeHtml(value)}" ${selected === value ? "selected" : ""}>${escapeHtml(optionLabel)}</option>`).join("")}
         </select>
       </label>
+    `;
+  }
+
+  function renderNewStudentScreen() {
+    const goalOptions = [
+      ["hipertrofia", "Hipertrofia"],
+      ["emagrecimento", "Emagrecimento"],
+      ["condicionamento", "Condicionamento"],
+      ["performance", "Performance"],
+      ["forca", "Forca"],
+      ["reabilitacao", "Reabilitacao"],
+      ["qualidade_de_vida", "Qualidade de vida"]
+    ];
+    const sexOptions = [
+      ["masculino", "Masculino"],
+      ["feminino", "Feminino"],
+      ["outro", "Outro"]
+    ];
+    const levelOptions = [
+      ["beginner", "Iniciante"],
+      ["intermediate", "Intermediario"],
+      ["advanced", "Avancado"]
+    ];
+    const today = todayISO();
+    return `
+      <div class="new-student-screen">
+        <div class="ns-topbar">
+          <button class="icon-button ns-close" type="button" data-manager-nav="students" aria-label="Cancelar">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+          <h3>Novo aluno</h3>
+          <div class="ns-topbar-spacer"></div>
+        </div>
+
+        <form class="ns-form" id="newStudentForm" novalidate>
+
+          <section class="ns-section">
+            <h4 class="ns-section-title">Dados pessoais</h4>
+
+            <div class="ns-avatar-block">
+              <div class="entity-avatar ns-avatar-preview" id="nsAvatarPreview" aria-hidden="true">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </div>
+              <button class="ns-avatar-btn" type="button" aria-label="Adicionar foto" tabindex="-1">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              </button>
+            </div>
+
+            <label class="field">
+              <span>Nome completo <span class="ns-required" aria-hidden="true">*</span></span>
+              <input name="name" type="text" placeholder="Ex: Maria Silva" autocomplete="name" required />
+            </label>
+
+            <div class="ns-row">
+              <label class="field">
+                <span>Telefone <span class="ns-required" aria-hidden="true">*</span></span>
+                <input name="phone" type="tel" inputmode="numeric" placeholder="(11) 99999-9999" autocomplete="tel" required data-phone-mask />
+              </label>
+              <label class="field">
+                <span>Nascimento</span>
+                <input name="birthdate" type="date" max="${today}" />
+              </label>
+            </div>
+
+            <label class="field">
+              <span>E-mail</span>
+              <input name="email" type="email" inputmode="email" placeholder="aluno@exemplo.com" autocomplete="email" />
+            </label>
+
+            <div class="ns-chip-label">Sexo</div>
+            <div class="ns-chip-group" role="group" aria-label="Sexo">
+              ${sexOptions.map(([value, label]) => `<label class="radio-chip"><input type="radio" name="sex" value="${value}" /><span>${label}</span></label>`).join("")}
+            </div>
+          </section>
+
+          <section class="ns-section">
+            <h4 class="ns-section-title">Objetivo</h4>
+            <div class="ns-chip-group" role="group" aria-label="Objetivo">
+              ${goalOptions.map(([value, label]) => `<label class="radio-chip"><input type="radio" name="goal" value="${value}" /><span>${label}</span></label>`).join("")}
+            </div>
+          </section>
+
+          <section class="ns-section">
+            <h4 class="ns-section-title">Contrato</h4>
+            <div class="ns-row">
+              <label class="field">
+                <span>Plano</span>
+                <select name="contractType">
+                  <option value="">Sem contrato</option>
+                  <option value="elite">Elite</option>
+                  <option value="performance">Performance</option>
+                  <option value="custom">Custom</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Valor / mes (R$)</span>
+                <input name="contractValue" type="number" inputmode="decimal" placeholder="350" min="0" step="0.01" />
+              </label>
+            </div>
+            <label class="field">
+              <span>Inicio</span>
+              <input name="contractStart" type="date" value="${today}" />
+            </label>
+          </section>
+
+          <section class="ns-section">
+            <h4 class="ns-section-title">Nivel</h4>
+            <div class="ns-chip-group" role="group" aria-label="Nivel">
+              ${levelOptions.map(([value, label]) => `<label class="radio-chip"><input type="radio" name="level" value="${value}" /><span>${label}</span></label>`).join("")}
+            </div>
+          </section>
+
+          <section class="ns-section">
+            <h4 class="ns-section-title">Observacoes internas</h4>
+            <label class="field">
+              <span class="sr-only">Observacoes</span>
+              <textarea name="internalNotes" rows="4" placeholder="Anotacoes privadas sobre o aluno, historico, restricoes..."></textarea>
+            </label>
+          </section>
+
+          <div class="ns-footer-spacer"></div>
+        </form>
+
+        <div class="ns-footer">
+          <button class="secondary-action ns-cancel-btn" type="button" data-manager-nav="students">Cancelar</button>
+          <div class="ns-footer-primary">
+            <button class="primary-action" type="submit" form="newStudentForm">Salvar aluno</button>
+            <button class="ghost-button ns-send-link-btn" type="button" data-ns-save-and-send>Salvar e enviar link</button>
+          </div>
+        </div>
+      </div>
     `;
   }
 
@@ -6577,6 +6709,80 @@
     }
   }
 
+  async function handleNewStudentForm(form, sendLink = false) {
+    const data = new FormData(form);
+    const name = String(data.get("name") || "").trim();
+    const phone = String(data.get("phone") || "").trim();
+
+    const nameInput = form.querySelector("[name='name']");
+    const phoneInput = form.querySelector("[name='phone']");
+    let valid = true;
+
+    if (!name) {
+      nameInput?.classList.add("ns-field-error");
+      nameInput?.focus();
+      valid = false;
+    } else {
+      nameInput?.classList.remove("ns-field-error");
+    }
+    if (!phone) {
+      phoneInput?.classList.add("ns-field-error");
+      if (valid) phoneInput?.focus();
+      valid = false;
+    } else {
+      phoneInput?.classList.remove("ns-field-error");
+    }
+    if (!valid) return showToast("Preencha os campos obrigatorios: Nome e Telefone.");
+
+    const email = normalizeEmail(data.get("email"));
+    if (email && email === ADMIN.email) return showToast("Use outro e-mail para o aluno.");
+    if (email && state.data.students.some((s) => s.email === email)) return showToast("Ja existe aluno com esse e-mail.");
+
+    const id = createId("student");
+    const goalRaw = String(data.get("goal") || "").trim();
+    const goalLabels = { hipertrofia: "Hipertrofia", emagrecimento: "Emagrecimento", condicionamento: "Condicionamento", performance: "Performance", forca: "Forca", reabilitacao: "Reabilitacao", qualidade_de_vida: "Qualidade de vida" };
+    const goal = goalLabels[goalRaw] || goalRaw || "Condicionamento";
+
+    const student = {
+      id,
+      trainerId: TRAINER_ID,
+      name,
+      email: email || "",
+      passwordHash: "",
+      hasPassword: false,
+      phone,
+      goal,
+      birthdate: String(data.get("birthdate") || ""),
+      sex: String(data.get("sex") || ""),
+      level: String(data.get("level") || "beginner"),
+      contractType: String(data.get("contractType") || ""),
+      contractValue: parseFloat(data.get("contractValue") || "0") || 0,
+      contractStart: String(data.get("contractStart") || ""),
+      status: "active",
+      accessStatus: "invite_pending",
+      inviteSentAt: "",
+      inviteExpiresAt: "",
+      inviteAcceptedAt: "",
+      passwordUpdatedAt: "",
+      internalNotes: String(data.get("internalNotes") || "").trim(),
+      createdAt: new Date().toISOString()
+    };
+
+    state.data.students.unshift(student);
+    ensureNextUpdatePending(student.id, todayISO());
+    ensureDefaultContractForStudent(student.id);
+    persistData();
+    state.managerMenu = "students";
+    renderApp();
+
+    await flushRemoteSync();
+    if (sendLink) {
+      await sendStudentInvite(student.id);
+    } else {
+      showToast("Aluno salvo com status Pendente.");
+    }
+  }
+
   async function handleStudentForm(form) {
     const data = new FormData(form);
     const id = form.dataset.id || createId("student");
@@ -7542,6 +7748,10 @@
       if (target.matches("[data-profile-tab]")) { state.profileTab = target.dataset.profileTab; openStudentProfile(state.activeStudentProfileId, { updateHash: false }); }
       if (target.matches("[data-delete-student]")) deleteStudent(target.dataset.deleteStudent);
       if (target.matches("[data-open-activity-form]")) openActivityForm(target.dataset.openActivityForm || "", target.dataset.prefillStudent || "");
+      if (target.matches("[data-ns-save-and-send]")) {
+        const form = document.getElementById("newStudentForm");
+        if (form) handleNewStudentForm(form, true);
+      }
     });
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape") closeManagerDrawer();
@@ -7549,6 +7759,14 @@
     document.addEventListener("input", (event) => {
       const target = event.target;
       if (target.matches("[data-student-search]")) { state.search = target.value; renderManager(); }
+      if (target.matches("[data-phone-mask]")) {
+        let v = target.value.replace(/\D/g, "").slice(0, 11);
+        if (v.length > 10) v = v.replace(/^(\d{2})(\d{5})(\d{4})$/, "($1) $2-$3");
+        else if (v.length > 6) v = v.replace(/^(\d{2})(\d{4})(\d{0,4})$/, "($1) $2-$3");
+        else if (v.length > 2) v = v.replace(/^(\d{2})(\d+)$/, "($1) $2");
+        else if (v.length > 0) v = `(${v}`;
+        target.value = v;
+      }
     });
     document.addEventListener("change", (event) => {
       const target = event.target;
@@ -7557,6 +7775,7 @@
     document.addEventListener("submit", async (event) => {
       event.preventDefault();
       const form = event.target;
+      if (form.id === "newStudentForm") await handleNewStudentForm(form, false);
       if (form.id === "studentForm") await handleStudentForm(form);
       if (form.id === "settingsForm") handleSettingsForm(form);
     });
