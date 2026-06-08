@@ -13685,3 +13685,49 @@ button:active:not(:disabled),
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ── Banner de alterações pendentes offline ── */
+@keyframes offline-banner-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(0.6rem); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.offline-pending-banner {
+  position: fixed;
+  bottom: calc(4.6rem + var(--safe-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 88;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.48rem 1rem;
+  background: var(--ink);
+  color: #fff;
+  border-radius: 2rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.28);
+  pointer-events: none;
+  white-space: nowrap;
+  animation: offline-banner-in 200ms ease;
+}
+
+.offline-banner-icon {
+  width: 0.95rem;
+  height: 0.95rem;
+  flex-shrink: 0;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.85;
+}
+
+@media (min-width: 42rem) {
+  .offline-pending-banner {
+    bottom: 1.5rem;
+  }
+}

@@ -74,6 +74,7 @@
     syncTimer: null,
     syncInFlight: false,
     syncAgain: false,
+    offlinePending: false,
     lastSyncAt: "",
     socket: null,
     socketReady: false,
@@ -494,20 +495,35 @@
     }
 
     state.syncInFlight = true;
+    renderOfflineBanner();
     try {
       const snapshot = currentDataSnapshot();
       await Promise.all(collectionMap.map(([name, key]) => writeRemoteCollection(key, snapshot[name])));
       state.lastSyncAt = new Date().toISOString();
+      state.offlinePending = false;
     } catch (error) {
       state.apiAvailable = false;
+      state.offlinePending = true;
       console.warn("Sincronizacao remota indisponivel. Mantendo fallback local.", error);
     } finally {
       state.syncInFlight = false;
+      renderOfflineBanner();
       if (state.syncAgain) {
         state.syncAgain = false;
         scheduleRemoteSync(250);
       }
     }
+  }
+
+  function renderOfflineBanner() {
+    const banner = document.getElementById("offlinePendingBanner");
+    if (!banner) return;
+    if (!state.offlinePending) { banner.hidden = true; return; }
+    banner.hidden = false;
+    const lbl = banner.querySelector(".offline-banner-label");
+    const spin = banner.querySelector(".offline-banner-syncing");
+    if (lbl) lbl.hidden = state.syncInFlight;
+    if (spin) spin.hidden = !state.syncInFlight;
   }
 
   function createId(prefix) {
@@ -10651,6 +10667,11 @@
     bindRelatorioEvents();
     bindPwaEvents();
     bindAuthEvents();
+    window.addEventListener("online", () => {
+      if (state.offlinePending && state.authToken) scheduleRemoteSync(1500);
+      renderOfflineBanner();
+    });
+    window.addEventListener("offline", () => renderOfflineBanner());
   }
 
   function duplicateWorkout(id) {
