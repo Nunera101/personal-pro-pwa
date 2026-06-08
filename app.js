@@ -4230,7 +4230,7 @@
               <details class="action-menu library-card-menu">
                 <summary aria-label="Mais ações">${icons.more}</summary>
                 <div>
-                  ${hasVideo ? `<button class="mini-button" type="button" data-remove-exercise-video="${escapeHtml(exercise.id)}">Remover vídeo</button>` : `<button class="mini-button" type="button" data-open-exercise-form="${escapeHtml(exercise.id)}">Enviar vídeo</button>`}
+                  ${hasVideo ? `<button class="mini-button" type="button" data-remove-exercise-video="${escapeHtml(exercise.id)}">Remover vídeo</button>` : `<button class="mini-button" type="button" data-vm-enviar-video="${escapeHtml(exercise.id)}">Enviar vídeo</button>`}
                   <button class="mini-button" type="button" data-toggle-exercise-status="${escapeHtml(exercise.id)}">${exercise.status === "active" ? "Arquivar" : "Publicar"}</button>
                   <button class="mini-button is-danger" type="button" data-delete-exercise="${escapeHtml(exercise.id)}">Excluir</button>
                 </div>
@@ -4273,7 +4273,7 @@
           <strong>Envie seu vídeo de execução</strong>
           <span>Adicione um vídeo próprio para este exercício e personalize sua biblioteca.</span>
         </div>
-        <button class="mini-button" type="button" data-open-exercise-form="${escapeHtml(exercise.id)}">Enviar vídeo</button>
+        <button class="mini-button" type="button" data-vm-enviar-video="${escapeHtml(exercise.id)}">Enviar vídeo</button>
       </div>
     `;
   }
@@ -7215,6 +7215,16 @@
         <input type="hidden" name="videoUrl" value="${escapeHtml(videoLink)}" />
       </form>
     `;
+
+    const fileInput = body.querySelector('[name="videoFile"]');
+    if (fileInput) {
+      fileInput.addEventListener("change", (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const nameEl = body.querySelector(".ex-video-label");
+        if (nameEl) nameEl.textContent = `${file.name} · ${formatFileSize(file.size)}`;
+      });
+    }
 
     _openSheet(sheet);
     document.body.style.overflow = "hidden";
