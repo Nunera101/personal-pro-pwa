@@ -165,6 +165,10 @@
     cobrarSheet: document.getElementById("cobrarSheet"),
     cobrarSheetTitle: document.getElementById("cobrarSheetTitle"),
     cobrarSheetBody: document.getElementById("cobrarSheetBody"),
+    threadSheet: document.getElementById("threadSheet"),
+    threadSheetHd: document.getElementById("threadSheetHd"),
+    threadSheetBd: document.getElementById("threadSheetBd"),
+    threadSheetFt: document.getElementById("threadSheetFt"),
     installSteps: document.getElementById("installSteps"),
     retryInstall: document.getElementById("retryInstall"),
     toast: document.getElementById("toast"),
@@ -1853,7 +1857,13 @@
       if (!state.data.messages.some((item) => item.id === normalized.id)) {
         state.data.messages.push(normalized);
         persistData();
-        renderApp();
+        const sheet = elements.threadSheet;
+        const form = document.getElementById("threadForm");
+        if (sheet && !sheet.hidden && form?.dataset?.studentId === normalized.studentId) {
+          _refreshThreadBd(normalized.studentId);
+        } else {
+          renderApp();
+        }
       }
     });
   }
@@ -8092,9 +8102,16 @@
   }
 
   function openMessages(studentId) {
+    openThreadSheet(studentId);
+  }
+
+  function openThreadSheet(studentId) {
+    const sheet = elements.threadSheet;
+    if (!sheet) return;
     const student = getStudent(studentId);
     if (!student) return;
     if (state.currentUser?.role === "student" && state.currentUser.studentId !== student.id) return showToast("Conversa indisponível.");
+
     if (state.currentUser?.role === "manager") {
       let changed = false;
       getStudentMessages(student.id).forEach((message) => {
@@ -8103,39 +8120,91 @@
           changed = true;
         }
       });
-      if (changed) {
-        persistData();
-        renderManager();
-      }
+      if (changed) persistData();
     }
-    openModal(
-      `Mensagens · ${student.name}`,
-      `
-        <div class="wa-thread">
-          <div class="wa-thread-header">
-            ${studentAvatar(student)}
-            <div class="wa-thread-info">
-              <strong>${escapeHtml(student.name)}</strong>
-              <span>${escapeHtml(student.goal || "Aluno Elite AS")}${state.socketReady ? " · tempo real" : ""}</span>
-            </div>
-            ${state.currentUser?.role === "manager" ? `<button class="ghost-button wa-thread-profile-btn" type="button" data-open-student-profile="${escapeHtml(student.id)}">Perfil</button>` : ""}
-          </div>
-          <div class="wa-thread-body" id="waMsgBody">
-            ${renderConversation(student.id)}
-          </div>
-          <form class="wa-compose" id="messageForm" data-student-id="${escapeHtml(student.id)}">
-            <textarea class="wa-compose-input" name="body" maxlength="800" required placeholder="Mensagem..." rows="1"></textarea>
-            <button class="wa-send-btn" type="submit" aria-label="Enviar">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/></svg>
-            </button>
-          </form>
-        </div>
-      `
-    );
+
+    const form = document.getElementById("threadForm");
+    if (form) form.dataset.studentId = studentId;
+
+    if (elements.threadSheetHd) elements.threadSheetHd.innerHTML = renderThreadHeader(student);
+
+    _refreshThreadBd(studentId);
+
+    const quickEl = document.getElementById("threadQuickChips");
+    if (quickEl) quickEl.innerHTML = renderQuickChips();
+
+    sheet.hidden = false;
+    document.body.style.overflow = "hidden";
+
     requestAnimationFrame(() => {
-      const body = document.getElementById("waMsgBody");
-      if (body) body.scrollTop = body.scrollHeight;
+      const bd = elements.threadSheetBd;
+      if (bd) bd.scrollTop = bd.scrollHeight;
     });
+  }
+
+  function closeThreadSheet() {
+    const sheet = elements.threadSheet;
+    if (!sheet || sheet.hidden) return;
+    sheet.hidden = true;
+    document.body.style.overflow = "";
+    if (state.currentUser?.role === "manager") renderManager();
+  }
+
+  function _refreshThreadBd(studentId) {
+    const bd = elements.threadSheetBd;
+    if (!bd) return;
+    bd.innerHTML = renderThreadBubbles(studentId);
+    requestAnimationFrame(() => { bd.scrollTop = bd.scrollHeight; });
+  }
+
+  function renderThreadHeader(student) {
+    const isManager = state.currentUser?.role === "manager";
+    const statusLabel = state.socketReady ? "tempo real ativo" : (student.goal || "Elite AS");
+    return `
+      <button class="thread-back-btn" type="button" data-close-thread-sheet aria-label="Voltar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      </button>
+      ${studentAvatar(student)}
+      <div class="thread-hd-info">
+        <strong>${escapeHtml(student.name)}</strong>
+        <span>${escapeHtml(statusLabel)}</span>
+      </div>
+      ${isManager ? `<button class="ghost-button thread-profile-btn" type="button" data-open-student-profile="${escapeHtml(student.id)}">Perfil</button>` : ""}
+    `;
+  }
+
+  function renderThreadBubbles(studentId) {
+    const messages = getStudentMessages(studentId);
+    if (!messages.length) return emptyState("Nenhuma mensagem", "Use o campo abaixo para iniciar a conversa.", icons.messages);
+    let html = '<div class="thread-bubbles">';
+    let lastDate = "";
+    messages.forEach((message) => {
+      const msgDate = String(message.createdAt || "").slice(0, 10);
+      if (msgDate && msgDate !== lastDate) {
+        lastDate = msgDate;
+        const label = msgDate === todayISO() ? "Hoje" : msgDate === addDays(todayISO(), -1) ? "Ontem" : formatShortDate(msgDate);
+        html += `<span class="thread-date-sep">${escapeHtml(label)}</span>`;
+      }
+      const isManager = message.senderRole === "manager";
+      const isRead = Boolean(message.readAt);
+      const timeStr = message.createdAt ? new Date(message.createdAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : "";
+      html += `
+        <div class="thread-bubble ${isManager ? "is-manager" : "is-student"}">
+          <p>${escapeHtml(message.body)}</p>
+          <div class="thread-bubble-foot">
+            <time>${escapeHtml(timeStr)}</time>
+            ${isManager ? `<span class="thread-check ${isRead ? "" : "is-unread"}" aria-label="${isRead ? "Lido" : "Enviado"}">✓✓</span>` : ""}
+          </div>
+        </div>
+      `;
+    });
+    html += "</div>";
+    return html;
+  }
+
+  function renderQuickChips() {
+    const chips = ["Boa semana! 💪", "Ótimo progresso!", "Vamos lá!", "Continue assim!"];
+    return chips.map((chip) => `<button class="thread-quick-chip" type="button" data-quick-reply="${escapeHtml(chip)}">${escapeHtml(chip)}</button>`).join("");
   }
 
   function openPaymentForm(paymentId = "", defaults = {}) {
@@ -9167,7 +9236,8 @@
     state.data.messages.push(message);
     persistData();
     if (state.socketReady && state.socket) state.socket.emit("message:send", message);
-    openMessages(studentId);
+    form.reset();
+    _refreshThreadBd(studentId);
     showToast(state.socketReady ? "Mensagem enviada em tempo real." : "Mensagem salva em modo local.");
   }
 
@@ -9960,9 +10030,20 @@
 
   function bindChatEvents() {
     document.addEventListener("click", (event) => {
-      const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-manager-drawer-backdrop]");
+      const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-close-thread-sheet], [data-manager-drawer-backdrop]");
       if (!target) return;
-      if (target.matches("[data-open-messages]")) openMessages(target.dataset.openMessages);
+      if (target.matches("[data-open-messages]")) openThreadSheet(target.dataset.openMessages);
+      if (target.matches("[data-close-thread-sheet]")) closeThreadSheet();
+      if (target.matches("[data-thread-attach]")) {
+        const form = document.getElementById("threadForm");
+        const sid = form?.dataset?.studentId || "";
+        if (sid) openEnviarLinkSheet(sid);
+      }
+      if (target.matches("[data-quick-reply]")) {
+        const text = target.dataset.quickReply || "";
+        const input = document.querySelector("#threadForm .thread-input");
+        if (input) { input.value = text; input.focus(); }
+      }
       if (target.matches("[data-message-show-all]")) { state.messageFilters = { q: "", status: "all" }; renderManager(); }
       if (target.matches("[data-whatsapp-activity]")) openWhatsApp(target.dataset.whatsappActivity, target.dataset.whatsappStudent);
     });
@@ -9977,7 +10058,7 @@
     document.addEventListener("submit", async (event) => {
       event.preventDefault();
       const form = event.target;
-      if (form.id === "messageForm") handleMessageForm(form);
+      if (form.id === "messageForm" || form.id === "threadForm") handleMessageForm(form);
     });
   }
 

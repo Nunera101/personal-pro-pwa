@@ -475,3 +475,321 @@
   }
 }
 
+/* ── Thread de chat (tela cheia) ────────────────────────────── */
+.thread-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  background: #080808;
+  overflow: hidden;
+}
+
+.thread-sheet[hidden] { display: none; }
+
+.thread-sheet-panel {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ── Cabeçalho ── */
+.thread-hd {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.78rem 1rem;
+  padding-top: calc(0.78rem + env(safe-area-inset-top, 0px));
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(14, 14, 14, 0.98);
+  backdrop-filter: blur(8px);
+}
+
+.thread-back-btn {
+  flex-shrink: 0;
+  display: inline-grid;
+  width: 2.35rem;
+  height: 2.35rem;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 140ms ease;
+}
+
+.thread-back-btn:hover { background: rgba(255, 255, 255, 0.13); }
+
+.thread-back-btn svg {
+  width: 1.05rem;
+  height: 1.05rem;
+  stroke: currentColor;
+  stroke-width: 2.2;
+}
+
+.thread-hd .entity-avatar {
+  flex-shrink: 0;
+  width: 2.65rem;
+  height: 2.65rem;
+  border-color: rgba(245, 181, 27, 0.44);
+}
+
+.thread-hd-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.thread-hd-info strong {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 1rem;
+  font-weight: 760;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.thread-hd-info span {
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1;
+}
+
+.thread-profile-btn {
+  flex-shrink: 0;
+  min-height: 2rem;
+  padding: 0 0.68rem;
+  border-radius: 0.6rem;
+  font-size: 0.8rem;
+}
+
+/* ── Área de mensagens ── */
+.thread-bd {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 0.85rem;
+  background:
+    radial-gradient(ellipse at 20% 80%, rgba(245, 181, 27, 0.04) 0%, transparent 60%),
+    #080808;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+}
+
+.thread-bd::-webkit-scrollbar { display: none; }
+
+.thread-bubbles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.36rem;
+  padding-bottom: 0.4rem;
+  margin-top: auto;
+}
+
+.thread-date-sep {
+  align-self: center;
+  margin: 0.6rem 0 0.4rem;
+  padding: 0.16rem 0.68rem;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.thread-bubble {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+  width: fit-content;
+  max-width: min(80%, 28rem);
+  padding: 0.52rem 0.76rem 0.34rem;
+  border-radius: 1rem;
+}
+
+.thread-bubble.is-student {
+  align-self: flex-start;
+  border-bottom-left-radius: 0.18rem;
+  background: #1A1A1D;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.thread-bubble.is-manager {
+  align-self: flex-end;
+  border-bottom-right-radius: 0.18rem;
+  background: linear-gradient(145deg, rgba(245, 181, 27, 0.26), rgba(245, 181, 27, 0.11));
+  border: 1px solid rgba(245, 181, 27, 0.3);
+}
+
+.thread-bubble p {
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.93rem;
+  line-height: 1.45;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.thread-bubble-foot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.22rem;
+}
+
+.thread-bubble time {
+  color: rgba(247, 244, 235, 0.42);
+  font-size: 0.625rem;
+  line-height: 1;
+}
+
+.thread-bubble.is-manager time {
+  color: rgba(245, 181, 27, 0.6);
+}
+
+.thread-check {
+  display: inline-flex;
+  align-items: center;
+  color: rgba(245, 181, 27, 0.65);
+  font-size: 0.68rem;
+  line-height: 1;
+  letter-spacing: -0.1em;
+}
+
+.thread-check.is-unread {
+  color: rgba(255, 255, 255, 0.32);
+}
+
+/* ── Rodapé (chips + compose) ── */
+.thread-ft {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(14, 14, 14, 0.98);
+}
+
+.thread-quick {
+  display: flex;
+  gap: 0.42rem;
+  overflow-x: auto;
+  padding: 0.48rem 0.85rem 0.32rem;
+  scrollbar-width: none;
+}
+
+.thread-quick::-webkit-scrollbar { display: none; }
+
+.thread-quick-chip {
+  flex-shrink: 0;
+  padding: 0.26rem 0.72rem;
+  border: 1px solid rgba(245, 181, 27, 0.34);
+  border-radius: 99px;
+  background: transparent;
+  color: var(--brand-strong);
+  font-size: 0.8rem;
+  font-weight: 640;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 130ms ease, border-color 130ms ease;
+}
+
+.thread-quick-chip:hover {
+  background: rgba(245, 181, 27, 0.1);
+  border-color: rgba(245, 181, 27, 0.55);
+}
+
+#threadForm {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.46rem;
+  padding: 0.58rem 0.78rem;
+  padding-bottom: calc(0.58rem + env(safe-area-inset-bottom, 0px));
+}
+
+.thread-attach-btn {
+  flex-shrink: 0;
+  display: inline-grid;
+  width: 2.65rem;
+  height: 2.65rem;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: var(--brand);
+  color: #080808;
+  cursor: pointer;
+  transition: background 140ms ease, transform 110ms ease;
+}
+
+.thread-attach-btn:hover { background: var(--brand-strong); }
+.thread-attach-btn:active { transform: scale(0.9); }
+
+.thread-attach-btn svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  stroke: currentColor;
+  stroke-width: 2.5;
+}
+
+.thread-input {
+  flex: 1;
+  min-width: 0;
+  min-height: 2.65rem;
+  max-height: 7rem;
+  padding: 0.52rem 0.82rem;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 1.5rem;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--ink);
+  font-size: 0.95rem;
+  line-height: 1.45;
+  resize: none;
+  overflow-y: auto;
+  scrollbar-width: none;
+  transition: border-color 140ms ease, background 140ms ease;
+}
+
+.thread-input::-webkit-scrollbar { display: none; }
+
+.thread-input:focus {
+  outline: none;
+  border-color: rgba(245, 181, 27, 0.48);
+  background: rgba(245, 181, 27, 0.05);
+}
+
+.thread-input::placeholder { color: rgba(247, 244, 235, 0.34); }
+
+.thread-send-btn {
+  flex-shrink: 0;
+  display: inline-grid;
+  width: 2.65rem;
+  height: 2.65rem;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: var(--brand);
+  color: #070707;
+  cursor: pointer;
+  transition: background 140ms ease, transform 110ms ease;
+}
+
+.thread-send-btn:hover { background: var(--brand-strong); }
+.thread-send-btn:active { transform: scale(0.92); }
+
+.thread-send-btn svg {
+  width: 1.08rem;
+  height: 1.08rem;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
