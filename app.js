@@ -127,15 +127,19 @@
     agendarSheet: document.getElementById("agendarSheet"),
     agSheetBody: document.getElementById("agSheetBody"),
     agSheetTitle: document.getElementById("agSheetTitle"),
+    agSheetFooter: document.getElementById("agSheetFooter"),
     detSheet: document.getElementById("detSheet"),
     detSheetBody: document.getElementById("detSheetBody"),
     detSheetStripe: document.getElementById("detSheetStripe"),
+    detSheetFooter: document.getElementById("detSheetFooter"),
     workoutSheet: document.getElementById("workoutSheet"),
     workoutSheetBody: document.getElementById("workoutSheetBody"),
     workoutSheetTitle: document.getElementById("workoutSheetTitle"),
+    workoutSheetFooter: document.getElementById("workoutSheetFooter"),
     apSheet: document.getElementById("apSheet"),
     apSheetBody: document.getElementById("apSheetBody"),
     apSheetTitle: document.getElementById("apSheetTitle"),
+    apSheetFooter: document.getElementById("apSheetFooter"),
     exerciseSheet: document.getElementById("exerciseSheet"),
     exerciseSheetBody: document.getElementById("exerciseSheetBody"),
     exerciseSheetTitle: document.getElementById("exerciseSheetTitle"),
@@ -157,17 +161,22 @@
     videoModalFooter: document.getElementById("videoModalFooter"),
     usarTreinoSheet: document.getElementById("usarTreinoSheet"),
     utSheetBody: document.getElementById("utSheetBody"),
+    utSheetFooter: document.getElementById("utSheetFooter"),
     enviarVideoSheet: document.getElementById("enviarVideoSheet"),
     evSheetBody: document.getElementById("evSheetBody"),
+    evSheetFooter: document.getElementById("evSheetFooter"),
     paymentFormSheet: document.getElementById("paymentFormSheet"),
     pfSheetTitle: document.getElementById("pfSheetTitle"),
     pfSheetBody: document.getElementById("pfSheetBody"),
+    pfSheetFooter: document.getElementById("pfSheetFooter"),
     paymentDetailSheet: document.getElementById("paymentDetailSheet"),
     pdSheetTitle: document.getElementById("pdSheetTitle"),
     pdSheetBody: document.getElementById("pdSheetBody"),
+    pdSheetFooter: document.getElementById("pdSheetFooter"),
     cobrarSheet: document.getElementById("cobrarSheet"),
     cobrarSheetTitle: document.getElementById("cobrarSheetTitle"),
     cobrarSheetBody: document.getElementById("cobrarSheetBody"),
+    cobrarSheetFooter: document.getElementById("cobrarSheetFooter"),
     threadSheet: document.getElementById("threadSheet"),
     threadSheetHd: document.getElementById("threadSheetHd"),
     threadSheetBd: document.getElementById("threadSheetBd"),
@@ -4406,11 +4415,13 @@
             <label class="field"><span>Descanso (s)</span><input type="number" name="rest" min="10" max="600" value="60" /></label>
           </div>
         </details>
-        <div class="ut-footer-row">
-          <button class="secondary-action" type="button" data-close-ut-sheet>Cancelar</button>
-          <button class="primary-action" type="submit">Adicionar</button>
-        </div>
       </form>`;
+    const utFooter = elements.utSheetFooter;
+    if (utFooter) utFooter.innerHTML = `
+      <div class="ut-footer-row">
+        <button class="secondary-action" type="button" data-close-ut-sheet>Cancelar</button>
+        <button class="primary-action" type="submit" form="utForm">Adicionar</button>
+      </div>`;
     document.getElementById("utSearch").addEventListener("input", (e) => {
       const q = e.target.value.toLowerCase().trim();
       document.querySelectorAll("#utPatternList .ut-radio-item[data-pattern-name]").forEach((item) => {
@@ -4482,6 +4493,8 @@
     let selectedFile = null;
     let previewUrl = null;
 
+    const evFooter = elements.evSheetFooter;
+
     function renderEmpty() {
       body.innerHTML = `
         <div class="ev-body">
@@ -4493,14 +4506,15 @@
             <p class="ev-drop-label">Toque para selecionar ou arraste o vídeo</p>
             <p class="ev-drop-sub">MP4, MOV ou WebM · máx 200 MB</p>
           </label>
-          <div class="ut-footer-row">
-            <button class="secondary-action" type="button" data-close-ev-sheet>Cancelar</button>
-            <button class="primary-action" type="button" disabled>Salvar</button>
-          </div>
         </div>`;
       body.querySelector(".ev-file-input").addEventListener("change", (e) => {
         if (e.target.files[0]) handleFileSelected(e.target.files[0]);
       });
+      if (evFooter) evFooter.innerHTML = `
+        <div class="ut-footer-row">
+          <button class="secondary-action" type="button" data-close-ev-sheet>Cancelar</button>
+          <button class="primary-action" type="button" disabled>Salvar</button>
+        </div>`;
     }
 
     function renderSelected() {
@@ -4524,10 +4538,6 @@
             </label>
             <button class="ghost-button" type="button" id="evRemoveBtn">Remover</button>
           </div>
-          <div class="ut-footer-row">
-            <button class="secondary-action" type="button" data-close-ev-sheet>Cancelar</button>
-            <button class="primary-action" type="button" id="evSaveBtn">Salvar</button>
-          </div>
         </div>`;
       body.querySelector(".ev-file-input").addEventListener("change", (e) => {
         if (e.target.files[0]) handleFileSelected(e.target.files[0]);
@@ -4537,7 +4547,14 @@
         selectedFile = null;
         renderEmpty();
       });
-      document.getElementById("evSaveBtn").addEventListener("click", handleSave);
+      if (evFooter) {
+        evFooter.innerHTML = `
+          <div class="ut-footer-row">
+            <button class="secondary-action" type="button" data-close-ev-sheet>Cancelar</button>
+            <button class="primary-action" type="button" id="evSaveBtn">Salvar</button>
+          </div>`;
+        evFooter.querySelector("#evSaveBtn").addEventListener("click", handleSave);
+      }
     }
 
     function handleFileSelected(file) {
@@ -7249,6 +7266,7 @@
 
     if (titleEl) titleEl.textContent = workout.id ? (isStudentWorkout ? "Editar treino do aluno" : "Editar padrão de treino") : isStudentWorkout ? "Novo treino do aluno" : "Novo padrão de treino";
 
+    const workoutSaveLabel = isStudentWorkout ? "Salvar treino" : "Salvar padrão";
     body.innerHTML = `
       <form class="form-grid" id="workoutForm" data-id="${workout.id || ""}" data-scope="${isStudentWorkout ? "student" : "pattern"}">
         <div class="form-grid two">
@@ -7269,9 +7287,10 @@
           <div class="section-title"><h3>Exercícios do ${isStudentWorkout ? "treino" : "padrão"}</h3><button class="mini-button" type="button" data-add-workout-row>Adicionar exercício</button></div>
           <div id="workoutRows">${rows.map((row, index) => workoutRowTemplate(row, index)).join("")}</div>
         </section>
-        <button class="primary-action" type="submit">${isStudentWorkout ? "Salvar treino" : "Salvar padrão"}</button>
       </form>
     `;
+    const wsFooter = elements.workoutSheetFooter;
+    if (wsFooter) wsFooter.innerHTML = `<button class="primary-action" type="submit" form="workoutForm">${workoutSaveLabel}</button>`;
 
     _openSheet(sheet);
     document.body.style.overflow = "hidden";
@@ -7341,10 +7360,10 @@
         </div>
 
         <button class="ghost-button" type="button" data-ap-adjust="${escapeHtml(workout.id)}">Ajustar antes de aplicar</button>
-
-        <button class="primary-action" type="submit">Aplicar</button>
       </form>
     `;
+    const apFooter = elements.apSheetFooter;
+    if (apFooter) apFooter.innerHTML = `<button class="primary-action" type="submit" form="applyPatternSheetForm">Aplicar</button>`;
 
     _openSheet(sheet);
     document.body.style.overflow = "hidden";
@@ -7474,9 +7493,10 @@
         </div>
         <label class="field"><span>Título</span><input name="title" type="text" value="${escapeHtml(activity.title || "Treino agendado")}" required /></label>
         <label class="field"><span>Observações</span><textarea name="notes">${escapeHtml(activity.notes || "")}</textarea></label>
-        <button class="primary-action" type="submit">Salvar atividade</button>
       </form>
     `;
+    const agFooter = elements.agSheetFooter;
+    if (agFooter) agFooter.innerHTML = `<button class="primary-action" type="submit" form="activityForm">Salvar atividade</button>`;
 
     _openSheet(sheet);
     document.body.style.overflow = "hidden";
@@ -7557,9 +7577,10 @@
           </div>
         </div>
         ${item.notes ? `<p class="det-notes">${escapeHtml(item.notes)}</p>` : ""}
-        ${actionsHtml}
       </div>
     `;
+    const detFooter = elements.detSheetFooter;
+    if (detFooter) detFooter.innerHTML = actionsHtml;
 
     _openSheet(sheet);
     document.body.style.overflow = "hidden";
@@ -8751,12 +8772,14 @@
           <div class="chip-group pf-method-chips" role="group" aria-label="Forma de pagamento">${methodChips}</div>
         </div>
         <label class="field"><span>Data do pagamento</span><input name="paidAt" type="date" value="${escapeHtml(paidAt)}" /></label>
-        <div class="pf-footer">
-          <button class="secondary-action" type="button" data-close-payment-form-sheet>Cancelar</button>
-          <button class="primary-action" type="submit" id="pfSubmitBtn">${payment ? "Salvar pagamento" : "Registrar pagamento"}</button>
-        </div>
       </form>
     `;
+    const pfFooter = elements.pfSheetFooter;
+    if (pfFooter) pfFooter.innerHTML = `
+      <div class="pf-footer">
+        <button class="secondary-action" type="button" data-close-payment-form-sheet>Cancelar</button>
+        <button class="primary-action" type="submit" form="paymentFormSheetForm" id="pfSubmitBtn">${payment ? "Salvar pagamento" : "Registrar pagamento"}</button>
+      </div>`;
 
     const searchInput = bodyEl.querySelector("#pfStudentInput");
     const hiddenId = bodyEl.querySelector("#pfStudentHiddenId");
@@ -8881,13 +8904,15 @@
           <article><span>Forma</span><strong>${escapeHtml(record.paymentMethod || "—")}</strong></article>
         </section>
         ${historicHtml}
-        <div class="pd-actions">
-          <button class="primary-action" type="button" data-open-payment-form="${escapeHtml(record.virtual ? "" : record.id)}" data-payment-record="${escapeHtml(record.id)}">${record.virtual ? "Registrar pagamento" : "Editar pagamento"}</button>
-          <button class="secondary-action" type="button" data-open-cobrar-sheet="${escapeHtml(record.id)}">Cobrar</button>
-          <button class="secondary-action" type="button" data-open-payment-receipt="${escapeHtml(record.id)}" ${meta.key !== "paid" ? "disabled" : ""}>Gerar recibo</button>
-        </div>
       </div>
     `;
+    const pdFooter = elements.pdSheetFooter;
+    if (pdFooter) pdFooter.innerHTML = `
+      <div class="pd-actions">
+        <button class="primary-action" type="button" data-open-payment-form="${escapeHtml(record.virtual ? "" : record.id)}" data-payment-record="${escapeHtml(record.id)}">${record.virtual ? "Registrar pagamento" : "Editar pagamento"}</button>
+        <button class="secondary-action" type="button" data-open-cobrar-sheet="${escapeHtml(record.id)}">Cobrar</button>
+        <button class="secondary-action" type="button" data-open-payment-receipt="${escapeHtml(record.id)}" ${meta.key !== "paid" ? "disabled" : ""}>Gerar recibo</button>
+      </div>`;
 
     _openSheet(sheet);
     document.body.style.overflow = "hidden";
@@ -9837,19 +9862,21 @@
           <span>Mensagem</span>
           <textarea id="cobrarMsg" class="cobrar-msg" rows="5">${escapeHtml(defaultMsg)}</textarea>
         </label>
-        <div class="cobrar-actions">
-          <button class="whatsapp-button cobrar-wa-btn" type="button" data-cobrar-wa="${escapeHtml(record.id)}" ${!hasPhone ? "disabled" : ""}>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zM12 0C5.373 0 0 5.373 0 12c0 2.135.559 4.137 1.532 5.875L0 24l6.267-1.508A11.956 11.956 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>
-            Cobrar pelo WhatsApp
-          </button>
-          <button class="secondary-action cobrar-email-btn" type="button" data-cobrar-email="${escapeHtml(record.id)}" ${!hasEmail ? "disabled" : ""}>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-            Por e-mail
-          </button>
-        </div>
         ${!hasPhone && !hasEmail ? `<p class="small-text cobrar-no-contact">Cadastre telefone ou e-mail no perfil do aluno para enviar cobrança.</p>` : ""}
       </div>
     `;
+    const cobrarFooter = elements.cobrarSheetFooter;
+    if (cobrarFooter) cobrarFooter.innerHTML = `
+      <div class="cobrar-actions">
+        <button class="whatsapp-button cobrar-wa-btn" type="button" data-cobrar-wa="${escapeHtml(record.id)}" ${!hasPhone ? "disabled" : ""}>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zM12 0C5.373 0 0 5.373 0 12c0 2.135.559 4.137 1.532 5.875L0 24l6.267-1.508A11.956 11.956 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>
+          Cobrar pelo WhatsApp
+        </button>
+        <button class="secondary-action cobrar-email-btn" type="button" data-cobrar-email="${escapeHtml(record.id)}" ${!hasEmail ? "disabled" : ""}>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          Por e-mail
+        </button>
+      </div>`;
 
     _openSheet(sheet);
     document.body.style.overflow = "hidden";
