@@ -119,6 +119,9 @@
     installSheet: document.getElementById("installSheet"),
     installSheetMessage: document.getElementById("installSheetMessage"),
     enviarLinkSheet: document.getElementById("enviarLinkSheet"),
+    agendarSheet: document.getElementById("agendarSheet"),
+    agSheetBody: document.getElementById("agSheetBody"),
+    agSheetTitle: document.getElementById("agSheetTitle"),
     installSteps: document.getElementById("installSteps"),
     retryInstall: document.getElementById("retryInstall"),
     toast: document.getElementById("toast"),
@@ -6087,36 +6090,55 @@
   }
 
   function openActivityForm(activityId = "", prefillStudentId = "") {
+    openAgendarSheet(activityId, prefillStudentId);
+  }
+
+  function openAgendarSheet(activityId = "", prefillStudentId = "") {
     const activity = state.data.activities.find((item) => item.id === activityId) || {};
     const selectedStudentId = activity.studentId || prefillStudentId || state.data.students[0]?.id || "";
     const selectedType = activity.type || "workout";
     const selectedStatus = activity.status || (selectedType === "update" ? "pending" : "scheduled");
-    openModal(
-      activity.id ? "Editar atividade" : "Agendar atividade",
-      `
-        <form class="form-grid" id="activityForm" data-id="${activity.id || ""}">
-          <div class="form-grid two">
-            <label class="field"><span>Aluno</span><select name="studentId" required data-activity-student>${studentOptions(selectedStudentId)}</select></label>
-            <label class="field"><span>Tipo</span><select name="type" data-activity-type>
-              <option value="workout" ${selectedType === "workout" ? "selected" : ""}>Treino</option>
-              <option value="assessment" ${selectedType === "assessment" ? "selected" : ""}>Avaliação</option>
-              <option value="reassessment" ${selectedType === "reassessment" ? "selected" : ""}>Reavaliação</option>
-              <option value="update" ${selectedType === "update" ? "selected" : ""}>Atualização quinzenal</option>
-              <option value="return" ${selectedType === "return" ? "selected" : ""}>Retorno</option>
-              <option value="other" ${selectedType === "other" ? "selected" : ""}>Outro evento</option>
-            </select></label>
-            <label class="field"><span>Treino vinculado</span><select name="workoutId">${workoutOptions(selectedStudentId, activity.workoutId)}</select></label>
-            <label class="field"><span>Status</span><select name="status"><option value="scheduled" ${selectedStatus === "scheduled" ? "selected" : ""}>Agendado</option><option value="pending" ${selectedStatus === "pending" ? "selected" : ""}>Pendente</option><option value="done" ${selectedStatus === "done" ? "selected" : ""}>Concluído</option><option value="sent" ${selectedStatus === "sent" ? "selected" : ""}>Atualização enviada</option><option value="missed" ${selectedStatus === "missed" ? "selected" : ""}>Não realizado</option><option value="canceled" ${selectedStatus === "canceled" ? "selected" : ""}>Cancelado</option></select></label>
-            <label class="field"><span>Data</span><input name="date" type="date" value="${escapeHtml(activity.date || state.agendaDate)}" required /></label>
-            <label class="field"><span>Horário</span><input name="time" type="time" value="${escapeHtml(activity.time || "08:00")}" required /></label>
-            <label class="field"><span>Duração</span><input name="duration" type="number" min="0" value="${escapeHtml(activity.duration || "60")}" /></label>
-          </div>
-          <label class="field"><span>Título</span><input name="title" type="text" value="${escapeHtml(activity.title || "Treino agendado")}" required /></label>
-          <label class="field"><span>Observações</span><textarea name="notes">${escapeHtml(activity.notes || "")}</textarea></label>
-          <button class="primary-action" type="submit">Salvar atividade</button>
-        </form>
-      `
-    );
+
+    const sheet = elements.agendarSheet;
+    const body = elements.agSheetBody;
+    const titleEl = elements.agSheetTitle;
+    if (!sheet || !body) return;
+
+    if (titleEl) titleEl.textContent = activity.id ? "Editar atividade" : "Agendar atividade";
+
+    body.innerHTML = `
+      <form class="form-grid" id="activityForm" data-id="${activity.id || ""}">
+        <div class="form-grid two">
+          <label class="field"><span>Aluno</span><select name="studentId" required data-activity-student>${studentOptions(selectedStudentId)}</select></label>
+          <label class="field"><span>Tipo</span><select name="type" data-activity-type>
+            <option value="workout" ${selectedType === "workout" ? "selected" : ""}>Treino</option>
+            <option value="assessment" ${selectedType === "assessment" ? "selected" : ""}>Avaliação</option>
+            <option value="reassessment" ${selectedType === "reassessment" ? "selected" : ""}>Reavaliação</option>
+            <option value="update" ${selectedType === "update" ? "selected" : ""}>Atualização quinzenal</option>
+            <option value="return" ${selectedType === "return" ? "selected" : ""}>Retorno</option>
+            <option value="other" ${selectedType === "other" ? "selected" : ""}>Outro evento</option>
+          </select></label>
+          <label class="field"><span>Treino vinculado</span><select name="workoutId">${workoutOptions(selectedStudentId, activity.workoutId)}</select></label>
+          <label class="field"><span>Status</span><select name="status"><option value="scheduled" ${selectedStatus === "scheduled" ? "selected" : ""}>Agendado</option><option value="pending" ${selectedStatus === "pending" ? "selected" : ""}>Pendente</option><option value="done" ${selectedStatus === "done" ? "selected" : ""}>Concluído</option><option value="sent" ${selectedStatus === "sent" ? "selected" : ""}>Atualização enviada</option><option value="missed" ${selectedStatus === "missed" ? "selected" : ""}>Não realizado</option><option value="canceled" ${selectedStatus === "canceled" ? "selected" : ""}>Cancelado</option></select></label>
+          <label class="field"><span>Data</span><input name="date" type="date" value="${escapeHtml(activity.date || state.agendaDate)}" required /></label>
+          <label class="field"><span>Horário</span><input name="time" type="time" value="${escapeHtml(activity.time || "08:00")}" required /></label>
+          <label class="field"><span>Duração (min)</span><input name="duration" type="number" min="0" value="${escapeHtml(activity.duration || "60")}" /></label>
+        </div>
+        <label class="field"><span>Título</span><input name="title" type="text" value="${escapeHtml(activity.title || "Treino agendado")}" required /></label>
+        <label class="field"><span>Observações</span><textarea name="notes">${escapeHtml(activity.notes || "")}</textarea></label>
+        <button class="primary-action" type="submit">Salvar atividade</button>
+      </form>
+    `;
+
+    sheet.hidden = false;
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeAgendarSheet() {
+    const sheet = elements.agendarSheet;
+    if (!sheet || sheet.hidden) return;
+    sheet.hidden = true;
+    document.body.style.overflow = "";
   }
 
   function dietObjectiveOptions(selected = "") {
@@ -7237,6 +7259,7 @@
     else state.data.activities.push(activity);
     persistData();
     closeModal();
+    closeAgendarSheet();
     state.agendaDate = activity.date;
     state.managerMenu = "agenda";
     renderApp();
@@ -7835,7 +7858,7 @@
       const target = event.target;
       if (target.matches("[data-workout-filter]")) { state.workoutFilters[target.dataset.workoutFilter] = target.value; state.workoutFilterOpen = true; renderManager(); }
       if (target.matches("[data-activity-student]")) {
-        const workoutSelect = elements.modalBody.querySelector('[name="workoutId"]');
+        const workoutSelect = document.querySelector('#activityForm [name="workoutId"]');
         if (workoutSelect) workoutSelect.innerHTML = workoutOptions(target.value);
       }
     });
@@ -7851,12 +7874,13 @@
 
   function bindStudentEvents() {
     document.addEventListener("click", (event) => {
-      const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-close-el-sheet], [data-manager-drawer-backdrop]");
+      const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-close-el-sheet], [data-close-ag-sheet], [data-manager-drawer-backdrop]");
       if (!target) return;
       if (target.matches("[data-manager-menu-toggle]")) openManagerDrawer();
       if (target.matches("[data-manager-drawer-backdrop]")) closeManagerDrawer();
       if (target.matches("[data-close-modal]")) closeModal();
       if (target.matches("[data-close-el-sheet]")) closeEnviarLinkSheet();
+      if (target.matches("[data-close-ag-sheet]")) closeAgendarSheet();
       if (target.dataset.managerNav) {
         if (target.dataset.managerNav !== "studentProfile") clearStudentProfileHash();
         state.managerMenu = target.dataset.managerNav;
