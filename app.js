@@ -7309,7 +7309,7 @@
       </form>
     `;
     const wsFooter = elements.workoutSheetFooter;
-    if (wsFooter) wsFooter.innerHTML = `<button class="primary-action" type="submit" form="workoutForm">${workoutSaveLabel}</button>`;
+    if (wsFooter) wsFooter.innerHTML = `<div class="pf-footer"><button class="secondary-action" type="button" data-close-workout-sheet>Cancelar</button><button class="primary-action" type="submit" form="workoutForm">${workoutSaveLabel}</button></div>`;
 
     _openSheet(sheet);
     document.body.style.overflow = "hidden";
@@ -7382,7 +7382,7 @@
       </form>
     `;
     const apFooter = elements.apSheetFooter;
-    if (apFooter) apFooter.innerHTML = `<button class="primary-action" type="submit" form="applyPatternSheetForm">Aplicar</button>`;
+    if (apFooter) apFooter.innerHTML = `<div class="pf-footer"><button class="secondary-action" type="button" data-close-ap-sheet>Cancelar</button><button class="primary-action" type="submit" form="applyPatternSheetForm">Aplicar padrão</button></div>`;
 
     _openSheet(sheet);
     document.body.style.overflow = "hidden";
@@ -7515,7 +7515,7 @@
       </form>
     `;
     const agFooter = elements.agSheetFooter;
-    if (agFooter) agFooter.innerHTML = `<button class="primary-action" type="submit" form="activityForm">Salvar atividade</button>`;
+    if (agFooter) agFooter.innerHTML = `<div class="pf-footer"><button class="secondary-action" type="button" data-close-ag-sheet>Cancelar</button><button class="primary-action" type="submit" form="activityForm">Salvar atividade</button></div>`;
 
     _openSheet(sheet);
     document.body.style.overflow = "hidden";
