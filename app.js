@@ -4342,7 +4342,8 @@
       body.innerHTML = `<div class="vm-player-wrap"><video class="vm-player" controls playsinline${poster ? ` poster="${escapeHtml(poster)}"` : ""}></video></div>`;
       const video = body.querySelector(".vm-player");
       video.addEventListener("error", () => {
-        body.innerHTML = placeholderHtml("Não foi possível carregar o vídeo.", "Reenviar vídeo");
+        if (!body.contains(video)) return;
+        body.innerHTML = placeholderHtml("Vídeo indisponível no servidor. O gestor pode reenviar.", "Reenviar vídeo");
       });
       video.src = src;
     }
@@ -4393,7 +4394,7 @@
     const modal = elements.videoModal;
     if (!modal || modal.hidden) return;
     const video = elements.videoModalBody?.querySelector("video");
-    if (video) { video.pause(); video.src = ""; }
+    if (video) { video.pause(); video.remove(); video.src = ""; }
     _closeSheet(modal, () => {
       elements.videoModalBody.innerHTML = "";
       elements.videoModalFooter.innerHTML = "";
