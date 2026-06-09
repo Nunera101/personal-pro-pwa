@@ -948,6 +948,48 @@
   background: rgba(255, 255, 255, 0.03);
 }
 
+/* ─── iOS PDF fallback card ──────────────────────────────────────────────────── */
+
+.contract-pdf-ios-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 2.2rem 1.2rem;
+  border: 1px solid rgba(245, 181, 27, 0.3);
+  border-radius: 0.75rem;
+  background: rgba(245, 181, 27, 0.05);
+  text-align: center;
+  text-decoration: none;
+  transition: background 150ms ease, border-color 150ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.contract-pdf-ios-card:active {
+  background: rgba(245, 181, 27, 0.11);
+  border-color: rgba(245, 181, 27, 0.55);
+}
+
+.contract-pdf-ios-card svg {
+  width: 2.2rem;
+  height: 2.2rem;
+  stroke: var(--brand-strong);
+  fill: none;
+  flex-shrink: 0;
+}
+
+.contract-pdf-ios-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--brand-strong);
+}
+
+.contract-pdf-ios-sub {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
 .contract-pdf-actions {
   display: flex;
   gap: 0.5rem;

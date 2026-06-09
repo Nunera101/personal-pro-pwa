@@ -8502,6 +8502,7 @@
     const meta = contractStatusMeta(contract);
     const student = getStudent(contract.studentId);
     const isManager = state.currentUser?.role === "manager";
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
     if (titleEl) titleEl.textContent = contract.title || "Contrato";
 
@@ -8564,16 +8565,23 @@
           ${contract.pdfUrl
             ? `
               <div class="contract-pdf-viewer-wrap">
-                <iframe src="${escapeHtml(contract.pdfUrl)}#toolbar=1" class="contract-pdf-viewer" title="Contrato PDF"></iframe>
+                ${isIOS
+                  ? `<a class="contract-pdf-ios-card" href="${escapeHtml(contract.pdfUrl)}" target="_blank" rel="noopener noreferrer">
+                      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" aria-hidden="true"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                      <span class="contract-pdf-ios-label">Visualizar PDF</span>
+                      <span class="contract-pdf-ios-sub">Abre na nova aba</span>
+                    </a>`
+                  : `<iframe src="${escapeHtml(contract.pdfUrl)}#toolbar=1" class="contract-pdf-viewer" title="Contrato PDF"></iframe>`
+                }
                 <div class="contract-pdf-actions">
-                  <a class="contract-pdf-open-btn is-download" href="${escapeHtml(contract.pdfUrl)}" download>
+                  <a class="contract-pdf-open-btn is-download" href="${escapeHtml(contract.pdfUrl)}" ${isIOS ? `target="_blank" rel="noopener noreferrer"` : `download`}>
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                     Baixar PDF
                   </a>
-                  <a class="contract-pdf-open-btn" href="${escapeHtml(contract.pdfUrl)}" target="_blank" rel="noopener noreferrer">
+                  ${isIOS ? `` : `<a class="contract-pdf-open-btn" href="${escapeHtml(contract.pdfUrl)}" target="_blank" rel="noopener noreferrer">
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                     Abrir em nova aba
-                  </a>
+                  </a>`}
                 </div>
               </div>
             `
@@ -8601,14 +8609,14 @@
             <button class="primary-action" type="button" data-sign-contract="${escapeHtml(contract.id)}" disabled>Assinar contrato</button>
             <p class="small-text">O aceite registra data/hora, IP e identificação técnica para fins de comprovação jurídica.</p>
           ` : contract.pdfUrl ? `
-            <a class="secondary-action" href="${escapeHtml(contract.pdfUrl)}" download>Baixar PDF</a>
+            <a class="secondary-action" href="${escapeHtml(contract.pdfUrl)}" ${isIOS ? `target="_blank" rel="noopener noreferrer"` : `download`}>Baixar PDF</a>
           ` : ""}
         </div>
       ` : ""}
       ${isManager ? `
         <div class="ex-footer-right">
           ${contract.pdfUrl
-            ? `<a class="secondary-action" href="${escapeHtml(contract.pdfUrl)}" download>Baixar PDF</a>`
+            ? `<a class="secondary-action" href="${escapeHtml(contract.pdfUrl)}" ${isIOS ? `target="_blank" rel="noopener noreferrer"` : `download`}>Baixar PDF</a>`
             : `<button class="secondary-action" type="button" data-contract-pdf="${escapeHtml(contract.id)}">Gerar PDF</button>`}
           ${_isPending
             ? `<button class="secondary-action" type="button" data-contract-resend="${escapeHtml(contract.id)}">Reenviar</button>`
