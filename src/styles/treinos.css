@@ -68,12 +68,9 @@
   min-height: 7.6rem;
   padding: 0.9rem;
   overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 0.95rem;
-  background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.025)),
-    rgba(10, 10, 10, 0.9);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--borda);
+  border-radius: 1rem;
+  background: var(--card);
 }
 
 .pattern-summary-card::after {
@@ -248,11 +245,9 @@
   display: grid;
   gap: 0.85rem;
   padding: 1rem;
-  border: 1px solid var(--line);
+  border: 1px solid var(--borda);
   border-radius: 1rem;
-  background:
-    linear-gradient(145deg, var(--borda), rgba(255, 255, 255, 0.024)),
-    rgba(9, 9, 9, 0.9);
+  background: var(--card);
 }
 
 .patterns-list-panel .section-title {
@@ -274,12 +269,9 @@
   display: grid;
   gap: 0.86rem;
   padding: 1rem;
-  border: 1px solid var(--line);
+  border: 1px solid var(--borda);
   border-radius: 1rem;
-  background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.062), rgba(255, 255, 255, 0.025)),
-    rgba(10, 10, 10, 0.92);
-  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.16);
+  background: var(--card);
 }
 
 .pattern-card-head {
@@ -570,11 +562,9 @@
   align-content: start !important;
   gap: 0.18rem !important;
   padding: 0.7rem !important;
-  border-radius: 0.86rem !important;
-  background:
-    linear-gradient(135deg, var(--borda), rgba(255, 255, 255, 0.025)) !important;
-  border: 1px solid rgba(255, 255, 255, 0.105) !important;
-  box-shadow: 0 0.72rem 1.5rem rgba(0, 0, 0, 0.22) !important;
+  border-radius: 1rem !important;
+  background: var(--card) !important;
+  border: 1px solid var(--borda) !important;
 }
 
 .library-stat-icon,
@@ -731,11 +721,9 @@
   grid-template-columns: clamp(7.25rem, 34vw, 11.25rem) minmax(0, 1fr) !important;
   gap: 0.66rem !important;
   padding: 0.62rem !important;
-  border-radius: 0.92rem !important;
-  background:
-    linear-gradient(135deg, var(--borda), rgba(255, 255, 255, 0.025)) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  box-shadow: 0 0.78rem 1.7rem rgba(0, 0, 0, 0.25) !important;
+  border-radius: 1rem !important;
+  background: var(--card) !important;
+  border: 1px solid var(--borda) !important;
   overflow: visible !important;
 }
 

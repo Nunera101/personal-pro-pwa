@@ -42,10 +42,9 @@
   min-height: 8rem;
   padding: 0.88rem;
   overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 0.88rem;
-  background: rgba(12, 12, 12, 0.9);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--borda);
+  border-radius: 1rem;
+  background: var(--card);
 }
 
 .contract-summary-icon {
@@ -104,12 +103,9 @@
 
 .contracts-filter-details,
 .contracts-list-panel {
-  border: 1px solid var(--line);
-  border-radius: 0.95rem;
-  background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.064), rgba(255, 255, 255, 0.024)),
-    rgba(12, 12, 12, 0.88);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--borda);
+  border-radius: 1rem;
+  background: var(--card);
 }
 
 .contracts-list-panel {
@@ -250,11 +246,9 @@
 .contract-card {
   position: relative;
   overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 0.92rem;
-  background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.066), rgba(255, 255, 255, 0.022)),
-    rgba(12, 12, 12, 0.9);
+  border: 1px solid var(--borda);
+  border-radius: 1rem;
+  background: var(--card);
 }
 
 .contract-card.is-signed {

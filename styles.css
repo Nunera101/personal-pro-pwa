@@ -78,12 +78,9 @@
   min-height: 8rem;
   padding: 0.86rem;
   overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 0.88rem;
-  background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.026)),
-    rgba(12, 12, 12, 0.9);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--borda);
+  border-radius: 1rem;
+  background: var(--card);
 }
 
 .finance-summary-icon {
@@ -143,12 +140,9 @@
   display: grid;
   gap: 0.78rem;
   padding: 0.82rem;
-  border: 1px solid var(--line);
-  border-radius: 0.95rem;
-  background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.064), rgba(255, 255, 255, 0.024)),
-    rgba(12, 12, 12, 0.88);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--borda);
+  border-radius: 1rem;
+  background: var(--card);
 }
 
 .finance-toolbar {
@@ -375,10 +369,9 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.76rem;
-  border: 1px solid var(--line);
-  border-radius: 0.9rem;
-  background:
-    rgba(255, 255, 255, 0.032);
+  border: 1px solid var(--borda);
+  border-radius: 1rem;
+  background: var(--card);
 }
 
 .finance-record-card.is-paid {
@@ -491,9 +484,9 @@
   gap: 0.65rem;
   align-items: center;
   padding: 0.78rem;
-  border: 1px solid var(--line);
-  border-radius: 0.86rem;
-  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid var(--borda);
+  border-radius: 1rem;
+  background: var(--card);
 }
 
 .finance-insight-card > span {
@@ -564,10 +557,9 @@
   display: grid;
   gap: 0.75rem;
   padding: 1rem;
-  border: 1px solid rgba(245, 181, 27, 0.28);
-  border-radius: 0.95rem;
-  background:
-    rgba(255, 255, 255, 0.045);
+  border: 1px solid var(--borda);
+  border-radius: 1rem;
+  background: var(--card);
 }
 
 .finance-receipt-grid {
@@ -1426,9 +1418,9 @@ svg {
 .workout-row,
 .calendar-board,
 .profile-card {
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--surface);
+  border: 1px solid var(--borda);
+  border-radius: 1rem;
+  background: var(--card);
 }
 
 .metric-card {
@@ -2298,9 +2290,9 @@ svg {
   display: grid;
   gap: 0.65rem;
   padding: 0.9rem;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--surface);
+  border: 1px solid var(--borda);
+  border-radius: 1rem;
+  background: var(--card);
 }
 
 .library-card strong,
@@ -3090,7 +3082,7 @@ body::before {
 .entity-row,
 .workout-row,
 .agenda-item {
-  border-radius: 0.85rem;
+  border-radius: 1rem;
   padding: 0.85rem;
 }
 
@@ -4139,7 +4131,7 @@ button.dashboard-metric {
   min-height: 5.55rem;
   gap: 0.22rem;
   padding: 0.58rem 0.64rem;
-  border-radius: 0.8rem;
+  border-radius: 1rem;
 }
 
 .dashboard-metric::after {
@@ -4431,9 +4423,7 @@ button.dashboard-metric {
   min-height: 5.15rem;
   gap: 0.05rem 0.48rem;
   padding: 0.56rem 0.6rem;
-  background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.02));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 14px 38px rgba(0, 0, 0, 0.22);
+  background: var(--card);
 }
 
 .dashboard-metric .metric-icon {
@@ -5382,12 +5372,9 @@ button.dashboard-metric {
   min-height: 7.6rem;
   padding: 0.9rem;
   overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 0.95rem;
-  background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.025)),
-    rgba(10, 10, 10, 0.9);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--borda);
+  border-radius: 1rem;
+  background: var(--card);
 }
 
 .pattern-summary-card::after {
@@ -5580,12 +5567,9 @@ button.dashboard-metric {
   display: grid;
   gap: 0.86rem;
   padding: 1rem;
-  border: 1px solid var(--line);
+  border: 1px solid var(--borda);
   border-radius: 1rem;
-  background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.062), rgba(255, 255, 255, 0.025)),
-    rgba(10, 10, 10, 0.92);
-  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.16);
+  background: var(--card);
 }
 
 .pattern-card-head {
@@ -9220,10 +9204,8 @@ button.dashboard-metric {
 .student-summary-card {
   min-height: 7.2rem;
   align-content: start;
-  border-radius: 0.95rem;
-  background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.025)),
-    rgba(10, 10, 10, 0.86);
+  border-radius: 1rem;
+  background: var(--card);
 }
 
 .profile-card-icon {
@@ -10151,7 +10133,7 @@ button.dashboard-metric {
 .profile-card {
   min-height: 5.45rem;
   padding: 0.62rem;
-  border-radius: 0.82rem;
+  border-radius: 1rem;
 }
 
 .pattern-summary-card,
@@ -10959,12 +10941,9 @@ button.dashboard-metric {
   isolation: isolate;
   min-height: 6.1rem !important;
   padding: 0.7rem 0.72rem 0.68rem !important;
-  border: 1px solid var(--elite-border) !important;
-  border-radius: 0.9rem !important;
-  background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.064), rgba(255, 255, 255, 0.018)),
-    rgba(9, 9, 9, 0.9) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.052), 0 0.9rem 1.8rem rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid var(--borda) !important;
+  border-radius: 1rem !important;
+  background: var(--card) !important;
 }
 
 .dashboard-metric::after {
@@ -12532,11 +12511,9 @@ body.is-manager-view {
   position: relative !important;
   gap: 0.6rem !important;
   padding: clamp(0.72rem, 2.7vw, 0.92rem) !important;
-  border-radius: 0.92rem !important;
-  border: 1px solid rgba(255, 255, 255, 0.105) !important;
-  background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.064), rgba(255, 255, 255, 0.018)) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045), 0 1.2rem 2.8rem rgba(0, 0, 0, 0.28) !important;
+  border-radius: 1rem !important;
+  border: 1px solid var(--borda) !important;
+  background: var(--card) !important;
   overflow: visible !important;
 }
 
@@ -12866,11 +12843,9 @@ body.is-manager-view {
 .student-profile-hero {
   position: relative !important;
   padding: clamp(0.82rem, 3.2vw, 1.1rem) !important;
-  border-radius: 1.02rem !important;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.025)) !important;
-  border: 1px solid rgba(255, 255, 255, 0.11) !important;
-  box-shadow: 0 1rem 2.4rem rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+  border-radius: 1rem !important;
+  background: var(--card) !important;
+  border: 1px solid var(--borda) !important;
   overflow: visible !important;
 }
 
@@ -12987,11 +12962,9 @@ body.is-manager-view {
 .student-summary-card {
   min-height: 6rem !important;
   padding: 0.72rem !important;
-  border-radius: 0.86rem !important;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.062), rgba(255, 255, 255, 0.025)) !important;
-  border: 1px solid rgba(255, 255, 255, 0.105) !important;
-  box-shadow: 0 0.75rem 1.6rem rgba(0, 0, 0, 0.22) !important;
+  border-radius: 1rem !important;
+  background: var(--card) !important;
+  border: 1px solid var(--borda) !important;
 }
 
 .student-summary-card svg {
@@ -13077,11 +13050,9 @@ body.is-manager-view {
 .profile-activity-card,
 .profile-pending-panel,
 .profile-evolution-panel {
-  border-radius: 0.92rem !important;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.025)) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  box-shadow: 0 0.85rem 1.8rem rgba(0, 0, 0, 0.24) !important;
+  border-radius: 1rem !important;
+  background: var(--card) !important;
+  border: 1px solid var(--borda) !important;
 }
 
 .student-page .panel {
@@ -13473,11 +13444,9 @@ body.is-manager-view {
   align-content: start !important;
   gap: 0.18rem !important;
   padding: 0.7rem !important;
-  border-radius: 0.86rem !important;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.025)) !important;
-  border: 1px solid rgba(255, 255, 255, 0.105) !important;
-  box-shadow: 0 0.72rem 1.5rem rgba(0, 0, 0, 0.22) !important;
+  border-radius: 1rem !important;
+  background: var(--card) !important;
+  border: 1px solid var(--borda) !important;
 }
 
 .library-stat-icon,
@@ -13628,11 +13597,9 @@ body.is-manager-view {
   grid-template-columns: clamp(7.25rem, 34vw, 11.25rem) minmax(0, 1fr) !important;
   gap: 0.66rem !important;
   padding: 0.62rem !important;
-  border-radius: 0.92rem !important;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.025)) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  box-shadow: 0 0.78rem 1.7rem rgba(0, 0, 0, 0.25) !important;
+  border-radius: 1rem !important;
+  background: var(--card) !important;
+  border: 1px solid var(--borda) !important;
   overflow: visible !important;
 }
 
