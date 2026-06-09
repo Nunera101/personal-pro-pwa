@@ -2493,7 +2493,7 @@
       if (markContractViewed(blockingContract)) persistData();
       elements.studentTitle.textContent = "Contrato";
       elements.studentSideNav.innerHTML = "";
-      elements.studentBottomNav.innerHTML = "";
+      elements.studentBottomNav.hidden = true;
       elements.studentContent.classList.remove("is-entering");
       void elements.studentContent.offsetWidth;
       elements.studentContent.innerHTML = fixMojibake(renderStudentContractGate(blockingContract));
@@ -2505,6 +2505,7 @@
     elements.studentTitle.textContent = fixMojibake(menu.label);
     renderSideNav(elements.studentSideNav, studentMenus.map((item) => ({ ...item, group: item.id === "today" ? "Aluno" : "" })), state.studentMenu, "data-student-nav");
     const studentBottomActive = studentBottomMenus.some((item) => item.id === state.studentMenu) ? state.studentMenu : "profile";
+    elements.studentBottomNav.hidden = false;
     renderNav(elements.studentBottomNav, _buildStudentBottomMenus(), studentBottomActive, "data-student-nav");
 
     const renderers = {
