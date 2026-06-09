@@ -2372,6 +2372,181 @@ svg {
   padding-bottom: 1rem;
 }
 
+/* execution progress bar */
+.execution-progress {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.execution-progress-track {
+  height: 6px;
+  border-radius: 99px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.execution-progress-fill {
+  height: 100%;
+  border-radius: 99px;
+  background: var(--brand);
+  transition: width 300ms ease;
+}
+
+.execution-progress-label {
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+/* focus card — current series */
+.execution-focus-card {
+  gap: 1rem;
+  border: 2px solid var(--line);
+  transition: border-color 200ms ease, background 200ms ease;
+}
+
+.execution-focus-card.is-running {
+  border-color: rgba(231, 168, 62, 0.7);
+  background: var(--accent-soft);
+}
+
+.execution-focus-card.is-complete {
+  border-color: rgba(45, 157, 120, 0.5);
+  background: var(--success-soft);
+}
+
+@keyframes exec-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(45,157,120,0.35); }
+  70%  { box-shadow: 0 0 0 10px rgba(45,157,120,0); }
+  100% { box-shadow: 0 0 0 0 rgba(45,157,120,0); }
+}
+
+.execution-focus-card.just-done {
+  animation: exec-pulse 0.55s ease;
+}
+
+.exec-focus-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.exec-focus-name {
+  font-size: clamp(1.2rem, 4vw, 1.55rem);
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--ink);
+}
+
+/* meta chips row */
+.exec-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.exec-meta-chip {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  min-width: 5rem;
+}
+
+.execution-focus-card.is-running .exec-meta-chip {
+  background: rgba(255,255,255,0.6);
+}
+
+.exec-meta-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.exec-meta-val {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+/* inputs row when running */
+.exec-inputs-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.exec-input-label {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.exec-input-label span {
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: var(--muted);
+}
+
+.exec-input-label input {
+  min-height: 2.8rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0 0.65rem;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 1.1rem;
+  font-weight: 700;
+  outline: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.exec-input-label input::placeholder {
+  color: var(--muted);
+  opacity: 0.6;
+}
+
+.exec-input-label input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(231, 168, 62, 0.22);
+}
+
+/* upcoming queue */
+.execution-queue {
+  gap: 0.5rem;
+}
+
+.exec-queue-label {
+  font-weight: 800;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  margin-bottom: 0.1rem;
+}
+
+.exec-queue-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.92rem;
+}
+
+.exec-queue-item:last-of-type {
+  border-bottom: none;
+}
+
+.exec-queue-more {
+  margin-top: 0.25rem;
+}
+
 .rest-banner {
   display: flex;
   align-items: center;

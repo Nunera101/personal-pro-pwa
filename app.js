@@ -6529,30 +6529,40 @@
     `;
   }
 
+  function findCurrentSet(session) {
+    const flat = session.exercises.flatMap((exercise, exerciseIndex) =>
+      exercise.sets.map((set, setIndex) => ({ exercise, exerciseIndex, set, setIndex }))
+    );
+    return flat.find((item) => item.set.status === "running") || flat.find((item) => item.set.status === "pending") || null;
+  }
+
   function renderWorkoutExecution() {
     const session = state.activeSession;
     const workout = getWorkout(session.workoutId);
     const totalSets = session.exercises.reduce((sum, exercise) => sum + exercise.sets.length, 0);
     const doneSets = session.exercises.reduce((sum, exercise) => sum + exercise.sets.filter((set) => set.status === "done").length, 0);
     const allDone = doneSets === totalSets && totalSets > 0;
+    const pct = totalSets > 0 ? Math.round((doneSets / totalSets) * 100) : 0;
+    const current = findCurrentSet(session);
     return `
       <div class="content-stack execution-screen">
         <section class="hero-panel">
           <div>
             <p>Treino em execução</p>
             <h3>${escapeHtml(workout?.title || "Treino")}</h3>
-            <span>${doneSets}/${totalSets} séries concluídas · Volume atual ${calculateSessionVolume(session)}</span>
+            <span>${doneSets}/${totalSets} séries · ${calculateSessionVolume(session)} kg volume</span>
           </div>
           <button class="secondary-action" type="button" data-cancel-active-session>Cancelar</button>
         </section>
         <div class="execution-progress" role="progressbar" aria-valuenow="${doneSets}" aria-valuemin="0" aria-valuemax="${totalSets}" aria-label="Progresso do treino">
           <div class="execution-progress-track">
-            <div class="execution-progress-fill" style="width:${totalSets > 0 ? Math.round((doneSets / totalSets) * 100) : 0}%"></div>
+            <div class="execution-progress-fill" style="width:${pct}%"></div>
           </div>
-          <span class="execution-progress-label">${totalSets > 0 ? Math.round((doneSets / totalSets) * 100) : 0}% concluído</span>
+          <span class="execution-progress-label">${pct}% concluído</span>
         </div>
         ${state.rest ? renderRestBanner() : ""}
-        ${session.exercises.map((exercise, index) => renderExecutionExercise(exercise, index)).join("")}
+        ${allDone ? renderWorkoutCompleteCard(session) : current ? renderFocusSetCard(current) : ""}
+        ${renderExecutionQueue(session, current)}
         <section class="panel">
           <button class="primary-action" type="button" data-finish-workout ${allDone ? "" : "disabled"}>Finalizar treino</button>
         </section>
@@ -6569,44 +6579,96 @@
     `;
   }
 
-  function renderExecutionExercise(exercise, exerciseIndex) {
+  function renderFocusSetCard({ exercise, exerciseIndex, set, setIndex }) {
     const libraryExercise = getExercise(exercise.exerciseId);
-    const done = exercise.sets.filter((set) => set.status === "done").length;
-    const status = done === exercise.sets.length ? "Concluído" : done > 0 ? "Em andamento" : "Pendente";
+    const running = set.status === "running";
+    const justDone = state.lastDoneKey === `${exerciseIndex}:${setIndex}`;
+    const muscle = libraryExercise ? getExercisePrimaryMuscle(libraryExercise) : "";
     return `
-      <section class="panel exercise-execution">
-        <div class="section-title">
-          <h3>${escapeHtml(exercise.name)}</h3>
-          <span class="badge ${status === "Concluído" ? "is-success" : status === "Em andamento" ? "is-info" : ""}">${status}</span>
+      <section class="panel execution-focus-card${running ? " is-running" : ""}${justDone ? " just-done" : ""}">
+        <div class="exec-focus-header">
+          <div>
+            <h2 class="exec-focus-name">${escapeHtml(exercise.name)}</h2>
+            ${muscle ? `<span class="small-text">${escapeHtml(muscle)}</span>` : ""}
+          </div>
+          <span class="badge ${running ? "is-warning" : "is-info"}">Série ${setIndex + 1}/${exercise.sets.length}</span>
         </div>
-        ${libraryExercise ? videoActionHtml(libraryExercise) : ""}
-        <p class="small-text">${escapeHtml(libraryExercise?.description || "Sem descrição cadastrada.")}</p>
-        ${exercise.coachNotes ? `<p class="small-text">Observação do professor: ${escapeHtml(exercise.coachNotes)}</p>` : ""}
-        <div class="set-list">
-          ${exercise.sets.map((set, setIndex) => renderSetRow(set, exerciseIndex, setIndex, exercise)).join("")}
+        ${!running && libraryExercise ? videoActionHtml(libraryExercise) : ""}
+        ${exercise.coachNotes ? `<p class="small-text">Obs: ${escapeHtml(exercise.coachNotes)}</p>` : ""}
+        <div class="exec-meta-row">
+          <div class="exec-meta-chip">
+            <span class="exec-meta-label">Alvo</span>
+            <strong class="exec-meta-val">${escapeHtml(exercise.targetReps)} reps</strong>
+          </div>
+          ${exercise.suggestedLoad ? `<div class="exec-meta-chip">
+            <span class="exec-meta-label">Sugestão</span>
+            <strong class="exec-meta-val">${escapeHtml(exercise.suggestedLoad)} kg</strong>
+          </div>` : ""}
+          ${Number(exercise.restSeconds) > 0 ? `<div class="exec-meta-chip">
+            <span class="exec-meta-label">Descanso</span>
+            <strong class="exec-meta-val">${exercise.restSeconds}s</strong>
+          </div>` : ""}
+        </div>
+        ${running ? `
+          <div class="exec-inputs-row">
+            <label class="exec-input-label">
+              <span>Carga (kg)</span>
+              <input type="number" inputmode="decimal" step="0.5" min="0"
+                placeholder="${escapeHtml(exercise.suggestedLoad || "0")}"
+                value="${escapeHtml(set.load)}"
+                data-set-load="${exerciseIndex}:${setIndex}" />
+            </label>
+            <label class="exec-input-label">
+              <span>Reps</span>
+              <input type="number" inputmode="numeric" step="1" min="0"
+                placeholder="${escapeHtml(exercise.targetReps || "0")}"
+                value="${escapeHtml(set.reps)}"
+                data-set-reps="${exerciseIndex}:${setIndex}" />
+            </label>
+          </div>
+          <button class="primary-action" type="button" data-series-action="${exerciseIndex}:${setIndex}" ${state.rest ? "disabled" : ""}>Finalizar série</button>
+        ` : `
+          <button class="primary-action" type="button" data-series-action="${exerciseIndex}:${setIndex}" ${state.rest ? "disabled" : ""}>Iniciar série</button>
+        `}
+      </section>
+    `;
+  }
+
+  function renderWorkoutCompleteCard(session) {
+    return `
+      <section class="panel execution-focus-card is-complete">
+        <div class="exec-focus-header">
+          <div>
+            <h2 class="exec-focus-name">Treino concluído!</h2>
+            <span class="small-text">Volume total: ${calculateSessionVolume(session)} kg</span>
+          </div>
+          <span class="badge is-success">100%</span>
         </div>
       </section>
     `;
   }
 
-  function renderSetRow(set, exerciseIndex, setIndex, exercise) {
-    const running = set.status === "running";
-    const done = set.status === "done";
-    const actionAvailable = isSetActionAvailable(exerciseIndex, setIndex);
-    const inputsDisabled = done || (!running && !actionAvailable);
-    const justDone = done && state.lastDoneKey === `${exerciseIndex}:${setIndex}`;
+  function renderExecutionQueue(session, current) {
+    const upcoming = [];
+    session.exercises.forEach((exercise, exerciseIndex) => {
+      exercise.sets.forEach((set, setIndex) => {
+        if (set.status === "done") return;
+        const isCurrent = current && exerciseIndex === current.exerciseIndex && setIndex === current.setIndex;
+        if (!isCurrent) upcoming.push({ exercise, exerciseIndex, set, setIndex });
+      });
+    });
+    if (!upcoming.length) return "";
     return `
-      <article class="set-row ${done ? "is-done" : running ? "is-running" : ""}${justDone ? " just-done" : ""}">
-        <div>
-          <strong>Série ${setIndex + 1}</strong>
-          <span>Alvo: ${escapeHtml(exercise.targetReps)} reps · Sugestão: ${escapeHtml(exercise.suggestedLoad || "-")} · Descanso: ${exercise.restSeconds}s</span>
-        </div>
-        <label><span>Carga (kg)</span><input type="number" inputmode="decimal" step="0.5" min="0" placeholder="${escapeHtml(exercise.suggestedLoad || "0")}" value="${escapeHtml(set.load)}" data-set-load="${exerciseIndex}:${setIndex}" ${inputsDisabled ? "disabled" : ""} /></label>
-        <label><span>Reps</span><input type="number" inputmode="numeric" step="1" min="0" placeholder="${escapeHtml(exercise.targetReps || "0")}" value="${escapeHtml(set.reps)}" data-set-reps="${exerciseIndex}:${setIndex}" ${inputsDisabled ? "disabled" : ""} /></label>
-        <div class="row-actions">
-          ${done ? `<span class="badge is-success">Volume ${set.volumeLoad}</span>` : `<button class="mini-button" type="button" data-series-action="${exerciseIndex}:${setIndex}" ${actionAvailable ? "" : "disabled"}>${running ? "Finalizar série" : "Iniciar série"}</button>`}
-        </div>
-      </article>
+      <section class="panel execution-queue">
+        <p class="exec-queue-label">A seguir</p>
+        ${upcoming.slice(0, 6).map(({ exercise, setIndex }) => `
+          <div class="exec-queue-item">
+            <span>${escapeHtml(exercise.name)}</span>
+            <span class="small-text">Série ${setIndex + 1}/${exercise.sets.length}</span>
+          </div>
+        `).join("")}
+        ${upcoming.length > 6 ? `<p class="small-text exec-queue-more">+${upcoming.length - 6} séries restantes</p>` : ""}
+      </section>
     `;
   }
 
