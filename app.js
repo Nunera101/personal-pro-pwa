@@ -3588,11 +3588,8 @@
             <h3>Dieta</h3>
             <p>Organize planos alimentares e acompanhamento</p>
           </div>
+          <button class="btn-action-header" type="button" data-open-diet-form>${icons.diet}<span>Novo plano alimentar</span></button>
         </section>
-
-        <button class="diet-new-btn" type="button" data-open-diet-form>
-          <span aria-hidden="true">🍎</span><span>Novo plano alimentar</span>
-        </button>
 
         <section class="metrics-row metrics-row--3">
           ${stdMetricCard("Planos ativos", stats.active, stats.active ? "em acompanhamento" : "nenhum ativo", "success")}
@@ -4335,7 +4332,7 @@
           <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m10 9 6 3-6 3V9Z"/></svg>
         </div>
         <p class="vm-placeholder-text">${escapeHtml(msg)}</p>
-        <button class="primary-action vm-upload-btn" type="button" data-vm-enviar-video="${escapeHtml(exerciseId)}">${escapeHtml(btnLabel)}</button>
+        <button class="btn-action-header vm-upload-btn" type="button" data-vm-enviar-video="${escapeHtml(exerciseId)}">${escapeHtml(btnLabel)}</button>
       </div>`;
 
     function renderVideoPlayer(src) {

@@ -4,6 +4,10 @@
 }
 
 .diet-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 1rem;
   padding-top: 0.2rem;
 }
 
@@ -30,7 +34,7 @@
   padding: 0.6rem 1rem;
   border: none;
   border-radius: var(--radius);
-  background: linear-gradient(135deg, #f7d06a, #f5b51b 58%, #c7810d);
+  background: #F59E0B;
   color: #0b0904;
   font-size: 0.95rem;
   font-weight: 820;
@@ -339,7 +343,7 @@
 }
 
 .diet-primary-action {
-  background: linear-gradient(135deg, rgba(245, 181, 27, 0.96), rgba(199, 129, 13, 0.96));
+  background: #F59E0B;
   color: #100c04;
   box-shadow: none;
 }

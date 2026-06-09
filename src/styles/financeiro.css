@@ -30,7 +30,7 @@
 .finance-hero .primary-action {
   min-height: 3.1rem;
   padding-inline: 1.25rem;
-  background: linear-gradient(135deg, #f7d06a, #f5b51b 55%, #cb850b);
+  background: #F59E0B;
   color: #0b0904;
   box-shadow: none;
 }
@@ -444,7 +444,7 @@
 }
 
 .finance-primary-action {
-  background: linear-gradient(135deg, rgba(245, 181, 27, 0.95), rgba(199, 129, 13, 0.95));
+  background: #F59E0B;
   color: #100c04;
   box-shadow: none;
 }
