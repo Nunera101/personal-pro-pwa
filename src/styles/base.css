@@ -3364,8 +3364,8 @@ button.dashboard-metric {
 }
 
 .dashboard-hero .primary-action svg {
-  width: 1.06rem;
-  height: 1.06rem;
+  width: 1.2rem;
+  height: 1.2rem;
 }
 
 .dashboard-metrics {
@@ -4925,9 +4925,8 @@ button.dashboard-metric {
 }
 
 .dashboard-hero .primary-action svg {
-  width: 1rem;
-  height: 1rem;
-  stroke-width: 2.25;
+  width: 1.2rem;
+  height: 1.2rem;
 }
 
 .dashboard-metrics {

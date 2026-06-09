@@ -432,11 +432,10 @@
 }
 
 .update-primary-action svg {
-  width: 1.1rem;
-  height: 1.1rem;
+  width: 1.2rem;
+  height: 1.2rem;
   fill: none;
   stroke: currentColor;
-  stroke-width: 2.2;
 }
 
 .update-detail {
@@ -801,7 +800,7 @@
   height: 1rem !important;
   fill: none !important;
   stroke: var(--brand-strong) !important;
-  stroke-width: 2.2 !important;
+  stroke-width: 2 !important;
 }
 
 .updates-page .updates-extra-filter summary {
@@ -967,8 +966,8 @@
 }
 
 .updates-page .update-primary-action svg {
-  width: 1rem !important;
-  height: 1rem !important;
+  width: 1.2rem !important;
+  height: 1.2rem !important;
 }
 
 @media (min-width: 44rem) {
@@ -1041,7 +1040,6 @@
   height: 1rem;
   fill: none;
   stroke: currentColor;
-  stroke-width: 2.2;
 }
 
 .evaluate-card {
@@ -1139,7 +1137,6 @@
   height: 0.9rem;
   fill: none;
   stroke: currentColor;
-  stroke-width: 2.2;
 }
 
 .evaluate-photos-wrap {
@@ -1436,7 +1433,6 @@
   height: 1rem;
   fill: none;
   stroke: currentColor;
-  stroke-width: 2.2;
 }
 
 /* Desktop: sidebar à esquerda + bottom nav ausente → sticky simples */
