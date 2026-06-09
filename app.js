@@ -10236,9 +10236,16 @@
       return;
     }
     if (set.status === "running") {
-      set.load = loadInput?.value ? loadInput.value : set.load || "0";
-      set.reps = repsInput?.value ? repsInput.value : set.reps || "0";
-      set.volumeLoad = numberValue(set.load) * numberValue(set.reps);
+      const repsRaw = repsInput?.value?.trim() ?? "";
+      const repsNum = numberValue(repsRaw);
+      if (!repsRaw || repsNum <= 0) {
+        repsInput?.focus();
+        return showToast("Informe as repetições realizadas antes de finalizar a série.");
+      }
+      const loadRaw = loadInput?.value?.trim() ?? "";
+      set.load = loadRaw || set.load || "0";
+      set.reps = repsRaw;
+      set.volumeLoad = numberValue(set.load) * repsNum;
       set.status = "done";
       set.finishedAt = new Date().toISOString();
       persistActiveSession();
