@@ -6242,7 +6242,7 @@
         <div class="content-stack">
           ${pageHeader("Dieta", "Plano alimentar publicado pelo personal")}
           <section class="panel">
-            ${emptyState("Nenhum plano alimentar", "Quando o personal publicar um plano alimentar, ele aparecerá aqui.", icons.diet)}
+            ${emptyState("Nenhum plano alimentar ainda", "Quando o personal publicar um plano alimentar, ele aparecerá aqui.", icons.diet)}
           </section>
         </div>
       `;
