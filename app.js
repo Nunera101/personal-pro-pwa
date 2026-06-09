@@ -6158,27 +6158,41 @@
   }
 
   function renderStudentContractGate(contract) {
+    const student = getStudent(contract.studentId);
+    const planName = contract.plan || "Acompanhamento personalizado";
+    const planValue = contract.value ? currencyValue(contract.value) : "—";
+    const startLabel = contract.startDate ? formatShortDate(contract.startDate) : null;
+    const endLabel = contract.endDate ? formatShortDate(contract.endDate) : null;
+    const vigencia = startLabel
+      ? endLabel ? `${startLabel} → ${endLabel}` : `Desde ${startLabel}`
+      : "—";
+    const vigenciaDetail = endLabel ? `Até ${endLabel}` : "Sem data de término";
     return `
       <div class="content-stack contract-gate">
         <section class="hero-panel">
           <div>
-            <p>Acesso aguardando aceite</p>
-            <h3>${escapeHtml(contract.title)}</h3>
+            <p>Primeiro acesso</p>
+            <h3>${escapeHtml(student?.name || "Aluno")}</h3>
             <span>Leia e aceite o contrato para liberar o app completo.</span>
           </div>
           ${statusBadge(contractStatusLabel(contract.status), "info")}
         </section>
+        <div class="student-summary-grid">
+          ${profileSummaryCard(icons.contracts, "Plano", planName, "Serviço contratado")}
+          ${profileSummaryCard(icons.finance, "Valor", planValue, "Mensalidade")}
+          ${profileSummaryCard(icons.agenda, "Vigência", vigencia, vigenciaDetail)}
+        </div>
         <section class="panel">
           <div class="section-title">
-            <h3>Contrato pendente</h3>
+            <h3>${escapeHtml(contract.title)}</h3>
             <span class="small-text">Versão ${escapeHtml(contract.version)}</span>
           </div>
-          <p class="contract-body">${escapeHtml(contract.body)}</p>
+          <div class="contract-body premium-contract-body">${escapeHtml(contract.body)}</div>
           <div class="form-actions">
-            <button class="primary-action" type="button" data-open-contract="${escapeHtml(contract.id)}">Ler e assinar contrato</button>
+            <button class="primary-action" type="button" data-open-contract="${escapeHtml(contract.id)}">Assinar contrato</button>
             <button class="ghost-button" type="button" data-logout>Sair</button>
           </div>
-          <p class="small-text">Leia o contrato completo antes de assinar. O aceite registra data/hora, IP e identificação técnica.</p>
+          <p class="small-text">O aceite registra data/hora, IP e identificação técnica do dispositivo.</p>
         </section>
       </div>
     `;
