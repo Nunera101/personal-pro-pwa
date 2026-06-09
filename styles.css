@@ -9110,7 +9110,7 @@ button.dashboard-metric {
 }
 
 .student-card-menu summary svg,
-.student-hero-menu summary svg {
+.student-hero-menu-btn svg {
   width: 1.4rem;
   height: 1.4rem;
   stroke: currentColor;
@@ -9173,7 +9173,7 @@ button.dashboard-metric {
   font-size: 0.96rem;
 }
 
-.student-hero-menu summary {
+.student-hero-menu-btn {
   width: 2.65rem;
   min-height: 2.65rem;
   padding: 0;
@@ -9353,7 +9353,7 @@ button.dashboard-metric {
     grid-template-columns: auto minmax(0, 1fr);
   }
 
-  .student-hero-menu {
+  .student-hero-menu-btn {
     grid-column: 2;
     justify-self: start;
   }
@@ -12934,12 +12934,8 @@ body.is-manager-view {
   font-weight: 650 !important;
 }
 
-.student-hero-menu {
-  position: relative !important;
+.student-hero-menu-btn {
   align-self: start !important;
-}
-
-.student-hero-menu summary {
   width: 2rem !important;
   height: 2rem !important;
   min-height: 2rem !important;
@@ -12951,15 +12947,31 @@ body.is-manager-view {
   box-shadow: none !important;
 }
 
-.student-hero-menu summary svg {
+.student-hero-menu-btn svg {
   width: 1.12rem !important;
   height: 1.12rem !important;
 }
 
-.student-hero-menu > div {
-  right: 0 !important;
-  left: auto !important;
-  min-width: 12.5rem !important;
+.hero-menu-float {
+  position: fixed;
+  z-index: 9999;
+  display: grid;
+  min-width: 12.5rem;
+  gap: 0.35rem;
+  padding: 0.45rem;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  background: rgba(8, 8, 8, 0.98);
+  box-shadow: var(--shadow);
+}
+
+.hero-menu-float[hidden] {
+  display: none;
+}
+
+.hero-menu-float .mini-button {
+  justify-content: center;
+  width: 100%;
 }
 
 .student-summary-grid {

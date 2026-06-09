@@ -2398,6 +2398,7 @@
   }
 
   function renderApp() {
+    closeHeroMenuFloat();
     if (state.currentUser?.role === "manager") renderManager();
     if (state.currentUser?.role === "student") renderStudent();
     scrubVisibleText(elements.managerView.hidden ? elements.studentView : elements.managerView);
@@ -6736,19 +6737,53 @@
             <p>Objetivo: ${escapeHtml(student.goal || "Sem objetivo cadastrado")}</p>
             ${statusBadge(status.label, status.tone)}
           </div>
-          <details class="action-menu student-hero-menu">
-            <summary aria-label="Mais ações">${icons.more}</summary>
-            <div>
-              <button class="mini-button" type="button" data-open-student-form="${student.id}">Editar dados</button>
-              <button class="mini-button" type="button" data-open-workout-form data-prefill-student="${student.id}">Novo treino</button>
-              <button class="mini-button" type="button" data-open-activity-form data-prefill-student="${student.id}">Agendar atividade</button>
-              <button class="mini-button" type="button" data-open-contract-form="${student.id}">Novo contrato</button>
-              <button class="mini-button is-danger" type="button" data-delete-student="${student.id}">Remover aluno</button>
-            </div>
-          </details>
+          <button class="icon-button student-hero-menu-btn" type="button" aria-label="Mais ações" aria-haspopup="true" data-hero-menu-trigger="${student.id}">${icons.more}</button>
         </div>
       </section>
     `;
+  }
+
+  function openHeroMenuFloat(triggerBtn, studentId) {
+    const student = getStudent(studentId);
+    if (!student) return;
+    let menu = document.getElementById("heroMenuFloat");
+    if (!menu) {
+      menu = document.createElement("div");
+      menu.id = "heroMenuFloat";
+      menu.className = "hero-menu-float";
+      menu.setAttribute("role", "menu");
+      document.body.appendChild(menu);
+    }
+    if (!menu.hidden && menu.dataset.forStudent === studentId) {
+      closeHeroMenuFloat();
+      return;
+    }
+    menu.dataset.forStudent = studentId;
+    menu.innerHTML = [
+      `<button class="mini-button" type="button" data-open-student-form="${escapeHtml(studentId)}">Editar dados</button>`,
+      `<button class="mini-button" type="button" data-open-workout-form data-prefill-student="${escapeHtml(studentId)}">Novo treino</button>`,
+      `<button class="mini-button" type="button" data-open-activity-form data-prefill-student="${escapeHtml(studentId)}">Agendar atividade</button>`,
+      `<button class="mini-button" type="button" data-open-contract-form="${escapeHtml(studentId)}">Novo contrato</button>`,
+      `<button class="mini-button is-danger" type="button" data-delete-student="${escapeHtml(studentId)}">Remover aluno</button>`,
+    ].join("");
+    const rect = triggerBtn.getBoundingClientRect();
+    menu.hidden = false;
+    menu.style.top = `${rect.bottom + 6}px`;
+    menu.style.right = `${window.innerWidth - rect.right}px`;
+    menu.style.left = "auto";
+    requestAnimationFrame(() => {
+      document.addEventListener("click", _onHeroMenuClickOutside, { capture: true, once: true });
+    });
+  }
+
+  function closeHeroMenuFloat() {
+    const menu = document.getElementById("heroMenuFloat");
+    if (menu) menu.hidden = true;
+  }
+
+  function _onHeroMenuClickOutside(e) {
+    if (e.target.closest("[data-hero-menu-trigger]")) return;
+    closeHeroMenuFloat();
   }
 
   function renderStudentSummaryCards(student, stats = getStudentProfileStats(student)) {
@@ -10442,6 +10477,7 @@
         renderManager();
       }
       if (target.dataset.studentNav) { state.studentMenu = target.dataset.studentNav; renderStudent(); }
+      if (target.matches("[data-hero-menu-trigger]")) { openHeroMenuFloat(target, target.dataset.heroMenuTrigger); return; }
       if (target.matches("[data-open-student-form]")) openStudentForm(target.dataset.openStudentForm || "");
       if (target.matches("[data-open-student-profile]")) { closeModal(); openStudentProfile(target.dataset.openStudentProfile); }
       if (target.matches("[data-send-student-invite]")) sendStudentInvite(target.dataset.sendStudentInvite);
