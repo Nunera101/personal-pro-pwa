@@ -2658,7 +2658,7 @@
             <h3>Dashboard</h3>
             <p>Visão geral da operação da sua assessoria.</p>
           </div>
-          <button class="primary-action" type="button" data-open-activity-form>${icons.agenda}<span>Agendar atividade</span></button>
+          <button class="btn-action-header" type="button" data-open-activity-form>${icons.agenda}<span>Agendar atividade</span></button>
         </section>
 
         <div class="metrics-row metrics-row--3" aria-label="Indicadores principais">
@@ -3785,7 +3785,7 @@
             <h3>Alunos</h3>
             <p>Gerencie alunos, treinos e evolução.</p>
           </div>
-          <button class="primary-action" type="button" data-manager-nav="newStudent">${icons.students}<span>Novo aluno</span></button>
+          <button class="btn-action-header" type="button" data-manager-nav="newStudent">${icons.students}<span>Novo</span></button>
         </section>
 
         <section class="student-search-panel" aria-label="Busca e filtros de alunos">
@@ -4172,7 +4172,7 @@
             <h2>Biblioteca de exercícios</h2>
             <p>Gerencie exercícios e vídeos de execução</p>
           </div>
-          <button class="primary-action library-primary-action" type="button" data-open-exercise-form>${icons.plus || "+"}<span>Novo exercício</span></button>
+          <button class="btn-action-header" type="button" data-open-exercise-form><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg><span>Novo exercício</span></button>
         </section>
 
         <section class="library-stat-grid" aria-label="Resumo da biblioteca">
@@ -4721,10 +4721,9 @@
             <h3>Padrões de treino</h3>
             <p>Modelos base reutilizáveis</p>
           </div>
-          <button class="patterns-new-btn" type="button" data-open-workout-form>
+          <button class="btn-action-header" type="button" data-open-workout-form>
             <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
             <span>Novo padrão</span>
-            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
           </button>
         </section>
         <section class="metrics-row metrics-row--3">

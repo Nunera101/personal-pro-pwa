@@ -1218,35 +1218,7 @@ body.is-manager-view {
   margin-top: 3px !important;
 }
 
-/* ── btn-action-header: botão compacto dourado ── */
-.btn-action-header {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 6px !important;
-  height: 36px !important;
-  padding: 0 14px !important;
-  border-radius: 10px !important;
-  border: 1px solid rgba(245, 159, 11, 0.35) !important;
-  background: rgba(245, 159, 11, 0.1) !important;
-  color: var(--dourado) !important;
-  font-size: 13px !important;
-  font-weight: 600 !important;
-  white-space: nowrap !important;
-  cursor: pointer !important;
-  box-shadow: none !important;
-  text-shadow: none !important;
-}
-
-.btn-action-header svg {
-  width: 15px !important;
-  height: 15px !important;
-  stroke: currentColor !important;
-  fill: none !important;
-  flex-shrink: 0 !important;
-}
-
-box-shadow: none !important;
-.btn-action-header:active { background: rgba(245, 159, 11, 0.2) !important; }
+/* .btn-action-header — estilo definido em base.css */
 
 /* ── Panels: fundo chapado, sem glow ── */
 .agenda-calendar-panel,
@@ -1562,15 +1534,6 @@ box-shadow: none !important;
   .agenda-hero {
     grid-template-columns: minmax(0, 1fr) auto !important;
     align-items: flex-start !important;
-  }
-  .btn-action-header {
-    height: 34px !important;
-    padding: 0 10px !important;
-    font-size: 12px !important;
-  }
-  .btn-action-header svg {
-    width: 14px !important;
-    height: 14px !important;
   }
   .agenda-item .agenda-status .badge {
     max-width: 72px !important;

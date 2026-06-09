@@ -5,7 +5,8 @@
 
 .patterns-hero {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
   gap: 0.75rem;
   padding: 0.35rem 0 0.1rem;
 }
