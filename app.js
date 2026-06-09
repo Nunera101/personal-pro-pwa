@@ -838,6 +838,7 @@
     return exercises.map((item, index) =>
       normalizeWorkoutExercise({
         ...item,
+        exerciseName: item.exerciseName || getExercise(item.exerciseId)?.name || "",
         id: createId("workout-exercise"),
         order: item.order || index + 1
       })
@@ -882,6 +883,13 @@
     state.data.diets = pickCollection(remote.diets, local.diets, []).map(normalizeDietPlan);
     state.data.settings = normalizeSettings(pickCollection(remote.settings, local.settings, {}));
     migrateOldWorkoutData();
+    state.data.workouts.forEach((workout) => {
+      workout.exercises.forEach((ex) => {
+        if (!ex.exerciseName && ex.exerciseId) {
+          ex.exerciseName = getExercise(ex.exerciseId)?.name || "";
+        }
+      });
+    });
     state.data.students.forEach((student) => ensureNextUpdatePending(student.id, todayISO()));
     state.data.diets.forEach(ensureDietReviewActivity);
     persistData();
@@ -1792,6 +1800,26 @@
       return `<span class="video-meta"><button class="mini-button" type="button" data-open-local-video="${escapeHtml(exercise.id)}">Abrir vídeo local</button><span class="small-text">Vídeo local deste aparelho: ${escapeHtml(exercise.videoName || "arquivo local")}${exercise.videoSize ? ` · ${escapeHtml(formatFileSize(exercise.videoSize))}` : ""}</span></span>`;
     }
     return `<span class="small-text video-meta">Sem vídeo cadastrado.</span>`;
+  }
+
+  function execVideoPlayerHtml(exercise) {
+    if (!hasExerciseVideo(exercise)) {
+      return `<div class="exec-video-placeholder" aria-hidden="true"><svg class="exec-video-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m10 9 6 3-6 3V9Z"/></svg></div>`;
+    }
+    if (exercise.videoStorage === "indexeddb" && exercise.videoKey) {
+      return `<div class="exec-video-wrap exec-video-local"><button class="exec-video-open-btn" type="button" data-open-exercise-video="${escapeHtml(exercise.id)}" aria-label="Assistir vídeo do exercício"><svg class="exec-video-play-circle" viewBox="0 0 48 48" fill="none" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="rgba(231,168,62,0.15)" stroke="rgba(231,168,62,0.6)" stroke-width="1.5"/><path d="M20 16.5 34 24 20 31.5Z" fill="rgba(231,168,62,0.85)"/></svg><span class="small-text">Assistir vídeo</span></button></div>`;
+    }
+    if (exercise.videoStorage === "external" && exercise.videoUrl && /youtube\.com|youtu\.be/.test(exercise.videoUrl)) {
+      const match = exercise.videoUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]+)/);
+      if (match) {
+        const embedUrl = `https://www.youtube.com/embed/${match[1]}?rel=0`;
+        return `<div class="exec-video-wrap"><iframe class="exec-video-el" src="${escapeHtml(embedUrl)}" allow="autoplay; encrypted-media" allowfullscreen frameborder="0" title="${escapeHtml(exercise.name || "Vídeo do exercício")}"></iframe></div>`;
+      }
+    }
+    if (exercise.videoUrl) {
+      return `<div class="exec-video-wrap"><video class="exec-video-el" controls playsinline preload="metadata" src="${escapeHtml(exercise.videoUrl)}"></video></div>`;
+    }
+    return "";
   }
 
   function openVideoStore() {
@@ -4887,7 +4915,9 @@
           .map((row, index) => {
             const exercise = getExercise(row.exerciseId);
             const name = exercise?.name || row.exerciseName || "Exercício indisponível";
-            return `<span>${index + 1}. ${escapeHtml(name)} · ${escapeHtml(row.sets)}x${escapeHtml(row.targetReps)} · ${escapeHtml(row.restSeconds)}s</span>`;
+            const muscle = exercise ? getExercisePrimaryMuscle(exercise) : "";
+            const load = row.suggestedLoad ? ` · ${escapeHtml(row.suggestedLoad)}kg` : "";
+            return `<span>${index + 1}. ${escapeHtml(name)}${muscle ? ` <small>(${escapeHtml(muscle)})</small>` : ""} · ${escapeHtml(String(row.sets))}x${escapeHtml(row.targetReps)} · ${escapeHtml(String(row.restSeconds))}s${load}</span>`;
           })
           .join("")}
         ${extra > 0 ? `<span>+${extra} exercício(s)</span>` : ""}
@@ -6605,7 +6635,7 @@
             return `<span class="exec-set-dot${isDone ? " is-done" : isRunning ? " is-running" : ""}" aria-label="Série ${i + 1}: ${isDone ? "concluída" : isRunning ? "em execução" : "pendente"}">${isDone ? `<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 5l2.5 2.5 4.5-4"/></svg>` : i + 1}</span>`;
           }).join("")}
         </div>
-        ${!running && libraryExercise ? videoActionHtml(libraryExercise) : ""}
+        ${!running && libraryExercise ? execVideoPlayerHtml(libraryExercise) : ""}
         ${exercise.coachNotes ? `<p class="small-text">Obs: ${escapeHtml(exercise.coachNotes)}</p>` : ""}
         <div class="exec-meta-row">
           <div class="exec-meta-chip">
@@ -10235,9 +10265,24 @@
           navigator.vibrate?.([40, 30, 80]);
         }
         showToast("Descanso finalizado. Próxima série!");
+        renderStudent();
+        return;
       }
-      renderStudent();
+      _tickRestDisplay();
     }, 1000);
+  }
+
+  function _tickRestDisplay() {
+    const rem = state.rest?.remaining ?? 0;
+    const urgent = rem <= 5;
+    const banner = elements.studentContent?.querySelector(".rest-banner");
+    if (!banner) { renderStudent(); return; }
+    const countdown = banner.querySelector(".rest-countdown");
+    if (!countdown) { renderStudent(); return; }
+    banner.classList.toggle("is-urgent", urgent);
+    banner.setAttribute("aria-label", `Descanso: ${rem} segundos restantes`);
+    countdown.textContent = `${rem}s`;
+    countdown.classList.toggle("is-urgent", urgent);
   }
 
   function stopRest() {

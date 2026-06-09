@@ -1,165 +1,42 @@
 ﻿==============================================
- LOTE DE AMANHA - acabamento da unificacao + area do aluno
- Base: validacao em video (09/06) + AUDITORIA-ALUNO.md.
- A LEVA 0 fecha as sobras da unificacao (botoes/cards que escaparam)
- ANTES do aluno, pois o aluno herda esses componentes. O problema do
- video que nao persiste no servidor fica SEPARADO no fim, marcado como
- backend/com acompanhamento - NAO rodar em fila noturna.
+ LOTE - CONTINUACAO DO ALUNO (o que faltou + reverificar)
+ Motivo: a sessao estourou na Leva 4 (reset 1pm). Rodaram de verdade:
+ Levas 0,1,2,3 e parte da 4 (exercicio removido[?], lista de treinos,
+ inputs carga/reps, execucao com contador). NAO rodaram: video do
+ exercicio, conclusao+historico, Leva 5 inteira, Leva 6.
+ Mais 3 SUSPEITAS que rodaram mas o Claude Code parou e perguntou em vez
+ de fazer (reverificar).
  Cada tarefa = UMA linha. NAO quebrar ao colar. SEM seta no texto.
  "session limit"/erro de CLI = NAO rodou -> [OK] volta para [ ]. ~7 por janela.
  Tokens: dourado #F59E0B, fundo #0D0D0D, card #1A1A1A flat sem glow,
  borda rgba(255,255,255,0.06), radius 16px, txt2 #9CA3AF, ok #10B981,
- erro #EF4444. Status: Treino=verde, Avaliacao=#8B5CF6, Atualizacao=
- #3B82F6, Retorno=#F97316, Contrato=dourado.
+ erro #EF4444.
 ==============================================
 
 == BACKUP ==
-[OK] git checkout -b backup/lote-09jun && git push origin backup/lote-09jun && git checkout main. NAO altere arquivos. Confirme que o app abre sem erro de sintaxe. (sem commit adicional)
-     Resultado: - `app.js` ÔÇö OK
- | - Todos os 13 arquivos em `server/` ÔÇö OK
- | - Todos os 34 arquivos em `src/` ÔÇö OK
- | Nenhum erro de sintaxe encontrado. Nenhum arquivo alterado.
+[OK] git checkout -b backup/aluno-continuacao && git push origin backup/aluno-continuacao && git checkout main. NAO altere arquivos. Confirme que o app abre sem erro de sintaxe. (sem commit adicional)
+     Resultado: - Branch `backup/aluno-continuacao` criado e publicado no GitHub. | - Retornado para `main`. | - `node --check app.js` saiu com c├│digo 0 ÔÇö **sem erros de sintaxe**. | O erro de `localStorage` mostrado antes ├® espe...
 
+== REVERIFICAR (rodaram mas o Claude Code perguntou em vez de fazer) ==
+[OK] REVERIFICAR o BUG "Exercicio removido" (na rodada anterior o Claude Code respondeu pedindo descricao em vez de corrigir, entao provavelmente NAO foi feito): no treino do aluno os exercicios podem aparecer como "Exercicio removido" quando getExercise(row.exerciseId) retorna undefined (renderWorkoutExercisePreview app.js:4752, renderPatternPreview 4726). Corrigir para exibir o NOME REAL do exercicio (grupo + meta series x reps x carga x descanso). Se o exercicio foi deletado da biblioteca, usar como fallback o nome salvo no proprio treino (snapshot) em vez de "Exercicio removido". Garantir IDs estaveis entre biblioteca e treino. git add . && git commit -m "fix(aluno): resolver exercicios reais no treino (fim do removido)" && git push origin main
+[ ] REVERIFICAR botoes de acao dos cards (Leva 0 marcou "OK sem alteracao" apos a mensagem ter sido cortada - confirmar se realmente estao unificados): em Alunos os botoes de card eram outline finos e em Atualizacoes um retangulo dourado largo. Padronizar os botoes de acao DENTRO dos cards de todas as listas (Alunos, Atualizacoes, Dieta, Contratos, Padroes) para o mesmo estilo: outline dourado para acao secundaria, solido chapado para a acao principal, mesma altura e radius. Se ja estiverem iguais, confirmar e listar; se nao, corrigir. git add . && git commit -m "fix(unificacao): confirmar botoes de acao dos cards iguais entre abas" && git push origin main
 
-############################################################
-# LEVA 0 - ACABAMENTO DA UNIFICACAO (sobras vistas no video)#
-# Fechar antes do aluno para ele herdar tudo consistente.   #
-############################################################
-[OK] BOTOES com gradiente/brilho que escaparam da unificacao: alguns botoes primarios AINDA tem fundo em gradiente dourado com brilho, enquanto a maioria ja esta CHAPADA (#F59E0B solido). Corrigir para chapado, iguais aos demais, estes especificamente: (1) "Reenviar video" no modal de video da Biblioteca; (2) "Novo plano alimentar" na aba Dieta; (3) "Registrar pagamento" no topo do Financeiro (tem leve degrade). Todos devem usar a MESMA classe .btn-action-header chapada, mesma altura e radius dos botoes de Padroes/Alunos/Agenda. Varrer tambem por qualquer outro background com linear-gradient/radial-gradient em botao e remover. git add . && git commit -m "fix(unificacao): remover gradiente de botoes que escaparam (reenviar video, novo plano, registrar pagamento)" && git push origin main
-     Resultado: - **`app.js`**: bot├úo "Reenviar/Enviar v├¡deo" ÔåÆ `btn-action-header`; "Novo plano alimentar" movido para dentro do `diet-hero` com `btn-action-header`
- | - **`src/styles/dieta.css`**: `.diet-hero` recebeu grid layout;...
-[OK] CARD da aba Padroes desequilibrado: no card de cada padrao, o titulo (ex "Treino teste") e o badge de status estao espremidos no TOPO com muito espaco vazio a direita, e o icone de halteres ficou solto. Reequilibrar o cabecalho do card: icone de halteres a esquerda alinhado, titulo + badge na mesma linha ocupando a largura, e as infos (Objetivo, Nivel, Exercicios, Ultima edicao) logo abaixo sem o vao estranho. Deve ficar visualmente equilibrado como os cards de Alunos/Dieta. git add . && git commit -m "fix(padroes): reequilibrar cabecalho e espacamento do card" && git push origin main
-     Resultado: - **`flex: 1`** ÔÇö para expandir e ocupar todo o espa├ºo dispon├¡vel ap├│s o ├¡cone
- | - **`min-width: 0`** ÔÇö para o truncamento com ellipsis funcionar
- | - **`display: flex; flex-direction: column; gap: 0.28rem`** ÔÇ...
-[OK] BOTOES DE ACAO dos cards inconsistentes entre abas: o mesmo tipo de acao tem tratamento diferente - em Alunos "Abrir perfil"/"Enviar link" sao outline finos, em Atualizacoes "Abrir" e um retangulo dourado largo. Padronizar os botoes de acao dentro dos cards de TODAS as listas (Alunos, Atualizacoes, Dieta, Contratos, Padroes) para o MESMO estilo: outline dourado para acao secundaria e solido chapado para a acao principal, mesma altura e radius. Listar o que ajustou em cada aba. git add . && git commit -m "fix(unificacao): botoes de acao dos cards iguais entre abas" && git push origin main
-     Resultado: ---
- | Sua mensagem foi cortada em "em Alunos Abrir" ÔÇö voc├¬ quer que eu:
- | **A)** Unifique todas as classes de bot├úo dos cards em tokens comuns (`.card-action-primary` / `.card-action-secondary`), corrigindo CSS e H...
-[OK] Revisao da Leva 0: percorrer Dashboard, Alunos, Agenda, Padroes, Biblioteca, Atualizacoes, Contratos, Financeiro, Dieta, Mensagens e confirmar que NENHUM botao tem gradiente/brilho (todos chapados), os botoes de acao dos cards sao iguais entre abas, e o card de Padroes esta equilibrado. git add . && git commit -m "chore(unificacao): revisao final do acabamento de botoes e cards" && git push origin main
-     Resultado: **Confirmados como OK (sem altera├º├úo):**
- | - Bot├Áes de a├º├úo dos cards (`.mini-button`, `.secondary-action`) ÔÇö j├í chapados desde antes
- | - Card de Padr├Áes ÔÇö estrutura equilibrada (fix do commit anterior manti...
-
-  >>> VALIDAR COM VIDEO: botoes todos chapados e iguais, card de Padroes ok. <<<
-
-############################################################
-# LEVA 1 - ALUNO: FUNDACAO (header, encoding, barra, login) #
-############################################################
-[OK] HEADER DO ALUNO igual ao gestor (header ja unificado): remover o eyebrow "Area do aluno" hardcoded em index.html:142 e trocar por um badge "ALUNO" ao lado do logo (mesmo tratamento do badge "GESTOR"). Adicionar o botao hamburguer (menu toggle) que hoje NAO existe no header do aluno, para abrir a sidebar no mobile. Adicionar sino de notificacoes e icone de chat ao lado, como no gestor. Aplicar em todas as telas do aluno. git add . && git commit -m "feat(aluno): header com badge ALUNO, hamburguer e acoes" && git push origin main
-     Resultado: 1. Badge `"ALUNO"` abaixo do h2 (igual ao `<span class="manager-badge">GESTOR</span>` do gestor)
- | 2. Bot├úo hamb├║rguer para abrir a sidebar no mobile
- | 3. Sino de notifica├º├Áes
- | Voc├¬ quer que eu implemente esses ...
-[OK] ENCODING do aluno - duas frentes: (1) corrigir strings SEM ACENTO hardcoded em renderStudentDietOverview (app.js:6046-6058): Refeicoes, Proxima revisao, Refeicao, Orientacao registrada, "As orientacoes do plano aparecerao aqui" - escrever com acento/cedilha corretos; (2) chamar scrubVisibleText no studentContent apos o render em renderStudent() (app.js:2458), como o gestor faz em switchProfileTab, para corrigir Ultima/Ultimos e residuos que o fixMojibake sozinho nao pega. git add . && git commit -m "fix(aluno): acentos hardcoded na dieta e scrubVisibleText no render" && git push origin main
-     Resultado: - As demais strings mencionadas na tarefa (Refei├º├úo, refei├º├Áes/dia, pr├│xima revis├úo, etc.) j├í estavam corretas nas fun├º├Áes `renderStudentDietProtocolHero` e `renderStudentDietPlanCard`
- | **Frente 2 ÔÇö `scrubVi...
-[OK] BARRA INFERIOR do aluno: confirmar #studentBottomNav fixa estavel (uma unica no DOM, fora de container com transform, sem piscar, safe-area), usando o conjunto de icones ja unificado, ativo dourado. A estrutura de itens muda na Leva 3 (Dieta entra) - aqui so garantir estabilidade e estilo. git add . && git commit -m "feat(aluno): barra inferior estavel no padrao unificado" && git push origin main
-     Resultado: - `renderNav` com otimiza├º├úo de diff (s├│ re-renderiza se a contagem muda) ÔÇö sem piscar
- | - ├ìcones do objeto `icons` unificado; ativo em `var(--dourado)`
- | **Bug corrigido (app.js):**
- | - Contract gate usava `stu...
-[OK] LOGIN premium: validacao inline (campo vazio com erro claro, NAO tooltip nativo do browser), estado de carregando no botao Entrar, mensagem amigavel se credencial invalida; manter Face ID/biometria se existir. git add . && git commit -m "feat(aluno): login premium com validacao" && git push origin main
-     Resultado: - Valida email e senha vazios **antes** da chamada async ÔåÆ exibe erro abaixo do campo + foca o campo com problema
- | - Enquanto aguarda o servidor: bot├úo fica `disabled`, texto muda para "EntrandoÔÇª"
- | - `finally` s...
-
-  >>> VALIDAR COM VIDEO: header novo, encoding correto, login. <<<
-
-############################################################
-# LEVA 2 - ALUNO: CONTRATO / ASSINATURA                    #
-############################################################
-[OK] GATE de primeiro acesso (ja existe renderStudentContractGate, app.js:5938): adequar ao padrao - resumo do plano (nome, valor, vigencia) + documento para leitura, antes de liberar o app. git add . && git commit -m "feat(aluno): gate de aceite no padrao" && git push origin main
-     Resultado: | Corpo do contrato como `<p>` (sem scroll) | Corpo como `<div class="contract-body premium-contract-body">` ÔÇö scroll interno, max 22rem |
- | | Nenhum resumo do plano | **3 cards**: Plano (nome), Valor (R$ formatado), ...
-[OK] VISUALIZAR PDF do contrato: viewer embutido (rolar o PDF inteiro) + botao Baixar, compativel com iOS (fallback nova aba). O gestor ja salva o pdfUrl. git add . && git commit -m "feat(aluno): visualizacao do PDF do contrato" && git push origin main
-     Resultado: Feito. O que mudou:
- | **Desktop/Android:** comportamento inalterado ÔÇö iframe rola o PDF inteiro (`min(72vh, 52rem)`), bot├úo "Baixar PDF" usa `download`, bot├úo "Abrir em nova aba" vis├¡vel.
- | **iOS (iPhone/iPad):** ...
-[OK] ACEITE/ASSINATURA: caixa "Li e aceito os termos" + nome completo + confirmacao, registrando data/hora (e IP/userAgent, como no gestor); ao aceitar status vira Assinado, libera o app, notifica o gestor, toast de sucesso. git add . && git commit -m "feat(aluno): aceite de contrato com registro datado" && git push origin main
-     Resultado: - Exibe toast "Contrato assinado. Bem-vindo!" e libera o app via `renderApp()`
- | **Servidor (`api.js`):**
- | - Detecta quando contrato transiciona para `"signed"` durante o sync
- | - Envia push ao gestor: "Contrato assi...
-
-  >>> VALIDAR COM VIDEO: primeiro acesso abre PDF, aceite libera o app. <<<
-
-############################################################
-# LEVA 3 - ALUNO: CRIAR TELA DE DIETA + REORGANIZAR BARRA   #
-# (AUDITORIA: dieta nao tem tela propria hoje, e secao)     #
-############################################################
-[OK] CRIAR a tela de DIETA do aluno como tela standalone (hoje so existe como secao no Perfil via renderStudentDietOverview). Adicionar studentMenu "diet" em renderStudent(), com a tela mostrando: protocolo atual em destaque (kcal, refeicoes/dia), refeicoes com horario/alimentos/quantidades/observacoes em cards no padrao, marcar refeicao cumprida com check. Estado vazio "Nenhum plano alimentar ainda". Reaproveitar o conteudo de renderStudentDietOverview. git add . && git commit -m "feat(aluno): tela de dieta standalone" && git push origin main
-     Resultado: - **Cards de refei├º├úo** (`renderStudentMealCard`): hor├írio, nome, lista de alimentos com quantidades e kcal, observa├º├Áes (com destaque dourado na borda esquerda)
- | - **Check de refei├º├úo cumprida**: bot├úo circula...
-[OK] REORGANIZAR a barra do aluno para: Inicio, Treinos, Dieta, Progresso, Mais. Dieta passa a ter item proprio; Evolucao deixa de ser aba separada e sera unida em Progresso (Leva 5); Agenda sai da barra e vai para o Mais. Atualizar bottom nav e sidebar coerentemente, SEM itens duplicados (a auditoria apontou Evolucao/Agenda em 3 lugares). git add . && git commit -m "feat(aluno): nova barra Inicio/Treinos/Dieta/Progresso/Mais" && git push origin main
-     Resultado: **Sidebar** (desktop): id├¬ntica ao bottom nav (5 itens, sem Atualiza├º├Áes nem Chat)  
- | **Agenda**: continua dentro de Mais (`renderStudentProfile`), sem duplicata  
- | **Progresso**: j├í continha "Evolu├º├úo por exer...
-[OK] INICIO premium (renderStudentToday, app.js:4837): card de PROXIMO TREINO (nome, dia, hora, botao Iniciar) - NAO o card "Treino da semana" dourado gigante repetido; resumo da semana; metricas em .metrics-row (sem caixas pretas); pendencias com badges de prioridade; atalhos. Card "Treino em execucao" so quando houver sessao ativa. Estado vazio padrao. git add . && git commit -m "feat(aluno): Inicio premium sem card repetido" && git push origin main
-     Resultado: Pronto. O que mudou:
- | - **Antes:** `nextWorkout` s├│ procurava itens da agenda de **hoje** ÔÇö se n├úo tivesse treino hoje, ca├¡a no estado vazio (ou mostrava o fallback "Treino").
- | - **Agora:** o c├│digo faz um look...
-
-  >>> VALIDAR COM VIDEO: Dieta como aba propria, barra nova, Inicio limpo. <<<
-
-############################################################
-# LEVA 4 - ALUNO: TREINOS + EXECUCAO (o coracao)           #
-# COM SEU OLHO - validar caprichado. NAO em fila noturna.  #
-############################################################
-[OK] BUG "Exercicio removido": investigar o vinculo treino-exercicio (renderWorkoutExercisePreview app.js:4752 e renderPatternPreview 4726). getExercise(row.exerciseId) retorna undefined quando o exercicio foi deletado da biblioteca, caindo no fallback "Exercicio removido". O treino do aluno deve exibir NOME REAL do exercicio, grupo e meta (series x reps x carga x descanso). Garantir IDs estaveis entre biblioteca e treino; se o exercicio realmente nao existir mais, fallback discreto com o nome salvo no proprio treino (snapshot) em vez de "removido". git add . && git commit -m "fix(aluno): resolver exercicios reais no treino (fim do removido)" && git push origin main
-     Resultado: Pode descrever o que est├í acontecendo com o Exerc├¡cio? Por exemplo: o que voc├¬ faz, o que espera acontecer, e o que acontece de fato (erro no console, tela em branco, dado n├úo salvo, etc.)?
-
-[OK] LISTA DE TREINOS (renderStudentWorkouts, app.js:4822): treinos publicados pelo gestor em cards no padrao (nome, objetivo, badge de status, numero de exercicios, botao Iniciar/Ver). Busca/filtro inline se houver muitos. Estado vazio "Nenhum treino publicado ainda / Seu personal vai publicar em breve". Remover qualquer card dourado gigante repetido. git add . && git commit -m "feat(aluno): lista de treinos em cards no padrao" && git push origin main
-     Resultado: **`renderStudentWorkouts`** ÔÇö reescrita:
- | - Busca inline (`.diet-search-field`) aparece automaticamente quando h├í **mais de 3 treinos** ÔÇö filtra por t├¡tulo, objetivo e descri├º├úo
- | - Estado vazio adapta a mensa...
-[OK] INPUTS de Carga/Reps legiveis (hoje sao caixas pretas vazias sem contraste na execucao): campos no padrao do app - label visivel, placeholder com a meta, fundo de input legivel, texto claro, foco dourado, teclado numerico no mobile. NUNCA retangulos pretos sem contraste. git add . && git commit -m "fix(aluno): inputs de carga e reps legiveis na execucao" && git push origin main
-     Resultado: - **Dark mode** ÔÇö override expl├¡cito: `background: #1c1c1c` + `color: var(--ink)` (creme claro) + borda sutil branca.
- | - **Foco** ÔÇö borda dourada + glow em ambos os temas (usa `--accent` no light, `rgba(245,181,27...
-[OK] Continue de onde parou: EXECUCAO premium (renderWorkoutExecution, app.js:6107): fluxo serie a serie - card do exercicio (nome real, video se houver, meta), botao "Iniciar serie", marcar serie concluida com check + vibracao, CONTADOR/timer de descanso entre series (conta o descanso, vibra/avisa ao acabar), barra de progresso do treino (X/Y series, volume acumulado). Remover o card "Treino em execucao" dourado duplicado/fixo - deve haver um unico indicador de sessao ativa. git add . && git commit -m "feat(aluno): execucao com contador de descanso e progresso" && git push origin main
-     Resultado: 2. **Barra de progresso** visual com porcentagem
- | 3. **Fila "A seguir"** ÔÇö lista compacta das pr├│ximas s├®ries (6 vis├¡veis + contador do restante)
- | 4. **Card de conclus├úo** com volume total quando tudo estiver f...
-[ ] VIDEO do exercicio na execucao: quando o exercicio tem video, o aluno assiste dentro do treino (player 16:9, play/pause) sem bugar; sem video, placeholder discreto. (Obs: depende do upload de video persistir no servidor - ver bloco BACKEND no fim; ate la, tratar ausencia com placeholder, nao erro.) git add . && git commit -m "feat(aluno): player de video do exercicio na execucao" && git push origin main
+== NAO RODARAM - FIM DA LEVA 4 (execucao) ==
+[ ] VIDEO do exercicio na execucao: quando o exercicio tem video, o aluno assiste dentro do treino (player 16:9, play/pause) sem bugar; sem video, placeholder discreto (nao erro). Obs: o upload de video ainda nao persiste no servidor (backend, ver fim) - ate la, tratar ausencia com placeholder. git add . && git commit -m "feat(aluno): player de video do exercicio na execucao" && git push origin main
 [ ] CONCLUSAO + HISTORICO: ao concluir o treino, registrar (data, volume, series concluidas) e refletir no Inicio ("ultimo treino concluido"), no Progresso e no perfil do aluno visto pelo gestor. Overlay de parabens premium ao finalizar. Este historico alimenta os widgets depois. git add . && git commit -m "feat(aluno): conclusao registra historico e evolucao" && git push origin main
 
-  >>> VALIDAR COM VIDEO (caprichado): abrir treino, ver exercicios reais,
+  >>> VALIDAR COM VIDEO (caprichado): abrir treino, exercicios reais,
       inputs legiveis, executar serie, contador de descanso, concluir. <<<
 
-############################################################
-# LEVA 5 - ALUNO: MENSAGENS (aba) + PROGRESSO + PERFIL     #
-# COM SEU OLHO.                                            #
-############################################################
-[ ] MENSAGENS vira tela/aba propria (hoje so existe como sheet modal via openThreadSheet app.js:8129, sem fixMojibake/scrub). Criar acesso direto (pelo icone de chat do header e/ou item de navegacao) que abre o thread no padrao do gestor: header com nome/avatar do personal + status, baloes (aluno a direita dourado, personal a esquerda escuro, horario + duplo check), compose bar fixa na base (input + enviar) ACIMA da barra de navegacao. Aplicar fixMojibake e scrubVisibleText no conteudo do thread. git add . && git commit -m "feat(aluno): mensagens como tela propria no padrao" && git push origin main
-[ ] Mensagens - envio e push: enviar adiciona o balao na hora (otimista), rola pro fim, dispara push pro gestor; resposta do gestor aparece em tempo real. Estado vazio "Inicie uma conversa com seu personal". git add . && git commit -m "feat(aluno): envio otimista de mensagem + push ao gestor" && git push origin main
-[ ] PROGRESSO (funde Evolucao + Atualizacoes, renderStudentProgress app.js:5810 e renderStudentUpdates 5253): uma tela so de Progresso com - envio de atualizacao (peso + fotos frente/lado/costas + observacoes) que dispara push ao gestor; historico de atualizacoes; e evolucao (volume e peso corporal) com graficos no padrao. Remover a duplicidade de Evolucao/Atualizacoes apontada na auditoria. git add . && git commit -m "feat(aluno): tela de Progresso unindo evolucao e atualizacoes" && git push origin main
-[ ] MAIS (hub) reorganizado (renderStudentProfile): lista organizada do que nao esta na barra - Perfil, Agenda, Contrato, Configuracoes - no padrao de lista do gestor, sem itens duplicados (a auditoria apontou Evolucao/Agenda em 3 lugares), com o botao Sair AQUI (movido do header). git add . && git commit -m "feat(aluno): hub Mais organizado sem duplicidade, com Sair" && git push origin main
+== NAO RODARAM - LEVA 5 (mensagens, progresso, perfil) ==
+[ ] MENSAGENS vira tela/aba propria (hoje so existe como sheet modal via openThreadSheet app.js:8129, sem fixMojibake/scrub). Criar acesso direto (icone de chat do header e/ou item de navegacao) que abre o thread no padrao do gestor: header com nome/avatar do personal + status, baloes (aluno a direita dourado, personal a esquerda escuro, horario + duplo check), compose bar fixa na base ACIMA da barra de navegacao. Aplicar fixMojibake e scrubVisibleText no conteudo. git add . && git commit -m "feat(aluno): mensagens como tela propria no padrao" && git push origin main
+[ ] Mensagens - envio e push: enviar adiciona o balao na hora (otimista), rola pro fim, dispara push pro gestor; resposta do gestor em tempo real. Estado vazio "Inicie uma conversa com seu personal". git add . && git commit -m "feat(aluno): envio otimista de mensagem + push ao gestor" && git push origin main
+[ ] PROGRESSO (funde Evolucao + Atualizacoes, renderStudentProgress app.js:5810 e renderStudentUpdates 5253): uma tela so com envio de atualizacao (peso + fotos frente/lado/costas + observacoes) que dispara push ao gestor; historico de atualizacoes; e evolucao (volume e peso corporal) com graficos no padrao. Remover a duplicidade apontada na auditoria. git add . && git commit -m "feat(aluno): tela de Progresso unindo evolucao e atualizacoes" && git push origin main
+[ ] MAIS (hub) reorganizado (renderStudentProfile): lista organizada do que nao esta na barra - Perfil, Agenda, Contrato, Configuracoes - sem itens duplicados, com o botao Sair AQUI (movido do header). git add . && git commit -m "feat(aluno): hub Mais organizado sem duplicidade, com Sair" && git push origin main
 [ ] PERFIL do proprio aluno: dados pessoais, objetivo, status do contrato e metricas (treinos na semana, volume, proximas atividades) em cards compactos no padrao do gestor; visualizar contrato (PDF) e dados da conta. Sem glow, encoding correto. git add . && git commit -m "feat(aluno): perfil do proprio aluno no padrao" && git push origin main
 
   >>> VALIDAR COM VIDEO: chat como aba com compose, progresso com envio,
       Mais sem duplicidade, perfil no padrao. <<<
 
-############################################################
-# LEVA 6 - ALUNO: CONSISTENCIA FINAL PREMIUM               #
-############################################################
-[ ] REVISAO FINAL premium do aluno: percorrer todas as telas (Login, Contrato, Inicio, Treinos, Execucao, Dieta, Mensagens, Progresso, Mais, Perfil, Agenda) garantindo paridade com o gestor: header com badge ALUNO e hamburguer em todas; nenhum texto cortado/vazando (truncar controlado ou quebrar, nunca estourar); nenhuma caixa preta vazia; nenhum botao escondido atras da barra; nenhum card fora do padrao; encoding correto (acentos, Ultima/Ultimos); sem glow; barra fixa estavel sem piscar; areas seguras; contador da execucao funcionando; chat com compose bar. Atualizar AUDITORIA-ALUNO.md marcando resolvido x pendente. git add . && git commit -m "chore(aluno): revisao final de consistencia premium" && git push origin main
-
-############################################################
-# DEPOIS DA LEVA 4 (precisa do historico de execucao):    #
-#  - tarefas-widgets-aluno.txt (resumo da semana, streak,  #
-#    peso, adesao, proxima atividade) - so apos a Leva 4   #
-#    senao mostram zero.                                   #
-#  - tarefas-isolamento-dados.txt (multi-aluno) - antes de #
-#    uso real; toca backend, COM acompanhamento.           #
-############################################################
-
-############################################################
-# SEPARADO - BACKEND (NAO rodar noturno, COM acompanhamento)#
-############################################################
-# PROBLEMA: o video enviado na Biblioteca NAO esta sendo salvo no
-# servidor - o player mostra "Video indisponivel no servidor". O erro
-# visual ja foi tratado, mas o upload nao PERSISTE. Isso e backend
-# (rota de upload + storage + URL persistente no lugar de blob/objectURL).
-# Como toca server/, fazer COM voce acompanhando, conferindo storage e
-# variaveis. NAO colocar em fila noturna. Quando for a hora, me peca o
-# prompt especifico para essa correcao de upload/storage de video.
+== NAO RODOU - LEVA 6 (fechamento) ==
+[ ] REVISAO FINAL premium do aluno: percorrer todas as telas (Login, Contrato, Inicio, Treinos, Execucao, Dieta, Mensagens, Progresso, Mais, Perfil, Agenda) garantindo paridade com o gestor: header com badge ALUNO e hamburguer; nenhum texto cortado; nenhuma caixa preta; nenhum botao escondido atras da barra; nenhum card fora do padrao; encoding correto; sem glow; barra estavel; contador da execucao funcionando; chat com compose. Atualizar AUDITORIA-ALUNO.md. git add . && git commit -m "chore(aluno): revisao final de consistencia premium" && git push origin main
