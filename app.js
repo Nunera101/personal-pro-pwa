@@ -1926,11 +1926,16 @@
     state.socket.on("message:new", (message) => {
       const normalized = normalizeMessage(message);
       if (!state.data.messages.some((item) => item.id === normalized.id)) {
-        state.data.messages.push(normalized);
-        persistData();
         const sheet = elements.threadSheet;
         const form = document.getElementById("threadForm");
-        if (sheet && !sheet.hidden && form?.dataset?.studentId === normalized.studentId) {
+        const isOpenThread = sheet && !sheet.hidden && form?.dataset?.studentId === normalized.studentId;
+        const myRole = state.currentUser?.role === "manager" ? "manager" : "student";
+        if (isOpenThread && normalized.senderRole !== myRole) {
+          normalized.readAt = new Date().toISOString();
+        }
+        state.data.messages.push(normalized);
+        persistData();
+        if (isOpenThread) {
           _refreshThreadBd(normalized.studentId);
           if (state.currentUser?.role === "student") _updateStudentChatBadge();
         } else {
@@ -9007,8 +9012,8 @@
     const messages = getStudentMessages(studentId);
     const isStudentView = state.currentUser?.role === "student";
     if (!messages.length) {
-      const label = isStudentView ? "Inicie a conversa" : "Nenhuma mensagem";
-      const sub = isStudentView ? "Mande uma mensagem para o seu personal." : "Use o campo abaixo para iniciar a conversa.";
+      const label = isStudentView ? "Inicie" : "Nenhuma mensagem";
+      const sub = isStudentView ? "Envie uma mensagem para o seu personal." : "Use o campo abaixo para iniciar a conversa.";
       return emptyState(label, sub, icons.messages);
     }
     let html = '<div class="thread-bubbles">';
@@ -10104,10 +10109,9 @@
     });
     state.data.messages.push(message);
     persistData();
-    if (state.socketReady && state.socket) state.socket.emit("message:send", message);
     form.reset();
     _refreshThreadBd(studentId);
-    showToast(state.socketReady ? "Mensagem enviada em tempo real." : "Mensagem salva em modo local.");
+    if (state.socketReady && state.socket) state.socket.emit("message:send", message);
   }
 
   function handlePaymentForm(form) {
