@@ -61,6 +61,7 @@
     dietFilters: { q: "", status: "all", objective: "all" },
     dietFilterOpen: false,
     studentDietQ: "",
+    studentWorkoutQ: "",
     mealChecks: {},
     relatorioFilters: { period: "mes" },
     workoutFilterOpen: false,
@@ -4954,17 +4955,53 @@
     return { draft: "Rascunho", published: isPattern ? "Disponível" : "Publicado", archived: "Arquivado" }[status] || "Rascunho";
   }
 
+  function renderStudentWorkoutCard(workout) {
+    const goal = workout.focus || workout.goal || "—";
+    const exerciseCount = workout.exercises.length;
+    const lastSession = getStudentSessions(workout.studentId).find((s) => s.workoutId === workout.id);
+    return `
+      <article class="pattern-card">
+        <div class="pattern-card-head">
+          <span class="pattern-icon">${icons.workouts}</span>
+          <div class="pattern-card-title-wrap">
+            <h3 class="pattern-name">${escapeHtml(workout.title)}</h3>
+            <span class="badge is-success">Publicado</span>
+          </div>
+        </div>
+        <ul class="pattern-meta-lines">
+          <li><span class="pml-label">Objetivo</span><span class="pml-value">${escapeHtml(goal)}</span></li>
+          <li><span class="pml-label">Exercícios</span><span class="pml-value">${exerciseCount}</span></li>
+          ${lastSession ? `<li><span class="pml-label">Última execução</span><span class="pml-value">${escapeHtml(formatDate(lastSession.finishedAt?.slice(0, 10) || ""))}</span></li>` : ""}
+        </ul>
+        <div class="sw-card-action">
+          <button class="primary-action" type="button" data-start-workout="${escapeHtml(workout.id)}">Iniciar</button>
+        </div>
+      </article>
+    `;
+  }
+
   function renderStudentWorkouts() {
     if (state.activeSession) return renderWorkoutExecution();
     const student = getCurrentStudent();
-    const workouts = getStudentWorkouts(student?.id, { publishedOnly: true });
+    const allWorkouts = getStudentWorkouts(student?.id, { publishedOnly: true });
+    const q = (state.studentWorkoutQ || "").toLowerCase().trim();
+    const workouts = q
+      ? allWorkouts.filter((w) => [w.title, w.focus, w.goal, w.description].join(" ").toLowerCase().includes(q))
+      : allWorkouts;
+    const showSearch = allWorkouts.length > 3;
     return `
       <div class="content-stack">
-        ${pageHeader("Treinos", "Escolha um treino publicado pelo personal")}
-        <section class="panel">
-          <div class="section-title"><h3>Treinos publicados</h3><span class="small-text">${workouts.length} treino(s)</span></div>
-          ${workouts.length ? `<div class="workout-list">${workouts.map((workout) => renderWorkoutCard(workout, false)).join("")}</div>` : emptyState("Nenhum treino publicado", "Quando o personal publicar um treino, ele aparece aqui.", icons.workouts)}
-        </section>
+        ${pageHeader("Treinos", "Treinos publicados pelo seu personal")}
+        ${showSearch ? `
+          <label class="diet-search-field">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 21l-4.3-4.3M10.8 18a7.2 7.2 0 1 1 0-14.4 7.2 7.2 0 0 1 0 14.4Z"/></svg>
+            <input type="search" data-sw-q placeholder="Buscar treino..." value="${escapeHtml(state.studentWorkoutQ || "")}" aria-label="Buscar treino" />
+          </label>
+        ` : ""}
+        ${workouts.length
+          ? `<div class="pattern-card-list">${workouts.map(renderStudentWorkoutCard).join("")}</div>`
+          : emptyState(q ? "Nenhum resultado" : "Nenhum treino publicado", q ? "Tente outros termos na busca." : "Quando o personal publicar um treino, ele aparece aqui.", icons.workouts)
+        }
       </div>
     `;
   }
@@ -10577,6 +10614,7 @@
       const target = event.target;
       if (target.matches("[data-student-search]")) { state.search = target.value; renderManager(); }
       if (target.matches("[data-student-diet-q]")) { state.studentDietQ = target.value; renderStudent(); }
+      if (target.matches("[data-sw-q]")) { state.studentWorkoutQ = target.value; renderStudent(); }
       if (target.matches("[data-phone-mask]")) {
         let v = target.value.replace(/\D/g, "").slice(0, 11);
         if (v.length > 10) v = v.replace(/^(\d{2})(\d{5})(\d{4})$/, "($1) $2-$3");

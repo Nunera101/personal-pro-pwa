@@ -1761,3 +1761,13 @@
   justify-content: center;
 }
 
+/* ── Lista de treinos do aluno ────────────────────────────────────── */
+.sw-card-action {
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  padding-top: 0.6rem;
+}
+
+.sw-card-action .primary-action {
+  width: 100%;
+}
+
