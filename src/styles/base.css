@@ -4820,16 +4820,6 @@ button.dashboard-metric {
   min-width: 0;
 }
 
-.manager-header .brand-logo-wordmark {
-  width: clamp(4.9rem, 19vw, 6.8rem) !important;
-  height: clamp(2.4rem, 9vw, 3.1rem) !important;
-  object-fit: contain;
-  padding: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
 .manager-header .brand-inline h2 {
   color: #f7f4ed;
   font-size: clamp(1.35rem, 5vw, 1.85rem) !important;
@@ -5293,11 +5283,6 @@ button.dashboard-metric {
     gap: 0.5rem;
   }
 
-  .manager-header .brand-logo-wordmark {
-    width: clamp(4.3rem, 20vw, 5.4rem) !important;
-    height: 2.3rem !important;
-  }
-
   .manager-header .brand-inline h2 {
     font-size: clamp(1.12rem, 5vw, 1.42rem) !important;
   }
@@ -5718,10 +5703,6 @@ button.dashboard-metric {
   .manager-header .avatar-button {
     width: 2.75rem !important;
     height: 2.75rem !important;
-  }
-
-  .manager-header .brand-logo-wordmark {
-    width: clamp(4.35rem, 18vw, 5rem) !important;
   }
 
   .dashboard-hero {

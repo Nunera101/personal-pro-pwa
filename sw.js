@@ -8,7 +8,6 @@ const APP_SHELL = [
   "./app.js?v=53",
   "./manifest.json",
   "./assets/logo-oficial.svg",
-  "./assets/elite-as-wordmark.svg",
   "./assets/favicon.svg",
   "./assets/icon-192.png",
   "./assets/icon-512.png",
