@@ -2435,6 +2435,21 @@ svg {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 0 0.55rem;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.set-row input::placeholder {
+  color: var(--muted);
+  opacity: 0.7;
+}
+
+.set-row input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(231, 168, 62, 0.2);
 }
 
 .photo-grid {
@@ -3346,6 +3361,17 @@ body::before {
 .set-row.is-done {
   border-color: rgba(72, 215, 100, 0.4);
   background: rgba(72, 215, 100, 0.11);
+}
+
+.set-row input {
+  background: #1c1c1c;
+  color: var(--ink);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.set-row input:focus {
+  border-color: rgba(245, 181, 27, 0.75);
+  box-shadow: 0 0 0 3px rgba(245, 181, 27, 0.18);
 }
 
 .bottom-nav {

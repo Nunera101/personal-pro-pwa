@@ -6601,8 +6601,8 @@
           <strong>Série ${setIndex + 1}</strong>
           <span>Alvo: ${escapeHtml(exercise.targetReps)} reps · Sugestão: ${escapeHtml(exercise.suggestedLoad || "-")} · Descanso: ${exercise.restSeconds}s</span>
         </div>
-        <label><span>Carga</span><input type="number" step="0.5" min="0" value="${escapeHtml(set.load)}" data-set-load="${exerciseIndex}:${setIndex}" ${inputsDisabled ? "disabled" : ""} /></label>
-        <label><span>Reps</span><input type="number" step="1" min="0" value="${escapeHtml(set.reps)}" data-set-reps="${exerciseIndex}:${setIndex}" ${inputsDisabled ? "disabled" : ""} /></label>
+        <label><span>Carga (kg)</span><input type="number" inputmode="decimal" step="0.5" min="0" placeholder="${escapeHtml(exercise.suggestedLoad || "0")}" value="${escapeHtml(set.load)}" data-set-load="${exerciseIndex}:${setIndex}" ${inputsDisabled ? "disabled" : ""} /></label>
+        <label><span>Reps</span><input type="number" inputmode="numeric" step="1" min="0" placeholder="${escapeHtml(exercise.targetReps || "0")}" value="${escapeHtml(set.reps)}" data-set-reps="${exerciseIndex}:${setIndex}" ${inputsDisabled ? "disabled" : ""} /></label>
         <div class="row-actions">
           ${done ? `<span class="badge is-success">Volume ${set.volumeLoad}</span>` : `<button class="mini-button" type="button" data-series-action="${exerciseIndex}:${setIndex}" ${actionAvailable ? "" : "disabled"}>${running ? "Finalizar série" : "Iniciar série"}</button>`}
         </div>
