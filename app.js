@@ -1969,7 +1969,7 @@
       const created = normalizeActivity({
         studentId: plan.studentId,
         type: "other",
-        title: "Revisao de dieta",
+        title: "Revisão de dieta",
         date: plan.nextReviewDate,
         time: "09:30",
         duration: "30",
@@ -1981,7 +1981,7 @@
       return created;
     }
     activity.studentId = plan.studentId;
-    activity.title = "Revisao de dieta";
+    activity.title = "Revisão de dieta";
     activity.date = plan.nextReviewDate;
     activity.status = nextStatus;
     activity.notes = plan.protocol || plan.title || activity.notes || "Plano alimentar";
@@ -2522,6 +2522,7 @@
       elements.studentContent.classList.remove("is-entering");
       void elements.studentContent.offsetWidth;
       elements.studentContent.innerHTML = fixMojibake((renderers[state.studentMenu] || renderStudentToday)());
+      scrubVisibleText(elements.studentContent);
       elements.studentContent.classList.add("is-entering");
       _updateStudentChatBadge();
     };
