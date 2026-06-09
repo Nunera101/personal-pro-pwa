@@ -4975,7 +4975,11 @@
     const agenda = getAgendaItemsForDate(todayISO(), student?.id);
     const workouts = getStudentWorkouts(student?.id, { publishedOnly: true });
     const sessions = getStudentSessions(student?.id);
-    const nextWorkout = agenda.find((item) => item.type === "workout" && item.workoutId && item.status !== "done") || null;
+    let nextWorkout = null;
+    for (let i = 0; i < 60 && !nextWorkout; i++) {
+      const dayItems = i === 0 ? agenda : getAgendaItemsForDate(addDays(todayISO(), i), student?.id);
+      nextWorkout = dayItems.find((item) => item.type === "workout" && item.workoutId && item.status !== "done") || null;
+    }
     const nextWorkoutData = nextWorkout ? getWorkout(nextWorkout.workoutId) : null;
     const nextUpdate = state.data.updates.find((item) => item.studentId === student?.id && item.status === "pending") || null;
 
@@ -4983,7 +4987,7 @@
       ? `<section class="next-workout-card">
           <div class="next-workout-card__info">
             <span class="next-workout-card__label">Próximo treino</span>
-            <strong class="next-workout-card__name">${escapeHtml(nextWorkoutData?.title || nextWorkout.title || "Treino")}</strong>
+            <strong class="next-workout-card__name">${escapeHtml(nextWorkoutData?.title || nextWorkout.title || "Treino sem título")}</strong>
             <span class="next-workout-card__meta">${formatDate(nextWorkout.date)} · ${nextWorkout.time}</span>
           </div>
           <button class="primary-action" type="button" data-start-workout="${nextWorkout.workoutId}" data-activity-id="${nextWorkout.id}">Iniciar</button>
@@ -4991,7 +4995,7 @@
       : `<section class="next-workout-card next-workout-card--empty">
           <div class="next-workout-card__info">
             <span class="next-workout-card__label">Próximo treino</span>
-            <strong class="next-workout-card__name">Nenhum treino agendado para hoje</strong>
+            <strong class="next-workout-card__name">Nenhum treino agendado</strong>
           </div>
           <button class="primary-action" type="button" data-student-nav="workouts">Ver treinos</button>
         </section>`;
