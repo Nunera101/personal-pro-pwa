@@ -11021,24 +11021,67 @@
     });
     elements.loginForm.addEventListener("submit", async (event) => {
       event.preventDefault();
+
+      const emailErr = document.getElementById("emailError");
+      const passwordErr = document.getElementById("passwordError");
+      const formErr = document.getElementById("loginFormError");
+      const submitBtn = document.getElementById("loginSubmitBtn");
+
+      // Limpa erros anteriores
+      if (emailErr) emailErr.textContent = "";
+      if (passwordErr) passwordErr.textContent = "";
+      if (formErr) { formErr.textContent = ""; formErr.hidden = true; }
+      elements.email.closest(".field")?.classList.remove("field--error");
+      elements.password.closest(".field")?.classList.remove("field--error");
+
+      // Validação inline — sem tooltip nativo do browser
+      const emailVal = elements.email.value.trim();
+      const passwordVal = elements.password.value;
+      let hasFieldError = false;
+      if (!emailVal) {
+        if (emailErr) emailErr.textContent = "Informe seu e-mail.";
+        elements.email.closest(".field")?.classList.add("field--error");
+        elements.email.focus();
+        hasFieldError = true;
+      }
+      if (!passwordVal) {
+        if (passwordErr) passwordErr.textContent = "Informe sua senha.";
+        elements.password.closest(".field")?.classList.add("field--error");
+        if (!hasFieldError) elements.password.focus();
+        hasFieldError = true;
+      }
+      if (hasFieldError) return;
+
+      // Estado de carregando
+      if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "Entrando…"; submitBtn.classList.add("login-btn--loading"); }
+
       const remember = Boolean(elements.rememberMe?.checked);
       setRememberSession(remember);
       try {
-        const user = await authenticateUser(elements.email.value, elements.password.value);
-      if (!user) return showToast(getLoginAccessMessage(elements.email.value) || "E-mail ou senha inválidos.");
-      state.currentUser = user;
-      setStoredUserSession(user, remember);
-      elements.password.value = "";
-      showView(user.role === "manager" ? "manager" : "student");
-      await connectRealtime();
-      syncRealtimeRoom();
-      applyRouteFromHash();
-      renderApp();
-      openPendingContractAfterLogin();
-      showToast(user.role === "manager" ? "Painel do gestor aberto." : "área do aluno aberta.");
-      schedulePushPermissionRequest();
+        const user = await authenticateUser(emailVal, passwordVal);
+        if (!user) {
+          const msg = getLoginAccessMessage(emailVal) || "E-mail ou senha inválidos. Verifique suas credenciais.";
+          if (formErr) { formErr.textContent = msg; formErr.hidden = false; }
+          else showToast(msg);
+          return;
+        }
+        state.currentUser = user;
+        setStoredUserSession(user, remember);
+        elements.password.value = "";
+        showView(user.role === "manager" ? "manager" : "student");
+        await connectRealtime();
+        syncRealtimeRoom();
+        applyRouteFromHash();
+        renderApp();
+        openPendingContractAfterLogin();
+        showToast(user.role === "manager" ? "Painel do gestor aberto." : "área do aluno aberta.");
+        schedulePushPermissionRequest();
       } catch (error) {
-        showToast(error.message || getLoginAccessMessage(elements.email.value) || "E-mail ou senha inválidos.");
+        const msg = error.message || getLoginAccessMessage(emailVal) || "E-mail ou senha inválidos. Verifique suas credenciais.";
+        if (formErr) { formErr.textContent = msg; formErr.hidden = false; }
+        else showToast(msg);
+      } finally {
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = "Entrar"; submitBtn.classList.remove("login-btn--loading"); }
       }
     });
     elements.fillAdminDemo.addEventListener("click", () => {

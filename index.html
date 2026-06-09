@@ -82,23 +82,27 @@
             <button type="button" id="fillAdminDemo">Preencher</button>
           </div>
 
-          <form class="login-form" id="loginForm">
+          <form class="login-form" id="loginForm" novalidate>
             <label class="field">
               <span>E-mail</span>
-              <input id="email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="seuemail@exemplo.com" required />
+              <input id="email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="seuemail@exemplo.com" />
+              <span class="login-field-error" id="emailError" role="alert"></span>
             </label>
 
             <label class="field">
               <span>Senha</span>
-              <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Digite sua senha" required />
+              <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Digite sua senha" />
+              <span class="login-field-error" id="passwordError" role="alert"></span>
             </label>
+
+            <p class="login-form-error" id="loginFormError" role="alert" hidden></p>
 
             <label class="remember-control">
               <input id="rememberMe" name="rememberMe" type="checkbox" />
               <span>Manter-se conectado</span>
             </label>
 
-            <button class="primary-action" type="submit">Entrar</button>
+            <button class="primary-action" type="submit" id="loginSubmitBtn">Entrar</button>
             <button class="text-action" id="forgotPassword" type="button">Esqueci minha senha</button>
             <button class="secondary-action" type="button" data-install-trigger>Instalar aplicativo</button>
           </form>

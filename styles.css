@@ -956,6 +956,40 @@ body.demo-mode .demo-only {
   gap: 0.85rem;
 }
 
+.login-field-error {
+  display: none;
+  color: #c44949;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding-top: 0.1rem;
+}
+
+.login-field-error:not(:empty) {
+  display: block;
+}
+
+.field--error input {
+  border-color: #c44949;
+  box-shadow: 0 0 0 3px rgba(196, 73, 73, 0.13);
+}
+
+.login-form-error {
+  margin: 0;
+  padding: 0.65rem 0.8rem;
+  border-radius: var(--radius);
+  border: 1px solid rgba(196, 73, 73, 0.3);
+  background: rgba(196, 73, 73, 0.07);
+  color: #b83535;
+  font-size: 0.86rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.login-btn--loading {
+  opacity: 0.72;
+  pointer-events: none;
+}
+
 .remember-control {
   display: flex;
   align-items: center;
