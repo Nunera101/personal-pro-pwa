@@ -6571,10 +6571,15 @@
   }
 
   function renderRestBanner() {
+    const rem = state.rest.remaining;
+    const urgency = rem <= 5 ? " is-urgent" : "";
     return `
-      <section class="rest-banner">
-        <div><strong>Descanso</strong><span>${state.rest.remaining}s restantes</span></div>
-        <button class="mini-button" type="button" data-skip-rest>Pular descanso</button>
+      <section class="rest-banner${urgency}" role="timer" aria-live="polite" aria-label="Descanso: ${rem} segundos restantes">
+        <div class="rest-banner-info">
+          <strong class="rest-banner-label">Descanso</strong>
+          <span class="rest-countdown${urgency}">${rem}s</span>
+        </div>
+        <button class="mini-button" type="button" data-skip-rest>Pular</button>
       </section>
     `;
   }
@@ -6592,6 +6597,13 @@
             ${muscle ? `<span class="small-text">${escapeHtml(muscle)}</span>` : ""}
           </div>
           <span class="badge ${running ? "is-warning" : "is-info"}">Série ${setIndex + 1}/${exercise.sets.length}</span>
+        </div>
+        <div class="exec-set-dots" aria-label="Progresso das séries">
+          ${exercise.sets.map((s, i) => {
+            const isDone = s.status === "done";
+            const isRunning = s.status === "running";
+            return `<span class="exec-set-dot${isDone ? " is-done" : isRunning ? " is-running" : ""}" aria-label="Série ${i + 1}: ${isDone ? "concluída" : isRunning ? "em execução" : "pendente"}">${isDone ? `<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 5l2.5 2.5 4.5-4"/></svg>` : i + 1}</span>`;
+          }).join("")}
         </div>
         ${!running && libraryExercise ? videoActionHtml(libraryExercise) : ""}
         ${exercise.coachNotes ? `<p class="small-text">Obs: ${escapeHtml(exercise.coachNotes)}</p>` : ""}
@@ -10219,7 +10231,10 @@
       state.rest.remaining -= 1;
       if (state.rest.remaining <= 0) {
         stopRest();
-        showToast("Descanso finalizado.");
+        if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          navigator.vibrate?.([40, 30, 80]);
+        }
+        showToast("Descanso finalizado. Próxima série!");
       }
       renderStudent();
     }, 1000);
