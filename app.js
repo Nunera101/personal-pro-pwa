@@ -5050,6 +5050,12 @@
     const nextWorkoutData = nextWorkout ? getWorkout(nextWorkout.workoutId) : null;
     const nextUpdate = state.data.updates.find((item) => item.studentId === student?.id && item.status === "pending") || null;
 
+    const lastSession = sessions[0] || null;
+    const lastWorkout = lastSession ? getWorkout(lastSession.workoutId) : null;
+    const lastSessionSeries = lastSession
+      ? lastSession.exercises.reduce((sum, ex) => sum + ex.sets.length, 0)
+      : 0;
+
     const nextWorkoutCard = nextWorkout
       ? `<section class="next-workout-card">
           <div class="next-workout-card__info">
@@ -5067,6 +5073,16 @@
           <button class="primary-action" type="button" data-student-nav="workouts">Ver treinos</button>
         </section>`;
 
+    const lastSessionCard = lastSession
+      ? `<section class="last-session-card">
+          <div class="last-session-card__info">
+            <span class="last-session-card__label">Último treino</span>
+            <strong class="last-session-card__name">${escapeHtml(lastWorkout?.title || "Treino")}</strong>
+            <span class="last-session-card__meta">${formatDate(lastSession.finishedAt.slice(0, 10))} · ${lastSessionSeries} série(s)${lastSession.totalVolumeLoad > 0 ? ` · ${lastSession.totalVolumeLoad} kg` : ""}</span>
+          </div>
+        </section>`
+      : "";
+
     return `
       <div class="content-stack">
         <section class="dashboard-hero">
@@ -5079,9 +5095,10 @@
         <section class="metric-grid">
           ${metricCard("Treinos na semana", sessionsThisWeek(student?.id).length)}
           ${metricCard("Treinos no mês", sessionsThisMonth(student?.id).length)}
-          ${metricCard("Volume último treino", sessions[0] ? sessions[0].totalVolumeLoad : 0)}
+          ${metricCard("Séries no último treino", lastSessionSeries)}
           ${metricCard("Atualizações pendentes", state.data.updates.filter((item) => item.studentId === student?.id && item.status === "pending").length)}
         </section>
+        ${lastSessionCard}
         ${
           nextUpdate
             ? `<section class="panel action-panel"><div><strong>Atualização quinzenal pendente</strong><span class="small-text">Vencimento ${formatDate(nextUpdate.dueDate)}</span></div><button class="primary-action" type="button" data-open-update-form="${nextUpdate.id}">Enviar atualização</button></section>`

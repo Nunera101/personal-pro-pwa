@@ -1435,6 +1435,47 @@ svg {
   border: none;
 }
 
+/* ---- card histórico: último treino (tela Início do aluno) ---- */
+.last-session-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.2rem;
+  border-radius: var(--radius);
+  background: var(--success-soft);
+  border: 1px solid var(--success);
+}
+
+.last-session-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+  min-width: 0;
+}
+
+.last-session-card__label {
+  font-size: 0.7rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--success);
+}
+
+.last-session-card__name {
+  font-size: clamp(0.95rem, 3.5vw, 1.15rem);
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.last-session-card__meta {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-top: 0.1rem;
+}
+
 .metric-grid {
   display: flex;
   flex-direction: row;
