@@ -6188,11 +6188,26 @@
             <span class="small-text">Versão ${escapeHtml(contract.version)}</span>
           </div>
           <div class="contract-body premium-contract-body">${escapeHtml(contract.body)}</div>
-          <div class="form-actions">
-            <button class="primary-action" type="button" data-open-contract="${escapeHtml(contract.id)}">Assinar contrato</button>
+          ${contract.pdfUrl ? `
+            <div class="form-actions" style="padding-bottom:0">
+              <button class="ghost-button" type="button" data-open-contract="${escapeHtml(contract.id)}">Ver PDF do contrato</button>
+            </div>
+          ` : ""}
+          <div class="contract-consent-block">
+            <label class="contract-consent-check-row">
+              <input type="checkbox" data-gate-consent-check="${escapeHtml(contract.id)}">
+              <span>Li e aceito todos os termos do contrato</span>
+            </label>
+            <label class="field">
+              <span>Nome completo (confirmação de identidade)</span>
+              <input type="text" data-gate-name-confirm="${escapeHtml(contract.id)}" placeholder="${escapeHtml(student?.name || "Seu nome completo")}" autocomplete="name" />
+            </label>
+            <button class="primary-action" type="button" data-sign-contract-gate="${escapeHtml(contract.id)}" disabled>Confirmar aceite</button>
+            <p class="small-text">O aceite registra data/hora, IP e identificação técnica para fins de comprovação jurídica.</p>
+          </div>
+          <div class="form-actions" style="padding-top:0;border-top:none">
             <button class="ghost-button" type="button" data-logout>Sair</button>
           </div>
-          <p class="small-text">O aceite registra data/hora, IP e identificação técnica do dispositivo.</p>
         </section>
       </div>
     `;
@@ -10834,6 +10849,9 @@
           .then(() => closeContractViewSheet())
           .catch(() => showToast("Nao foi possivel assinar o contrato agora."));
       }
+      if (target.matches("[data-sign-contract-gate]")) {
+        signContractFromGate(target.dataset.signContractGate).catch(() => showToast("Não foi possível registrar o aceite agora."));
+      }
       if (target.matches("[data-cancel-contract]")) cancelContract(target.dataset.cancelContract);
       if (target.matches("[data-print-contract]")) {
         showToast("Use a opção de salvar como PDF na impressão do navegador.");
@@ -10854,6 +10872,14 @@
             delete signBtn.dataset.consentAt;
           }
         }
+      }
+      if (target.matches("[data-gate-consent-check]")) {
+        updateGateSignButton(target.dataset.gateConsentCheck);
+      }
+    });
+    document.addEventListener("input", (event) => {
+      if (event.target.matches("[data-gate-name-confirm]")) {
+        updateGateSignButton(event.target.dataset.gateNameConfirm);
       }
     });
     document.addEventListener("toggle", (event) => {
@@ -11332,6 +11358,54 @@
     closeModal();
     renderApp();
     showSuccessToast("Contrato assinado digitalmente.");
+  }
+
+  function updateGateSignButton(contractId) {
+    const checkbox = document.querySelector(`[data-gate-consent-check="${contractId}"]`);
+    const nameInput = document.querySelector(`[data-gate-name-confirm="${contractId}"]`);
+    const signBtn = document.querySelector(`[data-sign-contract-gate="${contractId}"]`);
+    if (!signBtn) return;
+    const ready = checkbox?.checked && (nameInput?.value || "").trim().length >= 2;
+    signBtn.disabled = !ready;
+    if (ready && !signBtn.dataset.consentAt) signBtn.dataset.consentAt = new Date().toISOString();
+    if (!checkbox?.checked) delete signBtn.dataset.consentAt;
+  }
+
+  async function signContractFromGate(id) {
+    const contract = state.data.contracts.find((item) => item.id === id);
+    if (!contract || state.currentUser?.role !== "student" || contract.studentId !== state.currentUser.studentId) return showToast("Contrato indisponível.");
+    const signBtn = document.querySelector(`[data-sign-contract-gate="${id}"]`);
+    const nameInput = document.querySelector(`[data-gate-name-confirm="${id}"]`);
+    const checkbox = document.querySelector(`[data-gate-consent-check="${id}"]`);
+    const typedName = (nameInput?.value || "").trim();
+    const consentAt = signBtn?.dataset.consentAt || null;
+    if (!checkbox?.checked || !consentAt) return showToast("Confirme que leu os termos antes de assinar.");
+    if (!typedName) return showToast("Digite seu nome completo para confirmar a assinatura.");
+    if (signBtn) { signBtn.disabled = true; signBtn.textContent = "Registrando…"; }
+    try {
+      const meta = await getContractSignatureMeta(contract);
+      contract.status = "signed";
+      contract.signedAt = new Date().toISOString();
+      contract.signedVersion = contract.version;
+      contract.technicalId = technicalId();
+      contract.signatureIp = meta.ip || "";
+      contract.signatureUserAgent = meta.userAgent || navigator.userAgent || "";
+      contract.signatureMeta = JSON.stringify({
+        source: "internal_app_acceptance_gate",
+        consentCheckboxAt: consentAt,
+        signatureName: typedName,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "",
+        language: navigator.language || "",
+        backendMeta: meta || {}
+      });
+      persistData();
+      await flushRemoteSync();
+      renderApp();
+      showSuccessToast("Contrato assinado. Bem-vindo!");
+    } catch (_err) {
+      if (signBtn) { signBtn.disabled = false; signBtn.textContent = "Confirmar aceite"; }
+      showToast("Não foi possível registrar o aceite agora. Tente novamente.");
+    }
   }
 
   function cancelContract(id) {

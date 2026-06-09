@@ -326,7 +326,22 @@ async function writeCollectionForAuth(collection, payload, auth) {
   }
 
   if ([EXERCISES_KEY, WORKOUTS_KEY, STUDENTS_KEY, SETTINGS_KEY, PAYMENTS_KEY, DIETS_KEY].includes(collection)) return;
-  if (collection === CONTRACTS_KEY) return writeCollection(collection, mergeStudentContracts(existing, Array.isArray(payload) ? payload : [], auth));
+  if (collection === CONTRACTS_KEY) {
+    const existingById = new Map((Array.isArray(existing) ? existing : []).map((c) => [String(c.id), c]));
+    const merged = mergeStudentContracts(existing, Array.isArray(payload) ? payload : [], auth);
+    await writeCollection(collection, merged);
+    const newlySigned = merged.filter((c) => c.status === "signed" && existingById.get(String(c.id))?.status !== "signed");
+    if (newlySigned.length) {
+      const students = await readCollection(STUDENTS_KEY, []);
+      const student = students.find((s) => s.id === auth.studentId);
+      sendPushToManager({
+        title: "Contrato assinado!",
+        body: `${student?.name || "Um aluno"} assinou o contrato.`,
+        url: "/#contracts"
+      }).catch(() => {});
+    }
+    return;
+  }
   if (collection === MESSAGES_KEY) return writeCollection(collection, mergeStudentMessages(existing, Array.isArray(payload) ? payload : [], auth));
 
   if (collection === UPDATES_KEY && Array.isArray(payload)) {
