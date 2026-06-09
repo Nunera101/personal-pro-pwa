@@ -5538,22 +5538,7 @@
   }
 
   function renderStudentUpdates() {
-    const student = getCurrentStudent();
-    const updates = state.data.updates.filter((item) => item.studentId === student?.id).sort((a, b) => b.dueDate.localeCompare(a.dueDate));
-    const pending = updates.find((item) => item.status === "pending");
-    return `
-      <div class="content-stack">
-        ${pageHeader("Atualizações", "Peso, fotos e observações quinzenais")}
-        <section class="panel">
-          <div class="section-title"><h3>Atualização quinzenal</h3><span class="small-text">${pending ? `Pendente para ${formatDate(pending.dueDate)}` : "Sem pendência"}</span></div>
-          ${pending ? `<button class="primary-action" type="button" data-open-update-form="${pending.id}">Enviar atualização</button>` : emptyState("Nenhuma atualização pendente", "A próxima pendência será criada automaticamente.", icons.updates)}
-        </section>
-        <section class="panel">
-          <div class="section-title"><h3>Histórico de atualizações</h3><span class="small-text">${updates.length} registro(s)</span></div>
-          ${updates.length ? `<div class="entity-list">${updates.map(renderUpdateRow).join("")}</div>` : emptyState("Nenhum histórico de atualizações", "Suas atualizações enviadas aparecerão aqui.", icons.updates)}
-        </section>
-      </div>
-    `;
+    return renderProgressForStudent(getCurrentStudent()?.id);
   }
 
   function renderManagerUpdates() {
@@ -6102,56 +6087,75 @@
   function renderProgressForStudent(studentId) {
     const isStudentView = state.currentUser?.role === "student";
     const sessions = getStudentSessions(studentId);
-    const updateWeights = state.data.updates
-      .filter((update) => update.studentId === studentId && update.weight && update.status !== "pending")
-      .sort((a, b) => a.dueDate.localeCompare(b.dueDate));
     const exerciseProgress = buildExerciseProgress(studentId);
-
-    const allUpdates = isStudentView
-      ? state.data.updates.filter((item) => item.studentId === studentId).sort((a, b) => b.dueDate.localeCompare(a.dueDate))
-      : [];
+    const allUpdates = state.data.updates
+      .filter((item) => item.studentId === studentId)
+      .sort((a, b) => b.dueDate.localeCompare(a.dueDate));
     const pendingUpdate = allUpdates.find((item) => item.status === "pending");
     const sentUpdates = allUpdates.filter((u) => u.status !== "pending");
+    const updateWeightsChronological = sentUpdates
+      .filter((u) => u.weight)
+      .slice()
+      .reverse();
 
     return `
       <div class="content-stack">
-        ${isStudentView ? pageHeader("Progresso", "Atualizações e evolução") : ""}
+        ${isStudentView ? pageHeader("Progresso", "Evolução e atualizações") : ""}
 
         ${isStudentView ? `
           <section class="panel">
             <div class="section-title">
-              <h3>Enviar</h3>
-              <span class="small-text">${pendingUpdate ? `Vencimento ${formatDate(pendingUpdate.dueDate)}` : "Sem pendência"}</span>
+              <h3>Atualização quinzenal</h3>
+              <span class="small-text">${pendingUpdate ? `Vence ${formatDate(pendingUpdate.dueDate)}` : "Em dia"}</span>
             </div>
             ${pendingUpdate
-              ? `<button class="primary-action" type="button" data-open-update-form="${pendingUpdate.id}">Enviar atualização quinzenal</button>`
-              : emptyState("Sem atualização pendente", "A próxima será gerada automaticamente.", icons.updates)
+              ? `<button class="primary-action" type="button" data-open-update-form="${pendingUpdate.id}">
+                   Enviar peso, fotos e observações
+                 </button>`
+              : emptyState("Nenhuma pendência", "A próxima será criada automaticamente após o envio.", icons.updates)
             }
           </section>
 
+          ${updateWeightsChronological.length >= 2 ? `
+            <section class="panel">
+              <div class="section-title"><h3>Peso corporal</h3><span class="small-text">Evolução quinzenal</span></div>
+              ${renderProgressWeightChart(updateWeightsChronological)}
+            </section>
+          ` : ""}
+
           <section class="panel">
-            <div class="section-title"><h3>Histórico de envios</h3><span class="small-text">${sentUpdates.length} registro(s)</span></div>
+            <div class="section-title"><h3>Histórico de atualizações</h3><span class="small-text">${sentUpdates.length} registro(s)</span></div>
             ${sentUpdates.length
-              ? `<div class="entity-list">${sentUpdates.map((u) => `
-                  <article class="entity-row">
-                    <div class="entity-main">
-                      <strong>${formatDate(u.dueDate)}</strong>
-                      <span>${u.weight ? `Peso: ${escapeHtml(String(u.weight))} kg · ` : ""}Energia: ${escapeHtml(String(u.energy || "—"))}/5 · Dor: ${escapeHtml(String(u.pain || "—"))}/5</span>
-                      ${u.trainerComment ? `<span>Personal: ${escapeHtml(u.trainerComment)}</span>` : ""}
-                      <div class="badge-row"><span class="badge ${u.status === "viewed" ? "is-success" : "is-info"}">${updateStatusLabel(u.status)}</span></div>
-                    </div>
-                  </article>`).join("")}</div>`
-              : emptyState("Nenhum histórico", "Suas atualizações enviadas aparecerão aqui.", icons.updates)
+              ? `<div class="entity-list">${sentUpdates.map(renderStudentUpdateHistoryRow).join("")}</div>`
+              : emptyState("Nenhuma atualização enviada", "Suas atualizações aparecem aqui após o envio.", icons.updates)
             }
           </section>
-        ` : ""}
+        ` : `
+          <section class="panel">
+            <div class="section-title"><h3>Peso corporal</h3><span class="small-text">Atualizações</span></div>
+            ${updateWeightsChronological.length >= 2
+              ? renderProgressWeightChart(updateWeightsChronological)
+              : updateWeightsChronological.length
+                ? `<div class="entity-list">${updateWeightsChronological.map((item) => `<article class="entity-row"><div class="entity-main"><strong>${escapeHtml(String(item.weight))} kg</strong><span>${formatDate(item.dueDate)}</span></div></article>`).join("")}</div>`
+                : emptyState("Nenhum peso registrado", "O peso informado nas atualizações aparecerá aqui.", icons.updates)
+            }
+          </section>
+        `}
 
         <section class="metric-grid">
           ${metricCard("Semana", sessionsThisWeek(studentId).length)}
           ${metricCard("Mês", sessionsThisMonth(studentId).length)}
           ${metricCard("Treinos realizados", sessions.length)}
-          ${metricCard("Volume total", sessions.reduce((sum, session) => sum + Number(session.totalVolumeLoad || 0), 0))}
+          ${metricCard("Volume total", sessions.reduce((sum, s) => sum + Number(s.totalVolumeLoad || 0), 0))}
         </section>
+
+        ${sessions.length >= 2 ? `
+          <section class="panel">
+            <div class="section-title"><h3>Volume de treino</h3><span class="small-text">Últimas sessões</span></div>
+            ${renderProgressVolumeChart(sessions.slice(-8))}
+          </section>
+        ` : ""}
+
         <section class="panel">
           <div class="section-title"><h3>Últimos treinos</h3><span class="small-text">Volume load</span></div>
           ${sessions.length ? `<div class="entity-list">${sessions.slice(0, 8).map(renderSessionRow).join("")}</div>` : emptyState("Nenhum treino finalizado", "Finalize um treino para gerar histórico e evolução.", icons.progress)}
@@ -6160,10 +6164,98 @@
           <div class="section-title"><h3>Evolução por exercício</h3><span class="small-text">Maior carga registrada</span></div>
           ${exerciseProgress.length ? `<div class="entity-list">${exerciseProgress.map((item) => `<article class="entity-row"><div class="entity-main"><strong>${escapeHtml(item.name)}</strong><span>Maior carga: ${item.maxLoad} · Volume acumulado: ${item.volume}</span></div></article>`).join("")}</div>` : emptyState("Nenhum dado de carga", "Registre carga e repetições durante a execução do treino.", icons.progress)}
         </section>
-        <section class="panel">
-          <div class="section-title"><h3>Peso corporal</h3><span class="small-text">Atualizações</span></div>
-          ${updateWeights.length ? `<div class="entity-list">${updateWeights.map((item) => `<article class="entity-row"><div class="entity-main"><strong>${escapeHtml(String(item.weight))} kg</strong><span>${formatDate(item.dueDate)}</span></div></article>`).join("")}</div>` : emptyState("Nenhum peso registrado", "O peso informado nas atualizações aparecerá aqui.", icons.updates)}
-        </section>
+      </div>
+    `;
+  }
+
+  function renderStudentUpdateHistoryRow(u) {
+    const photos = Array.isArray(u.photos) ? u.photos : [];
+    const labels = ["Frente", "Lado", "Costas"];
+    const visiblePhotos = labels.map((label, i) => ({ label, src: photos[i] })).filter((p) => p.src);
+    return `
+      <article class="entity-row evol-update-row">
+        <div class="entity-main">
+          <div class="evol-update-meta">
+            <strong>${formatShortDate(u.dueDate)}</strong>
+            <span class="badge ${u.status === "viewed" ? "is-success" : "is-info"}">${updateStatusLabel(u.status)}</span>
+          </div>
+          ${u.weight ? `<span>Peso: ${escapeHtml(String(u.weight))} kg${u.energy ? ` · Energia: ${escapeHtml(String(u.energy))}/5` : ""}${u.pain ? ` · Dor: ${escapeHtml(String(u.pain))}/5` : ""}</span>` : ""}
+          ${visiblePhotos.length ? `
+            <div class="evol-photo-strip">
+              ${visiblePhotos.map((p) => `
+                <button class="evol-photo-thumb" type="button" data-zoom-photo="${escapeHtml(p.src)}" data-photo-label="${escapeHtml(p.label)}">
+                  <img src="${escapeHtml(p.src)}" alt="${escapeHtml(p.label)}" loading="lazy" />
+                  <small>${escapeHtml(p.label)}</small>
+                </button>
+              `).join("")}
+            </div>
+          ` : ""}
+          ${u.trainerComment ? `
+            <div class="evol-trainer-comment">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <p>${escapeHtml(u.trainerComment)}</p>
+            </div>
+          ` : ""}
+        </div>
+      </article>
+    `;
+  }
+
+  function renderProgressWeightChart(updateWeights) {
+    const n = updateWeights.length;
+    if (n < 2) return "";
+    const W = 560, H = 160, pad = 28;
+    const vals = updateWeights.map((u) => parseWeight(u.weight)).filter(Number.isFinite);
+    if (vals.length < 2) return "";
+    const minV = Math.min(...vals);
+    const maxV = Math.max(...vals);
+    const range = maxV - minV || 1;
+    const stepX = (W - 2 * pad) / (n - 1);
+    const toY = (v) => H - 12 - Math.round(((v - minV) / range) * (H - 32));
+    const pointPairs = updateWeights.map((u, i) => {
+      const v = parseWeight(u.weight);
+      return Number.isFinite(v) ? `${(pad + i * stepX).toFixed(1)},${toY(v)}` : null;
+    }).filter(Boolean);
+    const points = pointPairs.join(" ");
+    const lastPair = pointPairs[pointPairs.length - 1];
+    const [lastX] = lastPair.split(",");
+    const areaClose = `L${lastX} ${H - 12} L${pad} ${H - 12} Z`;
+    return `
+      <div class="rpt-chart-wrap">
+        <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Gráfico de peso corporal" aria-hidden="true">
+          <path class="rpt-grid" d="M${pad} ${Math.round(H * 0.22)}H${W - pad}M${pad} ${Math.round(H * 0.5)}H${W - pad}M${pad} ${Math.round(H * 0.78)}H${W - pad}"/>
+          <path class="rpt-area rpt-area--blue" d="M${points} ${areaClose}"/>
+          <polyline class="rpt-line rpt-line--blue" points="${points}"/>
+          ${updateWeights.map((u, i) => {
+            const v = parseWeight(u.weight);
+            return Number.isFinite(v) ? `<circle class="rpt-dot rpt-dot--blue" cx="${(pad + i * stepX).toFixed(1)}" cy="${toY(v)}" r="4"/>` : "";
+          }).join("")}
+        </svg>
+        <div class="rpt-chart-labels">${updateWeights.map((u) => `<span>${escapeHtml(formatShortDate(u.dueDate))}</span>`).join("")}</div>
+      </div>
+    `;
+  }
+
+  function renderProgressVolumeChart(sessions) {
+    const n = sessions.length;
+    if (n < 2) return "";
+    const W = 560, H = 160, pad = 28;
+    const vals = sessions.map((s) => Number(s.totalVolumeLoad || 0));
+    const maxV = Math.max(1, ...vals);
+    const stepX = (W - 2 * pad) / (n - 1);
+    const toY = (v) => H - 12 - Math.round((v / maxV) * (H - 32));
+    const points = sessions.map((s, i) => `${(pad + i * stepX).toFixed(1)},${toY(Number(s.totalVolumeLoad || 0))}`).join(" ");
+    const lastX = (pad + (n - 1) * stepX).toFixed(1);
+    const areaClose = `L${lastX} ${H - 12} L${pad} ${H - 12} Z`;
+    return `
+      <div class="rpt-chart-wrap">
+        <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Gráfico de volume de treino" aria-hidden="true">
+          <path class="rpt-grid" d="M${pad} ${Math.round(H * 0.22)}H${W - pad}M${pad} ${Math.round(H * 0.5)}H${W - pad}M${pad} ${Math.round(H * 0.78)}H${W - pad}"/>
+          <path class="rpt-area rpt-area--green" d="M${points} ${areaClose}"/>
+          <polyline class="rpt-line rpt-line--green" points="${points}"/>
+          ${sessions.map((s, i) => `<circle class="rpt-dot rpt-dot--green" cx="${(pad + i * stepX).toFixed(1)}" cy="${toY(Number(s.totalVolumeLoad || 0))}" r="4"/>`).join("")}
+        </svg>
+        <div class="rpt-chart-labels">${sessions.map((s) => `<span>${escapeHtml(formatShortDate(s.finishedAt.slice(0, 10)))}</span>`).join("")}</div>
       </div>
     `;
   }
@@ -9979,9 +10071,9 @@
     ensureNextUpdatePending(update.studentId, todayISO());
     persistData();
     closeModal();
-    state.studentMenu = "updates";
+    state.studentMenu = "progress";
     renderApp();
-    showToast("Atualização enviada. A próxima pendência foi criada para daqui 15 dias.");
+    showToast("Atualização enviada! O personal foi notificado. A próxima vence em 15 dias.");
   }
 
   function readPhotoFiles(files) {

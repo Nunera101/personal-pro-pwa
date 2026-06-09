@@ -15010,3 +15010,77 @@ body.is-student-chat-tab #threadForm { padding-bottom: calc(4.8rem + env(safe-ar
 .workout-complete-btn:hover {
   opacity: 0.88;
 }
+
+/* ── Progresso unificado: histórico de atualizações do aluno ── */
+.evol-update-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.evol-update-meta strong {
+  font-size: 0.95rem;
+}
+
+.evol-photo-strip {
+  display: flex;
+  gap: 0.45rem;
+  margin-top: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.evol-photo-thumb {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  width: 4.8rem;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 0.6rem;
+  background: var(--surface);
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.evol-photo-thumb img {
+  width: 100%;
+  height: 4rem;
+  object-fit: cover;
+  display: block;
+}
+
+.evol-photo-thumb small {
+  font-size: 0.65rem;
+  color: var(--muted);
+  padding: 0.15rem 0 0.25rem;
+}
+
+.evol-trainer-comment {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  margin-top: 0.45rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.55rem;
+  background: var(--surface);
+  border-left: 3px solid var(--brand-strong, #f5b51b);
+}
+
+.evol-trainer-comment svg {
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.1rem;
+  stroke: var(--brand-strong, #f5b51b);
+  stroke-width: 2;
+  fill: none;
+}
+
+.evol-trainer-comment p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
