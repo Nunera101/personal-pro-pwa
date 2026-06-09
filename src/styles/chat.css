@@ -805,6 +805,19 @@
   display: none;
 }
 
+/* ── Aba Mensagens: thread como tela própria (nav fica visível abaixo) ── */
+#studentBottomNav {
+  grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+}
+
+body.is-student-chat-tab .thread-sheet {
+  z-index: 999;
+}
+
+body.is-student-chat-tab #threadForm {
+  padding-bottom: calc(4.8rem + env(safe-area-inset-bottom, 0px)) !important;
+}
+
 /* ── Badge de chat no header do aluno ── */
 .student-chat-btn {
   position: relative;

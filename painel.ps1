@@ -39,7 +39,8 @@ $feitas  = 0
 $erros   = 0
 
 if ($total -eq 0) {
-    Write-Host "  Nenhuma tarefa pendente encontrada no tarefas.txt." -ForegroundColor Gray
+    Write-Host "  Nenhuma tarefa pendente encontra
+    da no tarefas.txt." -ForegroundColor Gray
     Write-Host "  Adicione linhas no formato:  [ ] Descricao da tarefa" -ForegroundColor Gray
     Write-Host ""
     Pause

@@ -303,6 +303,7 @@
     { id: "workouts", label: "Treinos", icon: icons.workouts },
     { id: "diet", label: "Dieta", icon: icons.diet },
     { id: "progress", label: "Progresso", icon: icons.progress },
+    { id: "chat", label: "Mensagens", icon: icons.messages },
     { id: "profile", label: "Mais", icon: icons.profile }
   ];
 
@@ -311,6 +312,7 @@
     { id: "workouts", label: "Treinos", icon: icons.workouts },
     { id: "diet", label: "Dieta", icon: icons.diet },
     { id: "progress", label: "Progresso", icon: icons.progress },
+    { id: "chat", label: "Chat", icon: icons.messages },
     { id: "profile", label: "Mais", icon: icons.more }
   ];
 
@@ -2515,6 +2517,16 @@
   }
 
   function renderStudent() {
+    if (state.studentMenu !== "chat" && document.body.classList.contains("is-student-chat-tab")) {
+      document.body.classList.remove("is-student-chat-tab");
+      const _s = elements.threadSheet;
+      if (_s && !_s.hidden) {
+        _removeThreadViewport();
+        _s.classList.remove("is-open", "is-closing", "is-student-view");
+        _s.hidden = true;
+        document.body.style.overflow = "";
+      }
+    }
     const blockingContract = getRequiredContractForStudent(getCurrentStudent()?.id);
     if (blockingContract) {
       if (markContractViewed(blockingContract)) persistData();
@@ -2543,7 +2555,7 @@
       updates: renderStudentUpdates,
       progress: renderStudentProgress,
       profile: renderStudentProfile,
-      chat: () => { const s = getCurrentStudent(); if (s) openThreadSheet(s.id); return ""; }
+      chat: () => { const s = getCurrentStudent(); if (s) openStudentChatTab(s.id); return ""; }
     };
 
     const applyStudentContent = () => {
@@ -8849,7 +8861,10 @@
     const form = document.getElementById("threadForm");
     if (form) form.dataset.studentId = studentId;
 
-    if (elements.threadSheetHd) elements.threadSheetHd.innerHTML = renderThreadHeader(student);
+    if (elements.threadSheetHd) {
+      elements.threadSheetHd.innerHTML = fixMojibake(renderThreadHeader(student));
+      scrubVisibleText(elements.threadSheetHd);
+    }
 
     _refreshThreadBd(studentId);
 
@@ -8867,10 +8882,16 @@
     });
   }
 
+  function openStudentChatTab(studentId) {
+    document.body.classList.add("is-student-chat-tab");
+    openThreadSheet(studentId);
+  }
+
   function closeThreadSheet() {
     const sheet = elements.threadSheet;
     if (!sheet || sheet.hidden) return;
     _removeThreadViewport();
+    document.body.classList.remove("is-student-chat-tab");
     _closeSheet(sheet, () => {
       sheet.classList.remove("is-student-view");
       document.body.style.overflow = "";
@@ -8890,7 +8911,8 @@
   function _refreshThreadBd(studentId) {
     const bd = elements.threadSheetBd;
     if (!bd) return;
-    bd.innerHTML = renderThreadBubbles(studentId);
+    bd.innerHTML = fixMojibake(renderThreadBubbles(studentId));
+    scrubVisibleText(bd);
     requestAnimationFrame(() => { bd.scrollTop = bd.scrollHeight; });
   }
 
@@ -10944,7 +10966,7 @@
       const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-close-thread-sheet], [data-manager-drawer-backdrop]");
       if (!target) return;
       if (target.matches("[data-open-messages]")) openThreadSheet(target.dataset.openMessages);
-      if (target.matches("[data-open-my-chat]")) { const sid = state.currentUser?.studentId || ""; if (sid) openThreadSheet(sid); }
+      if (target.matches("[data-open-my-chat]")) { state.studentMenu = "chat"; renderStudent(); }
       if (target.matches("[data-close-thread-sheet]")) closeThreadSheet();
       if (target.matches("[data-thread-attach]")) {
         const form = document.getElementById("threadForm");
