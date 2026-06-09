@@ -135,7 +135,7 @@
   min-height: 3rem;
   padding: 0 1.5rem;
   border-radius: 0.82rem;
-  background: linear-gradient(135deg, #f8d477, #f2a91d);
+  background: var(--brand);
   color: #111;
   font-size: 0.94rem;
   font-weight: 780;

@@ -40,7 +40,7 @@
   min-width: 10.7rem;
   min-height: 3.15rem;
   border-radius: 0.85rem;
-  background: linear-gradient(135deg, #ffd66f, var(--brand));
+  background: var(--brand);
   color: #080808;
   box-shadow: none;
 }

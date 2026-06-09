@@ -52,7 +52,7 @@
 .finance-hero .primary-action {
   min-height: 3.1rem;
   padding-inline: 1.25rem;
-  background: linear-gradient(135deg, #f7d06a, #f5b51b 55%, #cb850b);
+  background: var(--brand);
   color: #0b0904;
   box-shadow: none;
 }
@@ -460,7 +460,7 @@
 }
 
 .finance-primary-action {
-  background: linear-gradient(135deg, rgba(245, 181, 27, 0.95), rgba(199, 129, 13, 0.95));
+  background: var(--brand);
   color: #100c04;
   box-shadow: none;
 }
@@ -2846,7 +2846,7 @@ body::before {
 
 .primary-action {
   border: 1px solid rgba(255, 220, 134, 0.44);
-  background: linear-gradient(135deg, #ffd36a, #f5a90b);
+  background: var(--brand);
   color: #0b0b0b;
   box-shadow: none;
 }
@@ -3619,7 +3619,7 @@ body::before {
   width: auto;
   min-width: 11.2rem;
   border-radius: 0.72rem;
-  background: linear-gradient(135deg, #ffd66f, var(--brand));
+  background: var(--brand);
   color: #080808;
   box-shadow: none;
 }
@@ -4676,7 +4676,7 @@ button.dashboard-metric {
   min-width: 12.2rem;
   min-height: 2.95rem;
   border-radius: 0.82rem;
-  background: linear-gradient(135deg, #ffd66f, var(--brand));
+  background: var(--brand);
   color: #080808;
   box-shadow: none;
 }
@@ -5347,7 +5347,7 @@ button.dashboard-metric {
   min-width: 11rem;
   min-height: 3.15rem;
   border-radius: 0.86rem;
-  background: linear-gradient(135deg, #ffd66f, var(--brand));
+  background: var(--brand);
   color: #080808;
   box-shadow: none;
 }
@@ -8818,7 +8818,7 @@ button.dashboard-metric {
   min-width: 10.7rem;
   min-height: 3.15rem;
   border-radius: 0.85rem;
-  background: linear-gradient(135deg, #ffd66f, var(--brand));
+  background: var(--brand);
   color: #080808;
   box-shadow: none;
 }
@@ -9403,7 +9403,7 @@ button.dashboard-metric {
 .diet-hero .primary-action {
   min-height: 3rem;
   padding-inline: 1.2rem;
-  background: linear-gradient(135deg, #f7d06a, #f5b51b 58%, #c7810d);
+  background: var(--brand);
   color: #0b0904;
   box-shadow: none;
 }
@@ -9689,7 +9689,7 @@ button.dashboard-metric {
 }
 
 .diet-primary-action {
-  background: linear-gradient(135deg, rgba(245, 181, 27, 0.96), rgba(199, 129, 13, 0.96));
+  background: var(--brand);
   color: #100c04;
   box-shadow: none;
 }
@@ -10074,7 +10074,7 @@ button.dashboard-metric {
 .diet-hero .primary-action {
   min-height: 2.58rem;
   padding-inline: 0.95rem;
-  background: linear-gradient(135deg, #ffd978 0%, #f5b51b 54%, #c9800c 100%);
+  background: var(--brand);
   color: #090805;
   box-shadow: none;
 }
@@ -10934,8 +10934,8 @@ button.dashboard-metric {
   font-size: 0.9rem !important;
   font-weight: 830;
   white-space: nowrap;
-  background: linear-gradient(135deg, #ffe18a 0%, #f5b82e 48%, #ca820c 100%) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.32) !important;
+  background: var(--brand) !important;
+  box-shadow: none !important;
 }
 
 .dashboard-hero .primary-action svg {
@@ -11814,7 +11814,7 @@ button.dashboard-metric {
   padding: 0.58rem 0.9rem !important;
   border-radius: 0.86rem !important;
   font-size: 0.88rem !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+  box-shadow: none !important;
 }
 
 .agenda-control-panel {
@@ -12389,7 +12389,7 @@ body.is-manager-view {
   padding: 0.64rem 1.05rem !important;
   border-radius: 0.9rem !important;
   font-size: 0.86rem !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
+  box-shadow: none !important;
 }
 
 .students-hero .primary-action svg {
@@ -13437,7 +13437,7 @@ body.is-manager-view {
   min-width: 10.2rem !important;
   padding: 0.72rem 1.05rem !important;
   border-radius: 0.88rem !important;
-  background: linear-gradient(135deg, #f8d477, #f2a91d) !important;
+  background: var(--brand) !important;
   color: #111 !important;
   box-shadow: none !important;
   font-size: clamp(0.82rem, 3.15vw, 0.94rem) !important;
@@ -13663,7 +13663,7 @@ body.is-manager-view {
   place-items: center !important;
   border-radius: 999px !important;
   color: #121212 !important;
-  background: linear-gradient(135deg, #f8d477, #f2a91d) !important;
+  background: var(--brand) !important;
   box-shadow: none !important;
 }
 
@@ -13852,7 +13852,7 @@ body.is-manager-view {
 
 .library-exercise-actions .primary-action {
   color: #111 !important;
-  background: linear-gradient(135deg, #f8d477, #f2a91d) !important;
+  background: var(--brand) !important;
   border-color: rgba(245, 184, 46, 0.52) !important;
 }
 

@@ -35,7 +35,7 @@
   min-width: 12.2rem;
   min-height: 2.95rem;
   border-radius: 0.82rem;
-  background: linear-gradient(135deg, #ffd66f, var(--brand));
+  background: var(--brand);
   color: #080808;
   box-shadow: none;
 }

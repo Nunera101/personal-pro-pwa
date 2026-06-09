@@ -35,7 +35,7 @@
   padding: 0 1.4rem;
   border-radius: 1rem;
   border: none;
-  background: linear-gradient(135deg, #ffd66f, var(--brand));
+  background: var(--brand);
   color: #080808;
   font-size: clamp(1rem, 3.8vw, 1.1rem);
   font-weight: 800;
@@ -759,7 +759,7 @@
   place-items: center !important;
   border-radius: 999px !important;
   color: #121212 !important;
-  background: linear-gradient(135deg, #f8d477, #f2a91d) !important;
+  background: var(--brand) !important;
   box-shadow: none !important;
 }
 
@@ -948,7 +948,7 @@
 
 .library-exercise-actions .primary-action {
   color: #111 !important;
-  background: linear-gradient(135deg, #f8d477, #f2a91d) !important;
+  background: var(--brand) !important;
   border-color: rgba(245, 184, 46, 0.52) !important;
 }
 
