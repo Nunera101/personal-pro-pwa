@@ -302,8 +302,6 @@
     { id: "workouts", label: "Treinos", icon: icons.workouts },
     { id: "diet", label: "Dieta", icon: icons.diet },
     { id: "progress", label: "Progresso", icon: icons.progress },
-    { id: "updates", label: "Atualizações", icon: icons.updates },
-    { id: "chat", label: "Chat", icon: icons.messages },
     { id: "profile", label: "Mais", icon: icons.profile }
   ];
 
@@ -311,7 +309,7 @@
     { id: "today", label: "Início", icon: icons.today },
     { id: "workouts", label: "Treinos", icon: icons.workouts },
     { id: "diet", label: "Dieta", icon: icons.diet },
-    { id: "chat", label: "Chat", icon: icons.messages },
+    { id: "progress", label: "Progresso", icon: icons.progress },
     { id: "profile", label: "Mais", icon: icons.more }
   ];
 
@@ -8775,8 +8773,7 @@
   }
 
   function _buildStudentBottomMenus() {
-    const unread = _getStudentChatUnread();
-    return studentBottomMenus.map((m) => m.id === "chat" ? { ...m, badge: unread || null } : m);
+    return studentBottomMenus;
   }
 
   function _updateStudentChatBadge() {
