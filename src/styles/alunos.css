@@ -2949,3 +2949,123 @@
     padding: 0 0.5rem !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════
+   MAIS HUB — hub do aluno (renderStudentProfile)
+   ═══════════════════════════════════════════════════════ */
+
+.mais-identity {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.mais-identity .entity-avatar {
+  width: 52px;
+  height: 52px;
+  min-width: 52px;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.mais-identity-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.mais-identity-info h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.15;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mais-identity-info p {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin: 0;
+}
+
+.mais-hub-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.mais-hub-item {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.88rem 0.6rem;
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  transition: background 0.12s;
+}
+
+.mais-hub-item:last-child {
+  border-bottom: none;
+}
+
+.mais-hub-item:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.student-page .mais-hub-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.mais-hub-icon {
+  width: 2.1rem;
+  height: 2.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.05);
+  flex-shrink: 0;
+}
+
+.student-page .mais-hub-icon {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.mais-hub-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.mais-hub-text strong {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.mais-hub-text span {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: 0.1rem;
+}
+
+.mais-chevron {
+  opacity: 0.4;
+  flex-shrink: 0;
+}
+
+.mais-badge {
+  position: static !important;
+  transform: none !important;
+  flex-shrink: 0;
+}
+
+.mais-sair-btn {
+  width: 100%;
+}

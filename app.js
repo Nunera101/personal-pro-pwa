@@ -2560,6 +2560,9 @@
       updates: renderStudentUpdates,
       progress: renderStudentProgress,
       profile: renderStudentProfile,
+      "mais-perfil": renderStudentMaisPerfil,
+      "mais-contrato": renderStudentMaisContrato,
+      "mais-config": renderStudentMaisConfig,
       chat: () => { const s = getCurrentStudent(); if (s) openStudentChatTab(s.id); return ""; }
     };
 
@@ -6474,18 +6477,61 @@
   function renderStudentProfile() {
     const student = getCurrentStudent();
     const contracts = getStudentContracts(student?.id);
-    const pendingContracts = contracts.filter((contract) => contract.status === "pending" || contract.status === "viewed");
+    const pendingContracts = contracts.filter((c) => c.status === "pending" || c.status === "viewed");
+    const chevron = `<svg viewBox="0 0 24 24" aria-hidden="true" class="mais-chevron"><path d="m9 18 6-6-6-6"/></svg>`;
+    return `
+      <div class="content-stack">
+        ${pageHeader("Mais", "Perfil, agenda e configurações", '<button class="pill-button" type="button" data-install-trigger>Baixar app</button>')}
+        <section class="panel mais-identity-panel">
+          <div class="mais-identity">
+            ${studentAvatar(student)}
+            <div class="mais-identity-info">
+              <h3>${escapeHtml(student?.name || "Aluno")}</h3>
+              <p>${escapeHtml(student?.goal || "Sem objetivo cadastrado")}</p>
+            </div>
+            ${statusBadge(student?.status === "active" ? "Ativo" : "Inativo", student?.status === "active" ? "success" : "danger")}
+          </div>
+        </section>
+        <section class="panel">
+          <div class="mais-hub-list">
+            <button class="mais-hub-item" type="button" data-student-nav="mais-perfil">
+              <span class="mais-hub-icon">${icons.profile}</span>
+              <div class="mais-hub-text"><strong>Perfil</strong><span>Dados, estatísticas e evolução</span></div>
+              ${chevron}
+            </button>
+            <button class="mais-hub-item" type="button" data-student-nav="agenda">
+              <span class="mais-hub-icon">${icons.agenda}</span>
+              <div class="mais-hub-text"><strong>Agenda</strong><span>Atividades programadas</span></div>
+              ${chevron}
+            </button>
+            <button class="mais-hub-item" type="button" data-student-nav="mais-contrato">
+              <span class="mais-hub-icon">${icons.contracts}</span>
+              <div class="mais-hub-text"><strong>Contrato</strong><span>${pendingContracts.length ? `${pendingContracts.length} pendente(s)` : "Plano e vigência"}</span></div>
+              ${pendingContracts.length ? `<b class="nav-dot-badge mais-badge">${pendingContracts.length > 9 ? "9+" : String(pendingContracts.length)}</b>` : ""}
+              ${chevron}
+            </button>
+            <button class="mais-hub-item" type="button" data-student-nav="mais-config">
+              <span class="mais-hub-icon">${icons.settings}</span>
+              <div class="mais-hub-text"><strong>Configurações</strong><span>Conta e preferências</span></div>
+              ${chevron}
+            </button>
+          </div>
+        </section>
+        <button class="secondary-action mais-sair-btn" type="button" data-logout>Sair</button>
+      </div>
+    `;
+  }
+
+  function renderStudentMaisPerfil() {
+    const student = getCurrentStudent();
     const stats = student ? getStudentProfileStats(student) : null;
     const weekCount = stats ? stats.sessionsWeek.length : 0;
     const volumeLabel = stats ? `${Number(stats.recentVolume || 0).toLocaleString("pt-BR")} kg` : "0 kg";
     const nextAct = stats?.nextActivity;
     const contractSummary = stats?.contract || { label: "Sem contrato", tone: "" };
-    const selectedDayItems = getAgendaItemsForDate(state.agendaDate, student?.id);
-    const isDayView = state.agendaView === "day";
-    const title = agendaPeriodLabel();
     return `
       <div class="content-stack">
-        ${pageHeader("Mais", "Perfil, agenda e configurações", '<button class="pill-button" type="button" data-install-trigger>Baixar app</button>')}
+        ${pageHeader("Perfil", escapeHtml(student?.name || "Aluno"))}
         <section class="panel">
           <div class="profile-hero">
             <div>
@@ -6500,57 +6546,37 @@
             ${profileSummaryCard(icons.agenda, "Próxima atividade", nextAct ? formatShortDate(nextAct.date) : "Sem agenda", nextAct ? `${activityLabel(nextAct.type)} · ${nextAct.time || "--:--"}` : "Nenhuma marcada")}
             ${profileSummaryCard(icons.contracts, "Contrato", contractSummary.label, contractSummary.contract?.endDate ? `Até ${formatShortDate(contractSummary.contract.endDate)}` : "Status do contrato", contractSummary.tone)}
           </div>
-          <button class="quick-link" type="button" data-open-messages="${escapeHtml(student?.id || "")}"><strong>Mensagens</strong><span>${state.socketReady ? "Tempo real ativo" : "Modo local"}</span></button>
         </section>
+      </div>
+    `;
+  }
 
-        <section class="agenda-control-panel">
-          <div class="agenda-view-tabs" aria-label="Visualização da agenda">
-            <button class="${state.agendaView === 'day' ? 'is-active' : ''}" type="button" data-agenda-view="day">Dia</button>
-            <button class="${state.agendaView === 'week' ? 'is-active' : ''}" type="button" data-agenda-view="week">Semana</button>
-            <button class="${state.agendaView === 'month' ? 'is-active' : ''}" type="button" data-agenda-view="month">Mês</button>
-          </div>
-          <div class="agenda-period-nav">
-            <button class="icon-button" type="button" data-agenda-shift="-1" aria-label="Período anterior">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
-            </button>
-            <div class="agenda-period-label">
-              <strong>${escapeHtml(title)}</strong>
-            </div>
-            <button class="icon-button" type="button" data-agenda-shift="1" aria-label="Próximo período">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
-            </button>
-            <button class="mini-button agenda-today-button" type="button" data-agenda-today>Hoje</button>
-          </div>
-        </section>
-
-        ${isDayView ? "" : `
-        <section class="panel agenda-calendar-panel" aria-label="Calendário da agenda">
-          ${state.agendaView === 'week' ? renderWeekCalendar(student?.id || "") : renderMonthCalendar(student?.id || "")}
-          ${renderAgendaLegend()}
-        </section>
-        `}
-
-        <section class="panel agenda-day-panel">
-          <div class="section-title">
-            <div>
-              <h3>Itens do dia</h3>
-              <span class="small-text">${formatLongDate(state.agendaDate)} - ${selectedDayItems.length} item(ns)</span>
-            </div>
-          </div>
-          ${renderStudentAgendaRows(selectedDayItems)}
-        </section>
-
+  function renderStudentMaisContrato() {
+    const student = getCurrentStudent();
+    const contracts = getStudentContracts(student?.id);
+    const pendingContracts = contracts.filter((c) => c.status === "pending" || c.status === "viewed");
+    return `
+      <div class="content-stack">
+        ${pageHeader("Contrato", `${pendingContracts.length} pendente(s)`)}
         <section class="panel">
           <div class="section-title"><h3>Contratos</h3><span class="small-text">${pendingContracts.length} pendente(s)</span></div>
           ${contracts.length ? `<div class="entity-list">${contracts.map((contract) => renderContractRow(contract, false)).join("")}</div>` : emptyState("Nenhum contrato", "Contratos enviados pelo personal aparecerão aqui.", icons.contracts)}
         </section>
+      </div>
+    `;
+  }
+
+  function renderStudentMaisConfig() {
+    const student = getCurrentStudent();
+    return `
+      <div class="content-stack">
+        ${pageHeader("Configurações", "Conta e preferências")}
         <section class="panel">
           <div class="section-title"><h3>Conta</h3><span class="small-text">E-mail e telefone</span></div>
           <div class="profile-grid">
             <article class="profile-card"><span>E-mail</span><strong>${escapeHtml(student?.email || "-")}</strong></article>
             <article class="profile-card"><span>Telefone</span><strong>${escapeHtml(student?.phone || "-")}</strong></article>
           </div>
-          <button class="secondary-action" type="button" data-logout>Sair da conta</button>
         </section>
       </div>
     `;
