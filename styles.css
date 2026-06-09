@@ -2631,6 +2631,74 @@ svg {
   color: #000;
 }
 
+/* video player inside execution focus card */
+.exec-video-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: calc(var(--radius) - 2px);
+  overflow: hidden;
+  background: #000;
+}
+
+.exec-video-el {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  border: none;
+}
+
+.exec-video-wrap.exec-video-local {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.exec-video-open-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ink);
+  padding: 1.2rem;
+  border-radius: var(--radius);
+  transition: opacity 150ms ease;
+}
+
+.exec-video-open-btn:hover,
+.exec-video-open-btn:focus-visible {
+  opacity: 0.8;
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.exec-video-play-circle {
+  width: 3.2rem;
+  height: 3.2rem;
+}
+
+/* discrete placeholder when exercise has no video */
+.exec-video-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.6rem 0;
+  color: var(--muted);
+  opacity: 0.4;
+}
+
+.exec-video-placeholder-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
 .set-list {
   display: grid;
   gap: 0.65rem;
