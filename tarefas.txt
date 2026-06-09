@@ -1,11 +1,10 @@
 ﻿==============================================
- FILA - GESTOR: rerodar Padroes + pendencias do fechamento
- Motivo: Padroes (P-01..P-04) foi marcada [OK] mas o resultado mostra
- ERRO de CLI do Claude Code (PowerShell), nao execucao real -> rerodar.
- Mais as pendencias 🟠 que a revisao final levantou no DIVERGENCIAS e
- que sao do MESMO tipo ja corrigido em outras telas (rodape escondido).
- Cada tarefa = UMA linha. NAO quebrar ao colar. ~7 cabem numa janela.
- "session limit" OU erro de CLI no resultado = NAO rodou -> [OK] volta [ ].
+ LOTE DA NOITE - TERMINAR A UNIFICACAO DO GESTOR
+ Motivo: na rodada anterior so rodaram backup, inventario e o flash preto.
+ O resto bateu "session limit" (reset 11:10pm) e NAO rodou. Este lote
+ retoma do ponto que parou. Cabe numa janela de 5h.
+ Cada tarefa = UMA linha. NAO quebrar ao colar. SEM seta no texto.
+ "session limit" ou erro de CLI = NAO rodou -> [OK] volta para [ ].
  Tokens: dourado #F59E0B, fundo #0D0D0D, card #1A1A1A flat sem glow,
  borda rgba(255,255,255,0.06), radius 16px, txt2 #9CA3AF, ok #10B981,
  erro #EF4444. Status: Treino=verde, Avaliacao=#8B5CF6, Atualizacao=
@@ -13,21 +12,26 @@
 ==============================================
 
 == BACKUP ==
-[OK] git checkout -b backup/gestor-fechamento-2 && git push origin backup/gestor-fechamento-2 && git checkout main. NAO altere arquivos. Confirme que o app abre sem erro de sintaxe. (sem commit adicional)
-     Resultado: Tudo certo: | - Branch `backup/gestor-fechamento-2` criado e pushed para origin | - Retornado para `main` | - **Todos os 40 arquivos JS verificados ÔÇö zero erros de sintaxe**
+[OK] git checkout -b backup/unificar-parte2 && git push origin backup/unificar-parte2 && git checkout main. NAO altere arquivos. Confirme que o app abre sem erro de sintaxe. (sem commit adicional)
+     Resultado: Tudo certo: | - Branch `backup/unificar-parte2` criado e publicado no origin | - Voltou para `main` | - `app.js` e `server.js` passam no check de sintaxe sem erros
 
-== RERODAR (falhou com erro de CLI) ==
-[OK] (P-01/P-02/P-03/P-04) Padroes - ajustes finos vs mockup (a execucao anterior FALHOU com erro de CLI, nao rodou): (1) botao "Novo padrao" GRANDE dourado FULL-WIDTH com "+" e "Novo padrao ->" (hoje e botao pequeno no canto); (2) subtitulo do hero "Modelos base reutilizaveis" (verificar app.js, hoje pode estar so "Modelos"); (3) card com infos em LINHAS limpas separadas (Objetivo / Nivel / Exercicios / Ultima edicao), cada label+valor em linha propria, sem caixas; (4) botao "Aplicar" outline DOURADO sem icone de alunos; (5) placeholder da busca sem truncar em 390px. Comparar lado a lado com o mockup PADROES antes de finalizar. git add . && git commit -m "fix(padroes): botao full-width, subtitulo, card em linhas, aplicar dourado, busca" && git push origin main
-     Resultado: +   & "$basedir/node_modules/@anthropic-ai/claude-code/bin/claude.exe"  ... | +   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ |     + CategoryInfo          : NotSpecified: (error: unknown ...o h...
+== BUGS FUNCIONAIS (faltaram) ==
+[OK] BUG abas secundarias piscando/engolindo elemento ao abrir: os sheets tem flicker ou engolem um elemento (header, botao) ao abrir. Investigar a animacao de abertura (is-open / is-closing) e o reflow inicial. Garantir abertura com fade/slide estavel, sem piscar e sem cortar elemento no primeiro frame. Testar abrir e fechar 5 sheets. git add . && git commit -m "fix(sheets): abertura estavel sem flicker nem corte" && git push origin main
+     Resultado: | `.workout-sheet` (treino, exerc├¡cio, dieta, contrato) | idem | idem | | | `.video-modal` | idem | idem | | | `.thread-sheet` | ÔÇö (sem backdrop) | fade + translateX(6%) no wrapper, 260ms/160ms | | Todos os timings...
+[OK] BUG Mensagens - a barra inferior ENGOLE o compose ao abrir a conversa: ao abrir a conversa, a barra de navegacao cobre o campo de digitar ou o ultimo elemento. Garantir que na thread o compose fica ACIMA da bottom nav (ou a nav some na thread, padrao WhatsApp), com altura/padding respeitando a barra e a safe-area; ultimo balao e campo de digitar nunca escondidos. git add . && git commit -m "fix(mensagens): compose acima da barra inferior na conversa" && git push origin main
+     Resultado: Feito. A corre├º├úo foi cir├║rgica: uma linha em `chat.css`. | **Causa raiz:** `.thread-sheet` tinha `z-index: 90`, mas `.bottom-nav` tinha `z-index: 1000 !important` ÔÇö a nav ficava por cima do sheet inteiro, engolind...
+[OK] BUG Biblioteca - erro ao ver o video UPADO: ao abrir um video enviado pelo gestor, da erro. Investigar a URL/origem do video salvo: se for blob/objectURL que expira ao recarregar, documentar no resultado se a correcao exige salvar o video em local persistente (backend) para deixar para amanha; enquanto isso, se o video estiver indisponivel mostrar placeholder "Nao foi possivel carregar o video / Reenviar" em vez de erro. git add . && git commit -m "fix(biblioteca): tratar erro ao reproduzir video upado" && git push origin main
+     Resultado: - `closeVideoModal`: `video.remove()` antes de `video.src = ""` ÔÇö o v├¡deo ├® desconectado do DOM antes do evento `error` ser disparado. | - `renderVideoPlayer`: guard `if (!body.contains(video)) return` no handler de...
 
-== PENDENCIAS 🟠 DO FECHAMENTO (mesmo tipo ja corrigido em outras telas) ==
-[OK] (DI-01) Sheet "Plano alimentar" (montador de dieta): o rodape de acao (Cancelar / Salvar) pode sumir atras da bottom nav em mobile - aplicar a MESMA correcao ja usada no check-in e nas outras sheets: rodape DENTRO do sheet com z-index acima do bottom nav e padding-bottom com safe-area, conteudo rolavel ate o fim, botoes sempre visiveis e clicaveis. git add . && git commit -m "fix(dieta): rodape do montador visivel acima da bottom nav" && git push origin main
-     Resultado: DI-01 conclu├¡da e enviada. | **O que foi verificado:** o `mealPlanSheet` j├í estava corretamente implementado com o padr├úo `ex-sheet-panel` (flex column + overflow hidden), `ex-sheet-body` (flex:1, min-height:0, overf...
-[OK] (DI-02) Montador de dieta - acessibilidade: o input de busca de alimento (.mp-food-search-input) e os campos dinamicos de refeicao usam so placeholder, sem aria-label - adicionar aria-label a esses inputs (mesmo padrao ja aplicado na compose de mensagens). git add . && git commit -m "fix(a11y): aria-label nos inputs do montador de dieta" && git push origin main
-     Resultado: DI-02 conclu├¡da. O `mp-food-search-input` recebeu `aria-label="Buscar alimento"` ÔÇö os demais campos din├ómicos (`mp-meal-name-input`, `mp-meal-time-input`, `mp-food-qty-input`, `mp-food-kcal-input`) j├í tinham `aria-l...
-[OK] (M-03) Mensagens - compose bar no iOS com teclado: quando o teclado virtual sobe, a barra de composicao pode ser deslocada/escondida. Tratar com env(keyboard-inset-height) / safe-area para a compose acompanhar o teclado sem sumir nem cobrir a ultima mensagem. Testar (ou simular) com teclado aberto. git add . && git commit -m "fix(mensagens): compose bar estavel com teclado no iOS" && git push origin main
-     Resultado: **`app.js`** ÔÇö Visual Viewport API como fallback para iOS < 15.4: | - `_installThreadViewport()` ÔÇö registra `resize` + `scroll` no `visualViewport` ao abrir a thread. | - `_applyThreadViewport()` ÔÇö seta `height` ...
+== UNIFICAR HEADER + BOTOES + CARDS + ICONES ==
+[OK] Com base no INVENTARIO-COMPONENTES.md, unificar o LOGO/HEADER: UM unico componente de header (logo AS + "Elite AS" + badge GESTOR + sino + avatar) usado por TODAS as abas. Remover versoes duplicadas; mesmo tamanho, posicao e arquivo de logo em todas. git add . && git commit -m "refactor(header): header unico em todas as abas" && git push origin main
+     Resultado: Feito. Resumo das mudan├ºas: | **`index.html`** ÔÇö `manager-header` agora usa `logo-oficial.svg` com classe `brand-logo`, id├¬ntico ao `student-header`. O `elite-as-wordmark.svg` foi removido completamente. | **`base....
+[OK] Com base no INVENTARIO, unificar os BOTOES primarios do topo: UMA classe unica (fundo dourado #F59E0B, texto escuro, mesma altura e radius) em TODAS as abas. Reduzir o "Novo padrao" da aba Padroes ao MESMO tamanho e estilo chapado dos demais (alinhado ao topo, sem gradiente/brilho), batendo com "Agendar atividade" e "Novo aluno". Unificar tambem os botoes secundarios/outline (contorno dourado, texto claro, mesma altura/radius); pares de acao dos cards (Abrir perfil / Enviar link) identicos entre as abas. git add . && git commit -m "refactor(botoes): botoes primario e secundario unicos em todas as abas" && git push origin main
+     Resultado: | Biblioteca | `.primary-action.library-primary-action` (!important) | `.btn-action-header` | | | Financeiro | `.btn-action-header` (ghost) | `.btn-action-header` (s├│lido) | | **Estilo unificado:** `background: #F59E0...
+[OK] Com base no INVENTARIO, unificar os CARDS: card #1A1A1A flat, borda rgba(255,255,255,0.06), radius 16px, SEM glow/sombra/gradiente, em todas as abas. A Biblioteca usa estilo de card e cores diferentes - alinhar ao padrao. Remover as variantes B (gradiente 3-stops hardcoded), C (ghost/outline invertido) e D (classe propria da Biblioteca) citadas no inventario; tudo no token oficial. git add . && git commit -m "refactor(cards): cards e cores unificados, biblioteca alinhada" && git push origin main
+     Resultado: | `src/styles/chat.css` | message-summary-card, toolbar/list panels, conversation/message lists, message-detail-hero | | | `src/styles/treinos.css` | pattern-summary-card, patterns-list-panel, pattern-card, `.library-st...
+[OK] Com base no INVENTARIO, unificar os ICONES INTERNOS: UM unico conjunto/estilo de icone (mesmo peso de traco, tamanho e cor) nos cards, metricas, botoes e barra inferior, em TODAS as abas. Substituir os divergentes (Dashboard/Alunos/Agenda/Biblioteca) pelo conjunto padrao, dourado nos ativos e secundario nos inativos. git add . && git commit -m "refactor(icones): conjunto de icones unico em todas as abas" && git push origin main
+     Resultado: | `atualizacoes.css` | `1.1rem ÔåÆ 1.2rem` e `1rem ÔåÆ 1.2rem` nos bot├Áes; removeu `stroke-width: 2.2` de 5 seletores (bot├úo hero, filtro, back-btn, compare-btn, footer-btn) | | | `base.css` | `1.06rem ÔåÆ 1.2rem` e `...
 
 == FECHAMENTO ==
-[OK] Atualize DIVERGENCIAS-GESTOR.md: mover Padroes, DI-01, DI-02 e M-03 para "Resolvidos" se confirmados, e deixar listadas APENAS as pendencias remanescentes com prioridade (separar o que e 🟠 real do que e 🟢 cosmetico tipo 320px). git add . && git commit -m "chore: atualizar DIVERGENCIAS-GESTOR apos fechamento" && git push origin main
-     Resultado: Feito. P-02/P-06/P-07, DI-01, DI-02, M-03 movidos para Resolvidos. PA-02/PA-03 rebaixados para 🟢 (320px legado). Resumo reestruturado: 1 item 🟠, 8 items 🟡, 5 items 🟢. Commit 0d36dd1 pusado.
+[ ] Revisao de consistencia: percorrer as 11 abas e confirmar que header, botao primario, botao secundario, icones, cards e cores ficaram IDENTICOS; sem flash preto na troca de aba; sem sheet piscando/engolindo; Mensagens com compose acima da barra. Atualizar INVENTARIO-COMPONENTES.md marcando o unificado e o que sobrou. git add . && git commit -m "chore: revisao final de consistencia de componentes" && git push origin main

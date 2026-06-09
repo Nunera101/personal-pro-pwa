@@ -538,17 +538,6 @@
   line-height: 1.25 !important;
 }
 
-.library-primary-action {
-  min-height: 3rem !important;
-  min-width: 10.2rem !important;
-  padding: 0.72rem 1.05rem !important;
-  border-radius: 0.88rem !important;
-  background: linear-gradient(135deg, #f8d477, #f2a91d) !important;
-  color: #111 !important;
-  box-shadow: none !important;
-  font-size: clamp(0.82rem, 3.15vw, 0.94rem) !important;
-  font-weight: 760 !important;
-}
 
 .library-stat-grid {
   display: grid !important;
@@ -991,12 +980,6 @@
     gap: 0.58rem !important;
   }
 
-  .library-primary-action {
-    min-width: 8.75rem !important;
-    min-height: 2.58rem !important;
-    padding-inline: 0.78rem !important;
-  }
-
   .library-stat-grid {
     gap: 0.42rem !important;
   }
@@ -1056,10 +1039,6 @@
 @media (max-width: 23rem) {
   .library-hero {
     grid-template-columns: 1fr !important;
-  }
-
-  .library-primary-action {
-    width: 100% !important;
   }
 
   .library-exercise-card {

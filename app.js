@@ -8761,7 +8761,7 @@
 
   function renderThreadHeader(student) {
     const isManager = state.currentUser?.role === "manager";
-    const backBtn = `<button class="thread-back-btn" type="button" data-close-thread-sheet aria-label="Voltar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M19 12H5M12 5l-7 7 7 7"/></svg></button>`;
+    const backBtn = `<button class="thread-back-btn" type="button" data-close-thread-sheet aria-label="Voltar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M19 12H5M12 5l-7 7 7 7"/></svg></button>`;
     if (!isManager) {
       const trainerName = state.data.settings?.trainerName || "Personal";
       const statusLabel = state.socketReady ? "tempo real ativo" : "Personal";

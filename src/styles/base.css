@@ -4058,7 +4058,6 @@ button.dashboard-metric {
 .diet-secondary-action,
 .finance-primary-action,
 .finance-secondary-action,
-.contract-primary-action,
 .contract-secondary-action {
   border-radius: 0.78rem;
   letter-spacing: 0;
@@ -4370,7 +4369,6 @@ button.dashboard-metric {
 .pattern-card-actions .primary-action,
 .diet-primary-action,
 .diet-secondary-action,
-.contract-primary-action,
 .finance-primary-action,
 .finance-secondary-action {
   min-height: 2.75rem;
