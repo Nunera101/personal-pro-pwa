@@ -211,6 +211,8 @@ function mergeStudentContracts(existing = [], incoming = [], auth = {}) {
       status: signed ? "signed" : contract.status,
       signedAt: signed ? next.signedAt || contract.signedAt || new Date().toISOString() : contract.signedAt || "",
       signedVersion: signed ? contract.version || next.signedVersion || "" : contract.signedVersion || "",
+      signerName: next.signerName || contract.signerName || "",
+      signerCpf: next.signerCpf || contract.signerCpf || "",
       technicalId: next.technicalId || contract.technicalId || "",
       signatureIp: next.signatureIp || contract.signatureIp || "",
       signatureUserAgent: next.signatureUserAgent || contract.signatureUserAgent || "",

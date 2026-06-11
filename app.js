@@ -714,6 +714,7 @@
       passwordHash,
       hasPassword,
       phone: student.phone || "",
+      cpf: student.cpf || "",
       goal: student.goal || "Condicionamento",
       status: student.status || "active",
       accessStatus,
@@ -1043,6 +1044,8 @@
       viewedAt: contract.viewedAt || "",
       signedAt: contract.signedAt || "",
       signedVersion: contract.signedVersion || "",
+      signerName: contract.signerName || "",
+      signerCpf: contract.signerCpf || "",
       technicalId: contract.technicalId || "",
       signatureIp: contract.signatureIp || "",
       signatureUserAgent: contract.signatureUserAgent || "",
@@ -4058,6 +4061,35 @@
     `;
   }
 
+  // --- CPF: apenas dígitos, máscara 000.000.000-00 e validação de dígito verificador. ---
+  function cpfDigits(value = "") {
+    return String(value || "").replace(/\D+/g, "").slice(0, 11);
+  }
+
+  function maskCpf(value = "") {
+    const d = cpfDigits(value);
+    if (d.length <= 3) return d;
+    if (d.length <= 6) return `${d.slice(0, 3)}.${d.slice(3)}`;
+    if (d.length <= 9) return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6)}`;
+    return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6, 9)}-${d.slice(9)}`;
+  }
+
+  function isValidCpf(value = "") {
+    const cpf = cpfDigits(value);
+    if (cpf.length !== 11) return false;
+    if (/^(\d)\1{10}$/.test(cpf)) return false; // rejeita 000.../111... etc.
+    let sum = 0;
+    for (let i = 0; i < 9; i += 1) sum += parseInt(cpf[i], 10) * (10 - i);
+    let check = (sum * 10) % 11;
+    if (check === 10) check = 0;
+    if (check !== parseInt(cpf[9], 10)) return false;
+    sum = 0;
+    for (let i = 0; i < 10; i += 1) sum += parseInt(cpf[i], 10) * (11 - i);
+    check = (sum * 10) % 11;
+    if (check === 10) check = 0;
+    return check === parseInt(cpf[10], 10);
+  }
+
   function normalizeFilterText(value = "") {
     return String(value || "")
       .normalize("NFD")
@@ -6523,6 +6555,11 @@
               <span>Nome completo (confirmação de identidade)</span>
               <input type="text" data-gate-name-confirm="${escapeHtml(contract.id)}" placeholder="${escapeHtml(student?.name || "Seu nome completo")}" autocomplete="name" />
             </label>
+            <label class="field">
+              <span>CPF (confirmação de identidade)</span>
+              <input type="text" inputmode="numeric" data-gate-cpf-confirm="${escapeHtml(contract.id)}" placeholder="000.000.000-00" maxlength="14" autocomplete="off" />
+            </label>
+            <p class="contract-gate-error" data-gate-error="${escapeHtml(contract.id)}" role="alert" hidden></p>
             <button class="primary-action" type="button" data-sign-contract-gate="${escapeHtml(contract.id)}" disabled>Confirmar aceite</button>
             <p class="small-text">O aceite registra data/hora, IP e identificação técnica para fins de comprovação jurídica.</p>
           </div>
@@ -9032,7 +9069,7 @@
             : `<div class="contract-doc-body">${escapeHtml(cleanContractBody(contract.body) || "Texto do contrato não informado.")}</div>`
           }
           ${contract.signedAt ? `
-            <p class="small-text">Assinado em ${new Date(contract.signedAt).toLocaleString("pt-BR")} · Versão ${escapeHtml(contract.signedVersion || contract.version)} · ${escapeHtml(contract.technicalId || "sem ID técnico")}${contract.signatureIp ? " · IP " + escapeHtml(contract.signatureIp) : ""}</p>
+            <p class="small-text">Assinado em ${new Date(contract.signedAt).toLocaleString("pt-BR")} · Versão ${escapeHtml(contract.signedVersion || contract.version)} · ${escapeHtml(contract.technicalId || "sem ID técnico")}${contract.signatureIp ? " · IP " + escapeHtml(contract.signatureIp) : ""}${contract.signerName ? " · " + escapeHtml(contract.signerName) : ""}${contract.signerCpf ? " · CPF " + escapeHtml(contract.signerCpf) : ""}</p>
           ` : ""}
         </section>
 
@@ -11347,7 +11384,14 @@
     });
     document.addEventListener("input", (event) => {
       if (event.target.matches("[data-gate-name-confirm]")) {
+        setGateError(event.target.dataset.gateNameConfirm, "");
         updateGateSignButton(event.target.dataset.gateNameConfirm);
+      }
+      if (event.target.matches("[data-gate-cpf-confirm]")) {
+        const contractId = event.target.dataset.gateCpfConfirm;
+        event.target.value = maskCpf(event.target.value);
+        setGateError(contractId, "");
+        updateGateSignButton(contractId);
       }
     });
     document.addEventListener("toggle", (event) => {
@@ -11831,12 +11875,28 @@
   function updateGateSignButton(contractId) {
     const checkbox = document.querySelector(`[data-gate-consent-check="${contractId}"]`);
     const nameInput = document.querySelector(`[data-gate-name-confirm="${contractId}"]`);
+    const cpfInput = document.querySelector(`[data-gate-cpf-confirm="${contractId}"]`);
     const signBtn = document.querySelector(`[data-sign-contract-gate="${contractId}"]`);
     if (!signBtn) return;
-    const ready = checkbox?.checked && (nameInput?.value || "").trim().length >= 2;
+    const ready =
+      checkbox?.checked &&
+      (nameInput?.value || "").trim().length >= 2 &&
+      cpfDigits(cpfInput?.value || "").length === 11;
     signBtn.disabled = !ready;
     if (ready && !signBtn.dataset.consentAt) signBtn.dataset.consentAt = new Date().toISOString();
     if (!checkbox?.checked) delete signBtn.dataset.consentAt;
+  }
+
+  function setGateError(contractId, message) {
+    const errorEl = document.querySelector(`[data-gate-error="${contractId}"]`);
+    if (!errorEl) return;
+    if (message) {
+      errorEl.textContent = message;
+      errorEl.hidden = false;
+    } else {
+      errorEl.textContent = "";
+      errorEl.hidden = true;
+    }
   }
 
   async function signContractFromGate(id) {
@@ -11844,17 +11904,44 @@
     if (!contract || state.currentUser?.role !== "student" || contract.studentId !== state.currentUser.studentId) return showToast("Contrato indisponível.");
     const signBtn = document.querySelector(`[data-sign-contract-gate="${id}"]`);
     const nameInput = document.querySelector(`[data-gate-name-confirm="${id}"]`);
+    const cpfInput = document.querySelector(`[data-gate-cpf-confirm="${id}"]`);
     const checkbox = document.querySelector(`[data-gate-consent-check="${id}"]`);
     const typedName = (nameInput?.value || "").trim();
+    const typedCpf = cpfDigits(cpfInput?.value || "");
     const consentAt = signBtn?.dataset.consentAt || null;
     if (!checkbox?.checked || !consentAt) return showToast("Confirme que leu os termos antes de assinar.");
-    if (!typedName) return showToast("Digite seu nome completo para confirmar a assinatura.");
+    if (!typedName) { setGateError(id, "Digite seu nome completo para confirmar a assinatura."); return; }
+    if (!typedCpf) { setGateError(id, "Digite seu CPF para confirmar a assinatura."); return; }
+
+    const student = getStudent(contract.studentId);
+    // Nome: tolera diferença de caixa, acentos e espaçamento (mesma normalização da busca).
+    const registeredName = student?.name || "";
+    if (registeredName && normalizeFilterText(typedName) !== normalizeFilterText(registeredName)) {
+      setGateError(id, "O nome digitado não confere com o nome do seu cadastro.");
+      return;
+    }
+    // CPF: valida dígito verificador antes de comparar.
+    if (!isValidCpf(typedCpf)) {
+      setGateError(id, "CPF inválido. Confira os números digitados.");
+      return;
+    }
+    // CPF registrado pelo gestor (perfil do aluno ou contrato), ignorando pontuação.
+    const registeredCpf = cpfDigits(student?.cpf || contract.cpf || "");
+    if (registeredCpf && registeredCpf !== typedCpf) {
+      setGateError(id, "O CPF digitado não confere com o cadastro. Verifique com seu personal.");
+      return;
+    }
+
+    setGateError(id, "");
     if (signBtn) { signBtn.disabled = true; signBtn.textContent = "Registrando…"; }
     try {
       const meta = await getContractSignatureMeta(contract);
+      const signerCpf = maskCpf(typedCpf);
       contract.status = "signed";
       contract.signedAt = new Date().toISOString();
       contract.signedVersion = contract.version;
+      contract.signerName = typedName;
+      contract.signerCpf = signerCpf;
       contract.technicalId = technicalId();
       contract.signatureIp = meta.ip || "";
       contract.signatureUserAgent = meta.userAgent || navigator.userAgent || "";
@@ -11862,10 +11949,18 @@
         source: "internal_app_acceptance_gate",
         consentCheckboxAt: consentAt,
         signatureName: typedName,
+        signerCpf,
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "",
         language: navigator.language || "",
         backendMeta: meta || {}
       });
+      // Cadastro sem CPF: aceita o digitado e salva no perfil do aluno.
+      if (!registeredCpf && student) {
+        student.cpf = signerCpf;
+      }
+      // PONTO DE INTEGRAÇÃO FUTURA: provedor de assinatura certificada (Clicksign/D4Sign).
+      // O aceite atual registra a trilha de auditoria interna (nome, CPF, data/hora, IP,
+      // userAgent, versão). A assinatura ICP-Brasil entra aqui depois, com acompanhamento.
       persistData();
       await flushRemoteSync();
       showGateSuccessTransition(typedName || getStudent(contract.studentId)?.name);

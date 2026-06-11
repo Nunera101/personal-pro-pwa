@@ -1,71 +1,25 @@
 ﻿==============================================
- FILA - ALUNO: REFINAMENTO PREMIUM (pos-validacao video 11/06)
- Base: video real do aluno. Problemas confirmados: card dourado com
- texto branco ilegivel; Inicio despejando exercicios crus (deve ser
- dashboard); "Exercicio indisponivel" voltou (treinos antigos sem
- snapshot); header em 3 andares com espaco vazio; chat com a barra
- invadindo; Agenda escondida no Mais; contrato em texto com campos
- vazios e aceite fraco; badge ALUNO verde (GESTOR e dourado).
- Cada tarefa = UMA linha. NAO quebrar ao colar. SEM seta no texto.
- "session limit"/erro de CLI = NAO rodou. ~7 por janela. Validar com
- video entre levas.
- Tokens: dourado #F59E0B, fundo #0D0D0D, card #1A1A1A flat sem glow,
- borda rgba(255,255,255,0.06), radius 16px, txt2 #9CA3AF, ok #10B981,
- erro #EF4444. REGRA DE CONTRASTE: texto sobre fundo dourado e SEMPRE
- escuro (#1A1206 ou similar), NUNCA branco.
+ FILA - WIDGETS DE ACOMPANHAMENTO DO ALUNO
+ Calibrado pos-refinamento: o Inicio JA tem cards de Treinos na semana,
+ Volume recente, Proxima atividade e Contrato. Aqui: enriquecer esses e
+ adicionar os que faltam (bolinhas da semana, progresso de hoje, streak,
+ peso, adesao). Tudo alimentado pelo historico de execucao que ja existe.
+ Tema: dourado #F59E0B sobre fundo escuro #0D0D0D, cards #1A1A1A flat,
+ borda rgba(255,255,255,0.06), radius 16px, txt2 #9CA3AF, verde #10B981.
+ Texto sobre dourado SEMPRE escuro #1A1206. Sem glow. SEM seta no texto.
+ Cada tarefa = UMA linha. "session limit"/erro de CLI = NAO rodou.
 ==============================================
 
 == BACKUP ==
-[OK] git checkout -b backup/aluno-refinamento && git push origin backup/aluno-refinamento && git checkout main. NAO altere arquivos. Confirme que o app abre sem erro de sintaxe. (sem commit adicional)
-     Resultado: - Ô£à Branch `backup/aluno-refinamento` criada e enviada para o `origin`.
- | - Ô£à Voltei para a branch `main` (com a altera├º├úo n├úo commitada em `tarefas.txt` preservada ÔÇö nenhum arquivo foi alterado por mim e nenhu...
+[ ] git checkout -b backup/widgets-aluno && git push origin backup/widgets-aluno && git checkout main. NAO altere arquivos. Confirme que o app abre sem erro de sintaxe. (sem commit adicional)
 
-############################################################
-# LEVA A - INICIO VIRA DASHBOARD + TREINOS ORGANIZADOS     #
-# (o coracao do refinamento)                               #
-############################################################
-[OK] INICIO do aluno vira DASHBOARD (nao despejar exercicios crus na home): remover da tela Inicio a lista de exercicios/series com "Iniciar serie". O Inicio passa a ter: (1) saudacao + proxima atividade; (2) grade de cards de metricas compactos no padrao do gestor, com icone dourado em fundo escuro arredondado a esquerda e label maiuscula + valor + legenda: TREINOS NA SEMANA (X concluidos), VOLUME RECENTE (kg dos ultimos 4 treinos), PROXIMA ATIVIDADE (data e tipo), CONTRATO (status com cor); (3) card do TREINO DE HOJE apenas como atalho (nome do treino + botao Abrir treino), sem expor exercicios; (4) atalho para enviar progresso se houver pendencia. Estado vazio elegante para cada card sem dado. git add . && git commit -m "feat(aluno): Inicio vira dashboard com cards de metricas" && git push origin main
-     Resultado: 5. **Estado vazio elegante** para o treino de hoje e m├®tricas zeradas. | Removi o painel "Agenda de hoje" (`renderAgendaList`) que era a fonte da lista com bot├Áes "Iniciar" na home ÔÇö a Agenda passa a viver na pr├│pr...
-[OK] TREINOS como cards nomeados: a aba Treinos lista cada treino publicado como um card com o TITULO dado pelo professor (ex Treino A, Treino B, Peito e Triceps), objetivo, numero de exercicios, ultima execucao e botao Abrir. NADA de exercicios soltos na lista. Ao tocar, abre a TELA DO TREINO: lista organizada dos exercicios (nome real, grupo, series x reps x carga sugerida x descanso, thumbnail/play do video quando houver) e um botao unico INICIAR TREINO no rodape que leva ao fluxo de execucao serie a serie ja existente. git add . && git commit -m "feat(aluno): treinos em cards nomeados com tela de detalhe organizada" && git push origin main
-     Resultado: **Estado:** `state.studentWorkoutDetailId` controla a tela aberta; ├® limpo ao trocar de aba e ao iniciar o treino (pra voltar ├á lista depois de finalizar). | **CSS:** bloco `.swd-*` em `treinos.css` no padr├úo premium...
-[OK] BUG "Exercicio indisponivel" DE NOVO (o fix do snapshot so cobre clones novos): fazer BACKFILL nos treinos ja existentes - ao carregar/renderizar um treino cujas rows nao tem exerciseName, preencher a partir da biblioteca (getExercise) e salvar; se o exercicio nao existir mais na biblioteca e nao houver snapshot, exibir o ultimo nome conhecido ou "Exercicio" + grupo, NUNCA "Exercicio indisponivel". Conferir tambem o seed: os treinos de demonstracao devem referenciar exercicios QUE EXISTEM na biblioteca seed. git add . && git commit -m "fix(aluno): backfill de nomes de exercicios em treinos existentes" && git push origin main
-     Resultado: ## Seed | Verifiquei: n├úo h├í treino de demonstra├º├úo com `exerciseId` hardcoded. O `seedExercises` tem IDs est├íveis e os treinos s├úo montados sobre a biblioteca viva ÔÇö nada a corrigir aqui. | `node --check` pass...
-[OK] CONTRASTE nos cards dourados: TODO texto sobre fundo dourado deve ser escuro (#1A1206 ou tom proximo), nunca branco - corrigir o card "Treino em execucao/Treino da semana" e o card "Primeiro acesso" do gate de contrato (titulo, subtitulo e badge internos ilegiveis hoje). Varrer o CSS por .text sobre background dourado e padronizar uma regra unica de contraste. git add . && git commit -m "fix(aluno): texto escuro sobre fundos dourados (contraste)" && git push origin main
-     Resultado: - `.hero-panel`, `p` (subt├¡tulo), `h3` (t├¡tulo) e `span` (legenda) ÔåÆ texto escuro `#1A1206` (com leve transpar├¬ncia nos secund├írios). | - Regra ├║nica para **todos os badges internos** do `.hero-panel` (info/succe...
+== WIDGETS ==
+[ ] Enriquecer o card TREINOS NA SEMANA do Inicio do aluno com as bolinhas dos dias: ao lado do numero X/Y, uma linha com 7 bolinhas (S T Q Q S S D); dia com treino concluido = bolinha dourada preenchida com check escuro; dia pendente = contorno cinza; dia sem treino programado = contorno apagado. Calcular a partir do historico de conclusao e dos treinos programados na agenda da semana. git add . && git commit -m "feat(widgets): bolinhas da semana no card de treinos" && git push origin main
+[ ] Widget PROGRESSO DO TREINO DE HOJE no Inicio: quando houver treino do dia, card com nome do treino, X de Y series concluidas e barra de progresso dourada com porcentagem; atualiza conforme o aluno marca series na execucao; some quando nao ha treino hoje ou quando ja concluiu (nesse caso o card de hoje mostra Concluido com check verde). git add . && git commit -m "feat(widgets): progresso do treino de hoje no Inicio" && git push origin main
+[ ] Widget SEQUENCIA (streak) no Inicio: card com numero grande dourado de dias seguidos treinando + rotulo "dias seguidos" + icone de chama; calcular do historico (dias consecutivos com ao menos 1 treino concluido, contando ate ontem ou hoje se ja treinou); se a sequencia for 0, mostrar frase motivacional curta tipo "Comece hoje sua sequencia" em vez de 0. git add . && git commit -m "feat(widgets): sequencia de dias treinando" && git push origin main
+[ ] Widget PESO CORPORAL no Inicio: card com o peso mais recente em numero grande, a variacao no mes colorida (queda em verde #10B981 com seta para baixo, aumento em vermelho #EF4444 com seta para cima, estavel em cinza) e um mini grafico de linha da evolucao (SVG inline no padrao rpt- ja usado no Progresso). Usar os pesos enviados nas atualizacoes. Estado vazio "Envie seu peso no Progresso para acompanhar". git add . && git commit -m "feat(widgets): peso corporal com variacao e mini grafico" && git push origin main
+[ ] Widget ADESAO DO MES no Inicio: card com anel de progresso dourado (SVG) mostrando a porcentagem de treinos do plano concluidos no mes + texto "X de Y treinos do mes"; mesmo calculo de adesao que o gestor ve; texto central escuro se sobre dourado. Estado vazio coerente quando nao ha treinos programados no mes. git add . && git commit -m "feat(widgets): anel de adesao do mes" && git push origin main
+[ ] Enriquecer o card PROXIMA ATIVIDADE do Inicio: faixa lateral colorida por tipo (Treino=verde, Avaliacao=#8B5CF6, Atualizacao=#3B82F6, Retorno=#F97316, Contrato=dourado) + nome, dia e hora + botao pequeno "Abrir" que leva ao treino (se for treino) ou a agenda. Estado vazio "Nenhuma atividade agendada". git add . && git commit -m "feat(widgets): proxima atividade com tipo colorido e atalho" && git push origin main
 
-  >>> VALIDAR COM VIDEO: Inicio como dashboard, Treinos em cards que abrem
-      organizados, nomes reais de exercicios, cards dourados legiveis. <<<
-
-############################################################
-# LEVA B - HEADER, BARRA COM AGENDA, CHAT                  #
-############################################################
-[OK] HEADER do aluno em UMA linha (hoje esta em 3 andares com espaco vazio em cima): hamburguer + logo AS + nome Elite AS + badge ALUNO + sino + icone de chat + avatar, tudo na MESMA linha horizontal como o header do gestor, sem espaco morto acima nem icone solto abaixo. Remover o titulo gigante duplicado se redundante com o H1 da tela. Badge ALUNO em DOURADO (mesmo estilo do badge GESTOR - hoje esta verde, fora do padrao). git add . && git commit -m "fix(aluno): header em uma linha no padrao do gestor, badge dourado" && git push origin main
-     Resultado: - O sino aponta para `data-student-nav="updates"`, que j├í existe e renderiza a tela de Atualiza├º├Áes do aluno ÔÇö ent├úo ├® funcional, n├úo decorativo. | - **N├úo** repliquei o "ponto" permanente do sino do gestor: co...
-[OK] AGENDA entra na barra do aluno: nova composicao da barra inferior = Inicio, Treinos, Dieta, Agenda, Progresso, Mais (6 itens). O CHAT sai da barra e fica acessivel pelo icone de chat no header (presente em todas as telas) e por atalho no Mais. Atualizar sidebar na mesma ordem, sem duplicados. Agenda continua mostrando so as atividades do proprio aluno. git add . && git commit -m "feat(aluno): agenda na barra principal, chat pelo header" && git push origin main
-     Resultado: - **Agenda escopada ao pr├│prio aluno** ÔÇö o renderer j├í era `renderAgendaScreen(getCurrentStudent()?.id)`, ent├úo mostra s├│ as atividades do aluno. | - Ajustei o subt├¡tulo do "Mais" para "Perfil, mensagens e config...
-[OK] CHAT sem a barra invadindo: ao abrir o chat (pelo header), a tela de conversa deve ocupar o espaco SEM a bottom nav por cima do compose - ou a nav some na conversa (padrao WhatsApp) ou o compose fica acima dela com espacamento correto; com o TECLADO aberto, o compose acompanha o teclado e a ultima mensagem permanece visivel; os chips de resposta rapida ficam acima do compose sem sobrepor mensagens. Testar abrir, digitar e enviar com teclado aberto. git add . && git commit -m "fix(aluno): chat sem sobreposicao da barra e estavel com teclado" && git push origin main
-     Resultado: - **Chips de resposta r├ípida:** ficam em `.thread-quick`, dentro do `.thread-ft` em flex-column, acima do compose e abaixo das mensagens ÔÇö sem sobrepor. | - **Voltar:** `closeThreadSheet` remove a classe e a nav reap...
-
-  >>> VALIDAR COM VIDEO: header em 1 linha, barra com Agenda, chat limpo
-      digitando com teclado aberto. <<<
-
-############################################################
-# LEVA C - CONTRATO COM VALIDADE JURIDICA (PDF + dados)    #
-############################################################
-[OK] CONTRATO do aluno deve exibir o PDF real: quando o contrato tiver pdfUrl (enviado pelo gestor), o gate e a tela de contrato mostram o VIEWER DE PDF (nao o texto renderizado com campos vazios). O texto renderizado so aparece como fallback quando nao ha PDF. Esconder/nao exibir linhas de dados vazios (CPF:, Valor:, Fim: em branco) - dado vazio nao aparece. git add . && git commit -m "fix(aluno): contrato exibe o PDF real e oculta campos vazios" && git push origin main
-     Resultado: **2. Tela de contrato (`openContractViewSheet`)** ÔÇö j├í mostrava o viewer, mas refatorei para usar o mesmo helper compartilhado, eliminando a duplica├º├úo do markup do PDF. | **3. Dados vazios escondidos** ÔÇö novo `c...
-[OK] ACEITE com validade juridica reforcada: alem do "Li e aceito" + nome completo, o aceite deve CONFERIR a identidade com dados que o profissional ja cadastrou: pedir CPF e validar contra o CPF do cadastro do aluno (e nome igual ao cadastro, tolerando caixa/acentos); registrar no aceite: nome, CPF, data/hora, IP, dispositivo (userAgent) e versao do documento. Se o cadastro nao tiver CPF, pedir e salvar no perfil. Deixar marcado no codigo o ponto de integracao futura com provedor de assinatura certificada (Clicksign/D4Sign) - a integracao em si fica para depois COM acompanhamento. git add . && git commit -m "feat(aluno): aceite com conferencia de CPF e trilha de auditoria" && git push origin main
-     Resultado: - **O que capturar no aceite** al├®m do "Li e concordo" ÔÇö nome/CPF digitados, data-hora + IP, assinatura desenhada, hash do PDF, etc. | - **Onde gravar** ÔÇö no banco (PostgreSQL, via `server/`) ou s├│ no frontend. |...
-[OK] GATE de primeiro acesso premium: card de boas-vindas legivel (texto escuro sobre dourado), resumo do plano sem campos vazios (mostrar so o que existe), PDF rolavel, e o fluxo: ler, marcar aceite, confirmar identidade, sucesso com transicao suave para o app liberado. git add . && git commit -m "feat(aluno): gate de primeiro acesso premium e legivel" && git push origin main
-     Resultado: - **Sucesso com transi├º├úo suave** (novo): ap├│s assinar, em vez de saltar direto pro app, mostra uma tela `gate-success` com checkmark animado ("Tudo certo, {nome}! Acesso premium liberado"), fade-out de 300ms e ent├úo...
-
-  >>> VALIDAR COM VIDEO: contrato abre o PDF, aceite pede CPF e valida,
-      gate legivel e fluido. <<<
-
-############################################################
-# LEVA D - POLIMENTO PREMIUM GERAL DO ALUNO                #
-############################################################
-[OK] PASSADA PREMIUM em todas as telas do aluno (Inicio, Treinos, Detalhe do treino, Execucao, Dieta, Agenda, Progresso, Chat, Mais, Perfil, Contrato): espacamentos consistentes (mesmo padding dos cards do gestor), hierarquia de texto (H1 + subtitle padrao), icones dourados em fundo escuro arredondado nos cards de metrica, badges nas cores certas, estados vazios elegantes com icone + frase curta, microinteracoes (toque com feedback, transicoes suaves), nenhum texto cortado, nenhum elemento atras da barra, safe-areas respeitadas. Comparar lado a lado com o gestor e listar o que foi ajustado por tela. git add . && git commit -m "chore(aluno): passada premium de consistencia visual" && git push origin main
-     Resultado: - **In├¡cio** ÔÇö `dashboard-hero` (h3 + subtitle), id├¬ntico ao Dashboard do gestor. | - **Agenda / Chat / Execu├º├úo** ÔÇö safe-areas e padding-bottom j├í tratados nas LEVAs anteriores (nav.css/chat.css com `env(safe-...
-[OK] Atualizar AUDITORIA-ALUNO.md com o estado pos-refinamento: marcar resolvidos (dashboard, treinos organizados, header, agenda na barra, chat, contrato PDF, contraste) e listar qualquer pendencia remanescente com severidade. git add . && git commit -m "docs: atualizar auditoria do aluno pos-refinamento" && git push origin main
-     Resultado: AUDITORIA-ALUNO.md reescrito para o estado pos-refinamento. Tabela com os 11 problemas confirmados no video (11/06) todos marcados RESOLVIDO com severidade e leva. Secao 4 lista pendencias remanescentes (assinatura certificada Clicksign/D4Sign, persistencia da trilha de auditoria no backend, validacao por video) - nenhuma de severidade alta. Composicao final da barra/header e tokens documentados.
+== FECHAMENTO ==
+[ ] Revisao dos widgets: ordenar o Inicio como - saudacao, Progresso do treino de hoje (ou card do treino), grade de metricas (Treinos na semana com bolinhas, Volume recente, Proxima atividade, Contrato), depois Streak + Peso + Adesao; confirmar tema escuro/dourado em todos (nada branco sobre dourado), estados vazios elegantes, atualizacao em tempo real ao concluir series/treinos, nenhum texto cortado, sem glow. git add . && git commit -m "chore(widgets): ordenacao e revisao final do Inicio" && git push origin main
