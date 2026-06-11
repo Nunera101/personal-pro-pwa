@@ -5079,75 +5079,60 @@
   function renderStudentToday() {
     if (state.activeSession) return renderWorkoutExecution();
     const student = getCurrentStudent();
-    const agenda = getAgendaItemsForDate(todayISO(), student?.id);
-    const workouts = getStudentWorkouts(student?.id, { publishedOnly: true });
-    const sessions = getStudentSessions(student?.id);
-    let nextWorkout = null;
-    for (let i = 0; i < 60 && !nextWorkout; i++) {
-      const dayItems = i === 0 ? agenda : getAgendaItemsForDate(addDays(todayISO(), i), student?.id);
-      nextWorkout = dayItems.find((item) => item.type === "workout" && item.workoutId && item.status !== "done") || null;
-    }
-    const nextWorkoutData = nextWorkout ? getWorkout(nextWorkout.workoutId) : null;
-    const nextUpdate = state.data.updates.find((item) => item.studentId === student?.id && item.status === "pending") || null;
+    if (!student) return `<div class="content-stack">${emptyState("Sem dados do aluno", "Recarregue o aplicativo para continuar.", icons.home)}</div>`;
 
-    const lastSession = sessions[0] || null;
-    const lastWorkout = lastSession ? getWorkout(lastSession.workoutId) : null;
-    const lastSessionSeries = lastSession
-      ? lastSession.exercises.reduce((sum, ex) => sum + ex.sets.length, 0)
-      : 0;
+    const stats = getStudentProfileStats(student);
+    const nextActivity = stats.nextActivity;
+    const firstName = (student.name || "Aluno").trim().split(/\s+/)[0];
 
-    const nextWorkoutCard = nextWorkout
-      ? `<section class="next-workout-card">
-          <div class="next-workout-card__info">
-            <span class="next-workout-card__label">Próximo treino</span>
-            <strong class="next-workout-card__name">${escapeHtml(nextWorkoutData?.title || nextWorkout.title || "Treino sem título")}</strong>
-            <span class="next-workout-card__meta">${formatDate(nextWorkout.date)} · ${nextWorkout.time}</span>
-          </div>
-          <button class="primary-action" type="button" data-start-workout="${nextWorkout.workoutId}" data-activity-id="${nextWorkout.id}">Iniciar</button>
-        </section>`
-      : `<section class="next-workout-card next-workout-card--empty">
-          <div class="next-workout-card__info">
-            <span class="next-workout-card__label">Próximo treino</span>
-            <strong class="next-workout-card__name">Nenhum treino agendado</strong>
-          </div>
-          <button class="primary-action" type="button" data-student-nav="workouts">Ver treinos</button>
-        </section>`;
+    // Treino agendado para hoje (apenas atalho — sem expor exercícios na home).
+    const todayAgenda = getAgendaItemsForDate(todayISO(), student.id);
+    const todayWorkoutItem = todayAgenda.find((item) => item.type === "workout" && item.workoutId && item.status !== "done") || null;
+    const todayWorkoutData = todayWorkoutItem ? getWorkout(todayWorkoutItem.workoutId) : null;
 
-    const lastSessionCard = lastSession
-      ? `<section class="last-session-card">
-          <div class="last-session-card__info">
-            <span class="last-session-card__label">Último treino</span>
-            <strong class="last-session-card__name">${escapeHtml(lastWorkout?.title || "Treino")}</strong>
-            <span class="last-session-card__meta">${formatDate(lastSession.finishedAt.slice(0, 10))} · ${lastSessionSeries} série(s)${lastSession.totalVolumeLoad > 0 ? ` · ${lastSession.totalVolumeLoad} kg` : ""}</span>
+    const nextActivityLine = nextActivity
+      ? `Próxima atividade: ${activityLabel(nextActivity.type)} em ${formatDate(nextActivity.date)}${nextActivity.time ? ` às ${nextActivity.time}` : ""}.`
+      : "Nenhuma atividade agendada no momento.";
+
+    const weekCount = stats.sessionsWeek.length;
+    const contractTone = stats.contract.tone === "info" ? "warning" : stats.contract.tone;
+
+    const todayWorkoutCard = todayWorkoutItem
+      ? `<div class="today-workout-row">
+          <div class="today-workout-info">
+            <strong>${escapeHtml(todayWorkoutData?.title || todayWorkoutItem.title || "Treino")}</strong>
+            <span class="small-text">${todayWorkoutData ? `${todayWorkoutData.exercises.length} exercício(s)` : ""}${todayWorkoutItem.time ? `${todayWorkoutData ? " · " : ""}${escapeHtml(todayWorkoutItem.time)}` : ""}</span>
           </div>
-        </section>`
-      : "";
+          <button class="primary-action" type="button" data-start-workout="${escapeHtml(todayWorkoutItem.workoutId)}" data-activity-id="${escapeHtml(todayWorkoutItem.id)}">Abrir treino</button>
+        </div>`
+      : emptyState("Sem treino agendado para hoje", "Veja seus treinos publicados na aba Treinos.", icons.workouts);
 
     return `
-      <div class="content-stack">
+      <div class="content-stack dashboard-home">
         <section class="dashboard-hero">
           <div>
-            <h3>Início</h3>
-            <p>${escapeHtml(student?.name || "Aluno")} · ${agenda.length} item(ns) na agenda hoje</p>
+            <h3>Olá, ${escapeHtml(firstName)}</h3>
+            <p>${escapeHtml(nextActivityLine)}</p>
           </div>
         </section>
-        ${nextWorkoutCard}
-        <section class="metric-grid">
-          ${metricCard("Treinos na semana", sessionsThisWeek(student?.id).length)}
-          ${metricCard("Treinos no mês", sessionsThisMonth(student?.id).length)}
-          ${metricCard("Séries no último treino", lastSessionSeries)}
-          ${metricCard("Atualizações pendentes", state.data.updates.filter((item) => item.studentId === student?.id && item.status === "pending").length)}
+
+        <div class="metrics-row metrics-row--2" aria-label="Resumo do aluno">
+          ${dashboardMetricCard({ label: "Treinos na semana", value: weekCount, subtext: weekCount ? `${weekCount} concluído(s)` : "Nenhum ainda", icon: icons.today, tone: weekCount ? "success" : "" })}
+          ${dashboardMetricCard({ label: "Volume recente", value: `${stats.recentVolume} kg`, subtext: "Últimos 4 treinos", icon: icons.progress })}
+          ${dashboardMetricCard({ label: "Próxima atividade", value: nextActivity ? formatShortDate(nextActivity.date) : "—", subtext: nextActivity ? activityLabel(nextActivity.type) : "Nada agendado", icon: icons.agenda })}
+          ${dashboardMetricCard({ label: "Contrato", value: stats.contract.label, subtext: "Status do contrato", icon: icons.contracts, tone: contractTone })}
+        </div>
+
+        <section class="panel">
+          <div class="section-title"><h3>Treino de hoje</h3></div>
+          ${todayWorkoutCard}
         </section>
-        ${lastSessionCard}
+
         ${
-          nextUpdate
-            ? `<section class="panel action-panel"><div><strong>Atualização quinzenal pendente</strong><span class="small-text">Vencimento ${formatDate(nextUpdate.dueDate)}</span></div><button class="primary-action" type="button" data-open-update-form="${nextUpdate.id}">Enviar atualização</button></section>`
+          stats.pendingUpdate
+            ? `<section class="panel action-panel"><div><strong>Atualização quinzenal pendente</strong><span class="small-text">Vencimento ${formatDate(stats.pendingUpdate.dueDate)}</span></div><button class="primary-action" type="button" data-open-update-form="${escapeHtml(stats.pendingUpdate.id)}">Enviar progresso</button></section>`
             : ""
         }
-        <section class="panel">
-          <div class="section-title"><h3>Agenda de hoje</h3></div>
-          ${renderAgendaList(agenda, false)}
-        </section>
       </div>
     `;
   }

@@ -1476,6 +1476,34 @@ svg {
   margin-top: 0.1rem;
 }
 
+/* Atalho "Treino de hoje" no Início do aluno */
+.today-workout-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.today-workout-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+  min-width: 0;
+}
+
+.today-workout-info strong {
+  font-size: clamp(0.95rem, 3.5vw, 1.1rem);
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.today-workout-row .primary-action {
+  flex-shrink: 0;
+}
+
 .metric-grid {
   display: flex;
   flex-direction: row;
