@@ -843,6 +843,7 @@
       normalizeWorkoutExercise({
         ...item,
         exerciseName: item.exerciseName || getExercise(item.exerciseId)?.name || "",
+        exerciseMuscle: item.exerciseMuscle || (getExercise(item.exerciseId) ? getExercisePrimaryMuscle(getExercise(item.exerciseId)) : ""),
         id: createId("workout-exercise"),
         order: item.order || index + 1
       })
@@ -889,9 +890,11 @@
     migrateOldWorkoutData();
     state.data.workouts.forEach((workout) => {
       workout.exercises.forEach((ex) => {
-        if (!ex.exerciseName && ex.exerciseId) {
-          ex.exerciseName = getExercise(ex.exerciseId)?.name || "";
-        }
+        if (!ex.exerciseId) return;
+        const exercise = getExercise(ex.exerciseId);
+        if (!exercise) return;
+        if (!ex.exerciseName) ex.exerciseName = exercise.name || "";
+        if (!ex.exerciseMuscle) ex.exerciseMuscle = getExercisePrimaryMuscle(exercise);
       });
     });
     state.data.students.forEach((student) => ensureNextUpdatePending(student.id, todayISO()));
@@ -954,6 +957,7 @@
       id: item.id || createId("workout-exercise"),
       exerciseId: item.exerciseId || "",
       exerciseName: item.exerciseName || "",
+      exerciseMuscle: item.exerciseMuscle || "",
       order: Number(item.order || index + 1),
       sets: Number(item.sets || 3),
       targetReps: String(item.targetReps || item.reps || "10"),
@@ -1250,6 +1254,17 @@
 
   function getExercise(id) {
     return state.data.exercises.find((exercise) => exercise.id === id);
+  }
+
+  // Resolve um nome de exibicao para uma row de treino SEM nunca cair em "indisponivel":
+  // 1) nome atual da biblioteca; 2) snapshot do nome (ultimo nome conhecido);
+  // 3) "Exercicio" + grupo salvo; 4) "Exercicio".
+  function resolveWorkoutExerciseName(row = {}) {
+    const exercise = getExercise(row.exerciseId);
+    if (exercise?.name) return exercise.name;
+    if (row.exerciseName) return row.exerciseName;
+    if (row.exerciseMuscle) return `Exercício · ${row.exerciseMuscle}`;
+    return "Exercício";
   }
 
   function getWorkout(id) {
@@ -4543,7 +4558,7 @@
     const sets = parseInt(form.elements.sets?.value) || 3;
     const reps = (form.elements.reps?.value || "10").trim();
     const rest = parseInt(form.elements.rest?.value) || 60;
-    const exerciseRow = normalizeWorkoutExercise({ exerciseId, exerciseName: exercise.name, sets, targetReps: reps, restSeconds: rest }, 0);
+    const exerciseRow = normalizeWorkoutExercise({ exerciseId, exerciseName: exercise.name, exerciseMuscle: getExercisePrimaryMuscle(exercise), sets, targetReps: reps, restSeconds: rest }, 0);
     if (patternId === "__new__") {
       const newId = createId("workout");
       state.data.workouts.unshift(normalizeWorkout({
@@ -4900,7 +4915,7 @@
   function patternExercisePreviewLine(workout) {
     if (!workout.exercises.length) return "";
     const rows = [...workout.exercises].sort((a, b) => a.order - b.order);
-    const names = rows.slice(0, 3).map((r) => getExercise(r.exerciseId)?.name || r.exerciseName || "?").join(" · ");
+    const names = rows.slice(0, 3).map((r) => resolveWorkoutExerciseName(r)).join(" · ");
     const extra = rows.length > 3 ? ` +${rows.length - 3}` : "";
     return `<p class="pattern-exercise-preview">${escapeHtml(names + extra)}</p>`;
   }
@@ -4926,8 +4941,7 @@
       <div class="pattern-preview">
         ${visibleRows
           .map((row, index) => {
-            const exercise = getExercise(row.exerciseId);
-            const name = exercise?.name || row.exerciseName || "Exercício indisponível";
+            const name = resolveWorkoutExerciseName(row);
             const target = `${escapeHtml(row.sets)}x${escapeHtml(row.targetReps)} · ${escapeHtml(row.restSeconds)}s${row.suggestedLoad ? ` · ${escapeHtml(row.suggestedLoad)}` : ""}`;
             return `<span><b>${index + 1}. ${escapeHtml(name)}</b><small>${target}</small></span>`;
           })
@@ -4955,8 +4969,8 @@
         ${visibleRows
           .map((row, index) => {
             const exercise = getExercise(row.exerciseId);
-            const name = exercise?.name || row.exerciseName || "Exercício indisponível";
-            const muscle = exercise ? getExercisePrimaryMuscle(exercise) : "";
+            const name = resolveWorkoutExerciseName(row);
+            const muscle = exercise ? getExercisePrimaryMuscle(exercise) : row.exerciseMuscle || "";
             const load = row.suggestedLoad ? ` · ${escapeHtml(row.suggestedLoad)}kg` : "";
             return `<span>${index + 1}. ${escapeHtml(name)}${muscle ? ` <small>(${escapeHtml(muscle)})</small>` : ""} · ${escapeHtml(String(row.sets))}x${escapeHtml(row.targetReps)} · ${escapeHtml(String(row.restSeconds))}s${load}</span>`;
           })
@@ -5053,8 +5067,8 @@
 
   function renderStudentWorkoutDetailExercise(row, index) {
     const exercise = getExercise(row.exerciseId);
-    const name = exercise?.name || row.exerciseName || `Exercício ${index + 1}`;
-    const group = exercise ? getExercisePrimaryMuscle(exercise) : "";
+    const name = resolveWorkoutExerciseName(row);
+    const group = exercise ? getExercisePrimaryMuscle(exercise) : row.exerciseMuscle || "";
     const load = row.suggestedLoad ? `${escapeHtml(row.suggestedLoad)} kg` : "Carga livre";
     const hasVideo = exercise && hasExerciseVideo(exercise);
     const thumb = hasVideo
@@ -9950,6 +9964,7 @@
           id: old?.exercises?.[index]?.id || createId("workout-exercise"),
           exerciseId,
           exerciseName: getExercise(exerciseId)?.name || "",
+          exerciseMuscle: getExercise(exerciseId) ? getExercisePrimaryMuscle(getExercise(exerciseId)) : "",
           order: row.querySelector('[name="order"]').value || index + 1,
           sets: row.querySelector('[name="sets"]').value,
           targetReps: row.querySelector('[name="targetReps"]').value,
@@ -10456,11 +10471,10 @@
       activityId,
       startedAt: new Date().toISOString(),
       exercises: workout.exercises.map((item) => {
-        const exercise = getExercise(item.exerciseId);
         return {
           workoutExerciseId: item.id,
           exerciseId: item.exerciseId,
-          name: exercise?.name || item.exerciseName || "Exercício indisponível",
+          name: resolveWorkoutExerciseName(item),
           targetReps: item.targetReps,
           suggestedLoad: item.suggestedLoad,
           restSeconds: Number(item.restSeconds || 0),
