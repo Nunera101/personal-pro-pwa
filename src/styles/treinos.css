@@ -1771,3 +1771,166 @@
   width: 100%;
 }
 
+/* ===== Tela do treino (detalhe do aluno) ===== */
+.swd-detail {
+  padding-bottom: 5.5rem;
+}
+
+.swd-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.swd-head-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.22rem;
+  min-width: 0;
+}
+
+.swd-title {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(1.15rem, 4.5vw, 1.4rem);
+  font-weight: 800;
+  line-height: 1.12;
+}
+
+.swd-sub {
+  color: var(--brand-strong);
+  font-weight: 650;
+  font-size: 0.88rem;
+}
+
+.swd-last {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.swd-desc {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.swd-ex-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.swd-ex {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem;
+  border: 1px solid var(--borda);
+  border-radius: 1rem;
+  background: var(--card);
+}
+
+.swd-ex-index {
+  display: inline-grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  background: rgba(245, 181, 27, 0.1);
+  color: var(--brand-strong);
+  font-weight: 750;
+  font-size: 0.82rem;
+  flex-shrink: 0;
+}
+
+.swd-ex-thumb {
+  display: inline-grid;
+  place-items: center;
+  width: 3.1rem;
+  height: 3.1rem;
+  padding: 0;
+  border: 1px solid var(--borda);
+  border-radius: 0.7rem;
+  background: #000;
+  flex-shrink: 0;
+}
+
+.swd-ex-thumb.has-video {
+  cursor: pointer;
+}
+
+.swd-ex-thumb.has-video svg {
+  width: 2.2rem;
+  height: 2.2rem;
+}
+
+.swd-ex-thumb.is-placeholder {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--muted);
+  opacity: 0.55;
+}
+
+.swd-ex-thumb.is-placeholder svg {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
+.swd-ex-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.swd-ex-name {
+  color: var(--ink);
+  font-size: 0.96rem;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.swd-ex-group {
+  color: var(--brand-strong);
+  font-size: 0.76rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.swd-ex-specs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.7rem;
+  margin-top: 0.12rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.swd-ex-specs b {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.swd-ex-notes {
+  margin-top: 0.18rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-style: italic;
+  line-height: 1.35;
+}
+
+.swd-footer {
+  position: sticky;
+  bottom: 0.6rem;
+  margin-top: 0.4rem;
+}
+
+.swd-footer .swd-start {
+  width: 100%;
+}
+

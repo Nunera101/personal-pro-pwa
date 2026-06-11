@@ -62,6 +62,7 @@
     dietFilterOpen: false,
     studentDietQ: "",
     studentWorkoutQ: "",
+    studentWorkoutDetailId: "",
     mealChecks: {},
     relatorioFilters: { period: "mes" },
     workoutFilterOpen: false,
@@ -5044,9 +5045,71 @@
           ${lastSession ? `<li><span class="pml-label">Última execução</span><span class="pml-value">${escapeHtml(formatDate(lastSession.finishedAt?.slice(0, 10) || ""))}</span></li>` : ""}
         </ul>
         <div class="sw-card-action">
-          <button class="primary-action" type="button" data-start-workout="${escapeHtml(workout.id)}">Iniciar</button>
+          <button class="primary-action" type="button" data-open-student-workout="${escapeHtml(workout.id)}">Abrir</button>
         </div>
       </article>
+    `;
+  }
+
+  function renderStudentWorkoutDetailExercise(row, index) {
+    const exercise = getExercise(row.exerciseId);
+    const name = exercise?.name || row.exerciseName || `Exercício ${index + 1}`;
+    const group = exercise ? getExercisePrimaryMuscle(exercise) : "";
+    const load = row.suggestedLoad ? `${escapeHtml(row.suggestedLoad)} kg` : "Carga livre";
+    const hasVideo = exercise && hasExerciseVideo(exercise);
+    const thumb = hasVideo
+      ? `<button class="swd-ex-thumb has-video" type="button" data-open-exercise-video="${escapeHtml(exercise.id)}" aria-label="Ver vídeo de ${escapeHtml(name)}"><svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="rgba(231,168,62,0.15)" stroke="rgba(231,168,62,0.6)" stroke-width="1.5"/><path d="M20 16.5 34 24 20 31.5Z" fill="rgba(231,168,62,0.9)"/></svg></button>`
+      : `<div class="swd-ex-thumb is-placeholder" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m10 9 6 3-6 3V9Z"/></svg></div>`;
+    return `
+      <li class="swd-ex">
+        <span class="swd-ex-index">${index + 1}</span>
+        ${thumb}
+        <div class="swd-ex-body">
+          <strong class="swd-ex-name">${escapeHtml(name)}</strong>
+          ${group ? `<span class="swd-ex-group">${escapeHtml(group)}</span>` : ""}
+          <div class="swd-ex-specs">
+            <span><b>${escapeHtml(String(row.sets))}</b> séries</span>
+            <span><b>${escapeHtml(row.targetReps)}</b> reps</span>
+            <span><b>${load}</b></span>
+            <span>${escapeHtml(String(row.restSeconds))}s descanso</span>
+          </div>
+          ${row.coachNotes ? `<span class="swd-ex-notes">${escapeHtml(row.coachNotes)}</span>` : ""}
+        </div>
+      </li>
+    `;
+  }
+
+  function renderStudentWorkoutDetail(workout) {
+    const goal = workout.focus || workout.goal || "—";
+    const rows = [...workout.exercises].sort((a, b) => a.order - b.order);
+    const lastSession = getStudentSessions(workout.studentId).find((s) => s.workoutId === workout.id);
+    const lastLabel = lastSession ? formatDate(lastSession.finishedAt?.slice(0, 10) || "") : "Nunca executado";
+    return `
+      <div class="content-stack swd-detail">
+        <div class="evaluate-topbar">
+          <button class="evaluate-back-btn" type="button" data-sw-back>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+            Treinos
+          </button>
+        </div>
+        <header class="swd-head">
+          <span class="pattern-icon">${icons.workouts}</span>
+          <div class="swd-head-info">
+            <h2 class="swd-title">${escapeHtml(workout.title)}</h2>
+            <span class="swd-sub">${escapeHtml(goal)} · ${rows.length} exercício(s)</span>
+            <span class="swd-last">Última execução: ${escapeHtml(lastLabel)}</span>
+          </div>
+        </header>
+        ${workout.description ? `<p class="swd-desc">${escapeHtml(workout.description)}</p>` : ""}
+        ${rows.length
+          ? `<ol class="swd-ex-list">${rows.map(renderStudentWorkoutDetailExercise).join("")}</ol>`
+          : emptyState("Treino sem exercícios", "Este treino ainda não tem exercícios cadastrados.", icons.workouts)}
+        ${rows.length ? `
+          <div class="swd-footer">
+            <button class="primary-action swd-start" type="button" data-start-workout="${escapeHtml(workout.id)}">Iniciar treino</button>
+          </div>
+        ` : ""}
+      </div>
     `;
   }
 
@@ -5054,6 +5117,11 @@
     if (state.activeSession) return renderWorkoutExecution();
     const student = getCurrentStudent();
     const allWorkouts = getStudentWorkouts(student?.id, { publishedOnly: true });
+    if (state.studentWorkoutDetailId) {
+      const detail = allWorkouts.find((w) => w.id === state.studentWorkoutDetailId);
+      if (detail) return renderStudentWorkoutDetail(detail);
+      state.studentWorkoutDetailId = "";
+    }
     const q = (state.studentWorkoutQ || "").toLowerCase().trim();
     const workouts = q
       ? allWorkouts.filter((w) => [w.title, w.focus, w.goal, w.description].join(" ").toLowerCase().includes(q))
@@ -10410,6 +10478,7 @@
       })
     };
     state.studentMenu = "workouts";
+    state.studentWorkoutDetailId = "";
     persistActiveSession();
     renderStudent();
     showToast("Treino iniciado.");
@@ -10879,7 +10948,9 @@
         closeManagerDrawer();
         renderManager();
       }
-      if (target.dataset.studentNav) { closeStudentDrawer(); state.studentMenu = target.dataset.studentNav; renderStudent(); }
+      if (target.dataset.studentNav) { closeStudentDrawer(); state.studentWorkoutDetailId = ""; state.studentMenu = target.dataset.studentNav; renderStudent(); }
+      if (target.matches("[data-open-student-workout]")) { state.studentWorkoutDetailId = target.dataset.openStudentWorkout; renderStudent(); }
+      if (target.matches("[data-sw-back]")) { state.studentWorkoutDetailId = ""; renderStudent(); }
       if (target.matches("[data-hero-menu-trigger]")) { openHeroMenuFloat(target, target.dataset.heroMenuTrigger); return; }
       if (target.matches("[data-open-student-form]")) openStudentForm(target.dataset.openStudentForm || "");
       if (target.matches("[data-open-student-profile]")) { closeModal(); openStudentProfile(target.dataset.openStudentProfile); }

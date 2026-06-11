@@ -1,73 +1,61 @@
 ﻿==============================================
- LOTE - CONTINUACAO DO ALUNO (o que faltou + reverificar)
- Motivo: a sessao estourou na Leva 4 (reset 1pm). Rodaram de verdade:
- Levas 0,1,2,3 e parte da 4 (exercicio removido[?], lista de treinos,
- inputs carga/reps, execucao com contador). NAO rodaram: video do
- exercicio, conclusao+historico, Leva 5 inteira, Leva 6.
- Mais 3 SUSPEITAS que rodaram mas o Claude Code parou e perguntou em vez
- de fazer (reverificar).
+ FILA - ALUNO: REFINAMENTO PREMIUM (pos-validacao video 11/06)
+ Base: video real do aluno. Problemas confirmados: card dourado com
+ texto branco ilegivel; Inicio despejando exercicios crus (deve ser
+ dashboard); "Exercicio indisponivel" voltou (treinos antigos sem
+ snapshot); header em 3 andares com espaco vazio; chat com a barra
+ invadindo; Agenda escondida no Mais; contrato em texto com campos
+ vazios e aceite fraco; badge ALUNO verde (GESTOR e dourado).
  Cada tarefa = UMA linha. NAO quebrar ao colar. SEM seta no texto.
- "session limit"/erro de CLI = NAO rodou -> [OK] volta para [ ]. ~7 por janela.
+ "session limit"/erro de CLI = NAO rodou. ~7 por janela. Validar com
+ video entre levas.
  Tokens: dourado #F59E0B, fundo #0D0D0D, card #1A1A1A flat sem glow,
  borda rgba(255,255,255,0.06), radius 16px, txt2 #9CA3AF, ok #10B981,
- erro #EF4444.
+ erro #EF4444. REGRA DE CONTRASTE: texto sobre fundo dourado e SEMPRE
+ escuro (#1A1206 ou similar), NUNCA branco.
 ==============================================
 
 == BACKUP ==
-[OK] git checkout -b backup/aluno-continuacao && git push origin backup/aluno-continuacao && git checkout main. NAO altere arquivos. Confirme que o app abre sem erro de sintaxe. (sem commit adicional)
-     Resultado: - Branch `backup/aluno-continuacao` criado e publicado no GitHub.
- | - Retornado para `main`.
- | - `node --check app.js` saiu com c├│digo 0 ÔÇö **sem erros de sintaxe**.
- | O erro de `localStorage` mostrado antes ├® espe...
+[OK] git checkout -b backup/aluno-refinamento && git push origin backup/aluno-refinamento && git checkout main. NAO altere arquivos. Confirme que o app abre sem erro de sintaxe. (sem commit adicional)
+     Resultado: - Ô£à Branch `backup/aluno-refinamento` criada e enviada para o `origin`.
+ | - Ô£à Voltei para a branch `main` (com a altera├º├úo n├úo commitada em `tarefas.txt` preservada ÔÇö nenhum arquivo foi alterado por mim e nenhu...
 
-== REVERIFICAR (rodaram mas o Claude Code perguntou em vez de fazer) ==
-[OK] REVERIFICAR o BUG "Exercicio removido" (na rodada anterior o Claude Code respondeu pedindo descricao em vez de corrigir, entao provavelmente NAO foi feito): no treino do aluno os exercicios podem aparecer como "Exercicio removido" quando getExercise(row.exerciseId) retorna undefined (renderWorkoutExercisePreview app.js:4752, renderPatternPreview 4726). Corrigir para exibir o NOME REAL do exercicio (grupo + meta series x reps x carga x descanso). Se o exercicio foi deletado da biblioteca, usar como fallback o nome salvo no proprio treino (snapshot) em vez de "Exercicio removido". Garantir IDs estaveis entre biblioteca e treino. git add . && git commit -m "fix(aluno): resolver exercicios reais no treino (fim do removido)" && git push origin main
-     Resultado: **O que foi corrigido agora:**
- | 1. **`cloneWorkoutExercises`** ÔÇö ao copiar um padr├úo para treino de aluno, agora popula `exerciseName` da biblioteca se o campo estiver vazio, garantindo que o snapshot seja salvo no ...
-[OK] REVERIFICAR botoes de acao dos cards (Leva 0 marcou "OK sem alteracao" apos a mensagem ter sido cortada - confirmar se realmente estao unificados): em Alunos os botoes de card eram outline finos e em Atualizacoes um retangulo dourado largo. Padronizar os botoes de acao DENTRO dos cards de todas as listas (Alunos, Atualizacoes, Dieta, Contratos, Padroes) para o mesmo estilo: outline dourado para acao secundaria, solido chapado para a acao principal, mesma altura e radius. Se ja estiverem iguais, confirmar e listar; se nao, corrigir. git add . && git commit -m "fix(unificacao): confirmar botoes de acao dos cards iguais entre abas" && git push origin main
-     Resultado: Corrigido. O problema estava em `handleSeriesAction` (linha ~10238):
- | **Causa**: quando o aluno clicava "Finalizar s├®rie" sem preencher as reps (ou preenchendo "0"), o c├│digo ca├¡a no fallback `set.reps || "0"` e mar...
+############################################################
+# LEVA A - INICIO VIRA DASHBOARD + TREINOS ORGANIZADOS     #
+# (o coracao do refinamento)                               #
+############################################################
+[OK] INICIO do aluno vira DASHBOARD (nao despejar exercicios crus na home): remover da tela Inicio a lista de exercicios/series com "Iniciar serie". O Inicio passa a ter: (1) saudacao + proxima atividade; (2) grade de cards de metricas compactos no padrao do gestor, com icone dourado em fundo escuro arredondado a esquerda e label maiuscula + valor + legenda: TREINOS NA SEMANA (X concluidos), VOLUME RECENTE (kg dos ultimos 4 treinos), PROXIMA ATIVIDADE (data e tipo), CONTRATO (status com cor); (3) card do TREINO DE HOJE apenas como atalho (nome do treino + botao Abrir treino), sem expor exercicios; (4) atalho para enviar progresso se houver pendencia. Estado vazio elegante para cada card sem dado. git add . && git commit -m "feat(aluno): Inicio vira dashboard com cards de metricas" && git push origin main
+     Resultado: 5. **Estado vazio elegante** para o treino de hoje e m├®tricas zeradas. | Removi o painel "Agenda de hoje" (`renderAgendaList`) que era a fonte da lista com bot├Áes "Iniciar" na home ÔÇö a Agenda passa a viver na pr├│pr...
+[OK] TREINOS como cards nomeados: a aba Treinos lista cada treino publicado como um card com o TITULO dado pelo professor (ex Treino A, Treino B, Peito e Triceps), objetivo, numero de exercicios, ultima execucao e botao Abrir. NADA de exercicios soltos na lista. Ao tocar, abre a TELA DO TREINO: lista organizada dos exercicios (nome real, grupo, series x reps x carga sugerida x descanso, thumbnail/play do video quando houver) e um botao unico INICIAR TREINO no rodape que leva ao fluxo de execucao serie a serie ja existente. git add . && git commit -m "feat(aluno): treinos em cards nomeados com tela de detalhe organizada" && git push origin main
+     Resultado: Card de treino agora tem botao "Abrir" (data-open-student-workout) em vez de "Iniciar" — nenhum exercicio solto na lista. Nova TELA DO TREINO (renderStudentWorkoutDetail) com voltar, cabecalho (titulo/objetivo/qtd exercicios/ultima execucao), lista numerada de exercicios com nome real, grupo, series x reps x carga x descanso, thumbnail/play de video quando houver, e botao unico "Iniciar treino" fixo no rodape que reusa o fluxo data-start-workout ja existente. Estado em state.studentWorkoutDetailId, limpo ao trocar de aba e ao iniciar. CSS .swd-* em treinos.css. node --check OK.
+[ ] BUG "Exercicio indisponivel" DE NOVO (o fix do snapshot so cobre clones novos): fazer BACKFILL nos treinos ja existentes - ao carregar/renderizar um treino cujas rows nao tem exerciseName, preencher a partir da biblioteca (getExercise) e salvar; se o exercicio nao existir mais na biblioteca e nao houver snapshot, exibir o ultimo nome conhecido ou "Exercicio" + grupo, NUNCA "Exercicio indisponivel". Conferir tambem o seed: os treinos de demonstracao devem referenciar exercicios QUE EXISTEM na biblioteca seed. git add . && git commit -m "fix(aluno): backfill de nomes de exercicios em treinos existentes" && git push origin main
+[ ] CONTRASTE nos cards dourados: TODO texto sobre fundo dourado deve ser escuro (#1A1206 ou tom proximo), nunca branco - corrigir o card "Treino em execucao/Treino da semana" e o card "Primeiro acesso" do gate de contrato (titulo, subtitulo e badge internos ilegiveis hoje). Varrer o CSS por .text sobre background dourado e padronizar uma regra unica de contraste. git add . && git commit -m "fix(aluno): texto escuro sobre fundos dourados (contraste)" && git push origin main
 
-== NAO RODARAM - FIM DA LEVA 4 (execucao) ==
-[OK] VIDEO do exercicio na execucao: quando o exercicio tem video, o aluno assiste dentro do treino (player 16:9, play/pause) sem bugar; sem video, placeholder discreto (nao erro). Obs: o upload de video ainda nao persiste no servidor (backend, ver fim) - ate la, tratar ausencia com placeholder. git add . && git commit -m "feat(aluno): player de video do exercicio na execucao" && git push origin main
-     Resultado: - **URL externa** ÔåÆ `<video controls>` 16:9 com play/pause nativo
- | - **IndexedDB (local)** ÔåÆ bot├úo play que abre o modal j├í existente
- | - **Sem v├¡deo** ÔåÆ placeholder com ├¡cone de c├ómera, sutil, sem erro
- | ...
-[OK] CONCLUSAO + HISTORICO: ao concluir o treino, registrar (data, volume, series concluidas) e refletir no Inicio ("ultimo treino concluido"), no Progresso e no perfil do aluno visto pelo gestor. Overlay de parabens premium ao finalizar. Este historico alimenta os widgets depois. git add . && git commit -m "feat(aluno): conclusao registra historico e evolucao" && git push origin main
-     Resultado: - Exibe: nome do treino ┬À data de conclus├úo ┬À quantidade de s├®ries ┬À volume load (ex: `seg, 09 de jun. ┬À 12 s├®rie(s) ┬À 480 kg`)
- | - Quando n├úo h├í hist├│rico, o card simplesmente n├úo aparece
- | **Grid de m├®tr...
+  >>> VALIDAR COM VIDEO: Inicio como dashboard, Treinos em cards que abrem
+      organizados, nomes reais de exercicios, cards dourados legiveis. <<<
 
-  >>> VALIDAR COM VIDEO (caprichado): abrir treino, exercicios reais,
-      inputs legiveis, executar serie, contador de descanso, concluir. <<<
+############################################################
+# LEVA B - HEADER, BARRA COM AGENDA, CHAT                  #
+############################################################
+[ ] HEADER do aluno em UMA linha (hoje esta em 3 andares com espaco vazio em cima): hamburguer + logo AS + nome Elite AS + badge ALUNO + sino + icone de chat + avatar, tudo na MESMA linha horizontal como o header do gestor, sem espaco morto acima nem icone solto abaixo. Remover o titulo gigante duplicado se redundante com o H1 da tela. Badge ALUNO em DOURADO (mesmo estilo do badge GESTOR - hoje esta verde, fora do padrao). git add . && git commit -m "fix(aluno): header em uma linha no padrao do gestor, badge dourado" && git push origin main
+[ ] AGENDA entra na barra do aluno: nova composicao da barra inferior = Inicio, Treinos, Dieta, Agenda, Progresso, Mais (6 itens). O CHAT sai da barra e fica acessivel pelo icone de chat no header (presente em todas as telas) e por atalho no Mais. Atualizar sidebar na mesma ordem, sem duplicados. Agenda continua mostrando so as atividades do proprio aluno. git add . && git commit -m "feat(aluno): agenda na barra principal, chat pelo header" && git push origin main
+[ ] CHAT sem a barra invadindo: ao abrir o chat (pelo header), a tela de conversa deve ocupar o espaco SEM a bottom nav por cima do compose - ou a nav some na conversa (padrao WhatsApp) ou o compose fica acima dela com espacamento correto; com o TECLADO aberto, o compose acompanha o teclado e a ultima mensagem permanece visivel; os chips de resposta rapida ficam acima do compose sem sobrepor mensagens. Testar abrir, digitar e enviar com teclado aberto. git add . && git commit -m "fix(aluno): chat sem sobreposicao da barra e estavel com teclado" && git push origin main
 
-== NAO RODARAM - LEVA 5 (mensagens, progresso, perfil) ==
-[OK] MENSAGENS vira tela/aba propria (hoje so existe como sheet modal via openThreadSheet app.js:8129, sem fixMojibake/scrub). Criar acesso direto (icone de chat do header e/ou item de navegacao) que abre o thread no padrao do gestor: header com nome/avatar do personal + status, baloes (aluno a direita dourado, personal a esquerda escuro, horario + duplo check), compose bar fixa na base ACIMA da barra de navegacao. Aplicar fixMojibake e scrubVisibleText no conteudo. git add . && git commit -m "feat(aluno): mensagens como tela propria no padrao" && git push origin main
-     Resultado: - `#studentBottomNav`: `repeat(6, 1fr) !important` para comportar a nova aba
- | - `body.is-student-chat-tab .thread-sheet`: z-index 999 (abaixo do nav que ├® 1000) ÔÇö nav fica vis├¡vel
- | - `body.is-student-chat-tab #th...
-[OK] Mensagens - envio e push: enviar adiciona o balao na hora (otimista), rola pro fim, dispara push pro gestor; resposta do gestor em tempo real. Estado vazio "Inicie uma conversa com seu personal". git add . && git commit -m "feat(aluno): envio otimista de mensagem + push ao gestor" && git push origin main
-     Resultado: Feito. As 3 mudan├ºas entregues:
- | **`handleMessageForm`** ÔÇö toast removido. O bal├úo aparece na hora (j├í estava otimista) e o socket emite em background. Sil├¬ncio = confirma├º├úo visual suficiente.
- | **`message:ne...
-[OK] PROGRESSO (funde Evolucao + Atualizacoes, renderStudentProgress app.js:5810 e renderStudentUpdates 5253): uma tela so com envio de atualizacao (peso + fotos frente/lado/costas + observacoes) que dispara push ao gestor; historico de atualizacoes; e evolucao (volume e peso corporal) com graficos no padrao. Remover a duplicidade apontada na auditoria. git add . && git commit -m "feat(aluno): tela de Progresso unindo evolucao e atualizacoes" && git push origin main
-     Resultado: - `renderProgressWeightChart` / `renderProgressVolumeChart` ÔÇö novos: gr├íficos SVG inline no padr├úo `rpt-` j├í usado nos relat├│rios
- | - `handleUpdateForm` ÔÇö redireciona para `"progress"` (n├úo mais `"updates"`) e ...
-[OK] MAIS (hub) reorganizado (renderStudentProfile): lista organizada do que nao esta na barra - Perfil, Agenda, Contrato, Configuracoes - sem itens duplicados, com o botao Sair AQUI (movido do header). git add . && git commit -m "feat(aluno): hub Mais organizado sem duplicidade, com Sair" && git push origin main
-     Resultado: - **Agenda** ÔåÆ `data-student-nav="agenda"` ÔåÆ navega direto para a tela de agenda j├í existente
- | - **Contrato** ÔåÆ `data-student-nav="mais-contrato"` ÔåÆ abre `renderStudentMaisContrato()` com lista de contratos; b...
-[OK] PERFIL do proprio aluno: dados pessoais, objetivo, status do contrato e metricas (treinos na semana, volume, proximas atividades) em cards compactos no padrao do gestor; visualizar contrato (PDF) e dados da conta. Sem glow, encoding correto. git add . && git commit -m "feat(aluno): perfil do proprio aluno no padrao" && git push origin main
-     Resultado: 3. **Dados pessoais** ÔÇö panel com `profile-card`: nome completo, objetivo, telefone (se cadastrado) | 4. **Dados da conta** ÔÇö panel com `profile-card`: e-mail | 5. **Contrato** ÔÇö panel com badge de status + layou...
+  >>> VALIDAR COM VIDEO: header em 1 linha, barra com Agenda, chat limpo
+      digitando com teclado aberto. <<<
 
-  >>> VALIDAR COM VIDEO: chat como aba com compose, progresso com envio,
-      Mais sem duplicidade, perfil no padrao. <<<
+############################################################
+# LEVA C - CONTRATO COM VALIDADE JURIDICA (PDF + dados)    #
+############################################################
+[ ] CONTRATO do aluno deve exibir o PDF real: quando o contrato tiver pdfUrl (enviado pelo gestor), o gate e a tela de contrato mostram o VIEWER DE PDF (nao o texto renderizado com campos vazios). O texto renderizado so aparece como fallback quando nao ha PDF. Esconder/nao exibir linhas de dados vazios (CPF:, Valor:, Fim: em branco) - dado vazio nao aparece. git add . && git commit -m "fix(aluno): contrato exibe o PDF real e oculta campos vazios" && git push origin main
+[ ] ACEITE com validade juridica reforcada: alem do "Li e aceito" + nome completo, o aceite deve CONFERIR a identidade com dados que o profissional ja cadastrou: pedir CPF e validar contra o CPF do cadastro do aluno (e nome igual ao cadastro, tolerando caixa/acentos); registrar no aceite: nome, CPF, data/hora, IP, dispositivo (userAgent) e versao do documento. Se o cadastro nao tiver CPF, pedir e salvar no perfil. Deixar marcado no codigo o ponto de integracao futura com provedor de assinatura certificada (Clicksign/D4Sign) - a integracao em si fica para depois COM acompanhamento. git add . && git commit -m "feat(aluno): aceite com conferencia de CPF e trilha de auditoria" && git push origin main
+[ ] GATE de primeiro acesso premium: card de boas-vindas legivel (texto escuro sobre dourado), resumo do plano sem campos vazios (mostrar so o que existe), PDF rolavel, e o fluxo: ler, marcar aceite, confirmar identidade, sucesso com transicao suave para o app liberado. git add . && git commit -m "feat(aluno): gate de primeiro acesso premium e legivel" && git push origin main
 
-== LEVA 6 (fechamento) ==
-[OK] REVISAO FINAL premium do aluno: percorrer todas as telas (Login, Contrato, Inicio, Treinos, Execucao, Dieta, Mensagens, Progresso, Mais, Perfil, Agenda) garantindo paridade com o gestor: header com badge ALUNO e hamburguer; nenhum texto cortado; nenhuma caixa preta; nenhum botao escondido atras da barra; nenhum card fora do padrao; encoding correto; sem glow; barra estavel; contador da execucao funcionando; chat com compose. Atualizar AUDITORIA-ALUNO.md. git add . && git commit -m "chore(aluno): revisao final de consistencia premium" && git push origin main
-     Resultado: - Badge ALUNO (verde) + hamburguer adicionados ao header do aluno (index.html)
- | - Drawer lateral mobile do aluno: CSS em nav.css + openStudentDrawer/closeStudentDrawer em app.js
- | - "Baixar app" e "Sair" removidos do header (Sair esta no hub Mais; install no login)
- | - .student-badge CSS em styles.css; student-header agora usa grid 3 colunas igual ao manager
- | - AUDITORIA-ALUNO.md atualizada com status completo de todas as 11 telas
- | - app-version bumped para 55
+  >>> VALIDAR COM VIDEO: contrato abre o PDF, aceite pede CPF e valida,
+      gate legivel e fluido. <<<
+
+############################################################
+# LEVA D - POLIMENTO PREMIUM GERAL DO ALUNO                #
+############################################################
+[ ] PASSADA PREMIUM em todas as telas do aluno (Inicio, Treinos, Detalhe do treino, Execucao, Dieta, Agenda, Progresso, Chat, Mais, Perfil, Contrato): espacamentos consistentes (mesmo padding dos cards do gestor), hierarquia de texto (H1 + subtitle padrao), icones dourados em fundo escuro arredondado nos cards de metrica, badges nas cores certas, estados vazios elegantes com icone + frase curta, microinteracoes (toque com feedback, transicoes suaves), nenhum texto cortado, nenhum elemento atras da barra, safe-areas respeitadas. Comparar lado a lado com o gestor e listar o que foi ajustado por tela. git add . && git commit -m "chore(aluno): passada premium de consistencia visual" && git push origin main
+[ ] Atualizar AUDITORIA-ALUNO.md com o estado pos-refinamento: marcar resolvidos (dashboard, treinos organizados, header, agenda na barra, chat, contrato PDF, contraste) e listar qualquer pendencia remanescente com severidade. git add . && git commit -m "docs: atualizar auditoria do aluno pos-refinamento" && git push origin main
