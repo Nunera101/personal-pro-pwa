@@ -6528,24 +6528,56 @@
     const weekCount = stats ? stats.sessionsWeek.length : 0;
     const volumeLabel = stats ? `${Number(stats.recentVolume || 0).toLocaleString("pt-BR")} kg` : "0 kg";
     const nextAct = stats?.nextActivity;
-    const contractSummary = stats?.contract || { label: "Sem contrato", tone: "" };
+    const contractState = student ? getStudentContractState(student.id) : null;
+    const activeContract = contractState?.contract || null;
     return `
       <div class="content-stack">
         ${pageHeader("Perfil", escapeHtml(student?.name || "Aluno"))}
-        <section class="panel">
-          <div class="profile-hero">
-            <div>
+        <section class="panel mais-identity-panel">
+          <div class="mais-identity">
+            ${studentAvatar(student)}
+            <div class="mais-identity-info">
               <h3>${escapeHtml(student?.name || "Aluno")}</h3>
               <p>${escapeHtml(student?.goal || "Sem objetivo cadastrado")}</p>
             </div>
             ${statusBadge(student?.status === "active" ? "Ativo" : "Inativo", student?.status === "active" ? "success" : "danger")}
           </div>
-          <div class="profile-overview-grid student-summary-grid">
-            ${profileSummaryCard(icons.workouts, "Treinos na semana", String(weekCount), weekCount ? "Concluídos esta semana" : "Sem treino concluído")}
-            ${profileSummaryCard(icons.progress, "Volume recente", volumeLabel, "Últimos 4 treinos")}
-            ${profileSummaryCard(icons.agenda, "Próxima atividade", nextAct ? formatShortDate(nextAct.date) : "Sem agenda", nextAct ? `${activityLabel(nextAct.type)} · ${nextAct.time || "--:--"}` : "Nenhuma marcada")}
-            ${profileSummaryCard(icons.contracts, "Contrato", contractSummary.label, contractSummary.contract?.endDate ? `Até ${formatShortDate(contractSummary.contract.endDate)}` : "Status do contrato", contractSummary.tone)}
+        </section>
+        <div class="student-summary-grid">
+          ${profileSummaryCard(icons.workouts, "Treinos na semana", String(weekCount), weekCount ? "Concluídos esta semana" : "Sem treino concluído")}
+          ${profileSummaryCard(icons.progress, "Volume recente", volumeLabel, "Últimos 4 treinos")}
+          ${profileSummaryCard(icons.agenda, "Próxima atividade", nextAct ? formatShortDate(nextAct.date) : "Sem agenda", nextAct ? `${activityLabel(nextAct.type)} \xb7 ${nextAct.time || "--:--"}` : "Nenhuma marcada")}
+          ${profileSummaryCard(icons.contracts, "Contrato", contractState ? contractState.label : "Sem contrato", activeContract?.endDate ? `At\xe9 ${formatShortDate(activeContract.endDate)}` : "Status do plano", contractState?.tone || "")}
+        </div>
+        <section class="panel">
+          <div class="section-title"><h3>Dados pessoais</h3></div>
+          <div class="profile-grid">
+            <article class="profile-card"><span>Nome completo</span><strong>${escapeHtml(student?.name || "—")}</strong></article>
+            <article class="profile-card"><span>Objetivo</span><strong>${escapeHtml(student?.goal || "—")}</strong></article>
+            ${student?.phone ? `<article class="profile-card"><span>Telefone</span><strong>${escapeHtml(student.phone)}</strong></article>` : ""}
           </div>
+        </section>
+        <section class="panel">
+          <div class="section-title"><h3>Dados da conta</h3></div>
+          <div class="profile-grid">
+            <article class="profile-card"><span>E-mail</span><strong>${escapeHtml(student?.email || "—")}</strong></article>
+          </div>
+        </section>
+        <section class="panel">
+          <div class="section-title">
+            <h3>Contrato</h3>
+            ${contractState ? statusBadge(contractState.label, contractState.tone) : ""}
+          </div>
+          ${activeContract ? `
+            <div class="aluno-perfil-contrato">
+              <div class="aluno-perfil-contrato-info">
+                <strong>${escapeHtml(activeContract.title)}</strong>
+                ${activeContract.plan ? `<span>${escapeHtml(activeContract.plan)}</span>` : ""}
+                ${activeContract.endDate ? `<span>Vig\xeancia at\xe9 ${formatShortDate(activeContract.endDate)}</span>` : ""}
+              </div>
+              <button class="ghost-button" type="button" data-open-contract="${escapeHtml(activeContract.id)}">Visualizar</button>
+            </div>
+          ` : emptyState("Sem contrato ativo", "Contratos enviados pelo personal aparecer\xe3o aqui.", icons.contracts)}
         </section>
       </div>
     `;

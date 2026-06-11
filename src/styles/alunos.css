@@ -3069,3 +3069,38 @@
 .mais-sair-btn {
   width: 100%;
 }
+
+/* ═══════════════════════════════════════════════════════
+   ALUNO PERFIL — seção de contrato no perfil do aluno
+   ═══════════════════════════════════════════════════════ */
+
+.aluno-perfil-contrato {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 0.5rem;
+}
+
+.aluno-perfil-contrato-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.aluno-perfil-contrato-info strong {
+  font-size: 0.95rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.aluno-perfil-contrato-info span {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.aluno-perfil-contrato .ghost-button {
+  flex-shrink: 0;
+}
