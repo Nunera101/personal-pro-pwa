@@ -1337,18 +1337,20 @@ svg {
   padding: 1.15rem;
   border-radius: var(--radius);
   background: var(--brand-strong);
-  color: #fff;
+  /* Contraste: fundo dourado exige texto escuro, nunca branco. */
+  color: #1A1206;
   box-shadow: var(--shadow);
 }
 
 .hero-panel p {
-  color: rgba(255, 255, 255, 0.76);
+  color: rgba(26, 18, 6, 0.72);
   font-size: 0.84rem;
   font-weight: 800;
 }
 
 .hero-panel h3 {
   margin-top: 0.2rem;
+  color: #1A1206;
   font-size: clamp(1.35rem, 7vw, 2rem);
   line-height: 1.08;
 }
@@ -1356,8 +1358,20 @@ svg {
 .hero-panel span {
   display: block;
   margin-top: 0.45rem;
-  color: rgba(255, 255, 255, 0.78);
+  color: rgba(26, 18, 6, 0.78);
   line-height: 1.45;
+}
+
+/* Badge interno do hero-panel: escuro sobre o dourado (todas as variantes). */
+.hero-panel .badge,
+.hero-panel .badge.is-success,
+.hero-panel .badge.is-danger,
+.hero-panel .badge.is-info,
+.hero-panel .badge.is-warning,
+.hero-panel .badge.is-muted {
+  border-color: rgba(26, 18, 6, 0.24);
+  background: rgba(26, 18, 6, 0.12);
+  color: #1A1206;
 }
 
 /* ---- card destaque: próximo treino (tela Início do aluno) ---- */
