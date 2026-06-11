@@ -6232,12 +6232,12 @@
           </section>
         `}
 
-        <section class="metric-grid">
-          ${metricCard("Semana", sessionsThisWeek(studentId).length)}
-          ${metricCard("Mês", sessionsThisMonth(studentId).length)}
-          ${metricCard("Treinos realizados", sessions.length)}
-          ${metricCard("Volume total", sessions.reduce((sum, s) => sum + Number(s.totalVolumeLoad || 0), 0))}
-        </section>
+        <div class="metrics-row metrics-row--2" aria-label="Resumo de evolução">
+          ${dashboardMetricCard({ label: "Treinos na semana", value: sessionsThisWeek(studentId).length, subtext: "Sessões concluídas", icon: icons.today, tone: sessionsThisWeek(studentId).length ? "success" : "" })}
+          ${dashboardMetricCard({ label: "Treinos no mês", value: sessionsThisMonth(studentId).length, subtext: "Últimos 30 dias", icon: icons.agenda })}
+          ${dashboardMetricCard({ label: "Treinos realizados", value: sessions.length, subtext: "Histórico total", icon: icons.workouts })}
+          ${dashboardMetricCard({ label: "Volume total", value: `${sessions.reduce((sum, s) => sum + Number(s.totalVolumeLoad || 0), 0).toLocaleString("pt-BR")} kg`, subtext: "Carga acumulada", icon: icons.progress })}
+        </div>
 
         ${sessions.length >= 2 ? `
           <section class="panel">

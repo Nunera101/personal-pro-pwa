@@ -6561,15 +6561,27 @@ body::before {
   gap: 8px !important;
 }
 
-/* Icon: fixed size, no glow, aligned to top */
+/* Icon: chip dourado em fundo escuro arredondado (mesmo padrão dos summary cards) */
 .metric-top-row .metric-icon {
-  flex: 0 0 22px !important;
-  width: 22px !important;
-  height: 22px !important;
+  flex: 0 0 32px !important;
+  width: 32px !important;
+  height: 32px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 9px !important;
+  background: rgba(245, 159, 11, 0.12) !important;
+  color: var(--dourado) !important;
   box-shadow: none !important;
   align-self: flex-start !important;
-  margin-top: 1px !important;
+  margin-top: 0 !important;
 }
+.metric-top-row .metric-icon svg {
+  width: 18px !important;
+  height: 18px !important;
+}
+.dashboard-metric.is-success .metric-icon { background: rgba(72, 215, 100, 0.12) !important; color: #48d764 !important; }
+.dashboard-metric.is-warning .metric-icon { background: rgba(245, 159, 11, 0.12) !important; color: var(--dourado) !important; }
+.dashboard-metric.is-danger  .metric-icon { background: rgba(255, 90, 79, 0.12) !important; color: #ff5a4f !important; }
 
 /* Label: allow wrapping, max 2 lines, no horizontal cut */
 .metric-top-row .metric-label {
