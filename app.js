@@ -304,8 +304,8 @@
     { id: "today", label: "Início", icon: icons.today },
     { id: "workouts", label: "Treinos", icon: icons.workouts },
     { id: "diet", label: "Dieta", icon: icons.diet },
+    { id: "agenda", label: "Agenda", icon: icons.agenda },
     { id: "progress", label: "Progresso", icon: icons.progress },
-    { id: "chat", label: "Mensagens", icon: icons.messages },
     { id: "profile", label: "Mais", icon: icons.profile }
   ];
 
@@ -313,8 +313,8 @@
     { id: "today", label: "Início", icon: icons.today },
     { id: "workouts", label: "Treinos", icon: icons.workouts },
     { id: "diet", label: "Dieta", icon: icons.diet },
+    { id: "agenda", label: "Agenda", icon: icons.agenda },
     { id: "progress", label: "Progresso", icon: icons.progress },
-    { id: "chat", label: "Chat", icon: icons.messages },
     { id: "profile", label: "Mais", icon: icons.more }
   ];
 
@@ -6568,7 +6568,7 @@
     const chevron = `<svg viewBox="0 0 24 24" aria-hidden="true" class="mais-chevron"><path d="m9 18 6-6-6-6"/></svg>`;
     return `
       <div class="content-stack">
-        ${pageHeader("Mais", "Perfil, agenda e configurações", '<button class="pill-button" type="button" data-install-trigger>Baixar app</button>')}
+        ${pageHeader("Mais", "Perfil, mensagens e configurações", '<button class="pill-button" type="button" data-install-trigger>Baixar app</button>')}
         <section class="panel mais-identity-panel">
           <div class="mais-identity">
             ${studentAvatar(student)}
@@ -6586,9 +6586,9 @@
               <div class="mais-hub-text"><strong>Perfil</strong><span>Dados, estatísticas e evolução</span></div>
               ${chevron}
             </button>
-            <button class="mais-hub-item" type="button" data-student-nav="agenda">
-              <span class="mais-hub-icon">${icons.agenda}</span>
-              <div class="mais-hub-text"><strong>Agenda</strong><span>Atividades programadas</span></div>
+            <button class="mais-hub-item" type="button" data-open-my-chat>
+              <span class="mais-hub-icon">${icons.messages}</span>
+              <div class="mais-hub-text"><strong>Mensagens</strong><span>Conversar com o personal</span></div>
               ${chevron}
             </button>
             <button class="mais-hub-item" type="button" data-student-nav="mais-contrato">
