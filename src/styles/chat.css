@@ -805,17 +805,15 @@
   display: none;
 }
 
-/* ── Aba Mensagens: thread como tela própria (nav fica visível abaixo) ── */
-#studentBottomNav {
-  grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+/* ── Aba Mensagens: thread como tela cheia, padrão WhatsApp ──
+   Na conversa a bottom nav some por completo; o compose passa a ocupar
+   o rodapé (acompanhando o teclado via Visual Viewport) sem a barra por cima. */
+body.is-student-chat-tab #studentBottomNav {
+  display: none !important;
 }
 
 body.is-student-chat-tab .thread-sheet {
-  z-index: 999;
-}
-
-body.is-student-chat-tab #threadForm {
-  padding-bottom: calc(4.8rem + env(safe-area-inset-bottom, 0px)) !important;
+  z-index: 1100;
 }
 
 /* ── Badge de chat no header do aluno ── */
