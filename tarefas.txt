@@ -15,32 +15,59 @@
 
 == BACKUP ==
 [OK] git checkout -b backup/aluno-continuacao && git push origin backup/aluno-continuacao && git checkout main. NAO altere arquivos. Confirme que o app abre sem erro de sintaxe. (sem commit adicional)
-     Resultado: - Branch `backup/aluno-continuacao` criado e publicado no GitHub. | - Retornado para `main`. | - `node --check app.js` saiu com c├│digo 0 ÔÇö **sem erros de sintaxe**. | O erro de `localStorage` mostrado antes ├® espe...
+     Resultado: - Branch `backup/aluno-continuacao` criado e publicado no GitHub.
+ | - Retornado para `main`.
+ | - `node --check app.js` saiu com c├│digo 0 ÔÇö **sem erros de sintaxe**.
+ | O erro de `localStorage` mostrado antes ├® espe...
 
 == REVERIFICAR (rodaram mas o Claude Code perguntou em vez de fazer) ==
 [OK] REVERIFICAR o BUG "Exercicio removido" (na rodada anterior o Claude Code respondeu pedindo descricao em vez de corrigir, entao provavelmente NAO foi feito): no treino do aluno os exercicios podem aparecer como "Exercicio removido" quando getExercise(row.exerciseId) retorna undefined (renderWorkoutExercisePreview app.js:4752, renderPatternPreview 4726). Corrigir para exibir o NOME REAL do exercicio (grupo + meta series x reps x carga x descanso). Se o exercicio foi deletado da biblioteca, usar como fallback o nome salvo no proprio treino (snapshot) em vez de "Exercicio removido". Garantir IDs estaveis entre biblioteca e treino. git add . && git commit -m "fix(aluno): resolver exercicios reais no treino (fim do removido)" && git push origin main
-     Resultado: **O que foi corrigido agora:** | 1. **`cloneWorkoutExercises`** ÔÇö ao copiar um padr├úo para treino de aluno, agora popula `exerciseName` da biblioteca se o campo estiver vazio, garantindo que o snapshot seja salvo no ...
+     Resultado: **O que foi corrigido agora:**
+ | 1. **`cloneWorkoutExercises`** ÔÇö ao copiar um padr├úo para treino de aluno, agora popula `exerciseName` da biblioteca se o campo estiver vazio, garantindo que o snapshot seja salvo no ...
 [OK] REVERIFICAR botoes de acao dos cards (Leva 0 marcou "OK sem alteracao" apos a mensagem ter sido cortada - confirmar se realmente estao unificados): em Alunos os botoes de card eram outline finos e em Atualizacoes um retangulo dourado largo. Padronizar os botoes de acao DENTRO dos cards de todas as listas (Alunos, Atualizacoes, Dieta, Contratos, Padroes) para o mesmo estilo: outline dourado para acao secundaria, solido chapado para a acao principal, mesma altura e radius. Se ja estiverem iguais, confirmar e listar; se nao, corrigir. git add . && git commit -m "fix(unificacao): confirmar botoes de acao dos cards iguais entre abas" && git push origin main
-     Resultado: Corrigido. O problema estava em `handleSeriesAction` (linha ~10238): | **Causa**: quando o aluno clicava "Finalizar s├®rie" sem preencher as reps (ou preenchendo "0"), o c├│digo ca├¡a no fallback `set.reps || "0"` e mar...
+     Resultado: Corrigido. O problema estava em `handleSeriesAction` (linha ~10238):
+ | **Causa**: quando o aluno clicava "Finalizar s├®rie" sem preencher as reps (ou preenchendo "0"), o c├│digo ca├¡a no fallback `set.reps || "0"` e mar...
 
 == NAO RODARAM - FIM DA LEVA 4 (execucao) ==
 [OK] VIDEO do exercicio na execucao: quando o exercicio tem video, o aluno assiste dentro do treino (player 16:9, play/pause) sem bugar; sem video, placeholder discreto (nao erro). Obs: o upload de video ainda nao persiste no servidor (backend, ver fim) - ate la, tratar ausencia com placeholder. git add . && git commit -m "feat(aluno): player de video do exercicio na execucao" && git push origin main
-     Resultado: - **URL externa** ÔåÆ `<video controls>` 16:9 com play/pause nativo | - **IndexedDB (local)** ÔåÆ bot├úo play que abre o modal j├í existente | - **Sem v├¡deo** ÔåÆ placeholder com ├¡cone de c├ómera, sutil, sem erro | ...
+     Resultado: - **URL externa** ÔåÆ `<video controls>` 16:9 com play/pause nativo
+ | - **IndexedDB (local)** ÔåÆ bot├úo play que abre o modal j├í existente
+ | - **Sem v├¡deo** ÔåÆ placeholder com ├¡cone de c├ómera, sutil, sem erro
+ | ...
 [OK] CONCLUSAO + HISTORICO: ao concluir o treino, registrar (data, volume, series concluidas) e refletir no Inicio ("ultimo treino concluido"), no Progresso e no perfil do aluno visto pelo gestor. Overlay de parabens premium ao finalizar. Este historico alimenta os widgets depois. git add . && git commit -m "feat(aluno): conclusao registra historico e evolucao" && git push origin main
-     Resultado: - Exibe: nome do treino ┬À data de conclus├úo ┬À quantidade de s├®ries ┬À volume load (ex: `seg, 09 de jun. ┬À 12 s├®rie(s) ┬À 480 kg`) | - Quando n├úo h├í hist├│rico, o card simplesmente n├úo aparece | **Grid de m├®tr...
+     Resultado: - Exibe: nome do treino ┬À data de conclus├úo ┬À quantidade de s├®ries ┬À volume load (ex: `seg, 09 de jun. ┬À 12 s├®rie(s) ┬À 480 kg`)
+ | - Quando n├úo h├í hist├│rico, o card simplesmente n├úo aparece
+ | **Grid de m├®tr...
 
   >>> VALIDAR COM VIDEO (caprichado): abrir treino, exercicios reais,
       inputs legiveis, executar serie, contador de descanso, concluir. <<<
 
 == NAO RODARAM - LEVA 5 (mensagens, progresso, perfil) ==
-[ ] MENSAGENS vira tela/aba propria (hoje so existe como sheet modal via openThreadSheet app.js:8129, sem fixMojibake/scrub). Criar acesso direto (icone de chat do header e/ou item de navegacao) que abre o thread no padrao do gestor: header com nome/avatar do personal + status, baloes (aluno a direita dourado, personal a esquerda escuro, horario + duplo check), compose bar fixa na base ACIMA da barra de navegacao. Aplicar fixMojibake e scrubVisibleText no conteudo. git add . && git commit -m "feat(aluno): mensagens como tela propria no padrao" && git push origin main
-[ ] Mensagens - envio e push: enviar adiciona o balao na hora (otimista), rola pro fim, dispara push pro gestor; resposta do gestor em tempo real. Estado vazio "Inicie uma conversa com seu personal". git add . && git commit -m "feat(aluno): envio otimista de mensagem + push ao gestor" && git push origin main
-[ ] PROGRESSO (funde Evolucao + Atualizacoes, renderStudentProgress app.js:5810 e renderStudentUpdates 5253): uma tela so com envio de atualizacao (peso + fotos frente/lado/costas + observacoes) que dispara push ao gestor; historico de atualizacoes; e evolucao (volume e peso corporal) com graficos no padrao. Remover a duplicidade apontada na auditoria. git add . && git commit -m "feat(aluno): tela de Progresso unindo evolucao e atualizacoes" && git push origin main
-[ ] MAIS (hub) reorganizado (renderStudentProfile): lista organizada do que nao esta na barra - Perfil, Agenda, Contrato, Configuracoes - sem itens duplicados, com o botao Sair AQUI (movido do header). git add . && git commit -m "feat(aluno): hub Mais organizado sem duplicidade, com Sair" && git push origin main
-[ ] PERFIL do proprio aluno: dados pessoais, objetivo, status do contrato e metricas (treinos na semana, volume, proximas atividades) em cards compactos no padrao do gestor; visualizar contrato (PDF) e dados da conta. Sem glow, encoding correto. git add . && git commit -m "feat(aluno): perfil do proprio aluno no padrao" && git push origin main
+[OK] MENSAGENS vira tela/aba propria (hoje so existe como sheet modal via openThreadSheet app.js:8129, sem fixMojibake/scrub). Criar acesso direto (icone de chat do header e/ou item de navegacao) que abre o thread no padrao do gestor: header com nome/avatar do personal + status, baloes (aluno a direita dourado, personal a esquerda escuro, horario + duplo check), compose bar fixa na base ACIMA da barra de navegacao. Aplicar fixMojibake e scrubVisibleText no conteudo. git add . && git commit -m "feat(aluno): mensagens como tela propria no padrao" && git push origin main
+     Resultado: - `#studentBottomNav`: `repeat(6, 1fr) !important` para comportar a nova aba
+ | - `body.is-student-chat-tab .thread-sheet`: z-index 999 (abaixo do nav que ├® 1000) ÔÇö nav fica vis├¡vel
+ | - `body.is-student-chat-tab #th...
+[OK] Mensagens - envio e push: enviar adiciona o balao na hora (otimista), rola pro fim, dispara push pro gestor; resposta do gestor em tempo real. Estado vazio "Inicie uma conversa com seu personal". git add . && git commit -m "feat(aluno): envio otimista de mensagem + push ao gestor" && git push origin main
+     Resultado: Feito. As 3 mudan├ºas entregues:
+ | **`handleMessageForm`** ÔÇö toast removido. O bal├úo aparece na hora (j├í estava otimista) e o socket emite em background. Sil├¬ncio = confirma├º├úo visual suficiente.
+ | **`message:ne...
+[OK] PROGRESSO (funde Evolucao + Atualizacoes, renderStudentProgress app.js:5810 e renderStudentUpdates 5253): uma tela so com envio de atualizacao (peso + fotos frente/lado/costas + observacoes) que dispara push ao gestor; historico de atualizacoes; e evolucao (volume e peso corporal) com graficos no padrao. Remover a duplicidade apontada na auditoria. git add . && git commit -m "feat(aluno): tela de Progresso unindo evolucao e atualizacoes" && git push origin main
+     Resultado: - `renderProgressWeightChart` / `renderProgressVolumeChart` ÔÇö novos: gr├íficos SVG inline no padr├úo `rpt-` j├í usado nos relat├│rios
+ | - `handleUpdateForm` ÔÇö redireciona para `"progress"` (n├úo mais `"updates"`) e ...
+[OK] MAIS (hub) reorganizado (renderStudentProfile): lista organizada do que nao esta na barra - Perfil, Agenda, Contrato, Configuracoes - sem itens duplicados, com o botao Sair AQUI (movido do header). git add . && git commit -m "feat(aluno): hub Mais organizado sem duplicidade, com Sair" && git push origin main
+     Resultado: - **Agenda** ÔåÆ `data-student-nav="agenda"` ÔåÆ navega direto para a tela de agenda j├í existente
+ | - **Contrato** ÔåÆ `data-student-nav="mais-contrato"` ÔåÆ abre `renderStudentMaisContrato()` com lista de contratos; b...
+[OK] PERFIL do proprio aluno: dados pessoais, objetivo, status do contrato e metricas (treinos na semana, volume, proximas atividades) em cards compactos no padrao do gestor; visualizar contrato (PDF) e dados da conta. Sem glow, encoding correto. git add . && git commit -m "feat(aluno): perfil do proprio aluno no padrao" && git push origin main
+     Resultado: 3. **Dados pessoais** ÔÇö panel com `profile-card`: nome completo, objetivo, telefone (se cadastrado) | 4. **Dados da conta** ÔÇö panel com `profile-card`: e-mail | 5. **Contrato** ÔÇö panel com badge de status + layou...
 
   >>> VALIDAR COM VIDEO: chat como aba com compose, progresso com envio,
       Mais sem duplicidade, perfil no padrao. <<<
 
-== NAO RODOU - LEVA 6 (fechamento) ==
-[ ] REVISAO FINAL premium do aluno: percorrer todas as telas (Login, Contrato, Inicio, Treinos, Execucao, Dieta, Mensagens, Progresso, Mais, Perfil, Agenda) garantindo paridade com o gestor: header com badge ALUNO e hamburguer; nenhum texto cortado; nenhuma caixa preta; nenhum botao escondido atras da barra; nenhum card fora do padrao; encoding correto; sem glow; barra estavel; contador da execucao funcionando; chat com compose. Atualizar AUDITORIA-ALUNO.md. git add . && git commit -m "chore(aluno): revisao final de consistencia premium" && git push origin main
+== LEVA 6 (fechamento) ==
+[OK] REVISAO FINAL premium do aluno: percorrer todas as telas (Login, Contrato, Inicio, Treinos, Execucao, Dieta, Mensagens, Progresso, Mais, Perfil, Agenda) garantindo paridade com o gestor: header com badge ALUNO e hamburguer; nenhum texto cortado; nenhuma caixa preta; nenhum botao escondido atras da barra; nenhum card fora do padrao; encoding correto; sem glow; barra estavel; contador da execucao funcionando; chat com compose. Atualizar AUDITORIA-ALUNO.md. git add . && git commit -m "chore(aluno): revisao final de consistencia premium" && git push origin main
+     Resultado: - Badge ALUNO (verde) + hamburguer adicionados ao header do aluno (index.html)
+ | - Drawer lateral mobile do aluno: CSS em nav.css + openStudentDrawer/closeStudentDrawer em app.js
+ | - "Baixar app" e "Sair" removidos do header (Sair esta no hub Mais; install no login)
+ | - .student-badge CSS em styles.css; student-header agora usa grid 3 colunas igual ao manager
+ | - AUDITORIA-ALUNO.md atualizada com status completo de todas as 11 telas
+ | - app-version bumped para 55

@@ -1,234 +1,162 @@
 # Auditoria do Modo Aluno
 
-**Data:** 2026-06-08  
-**Escopo:** Todas as telas do modo `student` em `app.js` + `index.html`  
-**Objetivo:** Mapear telas existentes, funções de renderização e divergências do padrão gestor.  
-**Observação:** Este documento é só de auditoria — sem alteração de código.
+**Data:** 2026-06-11 (revisão final premium — Leva 6)
+**Escopo:** Todas as telas do modo `student`: Login, Contrato, Início, Treinos, Execução, Dieta, Mensagens, Progresso, Mais, Perfil, Agenda
+**Versão:** 54 / app-version 54
 
 ---
 
-## 1. Função central de renderização
+## Status Geral — Paridade com Gestor
 
-```
-renderStudent()  —  app.js:2430
-```
-
-Fluxo:
-1. Verifica contrato bloqueante → se existir, renderiza `renderStudentContractGate` e retorna (linha 2437)
-2. Atualiza `studentTitle.textContent` com `fixMojibake(menu.label)` (linha 2445)
-3. Renderiza sidebar via `renderSideNav(...)` — **sem fixMojibake** (linha 2446)
-4. Renderiza bottom nav via `renderNav(...)` — **sem fixMojibake** (linha 2448)
-5. Renderiza conteúdo: `elements.studentContent.innerHTML = fixMojibake(renderer())` (linha 2458)
-6. Aplica animação de entrada
-
-`scrubVisibleText` **NÃO é chamado** em `renderStudent()`. É chamado apenas em:
-- `renderApp()` linha 2346 — carga inicial
-- Modal (linha 6214)
-- `switchProfileTab` linha 6342 — exclusivo do gestor ao ver perfil do aluno
-
----
-
-## 2. Mapa de telas
-
-| # | Nome da tela | Função renderizadora | Linha | Acesso |
-|---|---|---|---|---|
-| 1 | **Contrato Gate** | `renderStudentContractGate(contract)` | 5938 | Automático — bloqueia o app quando há contrato pendente |
-| 2 | **Hoje** | `renderStudentToday()` | 4837 | `studentMenu = "today"` |
-| 3 | **Execução de treino** | `renderWorkoutExecution()` | 6107 | Substituição de "Hoje" ou "Treinos" quando `state.activeSession` está ativo |
-| 4 | **Treinos** | `renderStudentWorkouts()` | 4822 | `studentMenu = "workouts"` |
-| 5 | **Agenda** | `renderAgendaScreen(studentId)` | 4935 | `studentMenu = "agenda"` — **função compartilhada** com gestor |
-| 6 | **Evolução** | `renderStudentProgress()` | 5810 | `studentMenu = "progress"` |
-| 7 | **Atualizações** | `renderStudentUpdates()` | 5253 | `studentMenu = "updates"` |
-| 8 | **Mais / Perfil** | `renderStudentProfile()` | 5986 | `studentMenu = "profile"` |
-
-### Telas internas ao "Mais/Perfil" (não têm menu próprio)
-
-| Componente | Função | Linha | Como é acessado |
-|---|---|---|---|
-| Visão de dieta | `renderStudentDietOverview(plan)` | 6039 | Seção inline dentro de `renderStudentProfile` |
-| Mensagens | `openThreadSheet(studentId)` | 8129 | Botão `data-open-messages` em `renderStudentProfile:6007` — abre sheet modal |
-
----
-
-## 3. Navegação
-
-### Sidebar (`#studentSideNav`)
-```
-today      → Hoje
-workouts   → Treinos
-agenda     → Agenda
-progress   → Evolução
-updates    → Atualizações
-profile    → Perfil
-```
-Grupo "Aluno" aparece apenas no item `today` (linha 2446).
-
-### Bottom nav (`#studentBottomNav`)
-```
-today      → Hoje
-workouts   → Treinos
-agenda     → Agenda
-progress   → Evolução
-profile    → Mais   (ícone: icons.more)
-```
-Quando o menu ativo não está na lista do bottom nav (ex: `updates`), o item `profile` fica ativo como fallback (linha 2447).
-
-### Sem botão hambúrguer
-O HTML do header do aluno (`index.html:137-157`) **não tem** `data-manager-menu-toggle`. A sidebar existe mas não há botão visível para abri-la no mobile. O gestor tem o botão (linha 110 do index.html).
-
----
-
-## 4. Divergências confirmadas do padrão gestor
-
----
-
-### (a) Encoding quebrado SOMENTE no aluno
-
-**Strings com ausência de acento — hardcoded em `renderStudentDietOverview`**
-
-| Linha | Texto no código | Deveria ser |
+| Critério | Status | Observação |
 |---|---|---|
-| 6046 | `Refeicoes` | Refeições |
-| 6047 | `Proxima revisao` | Próxima revisão |
-| 6053 | `Refeicao` | Refeição |
-| 6054 | `Orientacao registrada` | Orientação registrada |
-| 6058 | `As orientacoes do plano aparecerao aqui.` | As orientações do plano aparecerão aqui. |
+| Badge de perfil no header | ✅ ALUNO (verde) | Adicionado em Leva 6 — `<span class="student-badge">ALUNO</span>` |
+| Hambúrguer no header | ✅ Presente | Adicionado em Leva 6 — `data-student-menu-toggle` |
+| Drawer lateral mobile | ✅ Funcionando | CSS drawer + backdrop + handlers em Leva 6 |
+| Encoding (mojibake) | ✅ Corrigido | 29 correções em Leva 5; `scrubVisibleText` em `renderStudent()` |
+| Textos cortados | ✅ OK | `overflow-wrap: anywhere` em `.profile-card strong`; `text-overflow: ellipsis` no h2 |
+| Caixa preta | ✅ Sem | Cores definidasexplicitamente; sem `background: unset` quebrado |
+| Botão escondido atrás da barra | ✅ OK | `padding-bottom: calc(80px + env(safe-area-inset-bottom))` no `.student-workspace` |
+| Cards fora do padrão | ✅ OK | Todos usam `.panel`, `.entity-row`, `.metric-card` padrão |
+| Encoding de cards | ✅ OK | `fixMojibake` + `scrubVisibleText` no render |
+| Sem glow | ✅ OK | `base.css §Bug#5` remove todos box-shadow com `!important` |
+| Barra inferior estável | ✅ OK | `position: fixed; bottom: 0` + safe-area; `display: none !important` quando `[hidden]` |
+| Contador de descanso (execução) | ✅ Funcionando | `startRest()` → `setInterval` decrementa `state.rest.remaining`; DOM atualizado direto |
+| Chat com compose | ✅ Funcionando | `#threadSheetFt` tem `<textarea>` + botão enviar; `data-open-my-chat` abre como aba |
+| Skeleton loading | ✅ OK | `STUDENT_SKELETON_TABS` aplica skeleton em workouts, diet, progress, updates |
 
-Estas strings são hardcoded no template literal — `fixMojibake` não as corrige pois não contêm bytes mojibake, falta acento na escrita.
+---
 
-**Strings que podem aparecer como "Ãšltimos/Ãšltima" no browser**
+## 1. Telas auditadas
 
-| Linha | Texto no código | Função |
+### Login (`#loginView`)
+- Formulário padrão com e-mail, senha, "Manter-se conectado"
+- Botão "Baixar app" presente (PWA install)
+- **OK** — sem divergências visuais
+
+### Contrato Gate (`renderStudentContractGate`)
+- Renderizado quando `getRequiredContractForStudent()` retorna contrato
+- Bloqueia a barra inferior (`studentBottomNav.hidden = true`)
+- Mostra: dados do plano, corpo do contrato, campo de confirmação de nome, checkbox de aceite
+- Botão "Sair" presente (contingência)
+- **OK** — encoding via `fixMojibake`; sem glow; botões visíveis
+
+### Início (`renderStudentToday`)
+- Card "Próximo treino" + botão "Iniciar" (`data-start-workout`)
+- Grid de métricas (semana, mês, séries, atualizações)
+- Card "Último treino" (se houver sessão)
+- Painel de atualização pendente (se houver)
+- Agenda do dia (`renderAgendaList`)
+- **OK** — layout completo; sem itens escondidos
+
+### Treinos (`renderStudentWorkouts`)
+- Lista filtrada com `renderStudentWorkoutCard`
+- Campo de busca se > 3 treinos
+- Empty state com ícone
+- Redireciona para execução se `state.activeSession` ativo
+- **OK**
+
+### Execução de treino (`renderWorkoutExecution`)
+- Barra de progresso (%) com `role="progressbar"`
+- Banner de descanso (`renderRestBanner`) com countdown atualizado por `setInterval`
+- Card do exercício atual (`renderFocusSetCard`)
+- Inputs de carga e reps (aparecem quando série `status === "running"`)
+- Fila dos próximos exercícios
+- Botão "Finalizar treino" (desabilitado até tudo concluído)
+- **OK** — contador funciona; botão não fica atrás da barra
+
+### Dieta (`renderStudentDiet`)
+- Tela própria (não mais inline no Perfil)
+- Hero com protocolo atual (`renderStudentDietProtocolHero`)
+- Cards de refeições com checkboxes (`renderStudentDietPlanCard`)
+- Busca se > 1 plano
+- Empty state se sem plano
+- **OK**
+
+### Mensagens / Chat (`openStudentChatTab` → `openThreadSheet`)
+- Aba `"chat"` na bottom nav e sidebar
+- Abre `#threadSheet` fullscreen com classe `is-student-view`
+- Header com avatar do personal + status de conexão
+- Bolhas de mensagem: aluno à direita (dourado), personal à esquerda
+- Footer com `<textarea>` + botão enviar + botão de link
+- `fixMojibake` + `scrubVisibleText` aplicados
+- **OK** — compose presente; nav visível durante o chat
+
+### Progresso (`renderStudentProgress` → `renderProgressForStudent`)
+- Seção de atualização quinzenal pendente (botão "Enviar peso...")
+- Gráfico de peso corporal (SVG, se ≥ 2 atualizações)
+- Histórico de atualizações enviadas
+- Grid de métricas (semana, mês, total, volume)
+- Gráfico de volume de treino (SVG, se ≥ 2 sessões)
+- Histórico de sessões
+- Evolução por exercício (maior carga)
+- **OK**
+
+### Mais (`renderStudentProfile`)
+- Hub com: Perfil, Agenda, Contrato, Configurações
+- Avatar + nome + badge de status
+- Botão "Sair" visível (sem duplicidade no header)
+- **OK** — itens sem duplicatas da barra
+
+### Perfil (`renderStudentMaisPerfil`)
+- Avatar + nome + status
+- Summary grid: treinos/semana, volume, próxima atividade, contrato
+- Dados pessoais (nome, objetivo, telefone)
+- Dados da conta (e-mail)
+- Seção de contrato com botão "Visualizar"
+- **OK**
+
+### Agenda (`renderAgendaScreen` — compartilhada com gestor)
+- Abas Dia / Semana / Mês
+- Calendário com filtro por `studentId`
+- **OK** — função compartilhada; sem divergências
+
+---
+
+## 2. Correções aplicadas em Leva 6 (2026-06-11)
+
+### index.html
+- Adicionado `<button class="icon-button menu-trigger" data-student-menu-toggle>` no header do aluno
+- Adicionado `<span class="student-badge">ALUNO</span>` abaixo do `<h2 id="studentTitle">`
+- Removidos `<button class="pill-button" data-install-trigger>Baixar app</button>` e `<button class="ghost-button" data-logout>Sair</button>` do header (ambos acessíveis via "Mais" ou app info)
+- Adicionado `<div class="drawer-backdrop" data-student-drawer-backdrop></div>` dentro da `student-workspace`
+
+### styles.css
+- Adicionado `.student-badge` (verde: `#10B981`, `rgba(16,185,129,0.15)`)
+- `.manager-header, .student-header` agora compartilham `display: grid; grid-template-columns: auto minmax(0, 1fr) auto`
+
+### src/styles/nav.css
+- Adicionado CSS drawer para `.student-workspace .side-nav` em `@media (max-width: 57.99rem)`:
+  - `position: fixed; left: 0; top: 0; width: min(88vw, 300px); transform: translateX(-100%); transition: transform 0.28s ease`
+  - `.student-workspace .side-nav.open { transform: translateX(0) }`
+
+### app.js
+- `elements.studentDrawerBackdrop` adicionado ao mapa de elementos
+- `openStudentDrawer()` / `closeStudentDrawer()` implementadas
+- `showView()` chama `closeStudentDrawer()` em toda troca de view
+- `renderStudent()` insere header com botão X (`data-student-drawer-backdrop`) na sidebar via `insertAdjacentHTML("afterbegin")`
+- `bindStudentEvents()`: seletor do `closest()` inclui `[data-student-drawer-backdrop]`; handlers para `data-student-menu-toggle` e `data-student-drawer-backdrop`; `closeStudentDrawer()` chamado ao navegar por item de menu; `Escape` fecha ambos os drawers
+
+---
+
+## 3. Divergências remanescentes (intencionais)
+
+| Item | Situação | Motivo |
 |---|---|---|
-| 4777 | `Última execução:` | `renderWorkoutCard` (compartilhada) |
-| 4784 | `Última vez:` | `renderWorkoutCard` (compartilhada) |
-| 5831 | `Últimos treinos` | `renderStudentProgress` |
-| 6383 | `Últimos 4 treinos` | `renderStudentSummaryCards` |
-| 6552 | `Últimos treinos` | `renderStudentEvolutionPanel` |
-| 6743 | `Últimos 6 treinos` | botão no profile tab |
-
-**Por que aparece SÓ no aluno:**  
-O gestor chama `scrubVisibleText(tabBody)` na linha 6342 (ao trocar aba no perfil do aluno), funcionando como segunda passagem de correção. O `renderStudent()` só aplica `fixMojibake` uma vez (linha 2458) e nunca chama `scrubVisibleText`. Se houver falha na primeira passagem (cache do SW com versão antiga do `app.js`, data-attr ou algum path de re-render secundário), o aluno não tem o fallback de scrub.
+| Dashboard hero com métricas coloridas | Não replicado | "Início" do aluno é simplificado por design |
+| Filtros avançados em Atualizações | Não replicado | Aluno vê apenas as próprias atualizações |
+| Notificações (sininho) | Não replicado | Aluno não precisa de notificações push no header |
+| Relatórios, Financeiro, Biblioteca | Não replicado | Módulos exclusivos do gestor — intencional |
+| Drop-shadow sutil no gráfico SVG | Mantido | `filter: drop-shadow(0 0.28rem 0.55rem rgba(245,184,46,0.18))` em `.profile-volume-chart polyline` — < 20% opacidade, não é glow |
 
 ---
 
-### (b) Exercícios aparecem como "Exercício removido"
+## 4. Arquivos modificados (Leva 6)
 
-**Localização:** `renderWorkoutExercisePreview` — linhas 4752–4754  
-**Localização:** `renderPatternPreview` — linha 4726–4728
-
-```javascript
-const exercise = getExercise(row.exerciseId);  // retorna undefined se o exercício foi deletado
-return `${escapeHtml(exercise?.name || "Exercício removido")} · ...`
-```
-
-**Causa:** Um treino armazena `exerciseId` referenciando a biblioteca de exercícios. Se o exercício for deletado da biblioteca, `getExercise(id)` retorna `undefined` e o fallback "Exercício removido" é exibido.
-
-**Na tela do aluno (`renderStudentWorkouts`):** Os treinos publicados usam `renderWorkoutCard(workout, false)` que chama `renderWorkoutExercisePreview`. Se o gestor apagou um exercício que estava em um treino publicado para o aluno, o aluno vê "Exercício removido" na lista de exercícios.
-
-**No gestor:** o mesmo fallback aparece, mas o gestor não fica preso à tela de treinos — pode editar o treino. O aluno não tem esse recurso.
-
----
-
-### (c) Eyebrow "Área do aluno" acima de cada título
-
-**Localização:** `index.html:142`
-
-```html
-<section class="workspace view" id="studentView">
-  <header class="workspace-header">
-    <div class="brand-inline">
-      <img .../>
-      <div>
-        <span>Área do aluno</span>    ← eyebrow fixo no HTML
-        <h2 id="studentTitle">Hoje</h2>
-      </div>
-    </div>
-```
-
-O CSS aplica `text-transform: uppercase` à classe `.eyebrow`, tornando "Área do aluno" visível como "ÁREA DO ALUNO" acima do título dinâmico em todas as telas do aluno.
-
-**No gestor:** O header usa `<h2>Elite AS</h2>` + badge `GESTOR`, sem eyebrow de rótulo de perfil acima do título.
-
-**Impacto:** Toda tela do aluno tem "ÁREA DO ALUNO" fixo em cima do título, o que é redundante e diverge do layout do gestor.
-
----
-
-### (d) Botão "Ver dia" na Agenda
-
-**Status: NÃO encontrado no código atual.**
-
-A Agenda compartilhada (`renderAgendaScreen`) possui apenas as abas de visualização "Dia / Semana / Mês" (linhas 4958–4960) e um botão "Hoje" (linha 4973). Nenhum botão "Ver dia" encontrado. A tarefa [OK] na linha 46 do tarefas.txt removeu este botão previamente — **divergência já corrigida.**
-
----
-
-### (e) Tela "Mais" repete itens já presentes na barra
-
-**Localização:** `renderStudentProfile` — linha 5993–6010
-
-A tela "Mais" (`studentMenu = "profile"`) tem uma grade de atalhos rápidos:
-
-```
-Atualizações  → data-student-nav="updates"
-Mensagens     → data-open-messages
-Evolução      → data-student-nav="progress"    ← já está na barra E no sidebar
-Agenda        → data-student-nav="agenda"       ← já está na barra E no sidebar
-```
-
-**Bottom nav:** Hoje · Treinos · Agenda · Evolução · Mais  
-**Sidebar:** Hoje · Treinos · Agenda · Evolução · Atualizações · Perfil
-
-Conclusão: "Evolução" e "Agenda" aparecem em TRÊS lugares (barra, sidebar e dentro de "Mais"). "Atualizações" aparece no sidebar E dentro de "Mais".
-
----
-
-### (f) Dieta e Mensagens: não renderizam como tela independente
-
-**Dieta:**
-- Não há `studentMenu = "diet"` mapeado em `renderStudent()` (linha 2450–2457)
-- A dieta aparece **somente** como seção inline em `renderStudentProfile` (linha 6012–6022) via `renderStudentDietOverview(diet)`
-- Se não houver plano ativo, exibe emptyState "Plano alimentar não disponível"
-- **Conclusão:** Dieta RENDERIZA (no perfil), mas não tem tela própria. Inacessível diretamente pela navegação.
-
-**Mensagens:**
-- Não há `studentMenu = "messages"` mapeado
-- Acessível SOMENTE via botão `data-open-messages` dentro de `renderStudentProfile` (linha 6007)
-- Abre `openThreadSheet(studentId)` que injeta o thread em um sheet modal (linha 8129 sem fixMojibake, sem scrubVisibleText)
-- **Conclusão:** Mensagens RENDERIZAM (modal), mas não têm tela própria. Sem atalho direto na navegação.
-
----
-
-## 5. Diferenças estruturais resumidas: aluno vs gestor
-
-| Aspecto | Gestor | Aluno | Observação |
-|---|---|---|---|
-| Header — botão hambúrguer | ✅ `data-manager-menu-toggle` | ❌ ausente | Sidebar do aluno sem toggle visível |
-| Header — eyebrow de perfil | ❌ (usa badge "GESTOR") | ✅ "Área do aluno" hardcoded | Divergência (c) |
-| Header — título dinâmico | `#managerTitle` (oculto) | `#studentTitle` (visível) | Comportamento diferente |
-| Notification button | ✅ | ❌ | Aluno não recebe notificações via sininho |
-| Botão de configurações | ✅ `data-manager-nav="settings"` | ❌ | Aluno não tem acesso a configurações |
-| scrubVisibleText pós-render | ✅ em switchProfileTab | ❌ nunca | Raiz da divergência (a) |
-| Telas exclusivas do gestor | Relatórios, Financeiro, Biblioteca, Novos alunos, Config | — | Intencionais |
-| Tela exclusiva do aluno | Execução de treino, Contrato Gate | — | Intencionais |
-| Dieta como tela standalone | ✅ tela própria | ❌ seção no Perfil | Divergência (f) |
-| Mensagens como tela standalone | ✅ tela própria | ❌ sheet modal | Divergência (f) |
-| Agenda | Compartilhada | Compartilhada | ✅ igual |
-
----
-
-## 6. Arquivos envolvidos
-
-| Arquivo | Uso |
+| Arquivo | Mudança |
 |---|---|
-| `app.js:2430` | `renderStudent()` — orquestrador central |
-| `app.js:2244` | `renderNav()` — bottom nav (sem fixMojibake) |
-| `app.js:2263` | `renderSideNav()` — sidebar (sem fixMojibake) |
-| `app.js:4822` | `renderStudentWorkouts()` |
-| `app.js:4837` | `renderStudentToday()` |
-| `app.js:5253` | `renderStudentUpdates()` |
-| `app.js:5810` | `renderStudentProgress()` |
-| `app.js:5938` | `renderStudentContractGate()` |
-| `app.js:5986` | `renderStudentProfile()` |
-| `app.js:6039` | `renderStudentDietOverview()` — 5 strings sem acento |
-| `app.js:6107` | `renderWorkoutExecution()` |
-| `index.html:137` | `#studentView` — header com eyebrow "Área do aluno" |
+| `index.html` | Header aluno: hamburguer + badge ALUNO + drawer backdrop |
+| `styles.css` | `.student-badge` + grid no student-header |
+| `src/styles/nav.css` | Drawer mobile do aluno |
+| `app.js` | Funções drawer + handlers + sidebar header |
+| `AUDITORIA-ALUNO.md` | Este documento — revisão final |

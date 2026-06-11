@@ -270,6 +270,34 @@
     display: none;
   }
 
+  /* Student sidebar — mobile drawer (same pattern as manager) */
+  .student-workspace .side-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100dvh;
+    z-index: 9999;
+    display: grid;
+    align-content: start;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    width: min(88vw, 300px);
+    gap: 0.28rem;
+    padding-top: max(env(safe-area-inset-top, 0px), 0.5rem);
+    padding-right: 0.75rem;
+    padding-left: 0.75rem;
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 5.5rem);
+    background: #111111;
+    box-shadow: 24px 0 70px rgba(0, 0, 0, 0.58);
+    transform: translateX(-100%);
+    transition: transform 0.28s ease;
+  }
+
+  .student-workspace .side-nav.open {
+    transform: translateX(0);
+  }
+
   .page-head {
     gap: 0.75rem;
   }

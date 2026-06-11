@@ -3327,7 +3327,8 @@ body::before {
     rgba(2, 2, 2, 0.92);
 }
 
-.manager-header {
+.manager-header,
+.student-header {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
 }
@@ -11257,6 +11258,21 @@ button.dashboard-metric {
   background: rgba(245, 158, 11, 0.18);
   border: 1px solid rgba(245, 158, 11, 0.45);
   color: #F59E0B;
+  font-size: 0.62rem;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1.4;
+  margin-top: 0.15rem;
+}
+
+.student-badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #10B981;
   font-size: 0.62rem;
   font-weight: 850;
   letter-spacing: 0.12em;

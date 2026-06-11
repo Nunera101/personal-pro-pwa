@@ -185,7 +185,8 @@
     installSteps: document.getElementById("installSteps"),
     retryInstall: document.getElementById("retryInstall"),
     toast: document.getElementById("toast"),
-    drawerBackdrop: document.querySelector("[data-manager-drawer-backdrop]")
+    drawerBackdrop: document.querySelector("[data-manager-drawer-backdrop]"),
+    studentDrawerBackdrop: document.querySelector("[data-student-drawer-backdrop]")
   };
 
   const icons = {
@@ -2308,6 +2309,7 @@
     elements.body.classList.toggle("is-manager-view", viewName === "manager");
     elements.body.classList.toggle("is-student-view", viewName === "student");
     closeManagerDrawer();
+    closeStudentDrawer();
     window.scrollTo({ top: 0, behavior: "auto" });
     // Animate only the login view; manager/student content is animated by renderManager/renderStudent.
     // Keeping the transform off the whole .view prevents any reflow side-effect on the fixed bottom nav.
@@ -2390,6 +2392,16 @@
   function closeManagerDrawer() {
     elements.managerSideNav.classList.remove("open");
     elements.drawerBackdrop.classList.remove("visible");
+  }
+
+  function openStudentDrawer() {
+    elements.studentSideNav.classList.add("open");
+    if (elements.studentDrawerBackdrop) elements.studentDrawerBackdrop.classList.add("visible");
+  }
+
+  function closeStudentDrawer() {
+    elements.studentSideNav.classList.remove("open");
+    if (elements.studentDrawerBackdrop) elements.studentDrawerBackdrop.classList.remove("visible");
   }
 
   function pageHeader(title, subtitle, action = "") {
@@ -2548,6 +2560,14 @@
     const menu = studentMenus.find((item) => item.id === state.studentMenu) || studentMenus[0];
     elements.studentTitle.textContent = fixMojibake(menu.label);
     renderSideNav(elements.studentSideNav, studentMenus.map((item) => ({ ...item, group: item.id === "today" ? "Aluno" : "" })), state.studentMenu, "data-student-nav");
+    elements.studentSideNav.insertAdjacentHTML("afterbegin", `
+      <div class="side-nav-header">
+        <span class="side-nav-title">Menu</span>
+        <button class="icon-button side-nav-close" type="button" data-student-drawer-backdrop aria-label="Fechar menu">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+    `);
     const studentBottomActive = studentBottomMenus.some((item) => item.id === state.studentMenu) ? state.studentMenu : "profile";
     elements.studentBottomNav.hidden = false;
     renderNav(elements.studentBottomNav, _buildStudentBottomMenus(), studentBottomActive, "data-student-nav");
@@ -10826,10 +10846,12 @@
 
   function bindStudentEvents() {
     document.addEventListener("click", (event) => {
-      const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-close-el-sheet], [data-close-ag-sheet], [data-close-det-sheet], [data-manager-drawer-backdrop]");
+      const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-close-el-sheet], [data-close-ag-sheet], [data-close-det-sheet], [data-manager-drawer-backdrop], [data-student-drawer-backdrop]");
       if (!target) return;
       if (target.matches("[data-manager-menu-toggle]")) openManagerDrawer();
       if (target.matches("[data-manager-drawer-backdrop]")) closeManagerDrawer();
+      if (target.matches("[data-student-menu-toggle]")) openStudentDrawer();
+      if (target.matches("[data-student-drawer-backdrop]")) closeStudentDrawer();
       if (target.matches("[data-close-modal]")) closeModal();
       if (target.matches("[data-close-el-sheet]")) closeEnviarLinkSheet();
       if (target.matches("[data-close-ag-sheet]")) closeAgendarSheet();
@@ -10872,7 +10894,7 @@
         closeManagerDrawer();
         renderManager();
       }
-      if (target.dataset.studentNav) { state.studentMenu = target.dataset.studentNav; renderStudent(); }
+      if (target.dataset.studentNav) { closeStudentDrawer(); state.studentMenu = target.dataset.studentNav; renderStudent(); }
       if (target.matches("[data-hero-menu-trigger]")) { openHeroMenuFloat(target, target.dataset.heroMenuTrigger); return; }
       if (target.matches("[data-open-student-form]")) openStudentForm(target.dataset.openStudentForm || "");
       if (target.matches("[data-open-student-profile]")) { closeModal(); openStudentProfile(target.dataset.openStudentProfile); }
@@ -10930,7 +10952,7 @@
       }
     });
     document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") closeManagerDrawer();
+      if (event.key === "Escape") { closeManagerDrawer(); closeStudentDrawer(); }
     });
     document.addEventListener("input", (event) => {
       const target = event.target;
