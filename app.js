@@ -11868,12 +11868,45 @@
       });
       persistData();
       await flushRemoteSync();
-      renderApp();
-      showSuccessToast("Contrato assinado. Bem-vindo!");
+      showGateSuccessTransition(typedName || getStudent(contract.studentId)?.name);
     } catch (_err) {
       if (signBtn) { signBtn.disabled = false; signBtn.textContent = "Confirmar aceite"; }
       showToast("Não foi possível registrar o aceite agora. Tente novamente.");
     }
+  }
+
+  // Transição suave entre o gate e o app liberado: tela de sucesso → fade → app.
+  function showGateSuccessTransition(name) {
+    const content = elements.studentContent;
+    if (!content) { renderApp(); showSuccessToast("Contrato assinado. Bem-vindo!"); return; }
+    const first = (name || "").trim().split(/\s+/)[0] || "Aluno";
+    elements.studentBottomNav.hidden = true;
+    elements.studentSideNav.innerHTML = "";
+    elements.studentTitle.textContent = "Acesso liberado";
+    content.classList.remove("is-entering", "is-leaving");
+    void content.offsetWidth;
+    content.innerHTML = `
+      <div class="gate-success">
+        <div class="gate-success-badge">
+          <svg viewBox="0 0 52 52" aria-hidden="true">
+            <circle class="gate-success-circle" cx="26" cy="26" r="23" />
+            <path class="gate-success-check" d="M15 27l7.5 7.5L37 19" />
+          </svg>
+        </div>
+        <h2>Tudo certo, ${escapeHtml(first)}!</h2>
+        <p>Seu contrato foi aceito. Acesso premium liberado.</p>
+        <span class="gate-success-hint">Preparando seu app…</span>
+      </div>
+    `;
+    content.classList.add("is-entering");
+    showSuccessToast("Contrato assinado. Bem-vindo!");
+    window.setTimeout(() => {
+      content.classList.add("is-leaving");
+      window.setTimeout(() => {
+        content.classList.remove("is-leaving");
+        renderApp();
+      }, 300);
+    }, 1500);
   }
 
   function cancelContract(id) {
