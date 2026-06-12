@@ -6916,3 +6916,57 @@ body::before {
   font-size: 12px;
   color: var(--txt2);
 }
+
+/* ── Widget Peso corporal (Início do aluno) ── */
+.weight-widget-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+  margin-bottom: 8px;
+}
+
+.weight-widget-value {
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.weight-widget-value small {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--txt2);
+  margin-left: 4px;
+}
+
+.weight-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.weight-trend svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.weight-trend.is-down {
+  color: var(--success);
+}
+
+.weight-trend.is-up {
+  color: var(--danger);
+}
+
+.weight-trend.is-flat {
+  color: var(--txt2);
+}
