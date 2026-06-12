@@ -690,6 +690,32 @@ svg {
   color: #1A1206;
 }
 
+/* ── Gate de primeiro acesso: hero escuro com acento dourado ── */
+.contract-gate .hero-panel {
+  background: #1A1A1A;
+  color: #f0ece0;
+  border-left: 3px solid var(--brand-strong);
+}
+.contract-gate .hero-panel p {
+  color: rgba(240, 236, 224, 0.5);
+}
+.contract-gate .hero-panel h3 {
+  color: #f0ece0;
+}
+.contract-gate .hero-panel span {
+  color: #9CA3AF;
+}
+.contract-gate .hero-panel .badge,
+.contract-gate .hero-panel .badge.is-success,
+.contract-gate .hero-panel .badge.is-danger,
+.contract-gate .hero-panel .badge.is-info,
+.contract-gate .hero-panel .badge.is-warning,
+.contract-gate .hero-panel .badge.is-muted {
+  border-color: rgba(255, 196, 71, 0.3);
+  background: rgba(255, 196, 71, 0.08);
+  color: var(--brand-strong);
+}
+
 .metric-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.65rem;
