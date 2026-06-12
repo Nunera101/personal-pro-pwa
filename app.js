@@ -5355,6 +5355,31 @@
     const weekPlannedDays = weekDays.filter((day) => day.status !== "off").length;
     const contractTone = stats.contract.tone === "info" ? "warning" : stats.contract.tone;
 
+    // Card Próxima atividade — faixa lateral na cor do tipo + botão Abrir.
+    const nextActivityName = nextActivity ? (nextActivity.title || activityLabel(nextActivity.type)) : "";
+    const nextActivityOpenAttr = nextActivity && nextActivity.type === "workout" && nextActivity.workoutId
+      ? ` data-student-nav="workouts" data-open-student-workout="${escapeHtml(nextActivity.workoutId)}"`
+      : ` data-student-nav="agenda"`;
+    const nextActivityCard = nextActivity
+      ? `<article class="metric-card dashboard-metric next-activity-card" style="--activity-color: ${activityTypeColor(nextActivity.type)}">
+          <span class="next-activity-stripe" aria-hidden="true"></span>
+          <div class="metric-top-row">
+            <span class="metric-icon">${icons.agenda}</span>
+            <span class="metric-label">Próxima atividade</span>
+          </div>
+          <strong class="next-activity-name">${escapeHtml(nextActivityName)}</strong>
+          <small>${escapeHtml(formatDate(nextActivity.date))} · ${escapeHtml(nextActivity.time || "--:--")}</small>
+          <button class="mini-button next-activity-open" type="button"${nextActivityOpenAttr}>Abrir</button>
+        </article>`
+      : `<article class="metric-card dashboard-metric next-activity-card">
+          <div class="metric-top-row">
+            <span class="metric-icon">${icons.agenda}</span>
+            <span class="metric-label">Próxima atividade</span>
+          </div>
+          <strong>Nenhuma</strong>
+          <small>atividade agendada</small>
+        </article>`;
+
     const todayWorkoutCard = todayWorkoutItem
       ? `<div class="today-workout-row">
           <div class="today-workout-info">
@@ -5510,7 +5535,7 @@
         <div class="metrics-row metrics-row--2" aria-label="Resumo do aluno">
           ${dashboardMetricCard({ label: "Treinos na semana", value: `${weekDoneDays} de ${weekPlannedDays}`, subtext: weekCount ? `${weekCount} concluído(s)` : "Nenhum ainda", icon: icons.today, tone: weekCount ? "success" : "", extra: renderWeekDots(weekDays) })}
           ${dashboardMetricCard({ label: "Volume recente", value: `${stats.recentVolume} kg`, subtext: "Últimos 4 treinos", icon: icons.progress })}
-          ${dashboardMetricCard({ label: "Próxima atividade", value: nextActivity ? formatShortDate(nextActivity.date) : "—", subtext: nextActivity ? activityLabel(nextActivity.type) : "Nada agendado", icon: icons.agenda })}
+          ${nextActivityCard}
           ${dashboardMetricCard({ label: "Contrato", value: stats.contract.label, subtext: "Status do contrato", icon: icons.contracts, tone: contractTone })}
         </div>
 
