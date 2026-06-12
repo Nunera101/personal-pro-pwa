@@ -1033,6 +1033,7 @@
       title: contract.title || "Contrato de prestação de serviço",
       body: contract.body || "",
       pdfUrl: contract.pdfUrl || "",
+      modelId: contract.modelId || "",
       version: contract.version || "1.0",
       status: contract.status || "pending",
       cpf: contract.cpf || "",
@@ -8851,6 +8852,9 @@
     const contract = contractId ? state.data.contracts.find((c) => c.id === contractId && c.studentId === studentId) : null;
     const defaults = contract || normalizeContract({ studentId: student.id, ...getContractDefaults(student), ...prefill });
     const existingPdfUrl = contract?.pdfUrl || prefill.pdfUrl || "";
+    const contractModels = getContractModels();
+    const selectedModelId = contract?.modelId && contractModels.some((m) => m.id === contract.modelId) ? contract.modelId : "";
+    const initialDocMode = existingPdfUrl ? "manual" : (contractModels.length ? "auto" : "manual");
 
     if (titleEl) titleEl.textContent = contract ? "Editar contrato" : "Novo contrato";
 
@@ -8908,30 +8912,61 @@
         </section>
 
         <section class="ns-section">
-          <h4 class="ns-section-title">Documento PDF</h4>
+          <h4 class="ns-section-title">Documento do contrato</h4>
           <input type="hidden" name="pdfUrl" id="cfsPdfUrl" value="${escapeHtml(existingPdfUrl)}" />
-          <label class="contract-pdf-dropzone" id="cfsPdfDropzone" for="cfsPdfInput" ${existingPdfUrl ? "hidden" : ""}>
-            <input type="file" id="cfsPdfInput" accept="application/pdf" />
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" aria-hidden="true">
-              <path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/>
-              <polyline points="16 10 12 6 8 10"/>
-              <line x1="12" y1="6" x2="12" y2="16"/>
-            </svg>
-            <strong>Escolher arquivo PDF</strong>
-            <span>Clique ou arraste o contrato (.pdf, máx. 20 MB)</span>
-          </label>
-          <div class="contract-pdf-attached" id="cfsPdfAttached" ${existingPdfUrl ? "" : "hidden"}>
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" aria-hidden="true">
-              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-              <line x1="9" y1="13" x2="15" y2="13"/>
-              <line x1="9" y1="17" x2="12" y2="17"/>
-            </svg>
-            <div class="contract-pdf-file-meta">
-              <strong id="cfsPdfFileName">${existingPdfUrl ? escapeHtml(existingPdfUrl.split("/").pop()) : ""}</strong>
-              <span>PDF pronto para envio</span>
+          <div class="ns-chip-group" role="group" aria-label="Origem do documento">
+            <label class="radio-chip">
+              <input type="radio" name="docMode" value="auto" ${initialDocMode === "auto" ? "checked" : ""} />
+              <span>Gerar do modelo</span>
+            </label>
+            <label class="radio-chip">
+              <input type="radio" name="docMode" value="manual" ${initialDocMode === "manual" ? "checked" : ""} />
+              <span>Anexar PDF pronto</span>
+            </label>
+          </div>
+
+          <div class="cfs-doc-block" id="cfsAutoBlock" ${initialDocMode === "auto" ? "" : "hidden"}>
+            ${contractModels.length ? `
+              <label class="field">
+                <span>Modelo do serviço</span>
+                <select id="cfsModelSelect">
+                  <option value="">Escolha o modelo…</option>
+                  ${contractModels.map((m) => `<option value="${escapeHtml(m.id)}" ${m.id === selectedModelId ? "selected" : ""}>${escapeHtml(m.service)}</option>`).join("")}
+                </select>
+              </label>
+              <p class="small-text">O app substitui os placeholders do modelo pelos dados do aluno, do profissional (Configurações) e pelos campos acima, e gera o PDF do contrato.</p>
+              <button class="secondary-action cfs-generate-btn" type="button" id="cfsGenerateBtn">Gerar PDF e pré-visualizar</button>
+              <p class="cfs-pdf-status" id="cfsPdfStatus" hidden></p>
+              <div class="cfs-pdf-preview" id="cfsPdfPreview" hidden></div>
+            ` : `
+              <p class="small-text">Nenhum modelo cadastrado. Crie um em Configurações → Modelos de contrato, ou anexe um PDF pronto.</p>
+            `}
+          </div>
+
+          <div class="cfs-doc-block" id="cfsManualBlock" ${initialDocMode === "manual" ? "" : "hidden"}>
+            <label class="contract-pdf-dropzone" id="cfsPdfDropzone" for="cfsPdfInput" ${existingPdfUrl ? "hidden" : ""}>
+              <input type="file" id="cfsPdfInput" accept="application/pdf" />
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" aria-hidden="true">
+                <path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/>
+                <polyline points="16 10 12 6 8 10"/>
+                <line x1="12" y1="6" x2="12" y2="16"/>
+              </svg>
+              <strong>Escolher arquivo PDF</strong>
+              <span>Clique ou arraste o contrato (.pdf, máx. 20 MB)</span>
+            </label>
+            <div class="contract-pdf-attached" id="cfsPdfAttached" ${existingPdfUrl ? "" : "hidden"}>
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" aria-hidden="true">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="9" y1="13" x2="15" y2="13"/>
+                <line x1="9" y1="17" x2="12" y2="17"/>
+              </svg>
+              <div class="contract-pdf-file-meta">
+                <strong id="cfsPdfFileName">${existingPdfUrl ? escapeHtml(existingPdfUrl.split("/").pop()) : ""}</strong>
+                <span>PDF pronto para envio</span>
+              </div>
+              <button type="button" class="contract-pdf-remove-btn" id="cfsPdfRemoveBtn">Remover</button>
             </div>
-            <button type="button" class="contract-pdf-remove-btn" id="cfsPdfRemoveBtn">Remover</button>
           </div>
         </section>
 
@@ -8967,6 +9002,7 @@
     document.body.style.overflow = "hidden";
     _bindContractFormSearch();
     _bindContractPdfUpload();
+    _bindContractDocSection(contract);
   }
 
   function closeContractFormSheet() {
@@ -9044,10 +9080,10 @@
       try {
         const headers = {};
         if (state.authToken) headers.Authorization = `Bearer ${state.authToken}`;
-        const resp = await fetch(`${state.apiBase || ""}/api/uploads/contracts`, { method: "POST", body: fd, headers });
+        const resp = await fetch(apiUrl("/uploads/contracts"), { method: "POST", body: fd, headers });
         if (!resp.ok) throw new Error();
         const data = await resp.json();
-        urlInput.value = data.url;
+        urlInput.value = String(data.url || "").startsWith("http") ? data.url : `${apiOrigin()}${data.url || ""}`;
         if (fileNameEl) fileNameEl.textContent = file.name;
         if (dropzone) dropzone.hidden = true;
         if (attached) attached.hidden = false;
@@ -9078,6 +9114,214 @@
         if (attached) attached.hidden = true;
       });
     }
+  }
+
+  let jsPdfLoader = null;
+  function loadJsPdf() {
+    if (window.jspdf?.jsPDF) return Promise.resolve(window.jspdf.jsPDF);
+    if (!jsPdfLoader) {
+      jsPdfLoader = new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+        script.async = true;
+        script.onload = () => (window.jspdf?.jsPDF ? resolve(window.jspdf.jsPDF) : reject(new Error("jsPDF indisponível")));
+        script.onerror = () => { jsPdfLoader = null; reject(new Error("Falha ao carregar jsPDF")); };
+        document.head.appendChild(script);
+      });
+    }
+    return jsPdfLoader;
+  }
+
+  function contractModelVariables(student = {}, values = {}) {
+    const settings = state.data.settings;
+    return {
+      nome_aluno: student.name || "",
+      cpf_aluno: student.cpf || "",
+      telefone_aluno: student.phone || "",
+      email_aluno: student.email || "",
+      plano: values.plan || "",
+      valor: values.value ? (moneyValue(values.value) > 0 ? currencyExact(values.value) : String(values.value)) : "",
+      data_inicio: values.startDate ? formatShortDate(values.startDate) : "",
+      data_fim: values.endDate ? formatShortDate(values.endDate) : "",
+      nome_personal: settings.professionalName || settings.trainerName || "",
+      cpf_cnpj_personal: settings.professionalDocument || "",
+      telefone_personal: settings.professionalPhone || settings.trainerPhone || "",
+      email_personal: settings.professionalEmail || settings.contactEmail || "",
+      data_hoje: formatShortDate(todayISO())
+    };
+  }
+
+  function fillContractModelText(template, variables) {
+    // Placeholder sem dado correspondente não aparece no documento (sem chaves vazias).
+    return String(template || "")
+      .replace(/\{([a-zA-Z0-9_]+)\}/g, (_match, key) => String(variables[key] ?? "").trim())
+      .replace(/[^\S\n]+([,.;:!?])/g, "$1")
+      .replace(/[^\S\n]{2,}/g, " ");
+  }
+
+  async function generateContractPdfBlob({ bodyText, version = "1.0" }) {
+    const JsPDF = await loadJsPdf();
+    const doc = new JsPDF({ unit: "pt", format: "a4" });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 56;
+    const maxWidth = pageWidth - margin * 2;
+    const bottomLimit = pageHeight - margin - 28;
+    const lineHeight = 16;
+
+    const lines = String(bodyText || "").replace(/\r\n/g, "\n").split("\n");
+    const firstIndex = lines.findIndex((line) => line.trim());
+    const title = firstIndex >= 0 ? lines[firstIndex].trim() : "Contrato de prestação de serviço";
+    const paragraphs = firstIndex >= 0 ? lines.slice(firstIndex + 1) : [];
+
+    let y = margin + 4;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.splitTextToSize(title, maxWidth).forEach((titleLine) => {
+      doc.text(titleLine, pageWidth / 2, y, { align: "center" });
+      y += 20;
+    });
+    y += 10;
+
+    doc.setFontSize(11);
+    paragraphs.forEach((raw) => {
+      const line = raw.replace(/\s+$/, "");
+      if (!line.trim()) { y += lineHeight * 0.55; return; }
+      const trimmed = line.trim();
+      const isHeading = /^\d+\.\s/.test(trimmed) || (trimmed.length <= 60 && trimmed === trimmed.toUpperCase() && /[A-ZÀ-Ü]/.test(trimmed));
+      doc.setFont("helvetica", isHeading ? "bold" : "normal");
+      doc.splitTextToSize(line, maxWidth).forEach((wrapped) => {
+        if (y > bottomLimit) { doc.addPage(); y = margin; }
+        doc.text(wrapped, margin, y);
+        y += lineHeight;
+      });
+    });
+
+    const totalPages = doc.getNumberOfPages();
+    const footerText = `Contrato v${version} · Gerado em ${formatShortDate(todayISO())} · Elite AS`;
+    for (let page = 1; page <= totalPages; page += 1) {
+      doc.setPage(page);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(130);
+      doc.text(footerText, margin, pageHeight - 26);
+      doc.text(`Página ${page} de ${totalPages}`, pageWidth - margin, pageHeight - 26, { align: "right" });
+      doc.setTextColor(0);
+    }
+    return doc.output("blob");
+  }
+
+  async function uploadGeneratedContractPdf(blob, contractId = "") {
+    const fd = new FormData();
+    fd.append("pdf", new File([blob], "contrato-gerado.pdf", { type: "application/pdf" }), "contrato-gerado.pdf");
+    if (contractId) fd.append("contractId", contractId);
+    const headers = {};
+    if (state.authToken) headers.Authorization = `Bearer ${state.authToken}`;
+    const resp = await fetch(apiUrl("/uploads/contracts"), { method: "POST", body: fd, headers });
+    if (!resp.ok) throw new Error("upload failed");
+    const data = await resp.json();
+    if (!data?.url) throw new Error("upload sem url");
+    return String(data.url).startsWith("http") ? data.url : `${apiOrigin()}${data.url}`;
+  }
+
+  function _bindContractDocSection(contract = null) {
+    const form = document.getElementById("contractSheetForm");
+    const urlInput = document.getElementById("cfsPdfUrl");
+    if (!form || !urlInput) return;
+    const autoBlock = document.getElementById("cfsAutoBlock");
+    const manualBlock = document.getElementById("cfsManualBlock");
+    const modelSelect = document.getElementById("cfsModelSelect");
+    const generateBtn = document.getElementById("cfsGenerateBtn");
+    const statusEl = document.getElementById("cfsPdfStatus");
+    const previewEl = document.getElementById("cfsPdfPreview");
+    let previewObjectUrl = "";
+
+    function setStatus(message, isError = false) {
+      if (!statusEl) return;
+      statusEl.hidden = !message;
+      statusEl.textContent = message || "";
+      statusEl.classList.toggle("is-error", isError);
+    }
+
+    function resetDocState() {
+      urlInput.value = "";
+      form._generatedDoc = null;
+      setStatus("");
+      if (previewEl) { previewEl.hidden = true; previewEl.innerHTML = ""; }
+      if (previewObjectUrl) { URL.revokeObjectURL(previewObjectUrl); previewObjectUrl = ""; }
+      const dropzone = document.getElementById("cfsPdfDropzone");
+      const attached = document.getElementById("cfsPdfAttached");
+      const fileInput = document.getElementById("cfsPdfInput");
+      if (fileInput) fileInput.value = "";
+      if (dropzone) dropzone.hidden = false;
+      if (attached) attached.hidden = true;
+    }
+
+    form.querySelectorAll('input[name="docMode"]').forEach((radio) => {
+      radio.addEventListener("change", () => {
+        if (!radio.checked) return;
+        const isAuto = radio.value === "auto";
+        if (autoBlock) autoBlock.hidden = !isAuto;
+        if (manualBlock) manualBlock.hidden = isAuto;
+        // Trocar a origem invalida o documento atual para evitar PDF inconsistente.
+        resetDocState();
+      });
+    });
+
+    if (!generateBtn) return;
+    generateBtn.addEventListener("click", async () => {
+      const data = new FormData(form);
+      const student = getStudent(String(data.get("studentId") || form.dataset.studentId || ""));
+      if (!student) return showToast("Selecione um aluno para continuar.");
+      const model = getContractModels().find((item) => item.id === modelSelect?.value);
+      if (!model) return showToast("Escolha o modelo do serviço.");
+      const plan = String(data.get("plan") || "").trim();
+      const value = String(data.get("value") || "").trim();
+      const startDate = String(data.get("startDate") || "").trim();
+      const endDate = String(data.get("endDate") || "").trim();
+      if (!plan) return showToast("Escolha o plano do contrato.");
+      if (!value) return showToast("Informe o valor mensal do contrato.");
+      if (!endDate) return showToast("Informe a data de vigência (fim) do contrato.");
+
+      generateBtn.disabled = true;
+      const originalLabel = generateBtn.textContent;
+      generateBtn.textContent = "Gerando PDF…";
+      try {
+        const variables = contractModelVariables(student, { plan, value, startDate, endDate });
+        const filledText = fillContractModelText(model.text, variables);
+        const version = contract?.version || "1.0";
+        const blob = await generateContractPdfBlob({ bodyText: filledText, version });
+
+        if (previewObjectUrl) URL.revokeObjectURL(previewObjectUrl);
+        previewObjectUrl = URL.createObjectURL(blob);
+        if (previewEl) {
+          previewEl.innerHTML = renderContractPdfViewer(previewObjectUrl);
+          previewEl.hidden = false;
+        }
+        form._generatedDoc = {
+          title: `Contrato — ${model.service}`,
+          body: filledText,
+          modelId: model.id,
+          snapshot: { studentId: student.id, plan, value, startDate, endDate }
+        };
+
+        setStatus("Enviando PDF ao servidor…");
+        const url = await uploadGeneratedContractPdf(blob, form.dataset.contractId || "");
+        urlInput.value = url;
+        setStatus("PDF gerado e anexado. Confira a pré-visualização antes de enviar.");
+        generateBtn.textContent = "Gerar novamente";
+      } catch (error) {
+        urlInput.value = "";
+        if (form._generatedDoc) {
+          setStatus("PDF gerado, mas o envio ao servidor falhou. Tente gerar novamente.", true);
+        } else {
+          setStatus("Não foi possível gerar o PDF. Verifique a conexão e tente novamente.", true);
+        }
+        generateBtn.textContent = originalLabel;
+      } finally {
+        generateBtn.disabled = false;
+      }
+    });
   }
 
   function openContractStudentPicker() {
@@ -10514,7 +10758,22 @@
     const pdfUrl = String(data.get("pdfUrl") || "").trim();
     const valueRaw = String(data.get("value") || "").trim();
     const endDateRaw = String(data.get("endDate") || "").trim();
-    if (!isDraft && !pdfUrl) return showToast("Adicione o PDF do contrato antes de enviar.");
+    const docMode = String(data.get("docMode") || "manual");
+    const generated = form._generatedDoc || null;
+    if (!isDraft && !pdfUrl) {
+      return showToast(docMode === "auto"
+        ? "Gere o PDF e confira a pré-visualização antes de enviar."
+        : "Adicione o PDF do contrato antes de enviar.");
+    }
+    if (!isDraft && docMode === "auto" && generated?.snapshot) {
+      const snap = generated.snapshot;
+      const changed = snap.studentId !== studentId
+        || snap.plan !== String(data.get("plan") || "").trim()
+        || snap.value !== valueRaw
+        || snap.startDate !== String(data.get("startDate") || "").trim()
+        || snap.endDate !== endDateRaw;
+      if (changed) return showToast("Os dados do contrato mudaram. Gere o PDF novamente antes de enviar.");
+    }
     const valueInput = form.querySelector('[name="value"]');
     const endInput = form.querySelector('[name="endDate"]');
     valueInput?.classList.remove("ns-field-error");
@@ -10533,8 +10792,9 @@
       ...(old || {}),
       id: old?.id || createId("contract"),
       studentId,
-      title: old?.title || "Contrato de prestação de serviço",
-      body: old?.body || "",
+      title: generated?.title || old?.title || "Contrato de prestação de serviço",
+      body: generated?.body || old?.body || "",
+      modelId: generated?.modelId || old?.modelId || "",
       pdfUrl,
       version: old?.version || "1.0",
       plan: String(data.get("plan") || "").trim(),

@@ -1,5 +1,6 @@
 node_modules/
 data/
 uploads/
+.tmp/
 npm-debug.log*
 .env

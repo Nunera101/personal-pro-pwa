@@ -930,6 +930,43 @@
   color: var(--danger);
 }
 
+/* ─── Geração automática de PDF a partir de modelo (form) ────────────────────── */
+
+.cfs-doc-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 0.7rem;
+}
+
+.cfs-doc-block[hidden] { display: none; }
+
+.cfs-generate-btn {
+  width: 100%;
+  justify-content: center;
+  border-color: rgba(245, 181, 27, 0.45);
+  color: var(--brand-strong);
+}
+
+.cfs-generate-btn:disabled {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.cfs-pdf-status {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--ok);
+}
+
+.cfs-pdf-status.is-error { color: var(--danger); }
+
+.cfs-pdf-status[hidden] { display: none; }
+
+.cfs-pdf-preview .contract-pdf-viewer {
+  height: min(48vh, 30rem);
+}
+
 /* ─── Contract PDF Viewer (view sheet) ────────────────────────────────────────── */
 
 .contract-pdf-viewer-wrap {
