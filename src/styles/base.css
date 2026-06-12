@@ -6731,37 +6731,106 @@ body::before {
   display: none !important;
 }
 
-/* ── Card Treinos na semana: bolinhas dos dias (Início do aluno) ── */
-.metric-value-row {
+/* ── Card Treinos na semana: layout horizontal + bolinhas (Início do aluno) ── */
+.week-card {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  min-height: auto !important;
+  padding: 14px 16px !important;
+}
+
+.week-card-left {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 6px 10px;
-  min-width: 0;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.week-card-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  color: var(--brand);
+  flex-shrink: 0;
+}
+
+.week-card-icon svg {
+  width: 1.3rem;
+  height: 1.3rem;
+}
+
+.week-card.is-success .week-card-icon { color: var(--success); }
+
+.week-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.week-card-label {
+  font-size: 0.71rem !important;
+  color: var(--muted) !important;
+  white-space: nowrap;
+  display: block !important;
+}
+
+.week-card-value {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.15;
+  white-space: nowrap;
+  display: block;
+}
+
+.week-card-sub {
+  font-size: 0.67rem;
+  color: var(--muted);
+  display: block;
 }
 
 .week-dots {
-  display: inline-flex;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.week-dot-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 4px;
+}
+
+.week-dot-label {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--muted);
+  line-height: 1;
+  text-transform: uppercase;
 }
 
 .week-dot {
   display: inline-grid;
   place-items: center;
-  width: 16px;
-  height: 16px;
-  border-radius: 999px;
-  font-size: 9px;
-  font-weight: 700;
-  line-height: 1;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .week-dot svg {
-  width: 10px;
-  height: 10px;
+  width: 13px;
+  height: 13px;
   fill: none;
   stroke: currentColor;
-  stroke-width: 3;
+  stroke-width: 2.5;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -6772,13 +6841,11 @@ body::before {
 }
 
 .week-dot.is-pending {
-  border: 1px solid rgba(156, 163, 175, 0.55);
-  color: var(--txt2);
+  border: 2px solid rgba(156, 163, 175, 0.55);
 }
 
 .week-dot.is-off {
-  border: 1px solid rgba(156, 163, 175, 0.18);
-  color: rgba(156, 163, 175, 0.35);
+  border: 2px solid rgba(156, 163, 175, 0.2);
 }
 
 /* ── Widget Progresso do treino de hoje (Início do aluno) ── */

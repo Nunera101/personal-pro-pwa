@@ -2777,13 +2777,25 @@
     `;
   }
 
-  function renderWeekDots(days) {
+  function renderWeekCard(days, doneDays, plannedDays, weekCount, icon, tone) {
     const statusLabels = { done: "treino concluído", pending: "treino pendente", off: "sem treino programado" };
     const check = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>`;
+    const subtext = weekCount ? `${weekCount} concluído(s)` : "Nenhum ainda";
+    const dots = days.map((day) => `<span class="week-dot-col"><span class="week-dot is-${day.status}" title="${escapeHtml(`${day.name}: ${statusLabels[day.status]}`)}">${ day.status === "done" ? check : ""}</span><span class="week-dot-label">${escapeHtml(day.letter)}</span></span>`).join("");
     return `
-      <span class="week-dots" role="img" aria-label="${escapeHtml(days.map((day) => `${day.name}: ${statusLabels[day.status]}`).join(", "))}">
-        ${days.map((day) => `<span class="week-dot is-${day.status}" title="${escapeHtml(`${day.name}: ${statusLabels[day.status]}`)}">${day.status === "done" ? check : day.letter}</span>`).join("")}
-      </span>
+      <article class="metric-card week-card${tone ? ` is-${tone}` : ""}">
+        <div class="week-card-left">
+          <span class="week-card-icon">${icon}</span>
+          <div class="week-card-info">
+            <span class="week-card-label">Treinos na semana</span>
+            <strong class="week-card-value">${escapeHtml(`${doneDays} de ${plannedDays}`)}</strong>
+            <small class="week-card-sub">${escapeHtml(subtext)}</small>
+          </div>
+        </div>
+        <div class="week-dots" role="img" aria-label="${escapeHtml(days.map((d) => `${d.name}: ${statusLabels[d.status]}`).join(", "))}">
+          ${dots}
+        </div>
+      </article>
     `;
   }
 
@@ -5530,8 +5542,8 @@
 
         ${todayProgressCard}
 
-        <div class="metrics-row metrics-row--3" aria-label="Resumo do aluno">
-          ${dashboardMetricCard({ label: "Treinos na semana", value: `${weekDoneDays} de ${weekPlannedDays}`, subtext: weekCount ? `${weekCount} concluído(s)` : "Nenhum ainda", icon: icons.today, tone: weekCount ? "success" : "", extra: renderWeekDots(weekDays) })}
+        ${renderWeekCard(weekDays, weekDoneDays, weekPlannedDays, weekCount, icons.today, weekCount ? "success" : "")}
+        <div class="metrics-row metrics-row--2" aria-label="Resumo do aluno">
           ${dashboardMetricCard({ label: "Volume recente", value: `${stats.recentVolume} kg`, subtext: "Últimos 4 treinos", icon: icons.progress })}
           ${dashboardMetricCard({ label: "Contrato", value: stats.contract.label, subtext: "Status do contrato", icon: icons.contracts, tone: contractTone })}
         </div>
