@@ -1481,6 +1481,31 @@
     });
   }
 
+  function getTodayWorkoutProgress(studentId) {
+    const items = getAgendaItemsForDate(todayISO(), studentId).filter((item) => item.type === "workout" && item.status !== "canceled");
+    const session = state.activeSession && state.activeSession.studentId === studentId ? state.activeSession : null;
+    if (session) {
+      const sets = session.exercises.flatMap((exercise) => exercise.sets);
+      const done = sets.filter((set) => set.status === "done").length;
+      return { title: getWorkout(session.workoutId)?.title || "Treino", done, total: sets.length, completed: false };
+    }
+    const doneItem = items.find((item) => item.status === "done");
+    if (doneItem) {
+      const finished = doneItem.completedSessionId ? state.data.sessions.find((s) => s.id === doneItem.completedSessionId) : null;
+      const total = finished ? finished.exercises.reduce((sum, exercise) => sum + exercise.sets.length, 0) : 0;
+      const title = getWorkout(finished?.workoutId || doneItem.workoutId)?.title || "Treino";
+      return { title, done: total, total, completed: true };
+    }
+    const pendingItem = items.find((item) => item.workoutId);
+    if (pendingItem) {
+      const workout = getWorkout(pendingItem.workoutId);
+      if (!workout) return null;
+      const total = workout.exercises.reduce((sum, item) => sum + Number(item.sets || 1), 0);
+      return { title: workout.title || "Treino", done: 0, total, completed: false };
+    }
+    return null;
+  }
+
   function getUpdateForStudent(studentId, status) {
     return state.data.updates
       .filter((update) => update.studentId === studentId)
@@ -5321,6 +5346,28 @@
         </div>`
       : emptyState("Sem treino agendado para hoje", "Veja seus treinos publicados na aba Treinos.", icons.workouts);
 
+    const todayProgress = getTodayWorkoutProgress(student.id);
+    const todayProgressPercent = todayProgress
+      ? (todayProgress.completed ? 100 : todayProgress.total ? Math.round((todayProgress.done / todayProgress.total) * 100) : 0)
+      : 0;
+    const todayProgressCard = todayProgress
+      ? `<section class="panel today-progress-card" aria-label="Progresso do treino de hoje">
+          <div class="section-title"><h3>Progresso do treino de hoje</h3></div>
+          <div class="today-progress-head">
+            <strong>${escapeHtml(todayProgress.title)}</strong>
+            ${todayProgress.completed
+              ? `<span class="today-progress-done"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>Concluído</span>`
+              : `<span class="today-progress-count">${todayProgress.done} de ${todayProgress.total} séries concluídas</span>`}
+          </div>
+          <div class="today-progress-row">
+            <div class="today-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${todayProgressPercent}" aria-label="Progresso do treino: ${todayProgressPercent}%">
+              <div class="today-progress-fill" style="width: ${todayProgressPercent}%"></div>
+            </div>
+            <span class="today-progress-percent">${todayProgressPercent}%</span>
+          </div>
+        </section>`
+      : "";
+
     let activeSessionBanner = "";
     if (state.activeSession && state.activeSession.studentId === student.id) {
       const sessionSets = state.activeSession.exercises.flatMap((exercise) => exercise.sets);
@@ -5348,6 +5395,8 @@
         </section>
 
         ${activeSessionBanner}
+
+        ${todayProgressCard}
 
         <div class="metrics-row metrics-row--2" aria-label="Resumo do aluno">
           ${dashboardMetricCard({ label: "Treinos na semana", value: `${weekDoneDays} de ${weekPlannedDays}`, subtext: weekCount ? `${weekCount} concluído(s)` : "Nenhum ainda", icon: icons.today, tone: weekCount ? "success" : "", extra: renderWeekDots(weekDays) })}
