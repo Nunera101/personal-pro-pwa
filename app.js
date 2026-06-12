@@ -5793,6 +5793,7 @@
             const studentName = getStudentName(item.studentId);
             const canWA = manager && canEditAgendaItem(item);
             const canStart = item.type === "workout" && item.workoutId && state.currentUser?.role === "student" && item.status !== "done";
+            const hasPendingContract = item.type !== "contract" && !!getBlockingContractForStudent(item.studentId);
             return `
               <article class="agenda-item ${agendaItemClass(item)}">
                 <button class="agenda-item-overlay" type="button"
@@ -5807,7 +5808,10 @@
                   <strong>${escapeHtml(activityLabel(item.type))}</strong>
                   <span>${escapeHtml(studentName)}</span>
                 </div>
-                <div class="agenda-status">${statusBadge(agendaStatusLabel(item.status), agendaStatusTone(item.status))}</div>
+                <div class="agenda-status">
+                  ${statusBadge(agendaStatusLabel(item.status), agendaStatusTone(item.status))}
+                  ${hasPendingContract ? statusBadge("Contrato", "warning") : ""}
+                </div>
                 <div class="agenda-item-actions">
                   ${canWA ? whatsappButton(item.id, item.studentId) : ""}
                   ${canStart ? `<button class="mini-button" type="button" data-start-workout="${escapeHtml(item.workoutId)}" data-activity-id="${escapeHtml(item.id)}">Iniciar</button>` : ""}
