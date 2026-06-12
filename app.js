@@ -5383,23 +5383,32 @@
   function renderStudentWorkoutCard(workout) {
     const goal = workout.focus || workout.goal || "—";
     const exerciseCount = workout.exercises.length;
+    const estimatedMin = Math.max(15, exerciseCount * 4);
     const lastSession = getStudentSessions(workout.studentId).find((s) => s.workoutId === workout.id);
+    const initial = (workout.title || "T").trim().slice(0, 1).toUpperCase();
+    const hue = ((workout.title || "T").charCodeAt(0) * 47 + 120) % 360;
     return `
-      <article class="pattern-card">
-        <div class="pattern-card-head">
-          <span class="pattern-icon">${icons.workouts}</span>
-          <div class="pattern-card-title-wrap">
-            <h3 class="pattern-name">${escapeHtml(workout.title)}</h3>
-            <span class="badge is-success">Publicado</span>
+      <article class="sw-workout-card">
+        <div class="sw-workout-media">
+          <div class="sw-workout-thumb" style="--sw-hue:${hue}">
+            <span class="sw-workout-initial">${escapeHtml(initial)}</span>
+            <span class="sw-workout-ex-count">${exerciseCount}</span>
           </div>
         </div>
-        <ul class="pattern-meta-lines">
-          <li><span class="pml-label">Objetivo</span><span class="pml-value">${escapeHtml(goal)}</span></li>
-          <li><span class="pml-label">Exercícios</span><span class="pml-value">${exerciseCount}</span></li>
-          ${lastSession ? `<li><span class="pml-label">Última execução</span><span class="pml-value">${escapeHtml(formatDate(lastSession.finishedAt?.slice(0, 10) || ""))}</span></li>` : ""}
-        </ul>
-        <div class="sw-card-action">
-          <button class="primary-action" type="button" data-open-student-workout="${escapeHtml(workout.id)}">Abrir</button>
+        <div class="sw-workout-content">
+          <div class="sw-workout-header">
+            <h3>${escapeHtml(workout.title)}</h3>
+            ${statusBadge("Publicado", "success")}
+          </div>
+          <div class="sw-workout-meta">
+            <span>${icons.goal}${escapeHtml(goal)}</span>
+            <span>${icons.workouts}${exerciseCount} exercício${exerciseCount !== 1 ? "s" : ""}</span>
+            <span>${icons.today}~${estimatedMin} min</span>
+          </div>
+          ${lastSession ? `<span class="sw-workout-last">Última execução: ${escapeHtml(formatDate(lastSession.finishedAt?.slice(0, 10) || ""))}</span>` : ""}
+          <div class="sw-workout-actions">
+            <button class="primary-action" type="button" data-open-student-workout="${escapeHtml(workout.id)}">Abrir</button>
+          </div>
         </div>
       </article>
     `;
@@ -5409,18 +5418,27 @@
     const exercise = getExercise(row.exerciseId);
     const name = resolveWorkoutExerciseName(row);
     const group = exercise ? getExercisePrimaryMuscle(exercise) : row.exerciseMuscle || "";
+    const equipment = exercise?.equipment || "";
     const load = row.suggestedLoad ? `${escapeHtml(row.suggestedLoad)} kg` : "Carga livre";
     const hasVideo = exercise && hasExerciseVideo(exercise);
+    const thumbContent = hasVideo
+      ? `<span class="swd-ex-play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></span>`
+      : `<svg class="swd-ex-no-video" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m10 9 6 3-6 3V9Z"/></svg>`;
     const thumb = hasVideo
-      ? `<button class="swd-ex-thumb has-video" type="button" data-open-exercise-video="${escapeHtml(exercise.id)}" aria-label="Ver vídeo de ${escapeHtml(name)}"><svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="rgba(231,168,62,0.15)" stroke="rgba(231,168,62,0.6)" stroke-width="1.5"/><path d="M20 16.5 34 24 20 31.5Z" fill="rgba(231,168,62,0.9)"/></svg></button>`
-      : `<div class="swd-ex-thumb is-placeholder" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m10 9 6 3-6 3V9Z"/></svg></div>`;
+      ? `<button class="swd-ex-thumb has-video" type="button" data-open-exercise-video="${escapeHtml(exercise.id)}" aria-label="Ver vídeo de ${escapeHtml(name)}">${thumbContent}</button>`
+      : `<div class="swd-ex-thumb is-placeholder" aria-hidden="true">${thumbContent}</div>`;
     return `
       <li class="swd-ex">
-        <span class="swd-ex-index">${index + 1}</span>
-        ${thumb}
+        <div class="swd-ex-media">
+          ${thumb}
+          <span class="swd-ex-index">${index + 1}</span>
+        </div>
         <div class="swd-ex-body">
           <strong class="swd-ex-name">${escapeHtml(name)}</strong>
-          ${group ? `<span class="swd-ex-group">${escapeHtml(group)}</span>` : ""}
+          <div class="swd-ex-meta-row">
+            ${group ? `<span>${icons.workouts}${escapeHtml(group)}</span>` : ""}
+            ${equipment ? `<span>${icons.library}${escapeHtml(equipment)}</span>` : ""}
+          </div>
           <div class="swd-ex-specs">
             <span><b>${escapeHtml(String(row.sets))}</b> séries</span>
             <span><b>${escapeHtml(row.targetReps)}</b> reps</span>
@@ -5438,6 +5456,9 @@
     const rows = [...workout.exercises].sort((a, b) => a.order - b.order);
     const lastSession = getStudentSessions(workout.studentId).find((s) => s.workoutId === workout.id);
     const lastLabel = lastSession ? formatDate(lastSession.finishedAt?.slice(0, 10) || "") : "Nunca executado";
+    const initial = (workout.title || "T").trim().slice(0, 1).toUpperCase();
+    const hue = ((workout.title || "T").charCodeAt(0) * 47 + 120) % 360;
+    const estimatedMin = Math.max(15, rows.length * 4);
     return `
       <div class="content-stack swd-detail">
         <div class="evaluate-topbar">
@@ -5447,10 +5468,16 @@
           </button>
         </div>
         <header class="swd-head">
-          <span class="pattern-icon">${icons.workouts}</span>
+          <div class="swd-head-thumb" style="--sw-hue:${hue}">
+            <span class="swd-head-initial">${escapeHtml(initial)}</span>
+          </div>
           <div class="swd-head-info">
             <h2 class="swd-title">${escapeHtml(workout.title)}</h2>
-            <span class="swd-sub">${escapeHtml(goal)} · ${rows.length} exercício(s)</span>
+            <div class="swd-meta-line">
+              <span>${icons.goal}${escapeHtml(goal)}</span>
+              <span>${icons.workouts}${rows.length} exercício${rows.length !== 1 ? "s" : ""}</span>
+              <span>${icons.today}~${estimatedMin} min</span>
+            </div>
             <span class="swd-last">Última execução: ${escapeHtml(lastLabel)}</span>
           </div>
         </header>
@@ -5480,7 +5507,7 @@
     const workouts = q
       ? allWorkouts.filter((w) => [w.title, w.focus, w.goal, w.description].join(" ").toLowerCase().includes(q))
       : allWorkouts;
-    const showSearch = allWorkouts.length > 3;
+    const showSearch = allWorkouts.length > 0;
     return `
       <div class="content-stack">
         ${pageHeader("Treinos", "Treinos publicados pelo seu personal")}
@@ -5491,7 +5518,7 @@
           </label>
         ` : ""}
         ${workouts.length
-          ? `<div class="pattern-card-list">${workouts.map(renderStudentWorkoutCard).join("")}</div>`
+          ? `<div class="sw-workout-list">${workouts.map(renderStudentWorkoutCard).join("")}</div>`
           : emptyState(q ? "Nenhum resultado" : "Nenhum treino publicado", q ? "Tente outros termos na busca." : "Quando o personal publicar um treino, ele aparece aqui.", icons.workouts)
         }
       </div>

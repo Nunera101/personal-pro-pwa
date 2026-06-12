@@ -1761,14 +1761,133 @@
   justify-content: center;
 }
 
-/* ── Lista de treinos do aluno ────────────────────────────────────── */
-.sw-card-action {
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
-  padding-top: 0.6rem;
+/* ── Student Workout List (biblioteca-style) ──────────────────────── */
+.sw-workout-list {
+  display: grid;
+  gap: 0.68rem;
 }
 
-.sw-card-action .primary-action {
+.sw-workout-card {
+  display: grid;
+  grid-template-columns: clamp(5.5rem, 28vw, 8rem) minmax(0, 1fr);
+  gap: 0.66rem;
+  padding: 0.62rem;
+  border-radius: 1rem;
+  background: var(--card);
+  border: 1px solid var(--borda);
+  overflow: visible;
+}
+
+.sw-workout-media,
+.sw-workout-content {
+  min-width: 0;
+}
+
+.sw-workout-thumb {
+  position: relative;
   width: 100%;
+  height: clamp(5rem, 22vw, 7rem);
+  display: grid;
+  place-items: center;
+  border-radius: 0.72rem;
+  background:
+    linear-gradient(135deg,
+      hsl(var(--sw-hue, 40), 45%, 25%),
+      hsl(var(--sw-hue, 40), 30%, 16%));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.sw-workout-initial {
+  color: rgba(247, 244, 235, 0.85);
+  font-size: clamp(1.5rem, 7vw, 2rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.sw-workout-ex-count {
+  position: absolute;
+  bottom: 0.3rem;
+  right: 0.3rem;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding: 0 0.3rem;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--brand);
+  color: #111;
+  font-size: 0.62rem;
+  font-weight: 750;
+  line-height: 1;
+}
+
+.sw-workout-content {
+  display: grid;
+  align-content: start;
+  gap: 0.36rem;
+}
+
+.sw-workout-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 0.45rem;
+}
+
+.sw-workout-header h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(0.95rem, 3.8vw, 1.15rem);
+  font-weight: 700;
+  line-height: 1.12;
+}
+
+.sw-workout-header .badge {
+  min-height: 1.42rem;
+  padding: 0.18rem 0.48rem;
+  font-size: 0.66rem;
+  white-space: nowrap;
+}
+
+.sw-workout-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.26rem 0.52rem;
+  align-items: center;
+  color: rgba(247, 244, 235, 0.72);
+  font-size: clamp(0.67rem, 2.5vw, 0.78rem);
+}
+
+.sw-workout-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.24rem;
+  min-width: 0;
+}
+
+.sw-workout-meta svg {
+  width: 0.8rem;
+  height: 0.8rem;
+  color: var(--brand-strong);
+  flex-shrink: 0;
+}
+
+.sw-workout-last {
+  color: var(--muted);
+  font-size: clamp(0.62rem, 2.2vw, 0.72rem);
+}
+
+.sw-workout-actions {
+  margin-top: 0.26rem;
+}
+
+.sw-workout-actions .primary-action {
+  min-height: 2.5rem;
+  padding: 0.42rem 1.1rem;
+  border-radius: 0.6rem;
+  font-size: 0.82rem;
+  font-weight: 670;
 }
 
 /* ===== Tela do treino (detalhe do aluno) ===== */
@@ -1779,8 +1898,29 @@
 .swd-head {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
+  align-items: start;
   gap: 0.8rem;
+}
+
+.swd-head-thumb {
+  width: 3.5rem;
+  height: 3.5rem;
+  display: grid;
+  place-items: center;
+  border-radius: 0.9rem;
+  background:
+    linear-gradient(135deg,
+      hsl(var(--sw-hue, 40), 45%, 25%),
+      hsl(var(--sw-hue, 40), 30%, 16%));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+
+.swd-head-initial {
+  color: rgba(247, 244, 235, 0.85);
+  font-size: 1.55rem;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .swd-head-info {
@@ -1788,6 +1928,27 @@
   flex-direction: column;
   gap: 0.22rem;
   min-width: 0;
+}
+
+.swd-meta-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.24rem 0.48rem;
+  align-items: center;
+  color: rgba(247, 244, 235, 0.72);
+  font-size: 0.8rem;
+}
+
+.swd-meta-line span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.24rem;
+}
+
+.swd-meta-line svg {
+  width: 0.82rem;
+  height: 0.82rem;
+  color: var(--brand-strong);
 }
 
 .swd-title {
@@ -1826,58 +1987,76 @@
 
 .swd-ex {
   display: grid;
-  grid-template-columns: auto auto minmax(0, 1fr);
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.85rem;
+  grid-template-columns: clamp(4.5rem, 22vw, 6rem) minmax(0, 1fr);
+  align-items: start;
+  gap: 0.65rem;
+  padding: 0.72rem;
   border: 1px solid var(--borda);
   border-radius: 1rem;
   background: var(--card);
 }
 
+.swd-ex-media {
+  position: relative;
+}
+
 .swd-ex-index {
+  position: absolute;
+  top: 0.3rem;
+  left: 0.3rem;
   display: inline-grid;
   place-items: center;
-  width: 1.6rem;
-  height: 1.6rem;
+  width: 1.42rem;
+  height: 1.42rem;
   border-radius: 50%;
-  background: rgba(245, 181, 27, 0.1);
+  background: rgba(245, 181, 27, 0.18);
   color: var(--brand-strong);
   font-weight: 750;
-  font-size: 0.82rem;
-  flex-shrink: 0;
+  font-size: 0.72rem;
+  backdrop-filter: blur(4px);
 }
 
 .swd-ex-thumb {
-  display: inline-grid;
+  display: grid;
   place-items: center;
-  width: 3.1rem;
-  height: 3.1rem;
+  width: 100%;
+  height: clamp(4rem, 19vw, 5.5rem);
   padding: 0;
-  border: 1px solid var(--borda);
-  border-radius: 0.7rem;
-  background: #000;
-  flex-shrink: 0;
+  border: 0;
+  border-radius: 0.65rem;
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  overflow: hidden;
 }
 
 .swd-ex-thumb.has-video {
   cursor: pointer;
-}
-
-.swd-ex-thumb.has-video svg {
-  width: 2.2rem;
-  height: 2.2rem;
+  background: #0a0a0a;
 }
 
 .swd-ex-thumb.is-placeholder {
-  background: rgba(255, 255, 255, 0.03);
   color: var(--muted);
   opacity: 0.55;
 }
 
-.swd-ex-thumb.is-placeholder svg {
-  width: 1.4rem;
-  height: 1.4rem;
+.swd-ex-play {
+  display: grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 999px;
+  background: var(--brand);
+  color: #111;
+}
+
+.swd-ex-play svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.swd-ex-no-video {
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 .swd-ex-body {
@@ -1900,6 +2079,28 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.03em;
+}
+
+.swd-ex-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.22rem 0.5rem;
+  align-items: center;
+  color: rgba(247, 244, 235, 0.72);
+  font-size: clamp(0.66rem, 2.4vw, 0.76rem);
+}
+
+.swd-ex-meta-row span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.22rem;
+}
+
+.swd-ex-meta-row svg {
+  width: 0.78rem;
+  height: 0.78rem;
+  color: var(--brand-strong);
+  flex-shrink: 0;
 }
 
 .swd-ex-specs {
