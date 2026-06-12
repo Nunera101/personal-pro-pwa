@@ -1,23 +1,7 @@
-﻿==============================================
- FILA - RERODAR: o que morreu no session limit (reset 1:40am)
- Rodaram de verdade: sessao fantasma/dashboard, barra 6 itens, header
- 1 linha, dados do profissional, modelos de contrato. Faltou: geracao
- do PDF, gate com PDF gerado, e os widgets.
- Cada tarefa = UMA linha. SEM seta no texto. Sao 10 tarefas: rodar
- BACKUP + CONTRATO (2) + 3 primeiros widgets numa janela; o resto na
- seguinte, OU tudo se a janela estiver zerada.
- Tokens: dourado #F59E0B, fundo #0D0D0D, card #1A1A1A flat sem glow,
- borda rgba(255,255,255,0.06), radius 16px, txt2 #9CA3AF, ok #10B981,
- erro #EF4444. Texto sobre dourado SEMPRE escuro #1A1206.
-==============================================
-
-== BACKUP ==
-[OK] git checkout -b backup/rerodar-pdf-widgets && git push origin backup/rerodar-pdf-widgets && git checkout main. NAO altere arquivos. Confirme que o app abre sem erro de sintaxe. (sem commit adicional)
-     Resultado: - **Backup criado e enviado:** branch `backup/rerodar-pdf-widgets` foi criada e publicada em `origin` (https://github.com/Nunera101/personal-pro-pwa/tree/backup/rerodar-pdf-widgets). | - **De volta ├á `main`:** branch a...
-
-== CONTRATO (nao rodaram) ==
-[OK] NOVO CONTRATO GERA PDF AUTOMATICAMENTE: refazer o fluxo Novo contrato do gestor: ele seleciona o aluno, escolhe o MODELO do servico (cadastrado nas Configuracoes), e preenche apenas plano, valor e vigencia; o app entao substitui TODOS os placeholders do modelo pelos dados reais (aluno do cadastro, profissional das Configuracoes, valores digitados) e GERA o PDF do contrato no proprio app usando jsPDF via cdnjs (texto formatado, titulo, paragrafos com quebra correta, dados completos, rodape com versao e data); o PDF gerado e salvo pelo MESMO caminho do pdfUrl atual (mesmo service usado no upload manual), de modo que viewer, gate e aceite com CPF continuem funcionando sem mudanca; mostrar PRE VISUALIZACAO do PDF gerado para o gestor antes de enviar para assinatura; manter o upload manual de PDF como opcao alternativa secundaria; placeholder sem dado correspondente nao aparece no documento, sem chaves vazias. git add . && git commit -m "feat(contratos): geracao automatica de PDF a partir de modelo e dados" && git push origin main
-     Resultado: validado com Playwright local (aluno criado, modelo seed, gerar PDF, preview iframe, %PDF de verdade no /uploads/contracts, zero chaves no corpo, guard "gere novamente" ao mudar dados, contrato salvo com pdfUrl/modelId). Corrigido bug de URL do upload (apiBase ja contem /api, dava /api/api 404) nos dois caminhos (gerado e manual) usando apiUrl() + apiOrigin().
+﻿== CONTRATO (nao rodaram) ==
+[OK] CONFIRA SE DEU CERTO: NOVO CONTRATO GERA PDF AUTOMATICAMENTE: refazer o fluxo Novo contrato do gestor: ele seleciona o aluno, escolhe o MODELO do servico (cadastrado nas Configuracoes), e preenche apenas plano, valor e vigencia; o app entao substitui TODOS os placeholders do modelo pelos dados reais (aluno do cadastro, profissional das Configuracoes, valores digitados) e GERA o PDF do contrato no proprio app usando jsPDF via cdnjs (texto formatado, titulo, paragrafos com quebra correta, dados completos, rodape com versao e data); o PDF gerado e salvo pelo MESMO caminho do pdfUrl atual (mesmo service usado no upload manual), de modo que viewer, gate e aceite com CPF continuem funcionando sem mudanca; mostrar PRE VISUALIZACAO do PDF gerado para o gestor antes de enviar para assinatura; manter o upload manual de PDF como opcao alternativa secundaria; placeholder sem dado correspondente nao aparece no documento, sem chaves vazias. git add . && git commit -m "feat(contratos): geracao automatica de PDF a partir de modelo e dados" && git push origin main
+     Resultado: O upload de contrato (inclusive o manual j├í existente) montava a URL como `${state.apiBase}/api/uploads/contracts`, mas `state.apiBase` j├í termina em `/api` ÔÇö resultava em `/api/api/...` e **404 em produ├º├úo**. Corr...
+     Conferido em 12/06/2026 (Playwright, fluxo completo no app real): login gestor, Novo contrato, picker de aluno, modo "Gerar do modelo" pre-selecionado, geracao via jsPDF cdnjs OK, status "PDF gerado e anexado", preview com iframe, PDF real (%PDF) salvo em /uploads/contracts com Teste/Elite/R$350,00/12/12/2026/rodape v1.0 e "Gerado em", zero placeholders sobrando; guards OK (sem modelo, sem valor, dados mudados apos gerar bloqueia envio); troca para "Anexar PDF pronto" mostra dropzone e invalida o doc gerado; envio para assinatura criou contrato com pdfUrl em producao (removido apos o teste, era so verificacao). ATENCAO: em localhost o app usa a API DE PRODUCAO do Railway (getApiBases prioriza REMOTE_API_BASE) ÔÇö testes locais criam dados reais.
 [ ] GATE DO ALUNO COM O PDF GERADO: confirmar que o aluno, no gate de primeiro acesso e na tela de contrato, ve o PDF GERADO integral com todas as infos corretas ja preenchidas (nome, CPF, plano, valor, vigencia, dados do profissional), rolavel, com Baixar; o resumo do plano acima do PDF usa os mesmos dados; o aceite com conferencia de CPF segue identico. Testar o fluxo completo: gestor cria contrato a partir de modelo, aluno abre o gate, le o PDF preenchido e assina com CPF. git add . && git commit -m "feat(aluno): gate exibe o PDF gerado com dados completos" && git push origin main
 
 == WIDGETS (nao rodaram) ==
