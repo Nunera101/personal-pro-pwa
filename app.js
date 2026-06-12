@@ -5406,23 +5406,6 @@
     const todayProgressPercent = todayProgress
       ? (todayProgress.completed ? 100 : todayProgress.total ? Math.round((todayProgress.done / todayProgress.total) * 100) : 0)
       : 0;
-    const todayProgressCard = todayProgress
-      ? `<section class="panel today-progress-card" aria-label="Progresso do treino de hoje">
-          <div class="section-title"><h3>Progresso do treino de hoje</h3></div>
-          <div class="today-progress-head">
-            <strong>${escapeHtml(todayProgress.title)}</strong>
-            ${todayProgress.completed
-              ? `<span class="today-progress-done"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>Concluído</span>`
-              : `<span class="today-progress-count">${todayProgress.done} de ${todayProgress.total} séries concluídas</span>`}
-          </div>
-          <div class="today-progress-row">
-            <div class="today-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${todayProgressPercent}" aria-label="Progresso do treino: ${todayProgressPercent}%">
-              <div class="today-progress-fill" style="width: ${todayProgressPercent}%"></div>
-            </div>
-            <span class="today-progress-percent">${todayProgressPercent}%</span>
-          </div>
-        </section>`
-      : "";
 
     const streakDays = getTrainingStreak(student.id);
     const streakCard = `
@@ -5450,44 +5433,73 @@
     } else {
       const latestEntry = weightEntries[weightEntries.length - 1];
       const latestWeight = parseWeight(latestEntry.weight);
-      const monthStart = `${todayISO().slice(0, 7)}-01`;
-      const baselineEntry = weightEntries.filter((u) => u.dueDate < monthStart).pop()
-        || (weightEntries.length >= 2 ? weightEntries[weightEntries.length - 2] : null);
-      let trendHtml = `<span class="weight-trend is-flat">Primeiro registro</span>`;
-      if (baselineEntry && baselineEntry !== latestEntry) {
+      const latestWeightStr = String(latestWeight.toFixed(1)).replace(".", ",").replace(/,0$/, "");
+      const hasMultiple = weightEntries.length >= 2;
+      let trendHtml = "";
+      if (hasMultiple) {
+        const monthStart = `${todayISO().slice(0, 7)}-01`;
+        const baselineEntry = weightEntries.filter((u) => u.dueDate < monthStart).pop()
+          || weightEntries[weightEntries.length - 2];
         const diff = Math.round((latestWeight - parseWeight(baselineEntry.weight)) * 10) / 10;
         if (diff <= -0.1) {
-          trendHtml = `<span class="weight-trend is-down"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7"/></svg>-${String(Math.abs(diff).toFixed(1)).replace(".", ",")} kg no mês</span>`;
+          trendHtml = `<span class="weight-trend is-down"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7"/></svg>−${String(Math.abs(diff).toFixed(1)).replace(".", ",")} kg</span>`;
         } else if (diff >= 0.1) {
-          trendHtml = `<span class="weight-trend is-up"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>+${String(diff.toFixed(1)).replace(".", ",")} kg no mês</span>`;
+          trendHtml = `<span class="weight-trend is-up"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>+${String(diff.toFixed(1)).replace(".", ",")} kg</span>`;
         } else {
-          trendHtml = `<span class="weight-trend is-flat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg>Estável no mês</span>`;
+          trendHtml = `<span class="weight-trend is-flat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg>Estável</span>`;
         }
       }
       weightCard = `
         <section class="panel weight-widget" aria-label="Peso corporal">
-          <div class="section-title"><h3>Peso corporal</h3><span class="small-text">Atualização de ${formatShortDate(latestEntry.dueDate)}</span></div>
-          <div class="weight-widget-head">
-            <strong class="weight-widget-value">${String(latestWeight.toFixed(1)).replace(".", ",").replace(/,0$/, "")}<small>kg</small></strong>
-            ${trendHtml}
+          <div class="weight-widget-body">
+            <div class="weight-widget-left">
+              <strong class="weight-widget-value">${latestWeightStr}<small>kg</small></strong>
+              <span class="weight-date">${formatShortDate(latestEntry.dueDate)}</span>
+              ${hasMultiple ? trendHtml : `<span class="weight-first-register">Primeiro registro</span>`}
+            </div>
+            ${hasMultiple ? `<div class="weight-widget-chart">${renderWeightMiniSpark(weightEntries)}</div>` : ""}
           </div>
-          ${renderHomeWeightSpark(weightEntries)}
         </section>`;
     }
 
-    let activeSessionBanner = "";
-    if (state.activeSession && state.activeSession.studentId === student.id) {
-      const sessionSets = state.activeSession.exercises.flatMap((exercise) => exercise.sets);
-      const sessionDone = sessionSets.filter((set) => set.status === "done").length;
-      activeSessionBanner = `
-        <section class="active-session-banner" aria-label="Treino em andamento">
-          <div class="active-session-info">
-            <strong>Treino em andamento</strong>
-            <span>${escapeHtml(getWorkout(state.activeSession.workoutId)?.title || "Treino")} · ${sessionDone} de ${sessionSets.length} séries</span>
+    // Unified: com sessão ativa → banner + barra de progresso; sem sessão mas com treino hoje → apenas widget de progresso
+    let sessionOrProgressBanner = "";
+    const hasActiveSession = !!(state.activeSession && state.activeSession.studentId === student.id);
+    if (hasActiveSession) {
+      sessionOrProgressBanner = `
+        <section class="active-session-banner active-session-banner--with-progress" aria-label="Treino em andamento">
+          <div class="asb-top">
+            <div class="active-session-info">
+              <strong>Treino em andamento</strong>
+              <span>${escapeHtml(todayProgress?.title || getWorkout(state.activeSession.workoutId)?.title || "Treino")} · ${todayProgress?.done ?? 0} de ${todayProgress?.total ?? 0} séries</span>
+            </div>
+            <div class="active-session-actions">
+              <button class="asb-resume" type="button" data-student-nav="workouts">Retomar</button>
+              <button class="asb-discard" type="button" data-cancel-active-session>Descartar</button>
+            </div>
           </div>
-          <div class="active-session-actions">
-            <button class="asb-resume" type="button" data-student-nav="workouts">Retomar</button>
-            <button class="asb-discard" type="button" data-cancel-active-session>Descartar</button>
+          <div class="asb-progress-row">
+            <div class="asb-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${todayProgressPercent}" aria-label="Progresso: ${todayProgressPercent}%">
+              <div class="asb-progress-fill" style="width: ${todayProgressPercent}%"></div>
+            </div>
+            <span class="asb-progress-percent">${todayProgressPercent}%</span>
+          </div>
+        </section>`;
+    } else if (todayProgress) {
+      sessionOrProgressBanner = `
+        <section class="panel today-progress-card" aria-label="Progresso do treino de hoje">
+          <div class="section-title"><h3>Progresso do treino de hoje</h3></div>
+          <div class="today-progress-head">
+            <strong>${escapeHtml(todayProgress.title)}</strong>
+            ${todayProgress.completed
+              ? `<span class="today-progress-done"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>Concluído</span>`
+              : `<span class="today-progress-count">${todayProgress.done} de ${todayProgress.total} séries concluídas</span>`}
+          </div>
+          <div class="today-progress-row">
+            <div class="today-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${todayProgressPercent}" aria-label="Progresso do treino: ${todayProgressPercent}%">
+              <div class="today-progress-fill" style="width: ${todayProgressPercent}%"></div>
+            </div>
+            <span class="today-progress-percent">${todayProgressPercent}%</span>
           </div>
         </section>`;
     }
@@ -5501,9 +5513,7 @@
           </div>
         </section>
 
-        ${activeSessionBanner}
-
-        ${todayProgressCard}
+        ${sessionOrProgressBanner}
 
         ${renderWeekCard(weekDays, weekDoneDays, weekPlannedDays, weekCount, icons.today, weekCount ? "success" : "")}
         <div class="metrics-row metrics-row--2" aria-label="Resumo do aluno">
@@ -6635,6 +6645,27 @@
         <div class="rpt-chart-labels">${updateWeights.map((u) => `<span>${escapeHtml(formatShortDate(u.dueDate))}</span>`).join("")}</div>
       </div>
     `;
+  }
+
+  function renderWeightMiniSpark(weightUpdates) {
+    const recent = weightUpdates.slice(-6);
+    const n = recent.length;
+    if (n < 2) return "";
+    const W = 120, H = 56, pad = 6;
+    const vals = recent.map((u) => parseWeight(u.weight));
+    const minV = Math.min(...vals);
+    const maxV = Math.max(...vals);
+    const range = maxV - minV || 1;
+    const stepX = (W - 2 * pad) / (n - 1);
+    const toY = (v) => H - pad - Math.round(((v - minV) / range) * (H - 2 * pad - 4));
+    const points = recent.map((u, i) => `${(pad + i * stepX).toFixed(1)},${toY(vals[i])}`).join(" ");
+    const lastX = (pad + (n - 1) * stepX).toFixed(1);
+    const areaClose = `L${lastX} ${H - pad} L${pad} ${H - pad} Z`;
+    return `<svg viewBox="0 0 ${W} ${H}" aria-hidden="true" class="weight-spark-svg">
+      <path class="rpt-area rpt-area--blue" d="M${points} ${areaClose}"/>
+      <polyline class="rpt-line rpt-line--blue" points="${points}"/>
+      ${recent.map((u, i) => `<circle class="rpt-dot rpt-dot--blue" cx="${(pad + i * stepX).toFixed(1)}" cy="${toY(vals[i])}" r="3"/>`).join("")}
+    </svg>`;
   }
 
   function renderHomeWeightSpark(weightUpdates) {
