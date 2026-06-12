@@ -74,6 +74,7 @@
     <link rel="stylesheet" href="./src/styles/atualizacoes.css" media="print" onload="this.media='all'" />
     <link rel="stylesheet" href="./src/styles/relatorios.css" media="print" onload="this.media='all'" />
     <link rel="stylesheet" href="./src/styles/microinteractions.css" media="print" onload="this.media='all'" />
+    <link rel="stylesheet" href="./src/styles/notificacoes.css" media="print" onload="this.media='all'" />
   </head>
   <body>
     <div class="startup-splash" id="startupSplash">
@@ -150,8 +151,9 @@
           </div>
           <span id="managerTitle" hidden>Dashboard</span>
           <div class="header-actions">
-            <button class="icon-button notification-button" type="button" aria-label="Notificações" data-manager-nav="updates">
+            <button class="icon-button notification-button" type="button" aria-label="Notificações" data-open-notif-sheet>
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>
+              <span class="notif-badge" id="managerNotifBadge" hidden></span>
             </button>
             <button class="avatar-button" type="button" aria-label="Configurações" data-manager-nav="settings">AS</button>
           </div>
@@ -183,8 +185,9 @@
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H7l-3 3zM8 9h8M8 13h5"/></svg>
               <span class="student-chat-badge" id="studentChatBadge" hidden></span>
             </button>
-            <button class="icon-button notification-button" type="button" aria-label="Atualizações" data-student-nav="updates">
+            <button class="icon-button notification-button" type="button" aria-label="Notificações" data-open-notif-sheet>
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>
+              <span class="notif-badge" id="studentNotifBadge" hidden></span>
             </button>
             <button class="avatar-button" type="button" aria-label="Meu perfil" data-student-nav="profile">AS</button>
           </div>
@@ -532,6 +535,21 @@
         </div>
         <div id="evSheetBody" class="ag-body"></div>
         <div class="ag-sheet-footer" id="evSheetFooter"></div>
+      </section>
+    </div>
+
+    <!-- Sheet: Central de notificações -->
+    <div class="ag-sheet" id="notifSheet" role="dialog" aria-modal="true" aria-labelledby="notifSheetTitle" hidden>
+      <div class="ag-backdrop" data-close-notif-sheet></div>
+      <section class="ag-panel">
+        <div class="sheet-handle" aria-hidden="true"></div>
+        <div class="ag-head">
+          <h2 id="notifSheetTitle" class="ag-title">Notificações</h2>
+          <button class="icon-button ag-close-btn" type="button" data-close-notif-sheet aria-label="Fechar">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div id="notifSheetBody" class="ag-body notif-sheet-body"></div>
       </section>
     </div>
 

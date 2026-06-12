@@ -18,6 +18,7 @@
     payments: "personal-pro-payments-v1",
     diets: "personal-pro-diets-v1",
     settings: "personal-pro-settings-v1",
+    notifications: "personal-pro-notifications-v1",
     activeSession: "personal-pro-active-session-v1",
     authToken: "elite-as-auth-token-v1",
     rememberAuth: "elite-as-remember-auth-v1",
@@ -96,7 +97,8 @@
       messages: [],
       payments: [],
       diets: [],
-      settings: {}
+      settings: {},
+      notifications: []
     }
   };
 
@@ -187,7 +189,9 @@
     retryInstall: document.getElementById("retryInstall"),
     toast: document.getElementById("toast"),
     drawerBackdrop: document.querySelector("[data-manager-drawer-backdrop]"),
-    studentDrawerBackdrop: document.querySelector("[data-student-drawer-backdrop]")
+    studentDrawerBackdrop: document.querySelector("[data-student-drawer-backdrop]"),
+    notifSheet: document.getElementById("notifSheet"),
+    notifSheetBody: document.getElementById("notifSheetBody")
   };
 
   const icons = {
@@ -467,7 +471,8 @@
       messages: readList(keys.messages),
       payments: readList(keys.payments),
       diets: readList(keys.diets),
-      settings: readObject(keys.settings, {})
+      settings: readObject(keys.settings, {}),
+      notifications: readList(keys.notifications)
     };
   }
 
@@ -888,6 +893,7 @@
     state.data.payments = pickCollection(remote.payments, local.payments, []).map(normalizePayment);
     state.data.diets = pickCollection(remote.diets, local.diets, []).map(normalizeDietPlan);
     state.data.settings = normalizeSettings(pickCollection(remote.settings, local.settings, {}));
+    state.data.notifications = local.notifications.map(normalizeNotification);
     migrateOldWorkoutData();
     state.data.workouts.forEach((workout) => {
       workout.exercises.forEach((ex) => {
@@ -1276,6 +1282,7 @@
     write(keys.payments, state.data.payments);
     write(keys.diets, state.data.diets);
     write(keys.settings, state.data.settings);
+    write(keys.notifications, state.data.notifications);
     scheduleRemoteSync();
   }
 
@@ -2085,6 +2092,15 @@
         }
         state.data.messages.push(normalized);
         persistData();
+        // Registra notificação in-app para o destinatário
+        const _msgRole = state.currentUser?.role;
+        if (_msgRole === "manager" && normalized.senderRole === "student") {
+          const _msgStudent = getStudent(normalized.studentId);
+          _addNotification({ type: "mensagem", title: `Mensagem de ${_msgStudent?.name || "Aluno"}`, body: normalized.body.slice(0, 80), targetRole: "manager", targetNav: "messages" });
+        } else if (_msgRole === "student" && normalized.senderRole === "manager") {
+          const _trainerName = state.data.settings?.trainerName || "Personal";
+          _addNotification({ type: "mensagem", title: `Mensagem de ${_trainerName}`, body: normalized.body.slice(0, 80), targetRole: "student", targetNav: "chat" });
+        }
         if (isOpenThread) {
           _refreshThreadBd(normalized.studentId);
           if (state.currentUser?.role === "student") _updateStudentChatBadge();
@@ -2661,6 +2677,7 @@
       void elements.managerContent.offsetWidth;
       elements.managerContent.innerHTML = html;
       elements.managerContent.classList.add("is-entering");
+      _updateNotifBadge();
       // Mede altura do manager-header para o offset sticky do cabeçalho do perfil
       requestAnimationFrame(() => {
         const mh = elements.managerView.querySelector(".manager-header");
@@ -2742,6 +2759,7 @@
       scrubVisibleText(elements.studentContent);
       elements.studentContent.classList.add("is-entering");
       _updateStudentChatBadge();
+      _updateNotifBadge();
     };
 
     if (STUDENT_SKELETON_TABS.has(state.studentMenu) && document.body.classList.contains("app-ready")) {
@@ -2808,6 +2826,138 @@
     const iconHtml = icon ? `<span class="empty-state-icon">${icon}</span>` : "";
     return `<div class="empty-state">${iconHtml}<strong>${escapeHtml(title)}</strong><span>${escapeHtml(description)}</span></div>`;
   }
+
+  // ─── CENTRAL DE NOTIFICAÇÕES ───────────────────────────────────────────────
+
+  function normalizeNotification(n) {
+    return {
+      id: n.id || createId("notif"),
+      type: n.type || "mensagem",
+      title: String(n.title || ""),
+      body: String(n.body || ""),
+      readAt: n.readAt || "",
+      createdAt: n.createdAt || new Date().toISOString(),
+      targetNav: n.targetNav || "",
+      targetRole: n.targetRole || "manager"
+    };
+  }
+
+  function _notifRelativeTime(iso) {
+    if (!iso) return "";
+    const ms = Date.now() - new Date(iso).getTime();
+    const mins = Math.floor(ms / 60000);
+    if (mins < 1) return "Agora";
+    if (mins < 60) return `${mins} min atrás`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h atrás`;
+    const days = Math.floor(hrs / 24);
+    if (days < 7) return `${days}d atrás`;
+    return new Date(iso).toLocaleDateString("pt-BR", { day: "numeric", month: "short" });
+  }
+
+  function _addNotification(n) {
+    if (!Array.isArray(state.data.notifications)) state.data.notifications = [];
+    state.data.notifications.unshift(normalizeNotification(n));
+    if (state.data.notifications.length > 60) state.data.notifications = state.data.notifications.slice(0, 60);
+    persistData();
+    _updateNotifBadge();
+  }
+
+  function _getUnreadNotifCount() {
+    const role = state.currentUser?.role;
+    if (!role || !Array.isArray(state.data.notifications)) return 0;
+    return state.data.notifications.filter((n) => n.targetRole === role && !n.readAt).length;
+  }
+
+  function _updateNotifBadge() {
+    const count = _getUnreadNotifCount();
+    const role = state.currentUser?.role;
+    const badgeId = role === "manager" ? "managerNotifBadge" : "studentNotifBadge";
+    const badge = document.getElementById(badgeId);
+    if (badge) {
+      badge.textContent = count > 9 ? "9+" : String(count);
+      badge.hidden = count === 0;
+    }
+    const selector = role === "manager" ? ".manager-header .notification-button" : ".student-header .notification-button";
+    const btn = document.querySelector(selector);
+    if (btn) btn.classList.toggle("has-unread-notif", count > 0);
+  }
+
+  function _notifIconByType(type) {
+    const map = { mensagem: icons.messages, atualizacao: icons.updates, contrato: icons.contracts, financeiro: icons.finance, treino: icons.workouts };
+    return map[type] || icons.updates;
+  }
+
+  function _renderNotifSheet() {
+    const body = elements.notifSheetBody;
+    if (!body) return;
+    const role = state.currentUser?.role;
+    const all = (state.data.notifications || []).filter((n) => n.targetRole === role);
+    if (!all.length) {
+      body.innerHTML = emptyState("Sem notificações", "Você será avisado sobre mensagens, contratos e atualizações.", icons.updates);
+      return;
+    }
+    const unread = all.filter((n) => !n.readAt);
+    const read = all.filter((n) => n.readAt);
+    let html = "";
+    if (unread.length) {
+      html += `<p class="notif-section-label">Não lidas</p>`;
+      html += unread.map((n) => _notifItemHtml(n, true)).join("");
+    }
+    if (read.length) {
+      html += `<p class="notif-section-label">Anteriores</p>`;
+      html += read.map((n) => _notifItemHtml(n, false)).join("");
+    }
+    body.innerHTML = html;
+  }
+
+  function _notifItemHtml(n, isUnread) {
+    return `
+      <button class="notif-item${isUnread ? " is-unread" : ""}" type="button" data-mark-notif="${escapeHtml(n.id)}">
+        <span class="notif-icon">${_notifIconByType(n.type)}</span>
+        <div class="notif-content">
+          <div class="notif-header-row">
+            <strong class="notif-title">${escapeHtml(n.title)}</strong>
+            ${isUnread ? '<span class="notif-unread-dot" aria-label="Não lida"></span>' : ""}
+          </div>
+          <p class="notif-preview">${escapeHtml(n.body)}</p>
+          <time class="notif-time" datetime="${escapeHtml(n.createdAt)}">${escapeHtml(_notifRelativeTime(n.createdAt))}</time>
+        </div>
+      </button>
+    `;
+  }
+
+  function openNotifSheet() {
+    _renderNotifSheet();
+    _openSheet(elements.notifSheet);
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeNotifSheet(afterFn) {
+    _closeSheet(elements.notifSheet, () => { document.body.style.overflow = ""; if (afterFn) afterFn(); });
+  }
+
+  function _handleNotifClick(id) {
+    const notif = (state.data.notifications || []).find((n) => n.id === id);
+    if (!notif) return;
+    notif.readAt = new Date().toISOString();
+    persistData();
+    _updateNotifBadge();
+    const role = state.currentUser?.role;
+    const nav = notif.targetNav;
+    closeNotifSheet(() => {
+      if (!nav) return;
+      if (role === "manager") {
+        state.managerMenu = nav;
+        renderManager();
+      } else {
+        state.studentMenu = nav;
+        renderStudent();
+      }
+    });
+  }
+
+  // ─── FIM CENTRAL DE NOTIFICAÇÕES ───────────────────────────────────────────
 
   function renderOperationalItem(item) {
     return `
@@ -6243,6 +6393,9 @@
       ensureUpdateActivity(update);
     }
     persistData();
+    if (sendFeedback) {
+      _addNotification({ type: "atualizacao", title: "Feedback do personal", body: "Seu personal avaliou sua atualização quinzenal.", targetRole: "student", targetNav: "progress" });
+    }
     state.managerMenu = "updates";
     renderApp();
     showToast(sendFeedback ? "Avaliação salva e feedback registrado." : "Avaliação salva.");
@@ -10916,6 +11069,7 @@
     ensureUpdateActivity(update);
     ensureNextUpdatePending(update.studentId, todayISO());
     persistData();
+    _addNotification({ type: "atualizacao", title: "Atualização enviada", body: "Nova atualização quinzenal aguarda avaliação.", targetRole: "manager", targetNav: "updates" });
     closeModal();
     state.studentMenu = "progress";
     renderApp();
@@ -11091,6 +11245,8 @@
     closeContractFormSheet();
     renderManager();
     if (!isDraft) {
+      const _ctStudent = getStudent(studentId);
+      _addNotification({ type: "contrato", title: old ? "Contrato atualizado" : "Contrato para assinar", body: old ? `Contrato de ${_ctStudent?.name || "aluno"} foi atualizado.` : `Um contrato aguarda sua assinatura.`, targetRole: "student", targetNav: "mais-contrato" });
       showToast(old ? "Contrato atualizado." : "Contrato criado para aceite do aluno.");
       await flushRemoteSync();
       await sendContractLink(contract.id);
@@ -11162,6 +11318,9 @@
     else state.data.payments.unshift(payment);
     state.financeFilters.month = payment.referenceMonth;
     persistData();
+    if (!old) {
+      _addNotification({ type: "financeiro", title: "Pagamento registrado", body: `Pagamento de ${student.name} registrado com sucesso.`, targetRole: "manager", targetNav: "finance" });
+    }
     closeModal();
     state.managerMenu = "finance";
     renderManager();
@@ -11809,7 +11968,7 @@
       }
     });
     document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") { closeManagerDrawer(); closeStudentDrawer(); }
+      if (event.key === "Escape") { closeManagerDrawer(); closeStudentDrawer(); closeNotifSheet(); }
     });
     document.addEventListener("input", (event) => {
       const target = event.target;
@@ -12419,6 +12578,16 @@
     });
   }
 
+  function bindNotifEvents() {
+    document.addEventListener("click", (event) => {
+      const target = event.target.closest("button, [data-open-notif-sheet], [data-close-notif-sheet], [data-mark-notif]");
+      if (!target) return;
+      if (target.matches("[data-open-notif-sheet]")) { openNotifSheet(); return; }
+      if (target.matches("[data-close-notif-sheet]")) { closeNotifSheet(); return; }
+      if (target.matches("[data-mark-notif]")) { _handleNotifClick(target.dataset.markNotif); return; }
+    });
+  }
+
   function bindEvents() {
     bindAgendaEvents();
     bindWorkoutEvents();
@@ -12432,6 +12601,7 @@
     bindRelatorioEvents();
     bindPwaEvents();
     bindAuthEvents();
+    bindNotifEvents();
     window.addEventListener("online", () => {
       if (state.offlinePending && state.authToken) scheduleRemoteSync(1500);
       renderOfflineBanner();
@@ -12844,6 +13014,7 @@
     syncRealtimeRoom();
     applyRouteFromHash();
     renderApp();
+    _updateNotifBadge();
     openPendingContractAfterLogin();
     schedulePushPermissionRequest();
     return true;
