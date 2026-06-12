@@ -697,9 +697,10 @@
 .thread-sheet {
   position: fixed;
   inset: 0;
-  /* 100dvh encolhe quando o teclado virtual sobe (iOS 15.4+ / Chrome); o JS
-     do Visual Viewport cobre versões mais antigas via data-vv-height inline. */
-  height: 100dvh;
+  /* Sem height explícito: inset:0 ancora top+bottom+left+right ao viewport,
+     preenchendo a tela inteira sem conflito de overconstrain.
+     Quando o teclado sobe, o JS (_applyThreadViewport) sobrescreve
+     height+top para encaixar no visual viewport. */
   z-index: 1100;
   display: flex;
   flex-direction: column;

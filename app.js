@@ -10003,10 +10003,17 @@
     const sheet = elements.threadSheet;
     if (!sheet || sheet.hidden) return;
     const vv = window.visualViewport;
-    // Clamp ao viewport layout para evitar saltos negativos
-    const h = Math.min(vv.height, window.innerHeight);
-    sheet.style.setProperty("height", h + "px", "important");
-    sheet.style.setProperty("top", vv.offsetTop + "px", "important");
+    // Só aplica override de altura quando o teclado virtual está aberto.
+    // Sem teclado, inset:0 do CSS ancora o sheet ao fundo real da tela
+    // (incluindo safe-area-inset-bottom), evitando a faixa preta.
+    const keyboardOpen = vv.height < window.innerHeight - 100;
+    if (keyboardOpen) {
+      sheet.style.setProperty("height", vv.height + "px", "important");
+      sheet.style.setProperty("top", vv.offsetTop + "px", "important");
+    } else {
+      sheet.style.removeProperty("height");
+      sheet.style.removeProperty("top");
+    }
     const bd = elements.threadSheetBd;
     if (bd) requestAnimationFrame(() => { bd.scrollTop = bd.scrollHeight; });
   }
