@@ -1467,6 +1467,20 @@
     return getStudentSessions(studentId).filter((session) => session.finishedAt.startsWith(prefix));
   }
 
+  function getWeekTrainingDays(studentId) {
+    const start = startOfWeek(todayISO());
+    const letters = ["S", "T", "Q", "Q", "S", "S", "D"];
+    const names = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
+    const sessions = getStudentSessions(studentId);
+    return Array.from({ length: 7 }, (_, index) => {
+      const day = addDays(start, index);
+      const workoutItems = getAgendaItemsForDate(day, studentId).filter((item) => item.type === "workout" && item.status !== "canceled");
+      const done = workoutItems.some((item) => item.status === "done") || sessions.some((session) => isSameDay(session.finishedAt, day));
+      const status = done ? "done" : workoutItems.length ? "pending" : "off";
+      return { letter: letters[index], name: names[index], status };
+    });
+  }
+
   function getUpdateForStudent(studentId, status) {
     return state.data.updates
       .filter((update) => update.studentId === studentId)
@@ -2704,7 +2718,7 @@
     return `<article class="metric-card"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></article>`;
   }
 
-  function dashboardMetricCard({ label, value, subtext = "", icon = icons.home, nav = "", tone = "" }) {
+  function dashboardMetricCard({ label, value, subtext = "", icon = icons.home, nav = "", tone = "", extra = "" }) {
     const tag = nav ? "button" : "article";
     const navAttr = nav ? ` type="button" data-manager-nav="${escapeHtml(nav)}"` : "";
     return `
@@ -2713,9 +2727,19 @@
           <span class="metric-icon">${icon}</span>
           <span class="metric-label">${escapeHtml(label)}</span>
         </div>
-        <strong>${escapeHtml(String(value))}</strong>
+        ${extra ? `<div class="metric-value-row"><strong>${escapeHtml(String(value))}</strong>${extra}</div>` : `<strong>${escapeHtml(String(value))}</strong>`}
         ${subtext ? `<small>${escapeHtml(subtext)}</small>` : ""}
       </${tag}>
+    `;
+  }
+
+  function renderWeekDots(days) {
+    const statusLabels = { done: "treino concluído", pending: "treino pendente", off: "sem treino programado" };
+    const check = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>`;
+    return `
+      <span class="week-dots" role="img" aria-label="${escapeHtml(days.map((day) => `${day.name}: ${statusLabels[day.status]}`).join(", "))}">
+        ${days.map((day) => `<span class="week-dot is-${day.status}" title="${escapeHtml(`${day.name}: ${statusLabels[day.status]}`)}">${day.status === "done" ? check : day.letter}</span>`).join("")}
+      </span>
     `;
   }
 
@@ -5282,6 +5306,9 @@
       : "Nenhuma atividade agendada no momento.";
 
     const weekCount = stats.sessionsWeek.length;
+    const weekDays = getWeekTrainingDays(student.id);
+    const weekDoneDays = weekDays.filter((day) => day.status === "done").length;
+    const weekPlannedDays = weekDays.filter((day) => day.status !== "off").length;
     const contractTone = stats.contract.tone === "info" ? "warning" : stats.contract.tone;
 
     const todayWorkoutCard = todayWorkoutItem
@@ -5323,7 +5350,7 @@
         ${activeSessionBanner}
 
         <div class="metrics-row metrics-row--2" aria-label="Resumo do aluno">
-          ${dashboardMetricCard({ label: "Treinos na semana", value: weekCount, subtext: weekCount ? `${weekCount} concluído(s)` : "Nenhum ainda", icon: icons.today, tone: weekCount ? "success" : "" })}
+          ${dashboardMetricCard({ label: "Treinos na semana", value: `${weekDoneDays} de ${weekPlannedDays}`, subtext: weekCount ? `${weekCount} concluído(s)` : "Nenhum ainda", icon: icons.today, tone: weekCount ? "success" : "", extra: renderWeekDots(weekDays) })}
           ${dashboardMetricCard({ label: "Volume recente", value: `${stats.recentVolume} kg`, subtext: "Últimos 4 treinos", icon: icons.progress })}
           ${dashboardMetricCard({ label: "Próxima atividade", value: nextActivity ? formatShortDate(nextActivity.date) : "—", subtext: nextActivity ? activityLabel(nextActivity.type) : "Nada agendado", icon: icons.agenda })}
           ${dashboardMetricCard({ label: "Contrato", value: stats.contract.label, subtext: "Status do contrato", icon: icons.contracts, tone: contractTone })}

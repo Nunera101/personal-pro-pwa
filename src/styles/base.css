@@ -6738,3 +6738,53 @@ body::before {
   opacity: 0 !important;
   display: none !important;
 }
+
+/* ── Card Treinos na semana: bolinhas dos dias (Início do aluno) ── */
+.metric-value-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  min-width: 0;
+}
+
+.week-dots {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.week-dot {
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.week-dot svg {
+  width: 10px;
+  height: 10px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.week-dot.is-done {
+  background: var(--dourado);
+  color: #241a04;
+}
+
+.week-dot.is-pending {
+  border: 1px solid rgba(156, 163, 175, 0.55);
+  color: var(--txt2);
+}
+
+.week-dot.is-off {
+  border: 1px solid rgba(156, 163, 175, 0.18);
+  color: rgba(156, 163, 175, 0.35);
+}
