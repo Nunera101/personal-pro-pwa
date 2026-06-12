@@ -7026,9 +7026,9 @@ body::before {
   color: var(--txt2);
 }
 
-/* ── Card Próxima atividade (Início do aluno) ── */
-.metrics-row .next-activity-card {
-  position: relative;
+/* ── Card Próxima atividade (Início do aluno) — autônomo fora da grade ── */
+.next-activity-card {
+  padding: 14px;
   padding-left: 18px;
   overflow: hidden;
 }
@@ -7049,7 +7049,7 @@ body::before {
   -webkit-box-orient: vertical;
   overflow: hidden;
   overflow-wrap: anywhere;
-  font-size: 15px;
+  font-size: 15px !important;
   line-height: 1.25;
 }
 
