@@ -9102,8 +9102,18 @@
     const titleEl = elements.contractFormTitle;
     if (!sheet || !bodyEl) return;
 
+    // Se o modal está fechando (e.g., picker → sheet), cancela o timer antes que ele
+    // resete body.style.overflow e desfaça o scroll-lock do sheet.
+    if (modalCloseTimer) {
+      clearTimeout(modalCloseTimer);
+      modalCloseTimer = null;
+      elements.modal.hidden = true;
+      elements.modal.classList.remove("is-closing");
+      elements.modalBody.innerHTML = "";
+    }
+
     const student = studentId ? getStudent(studentId) : null;
-    if (!studentId && !student) return openContractStudentPickerModal();
+    if (!student) return openContractStudentPickerModal();
     const contract = contractId ? state.data.contracts.find((c) => c.id === contractId && c.studentId === studentId) : null;
     const defaults = contract || normalizeContract({ studentId: student.id, ...getContractDefaults(student), ...prefill });
     const existingPdfUrl = contract?.pdfUrl || prefill.pdfUrl || "";
