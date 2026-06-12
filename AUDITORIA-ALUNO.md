@@ -1,6 +1,6 @@
 # Auditoria do Modo Aluno
 
-**Data:** 2026-06-11 (pós-refinamento premium — Levas A–D, base vídeo real 11/06)
+**Data:** 2026-06-12 (revisão final dos widgets do Início; base anterior: pós-refinamento premium — Levas A–D, vídeo real 11/06)
 **Escopo:** Todas as telas do modo `student`: Login, Contrato/Gate, Início, Treinos, Detalhe do treino, Execução, Dieta, Mensagens/Chat, Progresso, Agenda, Mais, Perfil
 **Status do refinamento:** ✅ Concluído (8 tarefas de refinamento + passada premium)
 
@@ -39,11 +39,19 @@
 - **OK**.
 
 ### Início / Dashboard (`renderStudentToday`)
-- Saudação + próxima atividade.
-- Grade de cards de métricas no padrão do gestor (ícone dourado em fundo escuro): TREINOS NA SEMANA, VOLUME RECENTE, PRÓXIMA ATIVIDADE, CONTRATO (status com cor).
-- Card "treino de hoje" **apenas como atalho** (nome + Abrir treino), sem expor exercícios.
-- Atalho para enviar progresso se houver pendência.
-- Estados vazios elegantes por card.
+- **Ordem final (revisão 12/06):**
+  1. Saudação ("Olá, {nome}" + linha da próxima atividade).
+  2. Banner **Treino em andamento** (apenas se houver sessão ativa) — fundo dourado com texto escuro, botões Retomar/Descartar.
+  3. **Progresso do treino de hoje** — título do treino, contagem de séries, barra de progresso dourada; lê a sessão ativa ao vivo, atualiza ao concluir séries (`handleSeriesAction` → `renderStudent()`).
+  4. **Grade de métricas** (padrão do gestor): TREINOS NA SEMANA (com bolinhas dos dias — concluído dourado/pendente/folga), VOLUME RECENTE, PRÓXIMA ATIVIDADE (faixa lateral na cor do tipo + botão Abrir), CONTRATO (status com cor).
+  5. **Sequência de dias treinando** — chama dourada acesa quando há streak; motivação quando zerada.
+  6. **Peso corporal** — último peso, variação no mês (seta ↓ verde / ↑ vermelha / estável) e mini gráfico.
+  7. **Adesão do mês** — anel de progresso dourado (concluídos/programados, mesmo cálculo do gestor).
+  8. Card "treino de hoje" **apenas como atalho** (nome + Abrir treino), sem expor exercícios.
+  9. Atalho para enviar progresso se houver pendência.
+- Tema escuro dourado em todos os widgets: dourado só em destaques, texto sobre dourado sempre escuro, **sem glow** (flat).
+- Estados vazios elegantes por widget (peso sem registro, adesão sem treinos programados, sem treino hoje, sem próxima atividade).
+- Nenhum texto cortado: `overflow-wrap: anywhere` nos títulos, `line-clamp: 2` no nome da próxima atividade, contadores em containers com `flex-wrap`.
 - **OK** — não despeja mais exercícios crus.
 
 ### Treinos (`renderStudentWorkouts`)
@@ -139,3 +147,19 @@
 | C | Aceite com CPF + auditoria | `feat(aluno): aceite com conferencia de CPF e trilha de auditoria` |
 | C | Gate de primeiro acesso premium | `feat(aluno): gate de primeiro acesso premium e legivel` |
 | D | Passada premium geral | `chore(aluno): passada premium de consistencia visual` |
+
+---
+
+## 7. Widgets do Início (ciclo 12/06)
+
+| Widget | Commit |
+|---|---|
+| Progresso do treino de hoje | `feat(widgets): progresso do treino de hoje no Inicio` |
+| Bolinhas da semana no card de treinos | `feat(widgets): bolinhas da semana no card de treinos` |
+| Sequência de dias treinando | `feat(widgets): sequencia de dias treinando` |
+| Peso corporal com variação e mini gráfico | `feat(widgets): peso corporal com variacao e mini grafico` |
+| Adesão do mês com anel dourado | `feat(widgets): adesao do mes com anel de progresso dourado no Inicio` |
+| Próxima atividade com tipo colorido | `feat(widgets): proxima atividade com tipo colorido e atalho` |
+| Revisão final: ordem dos widgets | `chore(aluno): revisao final do Inicio com ordem definitiva dos widgets` |
+
+**Verificações da revisão final:** ordem saudação → banner de sessão ativa → progresso de hoje → grade de métricas → sequência → peso → adesão; gate de contrato abre o PDF gerado (`contract.pdfUrl` → viewer com iframe / cartão iOS, verificado no app real em ciclo anterior); progresso atualiza ao concluir séries; sem glow; sem texto branco sobre dourado; sem texto cortado.

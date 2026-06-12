@@ -5530,8 +5530,6 @@
 
         ${todayProgressCard}
 
-        ${streakCard}
-
         <div class="metrics-row metrics-row--2" aria-label="Resumo do aluno">
           ${dashboardMetricCard({ label: "Treinos na semana", value: `${weekDoneDays} de ${weekPlannedDays}`, subtext: weekCount ? `${weekCount} concluído(s)` : "Nenhum ainda", icon: icons.today, tone: weekCount ? "success" : "", extra: renderWeekDots(weekDays) })}
           ${dashboardMetricCard({ label: "Volume recente", value: `${stats.recentVolume} kg`, subtext: "Últimos 4 treinos", icon: icons.progress })}
@@ -5539,9 +5537,11 @@
           ${dashboardMetricCard({ label: "Contrato", value: stats.contract.label, subtext: "Status do contrato", icon: icons.contracts, tone: contractTone })}
         </div>
 
-        ${adesaoCard}
+        ${streakCard}
 
         ${weightCard}
+
+        ${adesaoCard}
 
         <section class="panel">
           <div class="section-title"><h3>Treino de hoje</h3></div>
