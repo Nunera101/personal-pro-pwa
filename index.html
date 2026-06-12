@@ -478,10 +478,12 @@
         <footer class="thread-ft" id="threadSheetFt">
           <div class="thread-quick" id="threadQuickChips"></div>
           <form id="threadForm" data-student-id="">
-            <button class="thread-attach-btn" type="button" data-thread-attach aria-label="Enviar link">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-            </button>
-            <textarea class="thread-input" name="body" maxlength="800" required placeholder="Mensagem..." rows="1" aria-label="Mensagem"></textarea>
+            <div class="thread-compose-pill">
+              <button class="thread-attach-btn" type="button" data-thread-attach aria-label="Enviar link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+              </button>
+              <textarea class="thread-input" name="body" maxlength="800" required placeholder="Mensagem..." rows="1" aria-label="Mensagem"></textarea>
+            </div>
             <button class="thread-send-btn" type="submit" aria-label="Enviar">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/></svg>
             </button>

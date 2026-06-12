@@ -10093,10 +10093,13 @@
     }
     let html = '<div class="thread-bubbles">';
     let lastDate = "";
-    messages.forEach((message) => {
+    let lastSender = "";
+    messages.forEach((message, index) => {
       const msgDate = String(message.createdAt || "").slice(0, 10);
-      if (msgDate && msgDate !== lastDate) {
+      const dateChanged = msgDate && msgDate !== lastDate;
+      if (dateChanged) {
         lastDate = msgDate;
+        lastSender = "";
         const label = msgDate === todayISO() ? "Hoje" : msgDate === addDays(todayISO(), -1) ? "Ontem" : formatShortDate(msgDate);
         html += `<span class="thread-date-sep">${escapeHtml(label)}</span>`;
       }
@@ -10104,8 +10107,14 @@
       const isMine = isStudentView ? message.senderRole === "student" : message.senderRole === "manager";
       const isRead = Boolean(message.readAt);
       const timeStr = message.createdAt ? new Date(message.createdAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : "";
+      // Grouping: clustered = segue o mesmo remetente sem quebra de data
+      const nextMsg = messages[index + 1];
+      const nextDate = String(nextMsg?.createdAt || "").slice(0, 10);
+      const isClustered = !dateChanged && message.senderRole === lastSender;
+      const isLastGroup = !nextMsg || nextMsg.senderRole !== message.senderRole || nextDate !== msgDate;
+      const groupCls = [isClustered ? "is-clustered" : "", isLastGroup ? "is-last-group" : ""].filter(Boolean).join(" ");
       html += `
-        <div class="thread-bubble ${isMine ? "is-manager" : "is-student"}">
+        <div class="thread-bubble ${isMine ? "is-manager" : "is-student"}${groupCls ? " " + groupCls : ""}">
           <p>${escapeHtml(message.body)}</p>
           <div class="thread-bubble-foot">
             <time>${escapeHtml(timeStr)}</time>
@@ -10113,6 +10122,7 @@
           </div>
         </div>
       `;
+      lastSender = message.senderRole;
     });
     html += "</div>";
     return html;

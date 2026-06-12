@@ -811,14 +811,14 @@
 .thread-bubbles {
   display: flex;
   flex-direction: column;
-  gap: 0.36rem;
+  gap: 0;
   padding-bottom: 0.4rem;
   margin-top: auto;
 }
 
 .thread-date-sep {
   align-self: center;
-  margin: 0.6rem 0 0.4rem;
+  margin: 0.75rem 0 0.35rem;
   padding: 0.16rem 0.68rem;
   border-radius: 99px;
   background: rgba(255, 255, 255, 0.07);
@@ -829,6 +829,7 @@
 }
 
 .thread-bubble {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 0.18rem;
@@ -836,20 +837,61 @@
   max-width: min(80%, 28rem);
   padding: 0.52rem 0.76rem 0.34rem;
   border-radius: 1rem;
+  margin-top: 0.55rem;
+}
+
+/* Bubbles consecutivas do mesmo remetente: espaçamento menor */
+.thread-bubble.is-clustered {
+  margin-top: 0.2rem;
+}
+
+/* Primeira bolha logo após chip de data: espaçamento reduzido */
+.thread-date-sep + .thread-bubble {
+  margin-top: 0.35rem;
 }
 
 .thread-bubble.is-student {
   align-self: flex-start;
-  border-bottom-left-radius: 0.18rem;
-  background: #1A1A1D;
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-bottom-left-radius: 1rem;
+  background: #1F1F1F;
+}
+
+/* Cauda sutil na última bolha do cluster (recebida) */
+.thread-bubble.is-student.is-last-group {
+  border-bottom-left-radius: 2px;
+}
+
+.thread-bubble.is-student.is-last-group::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: -7px;
+  width: 8px;
+  height: 10px;
+  background: #1F1F1F;
+  clip-path: polygon(100% 0, 0 100%, 100% 100%);
 }
 
 .thread-bubble.is-manager {
   align-self: flex-end;
-  border-bottom-right-radius: 0.18rem;
-  background: linear-gradient(145deg, rgba(245, 181, 27, 0.26), rgba(245, 181, 27, 0.11));
-  border: 1px solid rgba(245, 181, 27, 0.3);
+  border-bottom-right-radius: 1rem;
+  background: #2E1D00;
+}
+
+/* Cauda sutil na última bolha do cluster (enviada) */
+.thread-bubble.is-manager.is-last-group {
+  border-bottom-right-radius: 2px;
+}
+
+.thread-bubble.is-manager.is-last-group::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: -7px;
+  width: 8px;
+  height: 10px;
+  background: #2E1D00;
+  clip-path: polygon(0 0, 0 100%, 100% 100%);
 }
 
 .thread-bubble p {
@@ -869,13 +911,13 @@
 }
 
 .thread-bubble time {
-  color: rgba(247, 244, 235, 0.42);
+  color: rgba(247, 244, 235, 0.38);
   font-size: 0.625rem;
   line-height: 1;
 }
 
 .thread-bubble.is-manager time {
-  color: rgba(245, 181, 27, 0.6);
+  color: rgba(245, 181, 27, 0.55);
 }
 
 .thread-check {
@@ -898,6 +940,7 @@
   flex-direction: column;
   border-top: 1px solid rgba(255, 255, 255, 0.07);
   background: rgba(14, 14, 14, 0.98);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 .thread-quick {
@@ -932,31 +975,50 @@
 #threadForm {
   display: flex;
   align-items: flex-end;
-  gap: 0.46rem;
-  padding: 0.58rem 0.78rem;
-  padding-bottom: calc(0.58rem + env(safe-area-inset-bottom, 0px));
+  gap: 0.5rem;
+  padding: 0.5rem 0.65rem 0.6rem;
+}
+
+/* Pill que envolve attach + textarea */
+.thread-compose-pill {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.1rem;
+  min-height: 2.6rem;
+  padding: 0.28rem 0.55rem 0.28rem 0.45rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 99px;
+  overflow: hidden;
+  transition: border-color 140ms ease, background 140ms ease;
+}
+
+.thread-compose-pill:focus-within {
+  border-color: rgba(245, 181, 27, 0.35);
+  background: rgba(245, 181, 27, 0.04);
 }
 
 .thread-attach-btn {
   flex-shrink: 0;
   display: inline-grid;
-  width: 2.75rem;
-  height: 2.75rem;
+  width: 2rem;
+  height: 2rem;
   place-items: center;
   border: 0;
   border-radius: 50%;
-  background: var(--brand);
-  color: #080808;
+  background: transparent;
+  color: var(--muted);
   cursor: pointer;
-  transition: background 140ms ease, transform 110ms ease;
+  transition: color 140ms ease;
 }
 
-.thread-attach-btn:hover { background: var(--brand-strong); }
-.thread-attach-btn:active { transform: scale(0.9); }
+.thread-attach-btn:hover { color: var(--ink); }
+.thread-attach-btn:active { transform: scale(0.88); }
 
 .thread-attach-btn svg {
-  width: 1.15rem;
-  height: 1.15rem;
+  width: 1.1rem;
+  height: 1.1rem;
   stroke: currentColor;
   stroke-width: 2.5;
 }
@@ -964,28 +1026,24 @@
 .thread-input {
   flex: 1;
   min-width: 0;
-  min-height: 2.65rem;
-  max-height: 7rem;
-  padding: 0.52rem 0.82rem;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 1.5rem;
-  background: rgba(255, 255, 255, 0.06);
+  min-height: 2rem;
+  max-height: 6.5rem;
+  padding: 0.44rem 0.2rem;
+  border: none;
+  border-radius: 0;
+  background: transparent;
   color: var(--ink);
   font-size: 0.95rem;
   line-height: 1.45;
   resize: none;
   overflow-y: auto;
   scrollbar-width: none;
-  transition: border-color 140ms ease, background 140ms ease;
 }
 
 .thread-input::-webkit-scrollbar { display: none; }
 
 .thread-input:focus-visible {
   outline: none;
-  border-color: rgba(245, 181, 27, 0.48);
-  background: rgba(245, 181, 27, 0.05);
-  box-shadow: 0 0 0 3px rgba(245, 181, 27, 0.3);
 }
 
 .thread-input::placeholder { color: rgba(247, 244, 235, 0.34); }
@@ -993,8 +1051,8 @@
 .thread-send-btn {
   flex-shrink: 0;
   display: inline-grid;
-  width: 2.75rem;
-  height: 2.75rem;
+  width: 2.65rem;
+  height: 2.65rem;
   place-items: center;
   border: 0;
   border-radius: 50%;
@@ -1014,7 +1072,7 @@
   stroke-width: 2;
 }
 
-/* ── Modo aluno: ocultar attach, ajustar form ── */
+/* ── Modo aluno: ocultar attach ── */
 .thread-sheet.is-student-view .thread-attach-btn {
   display: none;
 }
