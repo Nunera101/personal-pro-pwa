@@ -549,6 +549,30 @@
   padding-bottom: 0 !important;
 }
 
+/* ── Barra do aluno tem 6 itens (gestor tem 5): vence o repeat(5) do override v54 acima ── */
+#studentBottomNav {
+  grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+}
+
+#studentBottomNav .nav-button {
+  padding: 6px 2px !important;
+  font-size: 10px !important;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+@media (max-width: 22.5rem) {
+  #studentBottomNav .nav-button {
+    font-size: 9.5px !important;
+    gap: 3px !important;
+  }
+
+  #studentBottomNav .nav-button svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+}
+
 /* Promote to own compositor layer — isolates the nav from page reflows and content repaints */
 #managerBottomNav,
 #studentBottomNav {
