@@ -26,7 +26,7 @@
       html,body{margin:0;background:#0d0d0d}
       .startup-splash{
         position:fixed;inset:0;z-index:100;
-        display:grid;place-items:center;gap:1rem;
+        display:grid;align-content:center;justify-items:center;gap:1rem;
         background:#0d0d0d;color:#fff;
         transition:opacity 260ms ease,visibility 260ms ease
       }
@@ -35,7 +35,29 @@
         border-radius:24%;object-fit:contain
       }
       .startup-splash strong{font-size:1rem;font-weight:800}
+      .splash-spinner{
+        width:1.625rem;height:1.625rem;border-radius:50%;
+        border:2px solid rgba(231,168,62,.2);border-top-color:#e7a83e;
+        animation:splash-spin .9s linear infinite
+      }
+      .splash-slow{
+        margin:0;max-width:80vw;display:grid;gap:.75rem;justify-items:center;
+        opacity:0;visibility:hidden;
+        animation:splash-slow-in .4s ease 10s forwards
+      }
+      .splash-slow p{
+        margin:0;text-align:center;
+        font-size:.8rem;color:rgba(255,255,255,.55)
+      }
+      .splash-slow button{
+        font:inherit;font-size:.8rem;font-weight:700;color:#e7a83e;
+        background:none;border:1px solid rgba(231,168,62,.45);
+        border-radius:999px;padding:.5rem 1.25rem;cursor:pointer
+      }
+      @keyframes splash-spin{to{transform:rotate(360deg)}}
+      @keyframes splash-slow-in{to{opacity:1;visibility:visible}}
       body.app-ready .startup-splash{opacity:0;visibility:hidden;pointer-events:none}
+      body.app-ready .startup-splash .splash-spinner{animation:none}
     </style>
 
     <!-- CSS externo carregado de forma não-bloqueante: splash aparece antes de baixar esses arquivos -->
@@ -54,9 +76,14 @@
     <link rel="stylesheet" href="./src/styles/microinteractions.css" media="print" onload="this.media='all'" />
   </head>
   <body>
-    <div class="startup-splash" id="startupSplash" aria-hidden="true">
+    <div class="startup-splash" id="startupSplash">
       <img src="./assets/logo-oficial.svg" alt="" />
       <strong>Elite AS</strong>
+      <span class="splash-spinner"></span>
+      <div class="splash-slow">
+        <p>Demorando mais que o normal</p>
+        <button type="button" onclick="(async()=>{try{if(window.caches){const k=await caches.keys();await Promise.all(k.map(n=>caches.delete(n)))}if(navigator.serviceWorker){const r=await navigator.serviceWorker.getRegistrations();await Promise.all(r.map(x=>x.unregister()))}}catch(e){}location.reload()})()">Tentar novamente</button>
+      </div>
     </div>
 
     <div class="app-shell" id="appShell">

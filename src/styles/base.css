@@ -78,13 +78,13 @@ h1 {
   inset: 0;
   z-index: 100;
   display: grid;
-  place-items: center;
+  align-content: center;
+  justify-items: center;
   gap: 1rem;
   background: #0b6b57;
   background: var(--brand);
   color: #fff;
   transition: opacity 260ms ease, visibility 260ms ease;
-  animation: splash-fallback 1100ms ease 10000ms forwards;
 }
 
 .startup-splash img {
@@ -107,14 +107,6 @@ body.app-ready .startup-splash {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-}
-
-@keyframes splash-fallback {
-  to {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-  }
 }
 
 @keyframes splash-logo-pulse {
