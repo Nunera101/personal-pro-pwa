@@ -1,11 +1,11 @@
-﻿const CACHE_NAME = "personal-pro-pwa-v62";
-const DATA_CACHE_NAME = "personal-pro-data-v62";
+﻿const CACHE_NAME = "personal-pro-pwa-v63";
+const DATA_CACHE_NAME = "personal-pro-data-v63";
 const CRITICAL_ASSETS = new Set(["/", "/index.html", "/app.js", "/styles.css", "/manifest.json"]);
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./styles.css?v=53",
-  "./app.js?v=53",
+  "./styles.css?v=63",
+  "./app.js?v=63",
   "./manifest.json",
   "./assets/logo-oficial.svg",
   "./assets/favicon.svg",
@@ -33,13 +33,9 @@ self.addEventListener("activate", (event) => {
       .then(() => self.clients.claim())
       .then(() => self.clients.matchAll({ type: "window", includeUncontrolled: true }))
       .then((clients) => {
-        return Promise.all(
-          clients.map((client) => {
+        clients.forEach((client) => {
           client.postMessage({ type: "ELITE_AS_APP_UPDATED", version: CACHE_NAME });
-            if ("navigate" in client) return client.navigate(client.url);
-            return Promise.resolve();
-          })
-        );
+        });
       })
   );
 });

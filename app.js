@@ -11449,10 +11449,10 @@
       navigator.serviceWorker.addEventListener("message", (event) => {
         if (event.data?.type !== "ELITE_AS_APP_UPDATED") return;
         const version = event.data.version || "latest";
-        const reloadKey = `elite-as-reloaded-${version}`;
-        if (sessionStorage.getItem(reloadKey) === "true") return;
-        sessionStorage.setItem(reloadKey, "true");
-        window.location.reload();
+        const toastKey = `elite-as-toast-${version}`;
+        if (sessionStorage.getItem(toastKey) === "true") return;
+        sessionStorage.setItem(toastKey, "true");
+        showActionToast("Nova versão disponível", "Atualizar", () => window.location.reload());
       });
       navigator.serviceWorker
         .register("./sw.js", { updateViaCache: "none" })
