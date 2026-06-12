@@ -1506,6 +1506,25 @@
     return null;
   }
 
+  function getTrainingStreak(studentId) {
+    const days = new Set(
+      getStudentSessions(studentId)
+        .map((session) => String(session.finishedAt || "").slice(0, 10))
+        .filter(Boolean)
+    );
+    state.data.activities
+      .filter((item) => item.studentId === studentId && item.type === "workout" && item.status === "done" && item.date)
+      .forEach((item) => days.add(item.date));
+    let day = todayISO();
+    if (!days.has(day)) day = addDays(day, -1);
+    let streak = 0;
+    while (days.has(day)) {
+      streak += 1;
+      day = addDays(day, -1);
+    }
+    return streak;
+  }
+
   function getUpdateForStudent(studentId, status) {
     return state.data.updates
       .filter((update) => update.studentId === studentId)
@@ -5368,6 +5387,19 @@
         </section>`
       : "";
 
+    const streakDays = getTrainingStreak(student.id);
+    const streakCard = `
+      <section class="panel streak-card${streakDays ? " is-lit" : ""}" aria-label="Sequência de dias treinando">
+        <span class="streak-flame" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+        </span>
+        <div class="streak-info">
+          ${streakDays
+            ? `<strong class="streak-number">${streakDays}</strong><span class="streak-label">${streakDays === 1 ? "dia seguido" : "dias seguidos"} treinando</span>`
+            : `<strong class="streak-motivation">Treine hoje e acenda sua sequência!</strong><span class="streak-label">dias seguidos</span>`}
+        </div>
+      </section>`;
+
     let activeSessionBanner = "";
     if (state.activeSession && state.activeSession.studentId === student.id) {
       const sessionSets = state.activeSession.exercises.flatMap((exercise) => exercise.sets);
@@ -5397,6 +5429,8 @@
         ${activeSessionBanner}
 
         ${todayProgressCard}
+
+        ${streakCard}
 
         <div class="metrics-row metrics-row--2" aria-label="Resumo do aluno">
           ${dashboardMetricCard({ label: "Treinos na semana", value: `${weekDoneDays} de ${weekPlannedDays}`, subtext: weekCount ? `${weekCount} concluído(s)` : "Nenhum ainda", icon: icons.today, tone: weekCount ? "success" : "", extra: renderWeekDots(weekDays) })}
