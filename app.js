@@ -1138,6 +1138,42 @@
     };
   }
 
+  const CONTRACT_MODEL_PLACEHOLDERS = [
+    "nome_aluno", "cpf_aluno", "telefone_aluno", "email_aluno",
+    "plano", "valor", "data_inicio", "data_fim",
+    "nome_personal", "cpf_cnpj_personal", "telefone_personal", "email_personal",
+    "data_hoje"
+  ];
+
+  function normalizeContractModel(model = {}) {
+    return {
+      id: model.id || createId("ctmodel"),
+      service: String(model.service || "").trim() || "Serviço",
+      text: String(model.text || ""),
+      createdAt: model.createdAt || new Date().toISOString(),
+      updatedAt: model.updatedAt || model.createdAt || new Date().toISOString()
+    };
+  }
+
+  function seedContractModels() {
+    return [
+      normalizeContractModel({
+        id: "seed-modelo-consultoria-online",
+        service: "Consultoria online",
+        text:
+          "CONTRATO DE PRESTAÇÃO DE SERVIÇOS - CONSULTORIA ONLINE\n\n" +
+          "CONTRATADO(A): {nome_personal}, CPF/CNPJ {cpf_cnpj_personal}, telefone {telefone_personal}, e-mail {email_personal}.\n" +
+          "CONTRATANTE: {nome_aluno}, CPF {cpf_aluno}, telefone {telefone_aluno}, e-mail {email_aluno}.\n\n" +
+          "1. OBJETO\nPrestação de serviços de consultoria online de treinamento físico, no plano {plano}.\n\n" +
+          "2. VALOR\nPelos serviços, o contratante pagará o valor de {valor}, nas condições combinadas entre as partes.\n\n" +
+          "3. VIGÊNCIA\nO presente contrato vigora de {data_inicio} a {data_fim}.\n\n" +
+          "4. OBRIGAÇÕES\nO contratado fornecerá treinos, orientações e acompanhamento pelo aplicativo; o contratante se compromete a seguir as orientações e manter seus dados atualizados.\n\n" +
+          "E por estarem de acordo, as partes firmam o presente contrato.\n\n" +
+          "Data: {data_hoje}"
+      })
+    ];
+  }
+
   function normalizeSettings(settings) {
     return {
       trainerName: settings.trainerName || "Personal",
@@ -1159,7 +1195,10 @@
       contractEmailSignature: settings.contractEmailSignature || "Equipe Elite AS",
       contractTemplate:
         settings.contractTemplate ||
-        "CONTRATO DE PRESTAÇÃO DE SERVIÇOS\n\nAluno: {aluno}\nCPF: {cpf}\nTelefone: {telefone}\nE-mail: {email}\nPersonal: {personal}\nPlano: {plano}\nValor: {valor}\nInício: {data_inicio}\nFim: {data_fim}\nQuantidade de aulas: {quantidade_aulas}\n\nDeclaro estar ciente das condições de acompanhamento, treinos, comunicação e orientações definidas pelo personal.\n\nData de aceite: {data_assinatura}"
+        "CONTRATO DE PRESTAÇÃO DE SERVIÇOS\n\nAluno: {aluno}\nCPF: {cpf}\nTelefone: {telefone}\nE-mail: {email}\nPersonal: {personal}\nPlano: {plano}\nValor: {valor}\nInício: {data_inicio}\nFim: {data_fim}\nQuantidade de aulas: {quantidade_aulas}\n\nDeclaro estar ciente das condições de acompanhamento, treinos, comunicação e orientações definidas pelo personal.\n\nData de aceite: {data_assinatura}",
+      contractModels: Array.isArray(settings.contractModels)
+        ? settings.contractModels.map(normalizeContractModel)
+        : seedContractModels()
     };
   }
 
@@ -6951,6 +6990,14 @@
             <button class="primary-action" type="submit">Salvar configurações</button>
           </form>
         </section>
+        <section class="panel">
+          <div class="section-title"><h3>Modelos de contrato</h3><span class="small-text">Um modelo pré-pronto por serviço</span></div>
+          ${getContractModels().length
+            ? `<div class="contract-model-list">${getContractModels().map(renderContractModelCard).join("")}</div>`
+            : emptyState("Nenhum modelo cadastrado", "Crie um modelo por serviço (ex.: Consultoria online, Presencial, Avaliação) para gerar contratos automaticamente.", icons.contracts)}
+          <p class="small-text">Placeholders disponíveis: ${contractModelPlaceholdersLegend()}</p>
+          <button class="primary-action" type="button" data-open-contract-model>Novo modelo</button>
+        </section>
         <section class="panel demo-only">
           <div class="section-title"><h3>Sistema local</h3><span class="small-text">Ferramentas de teste</span></div>
           <div class="profile-grid">
@@ -6961,6 +7008,22 @@
           <button class="danger-action" type="button" data-clear-demo-data>Limpar dados demo</button>
         </section>
       </div>
+    `;
+  }
+
+  function renderContractModelCard(model) {
+    const excerpt = String(model.text || "").replace(/\s+/g, " ").trim().slice(0, 90);
+    return `
+      <article class="contract-model-card">
+        <div class="contract-model-info">
+          <strong>${escapeHtml(model.service)}</strong>
+          <span class="small-text">${escapeHtml(excerpt)}${model.text.length > 90 ? "…" : ""}</span>
+        </div>
+        <div class="contract-model-actions">
+          <button class="mini-button" type="button" data-open-contract-model="${escapeHtml(model.id)}">Editar</button>
+          <button class="mini-button" type="button" data-delete-contract-model="${escapeHtml(model.id)}">Excluir</button>
+        </div>
+      </article>
     `;
   }
 
@@ -10379,11 +10442,64 @@
       contractEmailSubject: String(data.get("contractEmailSubject") || "").trim(),
       contractEmailMessage: String(data.get("contractEmailMessage") || "").trim(),
       contractEmailSignature: String(data.get("contractEmailSignature") || "").trim(),
-      contractTemplate: String(data.get("contractTemplate") || "").trim()
+      contractTemplate: String(data.get("contractTemplate") || "").trim(),
+      contractModels: getContractModels()
     });
     persistData();
     renderApp();
     showToast("Configurações salvas.");
+  }
+
+  function getContractModels() {
+    return Array.isArray(state.data.settings.contractModels) ? state.data.settings.contractModels : [];
+  }
+
+  function contractModelPlaceholdersLegend() {
+    return CONTRACT_MODEL_PLACEHOLDERS.map((name) => `{${name}}`).join(", ");
+  }
+
+  function openContractModelForm(id = "") {
+    const model = getContractModels().find((item) => item.id === id);
+    openModal(model ? "Editar modelo de contrato" : "Novo modelo de contrato", `
+      <form class="form-grid" id="contractModelForm" data-id="${escapeHtml(model?.id || "")}">
+        <label class="field"><span>Nome do serviço</span><input name="service" type="text" value="${escapeHtml(model?.service || "")}" placeholder="Ex.: Consultoria online, Presencial, Avaliação" required /></label>
+        <label class="field"><span>Texto integral do contrato</span><textarea name="text" class="contract-model-textarea" required>${escapeHtml(model?.text || "")}</textarea></label>
+        <p class="small-text">Placeholders disponíveis (substituídos pelos dados reais ao gerar o contrato): ${contractModelPlaceholdersLegend()}</p>
+        <button class="primary-action" type="submit">${model ? "Salvar modelo" : "Criar modelo"}</button>
+      </form>
+    `);
+  }
+
+  function handleContractModelForm(form) {
+    const data = new FormData(form);
+    const service = String(data.get("service") || "").trim();
+    const text = String(data.get("text") || "").trim();
+    if (!service) return showToast("Informe o nome do serviço.");
+    if (!text) return showToast("Informe o texto integral do contrato.");
+    const models = getContractModels();
+    const existing = models.find((item) => item.id === form.dataset.id);
+    if (existing) {
+      existing.service = service;
+      existing.text = text;
+      existing.updatedAt = new Date().toISOString();
+    } else {
+      models.push(normalizeContractModel({ service, text }));
+      state.data.settings.contractModels = models;
+    }
+    persistData();
+    closeModal();
+    renderApp();
+    showToast(existing ? "Modelo atualizado." : "Modelo criado.");
+  }
+
+  function deleteContractModel(id) {
+    const model = getContractModels().find((item) => item.id === id);
+    if (!model) return;
+    if (!confirm(`Excluir o modelo "${model.service}"?`)) return;
+    state.data.settings.contractModels = getContractModels().filter((item) => item.id !== id);
+    persistData();
+    renderApp();
+    showToast("Modelo excluído.");
   }
 
   async function handleContractForm(form) {
@@ -11121,6 +11237,8 @@
         }
       }
       if (target.matches("[data-delete-student]")) deleteStudent(target.dataset.deleteStudent);
+      if (target.matches("[data-open-contract-model]")) openContractModelForm(target.dataset.openContractModel || "");
+      if (target.matches("[data-delete-contract-model]")) deleteContractModel(target.dataset.deleteContractModel);
       if (target.matches("[data-open-activity-form]")) openActivityForm(target.dataset.openActivityForm || "", target.dataset.prefillStudent || "");
       if (target.matches("[data-ns-save-and-send]")) {
         const form = document.getElementById("newStudentForm");
@@ -11177,6 +11295,7 @@
       if (form.id === "newStudentForm") await handleNewStudentForm(form, false);
       if (form.id === "studentForm") await handleStudentForm(form);
       if (form.id === "settingsForm") handleSettingsForm(form);
+      if (form.id === "contractModelForm") handleContractModelForm(form);
     });
     window.addEventListener("hashchange", () => {
       if (applyRouteFromHash()) renderManager();
