@@ -4148,6 +4148,12 @@
               <input name="email" type="email" inputmode="email" placeholder="aluno@exemplo.com" autocomplete="email" />
             </label>
 
+            <label class="field">
+              <span>CPF</span>
+              <input name="cpf" type="text" inputmode="numeric" placeholder="000.000.000-00" maxlength="14" autocomplete="off" data-cpf-mask />
+              <span data-cpf-error role="alert" hidden></span>
+            </label>
+
             <div class="ns-chip-label">Sexo</div>
             <div class="ns-chip-group" role="group" aria-label="Sexo">
               ${sexOptions.map(([value, label]) => `<label class="radio-chip"><input type="radio" name="sex" value="${value}" /><span>${label}</span></label>`).join("")}
@@ -7530,6 +7536,7 @@
             <label class="field"><span>Nome</span><input name="name" type="text" value="${escapeHtml(student.name)}" required /></label>
             <label class="field"><span>E-mail</span><input name="email" type="email" value="${escapeHtml(student.email)}" required /></label>
             <label class="field"><span>Telefone</span><input name="phone" type="tel" value="${escapeHtml(student.phone)}" /></label>
+            <label class="field"><span>CPF</span><input name="cpf" type="text" inputmode="numeric" placeholder="000.000.000-00" maxlength="14" autocomplete="off" data-cpf-mask value="${escapeHtml(student.cpf || "")}" /><span data-cpf-error role="alert" hidden></span></label>
             <label class="field"><span>Objetivo</span><input name="goal" type="text" value="${escapeHtml(student.goal || "Condicionamento")}" /></label>
             <label class="field"><span>Status</span><select name="status"><option value="active" ${student.status !== "inactive" ? "selected" : ""}>Ativo</option><option value="inactive" ${student.status === "inactive" ? "selected" : ""}>Inativo</option></select></label>
           </div>
@@ -10449,6 +10456,16 @@
     }
     if (!valid) return showToast("Preencha os campos obrigatorios: Nome e Telefone.");
 
+    const rawCpf = String(data.get("cpf") || "").trim();
+    const cpfInput = form.querySelector("[name='cpf']");
+    if (rawCpf && !isValidCpf(rawCpf)) {
+      cpfInput?.classList.add("ns-field-error");
+      if (cpfInput) { const e = cpfInput.closest("form")?.querySelector("[data-cpf-error]"); if (e) { e.textContent = "CPF inválido."; e.hidden = false; } }
+      cpfInput?.focus();
+      return showToast("CPF inválido. Confira os dígitos.");
+    }
+    cpfInput?.classList.remove("ns-field-error");
+
     const email = normalizeEmail(data.get("email"));
     if (email && email === ADMIN.email) return showToast("Use outro e-mail para o aluno.");
     if (email && state.data.students.some((s) => s.email === email)) return showToast("Ja existe aluno com esse e-mail.");
@@ -10466,6 +10483,7 @@
       passwordHash: "",
       hasPassword: false,
       phone,
+      cpf: rawCpf ? maskCpf(rawCpf) : "",
       goal,
       birthdate: String(data.get("birthdate") || ""),
       sex: String(data.get("sex") || ""),
@@ -10506,6 +10524,9 @@
     if (email === ADMIN.email) return showToast("Use outro e-mail para o aluno.");
     if (state.data.students.some((student) => student.email === email && student.id !== id)) return showToast("Já existe aluno com esse e-mail.");
 
+    const rawCpf = String(data.get("cpf") || "").trim();
+    if (rawCpf && !isValidCpf(rawCpf)) return showToast("CPF inválido. Confira os dígitos.");
+
     const isNew = !old;
     const oldHasPassword = Boolean(old?.passwordHash || old?.hasPassword);
     const oldAccessStatus = normalizeStudentAccessStatus(old?.accessStatus, oldHasPassword);
@@ -10517,6 +10538,7 @@
       passwordHash: old?.passwordHash || "",
       hasPassword: oldHasPassword,
       phone: String(data.get("phone") || "").trim(),
+      cpf: rawCpf ? maskCpf(rawCpf) : (old?.cpf || ""),
       goal: String(data.get("goal") || "").trim(),
       status: String(data.get("status") || "active"),
       accessStatus: oldHasPassword ? oldAccessStatus : "invite_pending",
@@ -11791,6 +11813,20 @@
         else if (v.length > 2) v = v.replace(/^(\d{2})(\d+)$/, "($1) $2");
         else if (v.length > 0) v = `(${v}`;
         target.value = v;
+      }
+      if (target.matches("[data-cpf-mask]")) {
+        target.value = maskCpf(target.value);
+        const errEl = target.closest("form")?.querySelector("[data-cpf-error]");
+        if (errEl) {
+          const isFull = cpfDigits(target.value).length === 11;
+          if (isFull && !isValidCpf(target.value)) {
+            errEl.textContent = "CPF inválido.";
+            errEl.hidden = false;
+          } else {
+            errEl.textContent = "";
+            errEl.hidden = true;
+          }
+        }
       }
     });
     document.addEventListener("change", (event) => {

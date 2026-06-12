@@ -2277,6 +2277,16 @@
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.18) !important;
 }
 
+[data-cpf-error] {
+  display: block;
+  color: var(--danger, #ef4444);
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+[data-cpf-error][hidden] {
+  display: none;
+}
+
 .ns-footer-spacer {
   height: 1rem;
 }
