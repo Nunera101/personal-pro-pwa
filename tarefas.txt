@@ -1,25 +1,43 @@
 ﻿==============================================
- FILA - WIDGETS DE ACOMPANHAMENTO DO ALUNO
- Calibrado pos-refinamento: o Inicio JA tem cards de Treinos na semana,
- Volume recente, Proxima atividade e Contrato. Aqui: enriquecer esses e
- adicionar os que faltam (bolinhas da semana, progresso de hoje, streak,
- peso, adesao). Tudo alimentado pelo historico de execucao que ja existe.
- Tema: dourado #F59E0B sobre fundo escuro #0D0D0D, cards #1A1A1A flat,
- borda rgba(255,255,255,0.06), radius 16px, txt2 #9CA3AF, verde #10B981.
- Texto sobre dourado SEMPRE escuro #1A1206. Sem glow. SEM seta no texto.
- Cada tarefa = UMA linha. "session limit"/erro de CLI = NAO rodou.
+ FILA - CORRECOES DO VIDEO + CONTRATO GERADO + WIDGETS
+ Tres blocos: (1) corrigir os erros da validacao em video de 11/06;
+ (2) NOVA LOGICA DE CONTRATO: o personal cadastra nas Configuracoes os
+ proprios dados e um modelo de contrato pre-pronto por servico; ao criar
+ um contrato ele so lanca as infos (aluno, plano, valor, vigencia) e o
+ app GERA o PDF integral preenchido, que o aluno ve no gate ja correto;
+ (3) widgets de acompanhamento no Inicio.
+ DECISOES JA TOMADAS (nao perguntar): gerar o PDF no cliente com jsPDF
+ via CDN (cdnjs, ja usado no projeto); salvar o PDF gerado pelo MESMO
+ service/caminho do pdfUrl atual, para o viewer do aluno e o aceite com
+ CPF continuarem funcionando sem mudanca; upload manual de PDF vira
+ opcao alternativa, nao o caminho principal.
+ Cada tarefa = UMA linha. NAO quebrar ao colar. SEM seta no texto.
+ Maximo ~8 por janela: rodar BACKUP + LEVA 1 + LEVA 2 numa janela,
+ validar, depois LEVA 3 + fechamento em outra.
+ "session limit" ou erro de CLI no resultado = NAO rodou.
+ Tokens: dourado #F59E0B, fundo #0D0D0D, card #1A1A1A flat sem glow,
+ borda rgba(255,255,255,0.06), radius 16px, txt2 #9CA3AF, ok #10B981,
+ erro #EF4444. Texto sobre dourado SEMPRE escuro #1A1206.
 ==============================================
 
 == BACKUP ==
-[ ] git checkout -b backup/widgets-aluno && git push origin backup/widgets-aluno && git checkout main. NAO altere arquivos. Confirme que o app abre sem erro de sintaxe. (sem commit adicional)
+[OK] git checkout -b backup/video-contrato-widgets && git push origin backup/video-contrato-widgets && git checkout main. NAO altere arquivos. Confirme que o app abre sem erro de sintaxe. (sem commit adicional)
+     Resultado: Tudo conclu├¡do. Resumo: | - **Branch de backup criada e enviada:** `backup/video-contrato-widgets` foi criada a partir do estado atual e publicada no remoto (`origin`). O GitHub confirmou o novo branch. | - **De volta...
 
-== WIDGETS ==
-[ ] Enriquecer o card TREINOS NA SEMANA do Inicio do aluno com as bolinhas dos dias: ao lado do numero X/Y, uma linha com 7 bolinhas (S T Q Q S S D); dia com treino concluido = bolinha dourada preenchida com check escuro; dia pendente = contorno cinza; dia sem treino programado = contorno apagado. Calcular a partir do historico de conclusao e dos treinos programados na agenda da semana. git add . && git commit -m "feat(widgets): bolinhas da semana no card de treinos" && git push origin main
-[ ] Widget PROGRESSO DO TREINO DE HOJE no Inicio: quando houver treino do dia, card com nome do treino, X de Y series concluidas e barra de progresso dourada com porcentagem; atualiza conforme o aluno marca series na execucao; some quando nao ha treino hoje ou quando ja concluiu (nesse caso o card de hoje mostra Concluido com check verde). git add . && git commit -m "feat(widgets): progresso do treino de hoje no Inicio" && git push origin main
-[ ] Widget SEQUENCIA (streak) no Inicio: card com numero grande dourado de dias seguidos treinando + rotulo "dias seguidos" + icone de chama; calcular do historico (dias consecutivos com ao menos 1 treino concluido, contando ate ontem ou hoje se ja treinou); se a sequencia for 0, mostrar frase motivacional curta tipo "Comece hoje sua sequencia" em vez de 0. git add . && git commit -m "feat(widgets): sequencia de dias treinando" && git push origin main
-[ ] Widget PESO CORPORAL no Inicio: card com o peso mais recente em numero grande, a variacao no mes colorida (queda em verde #10B981 com seta para baixo, aumento em vermelho #EF4444 com seta para cima, estavel em cinza) e um mini grafico de linha da evolucao (SVG inline no padrao rpt- ja usado no Progresso). Usar os pesos enviados nas atualizacoes. Estado vazio "Envie seu peso no Progresso para acompanhar". git add . && git commit -m "feat(widgets): peso corporal com variacao e mini grafico" && git push origin main
-[ ] Widget ADESAO DO MES no Inicio: card com anel de progresso dourado (SVG) mostrando a porcentagem de treinos do plano concluidos no mes + texto "X de Y treinos do mes"; mesmo calculo de adesao que o gestor ve; texto central escuro se sobre dourado. Estado vazio coerente quando nao ha treinos programados no mes. git add . && git commit -m "feat(widgets): anel de adesao do mes" && git push origin main
-[ ] Enriquecer o card PROXIMA ATIVIDADE do Inicio: faixa lateral colorida por tipo (Treino=verde, Avaliacao=#8B5CF6, Atualizacao=#3B82F6, Retorno=#F97316, Contrato=dourado) + nome, dia e hora + botao pequeno "Abrir" que leva ao treino (se for treino) ou a agenda. Estado vazio "Nenhuma atividade agendada". git add . && git commit -m "feat(widgets): proxima atividade com tipo colorido e atalho" && git push origin main
+== LEVA 1 - CORRECOES DA VALIDACAO EM VIDEO ==
+[ ] SESSAO FANTASMA + INICIO SEMPRE DASHBOARD: existe uma sessao de treino ativa antiga (0/10 series, 0 kg) que nunca foi concluida e causa dois problemas - sequestra a tela Inicio mostrando a execucao com exercicios crus, e as rows dela sao copia congelada de antes do fix do snapshot (por isso "Exercicio indisponivel" ainda aparece). Corrigir: (1) o Inicio NUNCA renderiza a execucao completa; com sessao ativa, mostra o dashboard normal mais um banner compacto dourado "Treino em andamento, X de Y series" com botoes Retomar e Descartar; Retomar abre a execucao DENTRO da aba Treinos, Descartar encerra sem registrar; (2) a execucao vive na aba Treinos, nunca na home; (3) ao carregar sessao ativa cujas rows nao tem exerciseName, fazer backfill na hora a partir da biblioteca, nunca exibir "Exercicio indisponivel"; (4) sessoes orfas (sem treino correspondente ou paradas ha mais de 24h) sao descartadas automaticamente no carregamento. Testar com a sessao fantasma atual. git add . && git commit -m "fix(aluno): inicio sempre dashboard, sessao ativa como banner com backfill" && git push origin main
+[ ] BARRA INFERIOR QUEBRADA EM DUAS LINHAS: os 6 itens (Inicio, Treinos, Dieta, Agenda, Progresso, Mais) nao couberam e o Mais caiu sozinho embaixo. Corrigir o #studentBottomNav para UMA unica linha horizontal: grid de 6 colunas iguais (verificar se algum CSS antigo de 5 colunas esta sobrescrevendo), reduzir padding e fonte dos labels se preciso para caber em 390px e 360px, icone em cima e label embaixo, sem quebra. git add . && git commit -m "fix(aluno): barra inferior com 6 itens em uma linha" && git push origin main
+[ ] HEADER DO ALUNO AINDA EM ANDARES: hamburguer numa linha, logo e badge noutra, chat e avatar numa terceira. Refazer o layout (index.html e CSS) para UMA UNICA linha horizontal igual ao gestor: hamburguer, logo AS com nome Elite AS e badge ALUNO, espaco flexivel, icone de chat, sino, avatar - tudo centralizado verticalmente na mesma linha, sem espaco morto acima nem elemento orfao abaixo, mesma altura do header do gestor. git add . && git commit -m "fix(aluno): header em uma unica linha igual ao gestor" && git push origin main
 
-== FECHAMENTO ==
-[ ] Revisao dos widgets: ordenar o Inicio como - saudacao, Progresso do treino de hoje (ou card do treino), grade de metricas (Treinos na semana com bolinhas, Volume recente, Proxima atividade, Contrato), depois Streak + Peso + Adesao; confirmar tema escuro/dourado em todos (nada branco sobre dourado), estados vazios elegantes, atualizacao em tempo real ao concluir series/treinos, nenhum texto cortado, sem glow. git add . && git commit -m "chore(widgets): ordenacao e revisao final do Inicio" && git push origin main
+== LEVA 2 - CONTRATO GERADO POR MODELO (nova logica) ==
+[ ] CONFIGURACOES DO GESTOR - DADOS DO PROFISSIONAL: criar na tela de Configuracoes do gestor uma secao "Dados do profissional" com campos: nome completo ou razao social, CPF ou CNPJ, telefone, e-mail, endereco (opcional), e CREF (opcional). Salvar no estado e persistir como as demais configuracoes. Esses dados alimentam os contratos gerados. git add . && git commit -m "feat(config): secao dados do profissional" && git push origin main
+[ ] CONFIGURACOES DO GESTOR - MODELOS DE CONTRATO POR SERVICO: criar na tela de Configuracoes a secao "Modelos de contrato" onde o gestor cadastra um modelo pre-pronto por servico (ex Consultoria online, Presencial, Avaliacao): cada modelo tem nome do servico e o texto integral do contrato com placeholders entre chaves: nome_aluno, cpf_aluno, telefone_aluno, email_aluno, plano, valor, data_inicio, data_fim, nome_personal, cpf_cnpj_personal, telefone_personal, email_personal, data_hoje. Tela com lista de modelos, criar, editar e excluir, num sheet com textarea grande e uma legenda mostrando os placeholders disponiveis. Incluir um modelo de exemplo no seed. git add . && git commit -m "feat(config): modelos de contrato por servico com placeholders" && git push origin main
+[ ] NOVO CONTRATO GERA PDF AUTOMATICAMENTE: refazer o fluxo Novo contrato do gestor: ele seleciona o aluno, escolhe o MODELO do servico (cadastrado nas Configuracoes), e preenche apenas plano, valor e vigencia; o app entao substitui TODOS os placeholders do modelo pelos dados reais (aluno do cadastro, profissional das Configuracoes, valores digitados) e GERA o PDF do contrato no proprio app usando jsPDF via cdnjs (texto formatado, titulo, paragrafos com quebra correta, dados completos, rodape com versao e data); o PDF gerado e salvo pelo MESMO caminho do pdfUrl atual (mesmo service usado no upload manual), de modo que viewer, gate e aceite com CPF continuem funcionando sem mudanca; mostrar PRE VISUALIZACAO do PDF gerado para o gestor antes de enviar para assinatura; manter o upload manual de PDF como opcao alternativa secundaria ("ou anexe um PDF pronto"); placeholder sem dado correspondente nao aparece no documento (sem chaves vazias). git add . && git commit -m "feat(contratos): geracao automatica de PDF a partir de modelo e dados" && git push origin main
+[ ] GATE DO ALUNO COM O PDF GERADO: confirmar que o aluno, no gate de primeiro acesso e na tela de contrato, ve o PDF GERADO integral com todas as infos corretas ja preenchidas (nome, CPF, plano, valor, vigencia, dados do profissional), rolavel, com Baixar; o resumo do plano acima do PDF usa os mesmos dados; o aceite com conferencia de CPF segue identico. Testar o fluxo completo: gestor cria contrato a partir de modelo, aluno abre o gate, le o PDF preenchido e assina com CPF. git add . && git commit -m "feat(aluno): gate exibe o PDF gerado com dados completos" && git push origin main
+
+  >>> VALIDAR COM VIDEO: Inicio como dashboard com banner de treino, barra
+      em 1 linha, header em 1 linha, gestor gerando contrato do modelo,
+      aluno vendo o PDF preenchido e assinando com CPF. <
+
+== LEVA 3 - WIDGETS DE ACOMPANHAMENTO NO INICIO ==
+[ ] Enriquecer o card TREINOS NA SEMANA do Inicio com as bolinhas dos dias: ao lado do numero X de Y, uma linha com 7 bolinhas (S T Q Q S S D); dia com treino concluido = bolinha dourada preenchida com check escuro; dia pendente = contorno cinza; dia sem treino programado = contorno apagado. Calcular do hi

@@ -902,6 +902,7 @@
     state.data.diets.forEach(ensureDietReviewActivity);
     persistData();
     state.activeSession = readActiveSession();
+    persistActiveSession();
   }
 
   function normalizeExercise(exercise) {
@@ -1232,14 +1233,39 @@
     scheduleRemoteSync();
   }
 
+  // Sessao ativa nao sobrevive a mais que isso: depois desse prazo é fantasma e é descartada.
+  const ACTIVE_SESSION_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+
   function readActiveSession() {
     try {
       const session = JSON.parse(localStorage.getItem(keys.activeSession) || "null");
-      if (!session || !session.workoutId) return null;
-      return session;
+      if (!session || !session.workoutId || !Array.isArray(session.exercises) || !session.exercises.length) return null;
+      const startedAt = new Date(session.startedAt || "").getTime();
+      if (!Number.isFinite(startedAt) || Date.now() - startedAt > ACTIVE_SESSION_MAX_AGE_MS) return null;
+      if (!getWorkout(session.workoutId)) return null;
+      return rehydrateActiveSession(session);
     } catch (error) {
       return null;
     }
+  }
+
+  // Sessoes persistidas antes do fix do snapshot guardam rows congeladas sem
+  // exerciseName/exerciseMuscle; reidrata nomes a partir do treino atual e da biblioteca.
+  function rehydrateActiveSession(session) {
+    const workout = getWorkout(session.workoutId);
+    session.exercises = session.exercises.filter((row) => row && Array.isArray(row.sets) && row.sets.length);
+    if (!session.exercises.length) return null;
+    session.exercises.forEach((row) => {
+      const source = workout?.exercises?.find((item) => item.id === row.workoutExerciseId)
+        || workout?.exercises?.find((item) => item.exerciseId === row.exerciseId);
+      if (source) {
+        if (!row.exerciseName) row.exerciseName = source.exerciseName || "";
+        if (!row.exerciseMuscle) row.exerciseMuscle = source.exerciseMuscle || "";
+      }
+      if (!row.exerciseName && row.name && row.name !== "Exercício") row.exerciseName = row.name;
+      row.name = resolveWorkoutExerciseName(row);
+    });
+    return session;
   }
 
   function persistActiveSession() {
@@ -5191,7 +5217,8 @@
   }
 
   function renderStudentToday() {
-    if (state.activeSession) return renderWorkoutExecution();
+    // Inicio é sempre o dashboard; treino em andamento vive na aba Treinos
+    // e aparece aqui apenas como banner de retomada.
     const student = getCurrentStudent();
     if (!student) return `<div class="content-stack">${emptyState("Sem dados do aluno", "Recarregue o aplicativo para continuar.", icons.home)}</div>`;
 
@@ -5221,6 +5248,23 @@
         </div>`
       : emptyState("Sem treino agendado para hoje", "Veja seus treinos publicados na aba Treinos.", icons.workouts);
 
+    let activeSessionBanner = "";
+    if (state.activeSession && state.activeSession.studentId === student.id) {
+      const sessionSets = state.activeSession.exercises.flatMap((exercise) => exercise.sets);
+      const sessionDone = sessionSets.filter((set) => set.status === "done").length;
+      activeSessionBanner = `
+        <section class="active-session-banner" aria-label="Treino em andamento">
+          <div class="active-session-info">
+            <strong>Treino em andamento</strong>
+            <span>${escapeHtml(getWorkout(state.activeSession.workoutId)?.title || "Treino")} · ${sessionDone} de ${sessionSets.length} séries</span>
+          </div>
+          <div class="active-session-actions">
+            <button class="asb-resume" type="button" data-student-nav="workouts">Retomar</button>
+            <button class="asb-discard" type="button" data-cancel-active-session>Descartar</button>
+          </div>
+        </section>`;
+    }
+
     return `
       <div class="content-stack dashboard-home">
         <section class="dashboard-hero">
@@ -5229,6 +5273,8 @@
             <p>${escapeHtml(nextActivityLine)}</p>
           </div>
         </section>
+
+        ${activeSessionBanner}
 
         <div class="metrics-row metrics-row--2" aria-label="Resumo do aluno">
           ${dashboardMetricCard({ label: "Treinos na semana", value: weekCount, subtext: weekCount ? `${weekCount} concluído(s)` : "Nenhum ainda", icon: icons.today, tone: weekCount ? "success" : "" })}
@@ -10514,6 +10560,16 @@
     const workout = getWorkout(workoutId);
     if (!student || !workout || workout.studentId !== student.id || workout.status !== "published") {
       return showToast("Treino indisponível para este aluno.");
+    }
+    if (state.activeSession) {
+      if (state.activeSession.workoutId === workoutId) {
+        state.studentMenu = "workouts";
+        state.studentWorkoutDetailId = "";
+        renderStudent();
+        return;
+      }
+      if (!confirm("Você tem um treino em andamento. Descartar e iniciar este?")) return;
+      stopRest();
     }
     state.activeSession = {
       id: createId("session-draft"),
