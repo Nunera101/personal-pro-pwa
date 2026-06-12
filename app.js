@@ -5424,43 +5424,6 @@
         </section>`
       : "";
 
-    // Adesão do mês — mesmo cálculo do gestor: concluídos / programados, teto de 100%.
-    const monthStartISO = `${todayISO().slice(0, 7)}-01`;
-    const monthEndISO = addDays(addMonths(monthStartISO, 1), -1);
-    const monthPlanned = state.data.activities.filter(
-      (item) => item.type === "workout" && item.studentId === student.id && item.date >= monthStartISO && item.date <= monthEndISO
-    ).length;
-    const monthCompleted = state.data.sessions.filter((session) => {
-      const day = String(session.finishedAt || "").slice(0, 10);
-      return session.studentId === student.id && day >= monthStartISO && day <= monthEndISO;
-    }).length;
-    const monthAdherence = monthPlanned
-      ? Math.min(100, Math.round((monthCompleted / monthPlanned) * 100))
-      : monthCompleted ? 100 : 0;
-    const ringRadius = 52;
-    const ringCirc = 2 * Math.PI * ringRadius;
-    const ringOffset = ringCirc * (1 - monthAdherence / 100);
-    const adesaoCard = `
-      <section class="panel adesao-widget" aria-label="Adesão do mês">
-        <div class="section-title"><h3>Adesão do mês</h3></div>
-        ${monthPlanned || monthCompleted
-          ? `<div class="adesao-body">
-              <div class="adesao-ring" role="img" aria-label="Adesão do mês: ${monthAdherence}%">
-                <svg viewBox="0 0 120 120" aria-hidden="true">
-                  <circle class="adesao-ring-track" cx="60" cy="60" r="${ringRadius}" />
-                  <circle class="adesao-ring-fill" cx="60" cy="60" r="${ringRadius}" stroke-dasharray="${ringCirc.toFixed(1)}" stroke-dashoffset="${ringOffset.toFixed(1)}" />
-                </svg>
-                <strong class="adesao-ring-value">${monthAdherence}%</strong>
-              </div>
-              <div class="adesao-info">
-                ${monthPlanned
-                  ? `<strong>${monthCompleted} de ${monthPlanned}</strong><span>treino(s) do mês concluído(s)</span>`
-                  : `<strong>${monthCompleted}</strong><span>treino(s) concluído(s) este mês</span>`}
-              </div>
-            </div>`
-          : emptyState("Sem treinos programados neste mês", "Quando seu personal agendar treinos, sua adesão aparecerá aqui.", icons.workouts)}
-      </section>`;
-
     const streakDays = getTrainingStreak(student.id);
     const streakCard = `
       <section class="panel streak-card${streakDays ? " is-lit" : ""}" aria-label="Sequência de dias treinando">
@@ -5552,8 +5515,6 @@
         ${streakCard}
 
         ${weightCard}
-
-        ${adesaoCard}
 
         <section class="panel">
           <div class="section-title"><h3>Treino de hoje</h3></div>
