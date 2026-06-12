@@ -14469,6 +14469,9 @@ body.is-manager-view {
 
 .library-exercise-actions .secondary-action,
 .library-exercise-actions .primary-action {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   min-height: 2.32rem !important;
   padding: 0.5rem 0.54rem !important;
   border-radius: 0.64rem !important;
@@ -14491,6 +14494,7 @@ body.is-manager-view {
 }
 
 .library-exercise-actions svg {
+  flex-shrink: 0 !important;
   width: 0.9rem !important;
   height: 0.9rem !important;
 }
