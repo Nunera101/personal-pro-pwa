@@ -1143,6 +1143,12 @@
       trainerName: settings.trainerName || "Personal",
       trainerPhone: settings.trainerPhone || "",
       contactEmail: settings.contactEmail || "",
+      professionalName: settings.professionalName || "",
+      professionalDocument: settings.professionalDocument || "",
+      professionalPhone: settings.professionalPhone || "",
+      professionalEmail: settings.professionalEmail || "",
+      professionalAddress: settings.professionalAddress || "",
+      professionalCref: settings.professionalCref || "",
       whatsappTemplate:
         settings.whatsappTemplate ||
         "Olá, {aluno}! Passando para lembrar da atividade {atividade}, marcada para {data} às {hora}.",
@@ -6926,6 +6932,15 @@
             <label class="field"><span>Mensagem padrão</span><textarea name="whatsappTemplate" required>${escapeHtml(state.data.settings.whatsappTemplate)}</textarea></label>
             <p class="small-text">Você pode usar: {aluno}, {data}, {hora}, {atividade}, {personal}, {dia_semana}</p>
             <div class="preview-box"><strong>Prévia</strong><span>${escapeHtml(preview)}</span></div>
+            <div class="section-title"><h3>Dados do profissional</h3><span class="small-text">Usados nos contratos gerados</span></div>
+            <div class="form-grid two">
+              <label class="field"><span>Nome completo ou razão social</span><input name="professionalName" type="text" value="${escapeHtml(state.data.settings.professionalName)}" /></label>
+              <label class="field"><span>CPF ou CNPJ</span><input name="professionalDocument" type="text" inputmode="numeric" value="${escapeHtml(state.data.settings.professionalDocument)}" /></label>
+              <label class="field"><span>Telefone</span><input name="professionalPhone" type="tel" value="${escapeHtml(state.data.settings.professionalPhone)}" /></label>
+              <label class="field"><span>E-mail</span><input name="professionalEmail" type="email" value="${escapeHtml(state.data.settings.professionalEmail)}" /></label>
+              <label class="field"><span>Endereço (opcional)</span><input name="professionalAddress" type="text" value="${escapeHtml(state.data.settings.professionalAddress)}" /></label>
+              <label class="field"><span>CREF (opcional)</span><input name="professionalCref" type="text" value="${escapeHtml(state.data.settings.professionalCref)}" /></label>
+            </div>
             <div class="section-title"><h3>Contrato e e-mail</h3><span class="small-text">Modelo usado no aceite interno</span></div>
             <label class="field"><span>Assunto do e-mail de contrato</span><input name="contractEmailSubject" type="text" value="${escapeHtml(state.data.settings.contractEmailSubject)}" required /></label>
             <label class="field"><span>Mensagem do e-mail de contrato</span><textarea name="contractEmailMessage" required>${escapeHtml(state.data.settings.contractEmailMessage)}</textarea></label>
@@ -10354,6 +10369,12 @@
       trainerName: String(data.get("trainerName") || "").trim(),
       trainerPhone: String(data.get("trainerPhone") || "").trim(),
       contactEmail: String(data.get("contactEmail") || "").trim(),
+      professionalName: String(data.get("professionalName") || "").trim(),
+      professionalDocument: String(data.get("professionalDocument") || "").trim(),
+      professionalPhone: String(data.get("professionalPhone") || "").trim(),
+      professionalEmail: String(data.get("professionalEmail") || "").trim(),
+      professionalAddress: String(data.get("professionalAddress") || "").trim(),
+      professionalCref: String(data.get("professionalCref") || "").trim(),
       whatsappTemplate: String(data.get("whatsappTemplate") || "").trim(),
       contractEmailSubject: String(data.get("contractEmailSubject") || "").trim(),
       contractEmailMessage: String(data.get("contractEmailMessage") || "").trim(),
