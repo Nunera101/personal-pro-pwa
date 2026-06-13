@@ -2010,7 +2010,7 @@
       return `<div class="exec-video-placeholder" aria-hidden="true"><svg class="exec-video-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m10 9 6 3-6 3V9Z"/></svg></div>`;
     }
     if (exercise.videoStorage === "indexeddb" && exercise.videoKey) {
-      return `<div class="exec-video-wrap exec-video-local"><button class="exec-video-open-btn" type="button" data-open-exercise-video="${escapeHtml(exercise.id)}" aria-label="Assistir vídeo do exercício"><svg class="exec-video-play-circle" viewBox="0 0 48 48" fill="none" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="rgba(231,168,62,0.15)" stroke="rgba(231,168,62,0.6)" stroke-width="1.5"/><path d="M20 16.5 34 24 20 31.5Z" fill="rgba(231,168,62,0.85)"/></svg><span class="small-text">Assistir vídeo</span></button></div>`;
+      return `<div class="exec-video-wrap exec-video-local"><button class="exec-video-open-btn" type="button" data-open-exercise-video="${escapeHtml(exercise.id)}" aria-label="Assistir vídeo do exercício"><svg class="exec-video-play-circle" viewBox="0 0 48 48" fill="none" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="rgb(from var(--brand-strong) r g b / 0.15)" stroke="rgb(from var(--brand-strong) r g b / 0.60)" stroke-width="1.5"/><path d="M20 16.5 34 24 20 31.5Z" fill="rgb(from var(--brand-strong) r g b / 0.85)"/></svg><span class="small-text">Assistir vídeo</span></button></div>`;
     }
     if (exercise.videoStorage === "external" && exercise.videoUrl && /youtube\.com|youtu\.be/.test(exercise.videoUrl)) {
       const match = exercise.videoUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]+)/);
@@ -6183,7 +6183,7 @@
       reassessment: "var(--aval, #8B5CF6)",
       update: "var(--atualiza, #3B82F6)",
       return: "var(--retorno, #F97316)",
-      contract: "var(--dourado, #F59E0B)",
+      contract: "var(--dourado)",
       other: "#6B7280"
     }[type] || "#6B7280";
   }
