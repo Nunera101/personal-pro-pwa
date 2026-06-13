@@ -55,7 +55,7 @@
   width: 5.2rem;
   height: 5.2rem;
   border-radius: 999px;
-  background: rgba(245, 181, 27, 0.055);
+  background: rgb(from var(--brand-soft) r g b / 0.055);
   pointer-events: none;
 }
 
@@ -144,8 +144,8 @@
 }
 
 .update-filter:focus-within {
-  border-color: rgba(245, 181, 27, 0.64);
-  background: rgba(245, 181, 27, 0.07);
+  border-color: rgb(from var(--brand-soft) r g b / 0.64);
+  background: rgb(from var(--brand-soft) r g b / 0.07);
 }
 
 .update-filter-icon {
@@ -185,7 +185,7 @@
 .update-filter select:focus-visible,
 .update-filter input:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(245, 181, 27, 0.5);
+  box-shadow: 0 0 0 2px rgb(from var(--brand-soft) r g b / 0.5);
   border-radius: 3px;
 }
 
@@ -219,7 +219,7 @@
 }
 
 .update-card.is-pending {
-  border-color: rgba(245, 181, 27, 0.24);
+  border-color: rgb(from var(--brand-soft) r g b / 0.24);
 }
 
 .update-card.is-late {
@@ -236,7 +236,7 @@
 .update-card-head .entity-avatar {
   width: 4rem;
   height: 4rem;
-  border-color: rgba(245, 181, 27, 0.32);
+  border-color: rgb(from var(--brand-soft) r g b / 0.32);
 }
 
 .update-title-block {
@@ -425,9 +425,9 @@
   gap: 0.45rem;
   min-height: 2.86rem;
   width: 100%;
-  border: 1px solid rgba(245, 181, 27, 0.55);
+  border: 1px solid rgb(from var(--brand-soft) r g b / 0.55);
   border-radius: 0.78rem;
-  background: rgba(245, 181, 27, 0.055);
+  background: rgb(from var(--brand-soft) r g b / 0.055);
   color: var(--brand-strong);
   font-weight: 850;
 }
@@ -1032,8 +1032,8 @@
 }
 
 .evaluate-back-btn:hover {
-  border-color: rgba(245, 181, 27, 0.44);
-  background: rgba(245, 181, 27, 0.06);
+  border-color: rgb(from var(--brand-soft) r g b / 0.44);
+  background: rgb(from var(--brand-soft) r g b / 0.06);
   color: var(--ink);
 }
 
@@ -1062,7 +1062,7 @@
 .evaluate-student-card .entity-avatar {
   width: 4.2rem;
   height: 4.2rem;
-  border-color: rgba(245, 181, 27, 0.36);
+  border-color: rgb(from var(--brand-soft) r g b / 0.36);
 }
 
 .evaluate-student-info {
@@ -1303,8 +1303,8 @@
 }
 
 .evaluate-chip:hover {
-  border-color: rgba(245, 181, 27, 0.44);
-  background: rgba(245, 181, 27, 0.07);
+  border-color: rgb(from var(--brand-soft) r g b / 0.44);
+  background: rgb(from var(--brand-soft) r g b / 0.07);
   color: var(--ink);
 }
 
@@ -1348,7 +1348,7 @@
 
 .evaluate-star:hover,
 .evaluate-star.is-active {
-  color: #F59E0B;
+  color: var(--brand);
   transform: scale(1.12);
 }
 
@@ -1382,8 +1382,8 @@
 }
 
 .evaluate-quick-btn:hover {
-  border-color: rgba(245, 181, 27, 0.44);
-  background: rgba(245, 181, 27, 0.06);
+  border-color: rgb(from var(--brand-soft) r g b / 0.44);
+  background: rgb(from var(--brand-soft) r g b / 0.06);
   color: var(--brand-strong);
 }
 

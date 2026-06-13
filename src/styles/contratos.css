@@ -191,8 +191,8 @@
 }
 
 .contract-filter:focus-within {
-  border-color: rgba(245, 181, 27, 0.64);
-  background: rgba(245, 181, 27, 0.07);
+  border-color: rgb(from var(--brand-soft) r g b / 0.64);
+  background: rgb(from var(--brand-soft) r g b / 0.07);
 }
 
 .contract-filter-icon {
@@ -230,7 +230,7 @@
 
 .contract-filter select:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(245, 181, 27, 0.5);
+  box-shadow: 0 0 0 2px rgb(from var(--brand-soft) r g b / 0.5);
   border-radius: 3px;
 }
 
@@ -258,7 +258,7 @@
 
 .contract-card.is-pending,
 .contract-card.is-upcoming {
-  border-color: rgba(245, 181, 27, 0.24);
+  border-color: rgb(from var(--brand-soft) r g b / 0.24);
 }
 
 .contract-card.is-expired,
@@ -277,7 +277,7 @@
 .contract-card-main .entity-avatar {
   width: 3.9rem;
   height: 3.9rem;
-  border-color: rgba(245, 181, 27, 0.32);
+  border-color: rgb(from var(--brand-soft) r g b / 0.32);
 }
 
 .contract-student-info,
@@ -372,8 +372,8 @@
 }
 
 .contract-action-btn.is-brand {
-  border-color: rgba(245, 181, 27, 0.5);
-  background: rgba(245, 181, 27, 0.065);
+  border-color: rgb(from var(--brand-soft) r g b / 0.5);
+  background: rgb(from var(--brand-soft) r g b / 0.065);
   color: var(--brand-strong);
 }
 
@@ -392,16 +392,16 @@
   width: 100%;
   min-height: 5.4rem;
   padding: 0.86rem 1rem;
-  border: 1px dashed rgba(245, 181, 27, 0.55);
+  border: 1px dashed rgb(from var(--brand-soft) r g b / 0.55);
   border-radius: 0.92rem;
-  background: rgba(245, 181, 27, 0.035);
+  background: rgb(from var(--brand-soft) r g b / 0.035);
   color: var(--brand-strong);
   text-align: left;
 }
 
 .new-contract-card:hover {
-  border-color: rgba(245, 181, 27, 0.82);
-  background: rgba(245, 181, 27, 0.075);
+  border-color: rgb(from var(--brand-soft) r g b / 0.82);
+  background: rgb(from var(--brand-soft) r g b / 0.075);
 }
 
 .new-contract-icon {
@@ -409,7 +409,7 @@
   width: 3rem;
   height: 3rem;
   place-items: center;
-  border: 1px solid rgba(245, 181, 27, 0.72);
+  border: 1px solid rgb(from var(--brand-soft) r g b / 0.72);
   border-radius: 999px;
   color: var(--brand-strong);
 }
@@ -626,7 +626,7 @@
 
 .cfs-student-search:focus-visible {
   border-color: rgba(245, 158, 11, 0.5);
-  box-shadow: 0 0 0 3px rgba(245, 181, 27, 0.3);
+  box-shadow: 0 0 0 3px rgb(from var(--brand-soft) r g b / 0.3);
 }
 
 .cfs-student-results {
@@ -851,9 +851,9 @@
   gap: 0.5rem;
   min-height: 9rem;
   padding: 1.5rem;
-  border: 2px dashed rgba(245, 181, 27, 0.38);
+  border: 2px dashed rgb(from var(--brand-soft) r g b / 0.38);
   border-radius: 0.88rem;
-  background: rgba(245, 181, 27, 0.025);
+  background: rgb(from var(--brand-soft) r g b / 0.025);
   cursor: pointer;
   text-align: center;
   transition: border-color 150ms ease, background 150ms ease;
@@ -869,8 +869,8 @@
 
 .contract-pdf-dropzone:hover,
 .contract-pdf-dropzone.is-dragging {
-  border-color: rgba(245, 181, 27, 0.75);
-  background: rgba(245, 181, 27, 0.055);
+  border-color: rgb(from var(--brand-soft) r g b / 0.75);
+  background: rgb(from var(--brand-soft) r g b / 0.055);
 }
 
 .contract-pdf-dropzone.is-uploading {
@@ -972,7 +972,7 @@
 .cfs-generate-btn {
   width: 100%;
   justify-content: center;
-  border-color: rgba(245, 181, 27, 0.45);
+  border-color: rgb(from var(--brand-soft) r g b / 0.45);
   color: var(--brand-strong);
 }
 
@@ -1022,9 +1022,9 @@
   justify-content: center;
   gap: 0.5rem;
   padding: 2.2rem 1.2rem;
-  border: 1px solid rgba(245, 181, 27, 0.3);
+  border: 1px solid rgb(from var(--brand-soft) r g b / 0.3);
   border-radius: 0.75rem;
-  background: rgba(245, 181, 27, 0.05);
+  background: rgb(from var(--brand-soft) r g b / 0.05);
   text-align: center;
   text-decoration: none;
   transition: background 150ms ease, border-color 150ms ease;
@@ -1032,8 +1032,8 @@
 }
 
 .contract-pdf-ios-card:active {
-  background: rgba(245, 181, 27, 0.11);
-  border-color: rgba(245, 181, 27, 0.55);
+  background: rgb(from var(--brand-soft) r g b / 0.11);
+  border-color: rgb(from var(--brand-soft) r g b / 0.55);
 }
 
 .contract-pdf-ios-card svg {
@@ -1077,19 +1077,19 @@
 }
 
 .contract-pdf-open-btn:hover {
-  border-color: rgba(245, 181, 27, 0.5);
+  border-color: rgb(from var(--brand-soft) r g b / 0.5);
   color: var(--brand-strong);
 }
 
 .contract-pdf-open-btn.is-download {
-  border-color: rgba(245, 181, 27, 0.4);
-  background: rgba(245, 181, 27, 0.06);
+  border-color: rgb(from var(--brand-soft) r g b / 0.4);
+  background: rgb(from var(--brand-soft) r g b / 0.06);
   color: var(--brand-strong);
 }
 
 .contract-pdf-open-btn.is-download:hover {
-  border-color: rgba(245, 181, 27, 0.75);
-  background: rgba(245, 181, 27, 0.1);
+  border-color: rgb(from var(--brand-soft) r g b / 0.75);
+  background: var(--brand-soft);
 }
 
 .contract-pdf-open-btn svg {
@@ -1118,22 +1118,22 @@
   gap: 0.7rem;
   cursor: pointer;
   padding: 0.7rem 0.9rem;
-  border: 1px solid rgba(245, 181, 27, 0.28);
+  border: 1px solid rgb(from var(--brand-soft) r g b / 0.28);
   border-radius: 0.65rem;
-  background: rgba(245, 181, 27, 0.04);
+  background: rgb(from var(--brand-soft) r g b / 0.04);
   transition: border-color 120ms ease, background 120ms ease;
 }
 
 .contract-consent-check-row:hover {
-  border-color: rgba(245, 181, 27, 0.55);
-  background: rgba(245, 181, 27, 0.08);
+  border-color: rgb(from var(--brand-soft) r g b / 0.55);
+  background: rgb(from var(--brand-soft) r g b / 0.08);
 }
 
 .contract-consent-check-row input[type="checkbox"] {
   flex-shrink: 0;
   width: 1.1rem;
   height: 1.1rem;
-  accent-color: var(--brand-strong, #f5b51b);
+  accent-color: var(--brand-strong);
   cursor: pointer;
 }
 

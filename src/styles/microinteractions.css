@@ -68,7 +68,7 @@
   padding: 2rem 1.75rem 1.6rem;
   border-radius: 1.4rem;
   background: linear-gradient(145deg, rgba(255, 255, 255, 0.072), rgba(255, 255, 255, 0.028));
-  border: 1px solid rgba(245, 181, 27, 0.24);
+  border: 1px solid rgb(from var(--brand-soft) r g b / 0.24);
   box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.55);
   text-align: center;
   animation: wc-card-in 0.38s cubic-bezier(0.34, 1.48, 0.64, 1) 0.05s both;
@@ -85,8 +85,8 @@
   border-radius: 999px;
   display: grid;
   place-items: center;
-  background: rgba(245, 181, 27, 0.1);
-  border: 2px solid rgba(245, 181, 27, 0.32);
+  background: var(--brand-soft);
+  border: 2px solid rgb(from var(--brand-soft) r g b / 0.32);
   color: var(--brand-strong);
   animation: wc-icon-in 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) 0.18s both;
 }
@@ -122,8 +122,8 @@
   gap: 0.38rem;
   padding: 0.42rem 0.82rem;
   border-radius: 999px;
-  background: rgba(245, 181, 27, 0.1);
-  border: 1px solid rgba(245, 181, 27, 0.22);
+  background: var(--brand-soft);
+  border: 1px solid rgb(from var(--brand-soft) r g b / 0.22);
   color: var(--brand-strong);
   font-size: 0.82rem;
   font-weight: 780;
@@ -200,8 +200,8 @@
   width: 2.75rem;
   height: 2.75rem;
   border-radius: 50%;
-  background: rgba(245, 181, 27, 0.1);
-  border: 1px solid rgba(245, 181, 27, 0.18);
+  background: var(--brand-soft);
+  border: 1px solid rgb(from var(--brand-soft) r g b / 0.18);
   color: var(--brand);
   opacity: 1;
   margin-bottom: 0.25rem;

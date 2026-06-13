@@ -9,7 +9,7 @@
   height: 1.1rem;
   padding: 0 0.22rem;
   border-radius: 999px;
-  background: var(--elite-gold, #e7a83e);
+  background: var(--brand-strong);
   color: #0d0d0d;
   font-size: 0.58rem;
   font-weight: 860;
@@ -68,10 +68,10 @@
   outline: none;
 }
 .notif-item.is-unread {
-  background: rgba(231, 168, 62, 0.07);
+  background: rgb(from var(--brand-strong) r g b / 0.07);
 }
 .notif-item.is-unread:active {
-  background: rgba(231, 168, 62, 0.14);
+  background: rgb(from var(--brand-strong) r g b / 0.14);
 }
 
 /* Ícone à esquerda */
@@ -84,7 +84,7 @@
   justify-content: center;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.07);
-  color: var(--elite-gold, #e7a83e);
+  color: var(--brand-strong);
 }
 .notif-icon svg {
   width: 1.1rem;
@@ -121,7 +121,7 @@
   width: 0.48rem;
   height: 0.48rem;
   border-radius: 50%;
-  background: var(--elite-gold, #e7a83e);
+  background: var(--brand-strong);
   margin-left: auto;
 }
 .notif-preview {

@@ -81,7 +81,7 @@
   width: 3.4rem;
   height: 3.4rem;
   border-radius: 999px;
-  background: rgba(245, 181, 27, 0.055);
+  background: rgb(from var(--brand-soft) r g b / 0.055);
   pointer-events: none;
 }
 
@@ -149,7 +149,7 @@
 }
 
 .pattern-search-field:focus-within {
-  border-color: rgba(245, 181, 27, 0.62);
+  border-color: rgb(from var(--brand-soft) r g b / 0.62);
   box-shadow: none;
 }
 
@@ -167,7 +167,7 @@
 
 .pattern-search-field input:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(245, 181, 27, 0.5);
+  box-shadow: 0 0 0 2px rgb(from var(--brand-soft) r g b / 0.5);
   border-radius: 3px;
 }
 
@@ -233,7 +233,7 @@
 
 .pattern-filter select:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(245, 181, 27, 0.5);
+  box-shadow: 0 0 0 2px rgb(from var(--brand-soft) r g b / 0.5);
   border-radius: 3px;
 }
 
@@ -298,9 +298,9 @@
   width: 2.35rem;
   height: 2.35rem;
   place-items: center;
-  border: 1px solid rgba(245, 181, 27, 0.22);
+  border: 1px solid rgb(from var(--brand-soft) r g b / 0.22);
   border-radius: 0.72rem;
-  background: rgba(245, 181, 27, 0.065);
+  background: rgb(from var(--brand-soft) r g b / 0.065);
   color: var(--brand-strong);
   flex-shrink: 0;
 }
@@ -425,7 +425,7 @@
   gap: 0.45rem;
   min-height: 2.75rem;
   border-radius: 0.72rem;
-  border: 1px solid rgba(245, 181, 27, 0.52);
+  border: 1px solid rgb(from var(--brand-soft) r g b / 0.52);
   background: transparent;
   color: var(--brand-strong);
   font-size: 0.88rem;
@@ -434,7 +434,7 @@
 }
 
 .pattern-card-actions .pattern-apply-button:active {
-  background: rgba(245, 181, 27, 0.08);
+  background: rgb(from var(--brand-soft) r g b / 0.08);
 }
 
 .pattern-action-menu {
@@ -626,7 +626,7 @@
 
 .library-search-field input:focus-visible {
   outline: none !important;
-  box-shadow: 0 0 0 2px rgba(245, 181, 27, 0.5) !important;
+  box-shadow: 0 0 0 2px rgb(from var(--brand-soft) r g b / 0.5) !important;
   border-radius: 3px !important;
 }
 
@@ -2010,7 +2010,7 @@
   width: 1.42rem;
   height: 1.42rem;
   border-radius: 50%;
-  background: rgba(245, 181, 27, 0.18);
+  background: rgb(from var(--brand-soft) r g b / 0.18);
   color: var(--brand-strong);
   font-weight: 750;
   font-size: 0.72rem;

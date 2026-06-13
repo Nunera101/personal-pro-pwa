@@ -34,7 +34,7 @@
 .finance-hero .primary-action {
   min-height: 3.1rem;
   padding-inline: 1.25rem;
-  background: #F59E0B;
+  background: var(--brand);
   color: #0b0904;
   box-shadow: none;
 }
@@ -149,8 +149,8 @@
 .finance-search-field:focus-within,
 .finance-filter:focus-within,
 .finance-month-controls input:focus {
-  border-color: rgba(245, 181, 27, 0.64);
-  background: rgba(245, 181, 27, 0.07);
+  border-color: rgb(from var(--brand-soft) r g b / 0.64);
+  background: rgb(from var(--brand-soft) r g b / 0.07);
 }
 
 .finance-search-field svg,
@@ -187,7 +187,7 @@
 .finance-filter select:focus-visible,
 .finance-month-controls input:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(245, 181, 27, 0.5);
+  box-shadow: 0 0 0 2px rgb(from var(--brand-soft) r g b / 0.5);
   border-radius: 3px;
 }
 
@@ -252,7 +252,7 @@
 }
 
 .finance-chart-area {
-  fill: rgba(245, 181, 27, 0.14);
+  fill: rgb(from var(--brand-soft) r g b / 0.14);
   stroke: none;
 }
 
@@ -311,7 +311,7 @@
   height: 2.45rem;
   place-items: center;
   border-radius: 999px;
-  background: rgba(245, 181, 27, 0.1);
+  background: var(--brand-soft);
   color: var(--brand-strong);
 }
 
@@ -375,7 +375,7 @@
 .finance-record-card .entity-avatar {
   width: 3.35rem;
   height: 3.35rem;
-  border-color: rgba(245, 181, 27, 0.3);
+  border-color: rgb(from var(--brand-soft) r g b / 0.3);
 }
 
 .finance-record-student,
@@ -441,16 +441,16 @@
   gap: 0.42rem;
   min-height: 2.35rem;
   padding: 0 0.75rem;
-  border: 1px solid rgba(245, 181, 27, 0.56);
+  border: 1px solid rgb(from var(--brand-soft) r g b / 0.56);
   border-radius: 0.66rem;
-  background: rgba(245, 181, 27, 0.07);
+  background: rgb(from var(--brand-soft) r g b / 0.07);
   color: var(--brand-strong);
   font-size: 0.78rem;
   font-weight: 820;
 }
 
 .finance-primary-action {
-  background: #F59E0B;
+  background: var(--brand);
   color: #100c04;
   box-shadow: none;
 }
@@ -485,9 +485,9 @@
   height: 2.75rem;
   place-items: center;
   border-radius: 999px;
-  border: 1px solid rgba(245, 181, 27, 0.28);
+  border: 1px solid rgb(from var(--brand-soft) r g b / 0.28);
   color: var(--brand-strong);
-  background: rgba(245, 181, 27, 0.07);
+  background: rgb(from var(--brand-soft) r g b / 0.07);
 }
 
 .finance-insight-card svg {
@@ -742,9 +742,9 @@
   align-items: center;
   gap: 0.55rem;
   padding: 0.65rem 0.85rem;
-  border: 1px solid rgba(245, 181, 27, 0.3);
+  border: 1px solid rgb(from var(--brand-soft) r g b / 0.3);
   border-radius: 0.82rem;
-  background: rgba(245, 181, 27, 0.06);
+  background: rgb(from var(--brand-soft) r g b / 0.06);
   color: var(--muted);
   font-size: 0.82rem;
   line-height: 1.35;
@@ -933,9 +933,9 @@
 
 .cobrar-msg:focus-visible {
   outline: none;
-  border-color: rgba(245, 181, 27, 0.5);
-  background: rgba(245, 181, 27, 0.04);
-  box-shadow: 0 0 0 3px rgba(245, 181, 27, 0.3);
+  border-color: rgb(from var(--brand-soft) r g b / 0.5);
+  background: rgb(from var(--brand-soft) r g b / 0.04);
+  box-shadow: 0 0 0 3px rgb(from var(--brand-soft) r g b / 0.3);
 }
 
 .cobrar-actions {

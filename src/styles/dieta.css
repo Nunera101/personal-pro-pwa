@@ -36,7 +36,7 @@
   padding: 0.6rem 1rem;
   border: none;
   border-radius: var(--radius);
-  background: #F59E0B;
+  background: var(--brand);
   color: #0b0904;
   font-size: 0.95rem;
   font-weight: 820;
@@ -155,8 +155,8 @@
 
 .diet-search-field:focus-within,
 .diet-filter:focus-within {
-  border-color: rgba(245, 181, 27, 0.64);
-  background: rgba(245, 181, 27, 0.07);
+  border-color: rgb(from var(--brand-soft) r g b / 0.64);
+  background: rgb(from var(--brand-soft) r g b / 0.07);
 }
 
 .diet-search-field svg,
@@ -181,7 +181,7 @@
 .diet-search-field input:focus-visible,
 .diet-filter select:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(245, 181, 27, 0.5);
+  box-shadow: 0 0 0 2px rgb(from var(--brand-soft) r g b / 0.5);
   border-radius: 3px;
 }
 
@@ -224,7 +224,7 @@
 
 .diet-plan-card.is-review,
 .diet-plan-card.is-draft {
-  border-color: rgba(245, 181, 27, 0.28);
+  border-color: rgb(from var(--brand-soft) r g b / 0.28);
 }
 
 .diet-plan-card.is-expired {
@@ -241,7 +241,7 @@
 .diet-plan-head .entity-avatar {
   width: 3.4rem;
   height: 3.4rem;
-  border-color: rgba(245, 181, 27, 0.32);
+  border-color: rgb(from var(--brand-soft) r g b / 0.32);
 }
 
 .diet-plan-title {
@@ -337,16 +337,16 @@
   gap: 0.45rem;
   min-height: 2.45rem;
   padding: 0 0.78rem;
-  border: 1px solid rgba(245, 181, 27, 0.58);
+  border: 1px solid rgb(from var(--brand-soft) r g b / 0.58);
   border-radius: var(--radius);
   color: var(--brand-strong);
-  background: rgba(245, 181, 27, 0.07);
+  background: rgb(from var(--brand-soft) r g b / 0.07);
   font-size: 0.82rem;
   font-weight: 820;
 }
 
 .diet-primary-action {
-  background: #F59E0B;
+  background: var(--brand);
   color: #100c04;
   box-shadow: none;
 }
@@ -380,10 +380,10 @@
   width: 2.7rem;
   height: 2.7rem;
   place-items: center;
-  border: 1px solid rgba(245, 181, 27, 0.28);
+  border: 1px solid rgb(from var(--brand-soft) r g b / 0.28);
   border-radius: 999px;
   color: var(--brand-strong);
-  background: rgba(245, 181, 27, 0.07);
+  background: rgb(from var(--brand-soft) r g b / 0.07);
 }
 
 .diet-insight-card svg {
@@ -533,8 +533,8 @@
 }
 
 .sdp-stat.is-kcal {
-  border-color: rgba(245, 181, 27, 0.32);
-  background: rgba(245, 181, 27, 0.07);
+  border-color: rgb(from var(--brand-soft) r g b / 0.32);
+  background: rgb(from var(--brand-soft) r g b / 0.07);
 }
 
 .sdp-stat.is-kcal strong {
@@ -704,9 +704,9 @@
 .smc-notes {
   margin: 0;
   padding: 0.38rem 0.52rem;
-  border-left: 2px solid rgba(245, 181, 27, 0.4);
+  border-left: 2px solid rgb(from var(--brand-soft) r g b / 0.4);
   border-radius: 0 4px 4px 0;
-  background: rgba(245, 181, 27, 0.05);
+  background: rgb(from var(--brand-soft) r g b / 0.05);
   color: var(--muted);
   font-style: italic;
 }
@@ -909,7 +909,7 @@
   min-width: 0;
 }
 
-.mp-meal-name-input:focus-visible { background: rgba(255,255,255,0.04); box-shadow: 0 0 0 2px rgba(245, 181, 27, 0.5); }
+.mp-meal-name-input:focus-visible { background: rgba(255,255,255,0.04); box-shadow: 0 0 0 2px rgb(from var(--brand-soft) r g b / 0.5); }
 
 .mp-meal-time-input {
   width: 5.2rem;
@@ -922,7 +922,7 @@
   text-align: center;
 }
 
-.mp-meal-time-input:focus-visible { border-color: var(--dourado); outline: none; box-shadow: 0 0 0 3px rgba(245, 181, 27, 0.3); }
+.mp-meal-time-input:focus-visible { border-color: var(--dourado); outline: none; box-shadow: 0 0 0 3px rgb(from var(--brand-soft) r g b / 0.3); }
 
 .mp-meal-menu-btn {
   background: none;
@@ -971,7 +971,7 @@
 .mp-food-kcal-input { color: var(--ok); }
 
 .mp-food-qty-input:focus-visible,
-.mp-food-kcal-input:focus-visible { border-color: var(--dourado); outline: none; color: var(--ink); box-shadow: 0 0 0 3px rgba(245, 181, 27, 0.3); }
+.mp-food-kcal-input:focus-visible { border-color: var(--dourado); outline: none; color: var(--ink); box-shadow: 0 0 0 3px rgb(from var(--brand-soft) r g b / 0.3); }
 
 .mp-food-remove-btn {
   background: none;
@@ -1037,7 +1037,7 @@
   font-size: 0.88rem;
 }
 
-.mp-food-search-input:focus-visible { border-color: var(--dourado); outline: none; box-shadow: 0 0 0 3px rgba(245, 181, 27, 0.3); }
+.mp-food-search-input:focus-visible { border-color: var(--dourado); outline: none; box-shadow: 0 0 0 3px rgb(from var(--brand-soft) r g b / 0.3); }
 
 .mp-food-search-list {
   display: flex;

@@ -79,7 +79,7 @@
 }
 
 .student-search-field:focus-within {
-  border-color: rgba(245, 181, 27, 0.62);
+  border-color: rgb(from var(--brand-soft) r g b / 0.62);
   box-shadow: none;
 }
 
@@ -297,8 +297,8 @@
   gap: 0.5rem;
   min-height: 2.85rem;
   border-radius: 0.72rem;
-  border-color: rgba(245, 181, 27, 0.38);
-  background: rgba(245, 181, 27, 0.045);
+  border-color: rgb(from var(--brand-soft) r g b / 0.38);
+  background: rgb(from var(--brand-soft) r g b / 0.045);
   color: var(--ink);
 }
 
@@ -346,7 +346,7 @@
   width: auto;
   min-height: 2.75rem;
   border-radius: 0.8rem;
-  border-color: rgba(245, 181, 27, 0.35);
+  border-color: rgb(from var(--brand-soft) r g b / 0.35);
   background: rgba(255, 255, 255, 0.045);
   color: var(--ink);
 }
@@ -2469,7 +2469,7 @@
 
 .el-link-input:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(245, 181, 27, 0.5);
+  box-shadow: 0 0 0 2px rgb(from var(--brand-soft) r g b / 0.5);
   border-radius: 3px;
 }
 
@@ -2923,7 +2923,7 @@
   font-weight: 600 !important;
   border-color: rgba(245, 159, 11, 0.4) !important;
   background: transparent !important;
-  color: var(--dourado, #F59E0B) !important;
+  color: var(--brand) !important;
 }
 
 .sp-edit-btn {
@@ -3051,7 +3051,7 @@
   font-size: 1.6rem;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid rgba(245, 181, 27, 0.45);
+  border: 2px solid rgb(from var(--brand-soft) r g b / 0.45);
 }
 
 .profile-photo-section .profile-photo-badge {

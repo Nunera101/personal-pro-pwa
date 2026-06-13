@@ -176,7 +176,7 @@
 }
 
 .nav-button.is-active {
-  background: rgba(245, 181, 27, 0.12);
+  background: rgb(from var(--brand-soft) r g b / 0.12);
   color: var(--brand-strong);
   box-shadow: none;
 }
@@ -190,7 +190,7 @@
 }
 
 .side-nav .nav-button.is-active {
-  background: rgba(245, 181, 27, 0.12);
+  background: rgb(from var(--brand-soft) r g b / 0.12);
   color: var(--brand-strong);
 }
 
@@ -590,7 +590,7 @@
   height: 1.05rem;
   padding: 0 0.22rem;
   border-radius: 999px;
-  background: var(--brand, #f5b51b);
+  background: var(--brand);
   color: #070707;
   font-size: 0.58rem;
   font-style: normal;

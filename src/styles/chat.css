@@ -54,7 +54,7 @@
   width: 5.2rem;
   height: 5.2rem;
   border-radius: 999px;
-  background: rgba(245, 181, 27, 0.055);
+  background: rgb(from var(--brand-soft) r g b / 0.055);
   pointer-events: none;
 }
 
@@ -142,8 +142,8 @@
 
 .message-search-field:focus-within,
 .message-filter:focus-within {
-  border-color: rgba(245, 181, 27, 0.64);
-  background: rgba(245, 181, 27, 0.07);
+  border-color: rgb(from var(--brand-soft) r g b / 0.64);
+  background: rgb(from var(--brand-soft) r g b / 0.07);
 }
 
 .message-search-field svg {
@@ -165,7 +165,7 @@
 
 .message-search-field input:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(245, 181, 27, 0.5);
+  box-shadow: 0 0 0 2px rgb(from var(--brand-soft) r g b / 0.5);
   border-radius: 3px;
 }
 
@@ -214,7 +214,7 @@
 
 .message-filter select:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(245, 181, 27, 0.5);
+  box-shadow: 0 0 0 2px rgb(from var(--brand-soft) r g b / 0.5);
   border-radius: 3px;
 }
 
@@ -261,14 +261,14 @@
 
 .conversation-card:hover,
 .recent-message-card:hover {
-  background: rgba(245, 181, 27, 0.07);
+  background: rgb(from var(--brand-soft) r g b / 0.07);
 }
 
 .conversation-card .entity-avatar,
 .recent-message-card .entity-avatar {
   width: 3.3rem;
   height: 3.3rem;
-  border-color: rgba(245, 181, 27, 0.46);
+  border-color: rgb(from var(--brand-soft) r g b / 0.46);
 }
 
 .conversation-card.has-unread .entity-avatar,
@@ -383,9 +383,9 @@
 }
 
 .message-detail .chat-message.is-manager {
-  border-color: rgba(245, 181, 27, 0.34);
+  border-color: rgb(from var(--brand-soft) r g b / 0.34);
   background:
-    linear-gradient(145deg, rgba(245, 181, 27, 0.18), rgba(245, 181, 27, 0.06)),
+    linear-gradient(145deg, rgb(from var(--brand-soft) r g b / 0.18), rgb(from var(--brand-soft) r g b / 0.06)),
     rgba(18, 18, 18, 0.95);
 }
 
@@ -403,8 +403,8 @@
 }
 
 .chat-list.is-compact .chat-message.is-manager {
-  border-color: rgba(245, 181, 27, 0.3);
-  background: rgba(245, 181, 27, 0.1);
+  border-color: rgb(from var(--brand-soft) r g b / 0.3);
+  background: var(--brand-soft);
 }
 
 .message-compose {
@@ -530,8 +530,8 @@
 }
 
 .wa-inbox-search:focus-within {
-  border-color: rgba(245, 181, 27, 0.5);
-  background: rgba(245, 181, 27, 0.06);
+  border-color: rgb(from var(--brand-soft) r g b / 0.5);
+  background: rgb(from var(--brand-soft) r g b / 0.06);
 }
 
 .wa-inbox-search svg {
@@ -594,11 +594,11 @@
 }
 
 .wa-conv-card:hover {
-  background: rgba(245, 181, 27, 0.06);
+  background: rgb(from var(--brand-soft) r g b / 0.06);
 }
 
 .wa-conv-card:active {
-  background: rgba(245, 181, 27, 0.1);
+  background: var(--brand-soft);
 }
 
 .wa-conv-card .entity-avatar {
@@ -606,7 +606,7 @@
   width: 3.2rem;
   height: 3.2rem;
   border-radius: 999px;
-  border-color: rgba(245, 181, 27, 0.25);
+  border-color: rgb(from var(--brand-soft) r g b / 0.25);
 }
 
 .wa-conv-body {
@@ -759,7 +759,7 @@
   flex-shrink: 0;
   width: 2.65rem;
   height: 2.65rem;
-  border-color: rgba(245, 181, 27, 0.44);
+  border-color: rgb(from var(--brand-soft) r g b / 0.44);
 }
 
 .thread-hd-info {
@@ -802,7 +802,7 @@
   overflow-y: auto;
   padding: 0.85rem;
   background:
-    radial-gradient(ellipse at 20% 80%, rgba(245, 181, 27, 0.04) 0%, transparent 60%),
+    radial-gradient(ellipse at 20% 80%, rgb(from var(--brand-soft) r g b / 0.04) 0%, transparent 60%),
     #080808;
   scroll-behavior: smooth;
   scrollbar-width: none;
@@ -919,13 +919,13 @@
 }
 
 .thread-bubble.is-manager time {
-  color: rgba(245, 181, 27, 0.55);
+  color: rgb(from var(--brand-soft) r g b / 0.55);
 }
 
 .thread-check {
   display: inline-flex;
   align-items: center;
-  color: rgba(245, 181, 27, 0.65);
+  color: rgb(from var(--brand-soft) r g b / 0.65);
   font-size: 0.68rem;
   line-height: 1;
   letter-spacing: -0.1em;
@@ -958,7 +958,7 @@
 .thread-quick-chip {
   flex-shrink: 0;
   padding: 0.26rem 0.72rem;
-  border: 1px solid rgba(245, 181, 27, 0.34);
+  border: 1px solid rgb(from var(--brand-soft) r g b / 0.34);
   border-radius: 99px;
   background: transparent;
   color: var(--brand-strong);
@@ -970,8 +970,8 @@
 }
 
 .thread-quick-chip:hover {
-  background: rgba(245, 181, 27, 0.1);
-  border-color: rgba(245, 181, 27, 0.55);
+  background: var(--brand-soft);
+  border-color: rgb(from var(--brand-soft) r g b / 0.55);
 }
 
 #threadForm {
@@ -997,8 +997,8 @@
 }
 
 .thread-compose-pill:focus-within {
-  border-color: rgba(245, 181, 27, 0.35);
-  background: rgba(245, 181, 27, 0.04);
+  border-color: rgb(from var(--brand-soft) r g b / 0.35);
+  background: rgb(from var(--brand-soft) r g b / 0.04);
 }
 
 .thread-attach-btn {
