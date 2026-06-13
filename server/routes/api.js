@@ -235,10 +235,14 @@ function mergeSettingsForWrite(existing = {}, incoming = {}) {
 }
 
 function mergeStudentContracts(existing = [], incoming = [], auth = {}) {
+  // R-14: filtra PRIMEIRO os contratos do proprio aluno e SO DEPOIS mescla.
+  // Contratos de outros alunos NUNCA entram neste resultado — a preservacao
+  // deles fica a cargo do chamador, que concatena os contratos alheios intactos
+  // antes de gravar (ver writeCollectionForAuth/CONTRACTS_KEY).
   const incomingById = new Map(incoming.filter((item) => item.studentId === auth.studentId).map((item) => [String(item.id || ""), item]));
-  return existing.map((contract) => {
+  return existing.filter((contract) => contract.studentId === auth.studentId).map((contract) => {
     const next = incomingById.get(String(contract.id || ""));
-    if (!next || contract.studentId !== auth.studentId) return contract;
+    if (!next) return contract;
     const signed = next.status === "signed" || contract.status === "signed";
     return {
       ...contract,
@@ -384,10 +388,15 @@ async function writeCollectionForAuth(collection, payload, auth) {
 
   if ([EXERCISES_KEY, WORKOUTS_KEY, STUDENTS_KEY, SETTINGS_KEY, PAYMENTS_KEY, DIETS_KEY].includes(collection)) return;
   if (collection === CONTRACTS_KEY) {
-    const existingById = new Map((Array.isArray(existing) ? existing : []).map((c) => [String(c.id), c]));
-    const merged = mergeStudentContracts(existing, Array.isArray(payload) ? payload : [], auth);
-    await writeCollection(collection, merged);
-    const newlySigned = merged.filter((c) => c.status === "signed" && existingById.get(String(c.id))?.status !== "signed");
+    const existingArr = Array.isArray(existing) ? existing : [];
+    const existingById = new Map(existingArr.map((c) => [String(c.id), c]));
+    // mergeStudentContracts retorna SOMENTE os contratos do aluno (R-14).
+    // Contratos de outros alunos sao preservados intactos: nunca passam pelo
+    // merge, evitando vazamento e tambem perda dos dados alheios na gravacao.
+    const ownMerged = mergeStudentContracts(existingArr, Array.isArray(payload) ? payload : [], auth);
+    const foreign = existingArr.filter((c) => c.studentId !== auth.studentId);
+    await writeCollection(collection, [...foreign, ...ownMerged]);
+    const newlySigned = ownMerged.filter((c) => c.status === "signed" && existingById.get(String(c.id))?.status !== "signed");
     if (newlySigned.length) {
       const students = await readCollection(STUDENTS_KEY, []);
       const student = students.find((s) => s.id === auth.studentId);
@@ -1163,5 +1172,6 @@ function createApiRouter() {
 }
 
 module.exports = {
-  createApiRouter
+  createApiRouter,
+  mergeStudentContracts
 };
