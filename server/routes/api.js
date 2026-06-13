@@ -18,7 +18,11 @@ const { isMailConfigured, sendPasswordResetEmail, sendStudentInviteEmail, sendCo
 const { TRAINER_ID, SESSION_TTL, createSessionToken, requireAuth, requireManager } = require("../auth");
 const { getVapidPublicKey, savePushSubscription, removePushSubscriptionByEndpoint, sendPushToStudent, sendPushToManager } = require("../push");
 
-const ADMIN_EMAIL = "admin@personalpro.app";
+// E-mail do admin e hash bcrypt da senha vem SEMPRE do ambiente em producao.
+// No Railway defina: ADMIN_EMAIL e ADMIN_PASSWORD_HASH (ver README "Variaveis de ambiente").
+// Gere o hash com: node server/gen-admin-hash.js "suaSenhaForte"
+const ADMIN_EMAIL = normalizeEmail(process.env.ADMIN_EMAIL || "admin@personalpro.app");
+const ADMIN_PASSWORD_HASH_ENV = String(process.env.ADMIN_PASSWORD_HASH || "").trim();
 const STUDENTS_KEY = "personal-pro-students-v2";
 const EXERCISES_KEY = "personal-pro-exercises-v1";
 const WORKOUTS_KEY = "personal-pro-workouts-v3";
@@ -76,6 +80,26 @@ function verifyPassword(password, storedHash) {
   if (!hash) return false;
   if (isBcryptHash(hash)) return bcrypt.compareSync(String(password || ""), hash);
   return hashPassword(password) === hash;
+}
+
+// Senha de admin para desenvolvimento local quando ADMIN_PASSWORD_HASH nao esta no ambiente.
+// Nunca e usada em producao e o hash nunca e enviado ao cliente.
+const DEV_ADMIN_PASSWORD = "admin-dev";
+let devAdminPasswordHash = "";
+
+// Resolve o hash bcrypt da senha do admin sem nunca expor a senha em si.
+// Prioridade: ADMIN_PASSWORD_HASH (ambiente) > fallback local (apenas fora de producao).
+function resolveAdminPasswordHash() {
+  if (ADMIN_PASSWORD_HASH_ENV) return ADMIN_PASSWORD_HASH_ENV;
+  if (process.env.NODE_ENV === "production") return "";
+  if (!devAdminPasswordHash) {
+    devAdminPasswordHash = createPasswordHash(DEV_ADMIN_PASSWORD);
+    console.warn(
+      `[seguranca] ADMIN_PASSWORD_HASH nao definido: usando senha de DESENVOLVIMENTO "${DEV_ADMIN_PASSWORD}" (apenas local). ` +
+      "Defina ADMIN_EMAIL e ADMIN_PASSWORD_HASH no ambiente (Railway) antes de ir para producao."
+    );
+  }
+  return devAdminPasswordHash;
 }
 
 function hashToken(token) {
@@ -539,8 +563,9 @@ function createApiRouter() {
 
       if (email === ADMIN_EMAIL) {
         const settings = await readCollection(SETTINGS_KEY, {});
-        const storedHash = settings.adminPasswordHash || hashPassword("Admin@2026");
-        if (!verifyPassword(password, storedHash)) {
+        // Hash do admin: senha trocada pelo gestor (settings) ou ADMIN_PASSWORD_HASH do ambiente.
+        const storedHash = settings.adminPasswordHash || resolveAdminPasswordHash();
+        if (!storedHash || !verifyPassword(password, storedHash)) {
           response.status(401).json({ error: "E-mail ou senha invalidos." });
           return;
         }

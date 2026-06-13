@@ -57,6 +57,12 @@ DATABASE_URL=postgres://user:pass@host:5432/dbname
 # JWT
 JWT_SECRET=seu-segredo-aqui
 
+# Admin / gestor — credenciais lidas do ambiente (nunca hardcode a senha)
+# ADMIN_EMAIL: e-mail de login do gestor
+# ADMIN_PASSWORD_HASH: hash bcrypt da senha (gere com o script abaixo)
+ADMIN_EMAIL=admin@personalpro.app
+ADMIN_PASSWORD_HASH=$2a$12$coloque-aqui-o-hash-gerado
+
 # URL pública do app (para links em e-mails)
 APP_PUBLIC_URL=http://localhost:3000
 
@@ -69,6 +75,23 @@ SMTP_PASS=senha
 ```
 
 > Em produção (Railway) todas as variáveis são configuradas no painel da plataforma — não hardcode valores sensíveis.
+
+#### Senha do admin (ADMIN_EMAIL / ADMIN_PASSWORD_HASH)
+
+O login do gestor valida `ADMIN_EMAIL` e `ADMIN_PASSWORD_HASH` lidos do ambiente. A senha **nunca** fica no código — apenas o hash bcrypt vai para a variável de ambiente.
+
+Gere o hash da sua senha:
+
+```powershell
+node server/gen-admin-hash.js "suaSenhaForte"
+```
+
+Copie o hash impresso e configure no Railway (Settings → Variables):
+
+- `ADMIN_EMAIL` = e-mail de login do gestor
+- `ADMIN_PASSWORD_HASH` = hash gerado acima
+
+> Em **desenvolvimento local**, se `ADMIN_PASSWORD_HASH` não estiver definido, o servidor usa uma senha de fallback **apenas local** (`admin-dev`) e imprime um aviso no console. Esse fallback **não funciona em produção** (`NODE_ENV=production`) e a senha/hash nunca é enviada ao cliente. Nunca commite a senha real nem o hash de produção.
 
 ### 3. Rodar migrações (apenas com PostgreSQL)
 
@@ -88,10 +111,10 @@ O app estará disponível em `http://localhost:3000`.
 
 ### Credencial demo
 
-Adicione `?demo=1` à URL para exibir o card de preenchimento automático:
+Adicione `?demo=1` à URL para exibir o card de preenchimento automático.
 
-- **E-mail:** `admin@personalpro.app`
-- **Senha:** `Admin@2026`
+- **E-mail:** valor de `ADMIN_EMAIL` (padrão local `admin@personalpro.app`)
+- **Senha:** definida via `ADMIN_PASSWORD_HASH`. Em desenvolvimento local sem essa variável, o fallback é `admin-dev` (apenas local — ver seção de variáveis de ambiente).
 
 ---
 
