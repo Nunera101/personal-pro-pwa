@@ -485,7 +485,11 @@ async function updateAccountPassword(reset, password) {
 function createApiRouter() {
   const router = express.Router();
 
-  router.get("/health", async (_request, response) => {
+  router.get("/health", (_request, response) => {
+    response.json({ ok: true });
+  });
+
+  router.get("/health/detail", requireManager, async (_request, response) => {
     const dbReady = await isDatabaseReady();
     response.json({
       ok: true,
