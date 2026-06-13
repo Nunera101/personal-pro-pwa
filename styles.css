@@ -15162,7 +15162,7 @@ button:not(:disabled),
 [role="button"],
 .quick-link,
 .day-cell {
-  transition: transform 80ms ease;
+  transition: transform 150ms ease, opacity 150ms ease;
 }
 
 /* Estado :active — leve compressão tátil */
@@ -15170,7 +15170,7 @@ button:active:not(:disabled),
 [role="button"]:active,
 .quick-link:active,
 .day-cell:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
 }
 
 /* ── Animação de entrada do conteúdo (troca de aba / seção) ── */

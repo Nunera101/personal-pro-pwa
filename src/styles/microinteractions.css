@@ -262,6 +262,50 @@
   transition: transform var(--t-fast) ease, background var(--t-fast) ease;
 }
 
+/* ── :active — escala diferenciada por tipo de botão ── */
+.primary-action:active:not(:disabled),
+.secondary-action:active:not(:disabled),
+.danger-action:active:not(:disabled),
+.ghost-button:active:not(:disabled),
+.pill-button:active:not(:disabled),
+.filter-btn:active:not(:disabled) {
+  transform: scale(0.96);
+  opacity: 0.88;
+}
+
+.icon-button:active:not(:disabled),
+.mini-button:active:not(:disabled) {
+  transform: scale(0.90);
+  opacity: 0.82;
+}
+
+.nav-button:active:not(:disabled) {
+  transform: scale(0.88);
+  opacity: 0.78;
+}
+
+.text-action:active:not(:disabled) {
+  opacity: 0.62;
+}
+
+/* ── Não-button interativos: cobertura explícita ── */
+.avatar-button,
+.notification-button,
+.action-menu summary,
+.day-select,
+.check-chip {
+  transition: transform var(--t-fast) ease, opacity var(--t-fast) ease;
+}
+
+.avatar-button:active,
+.notification-button:active,
+.action-menu summary:active,
+.day-select:active,
+.check-chip:active {
+  transform: scale(0.90);
+  opacity: 0.82;
+}
+
 /* ── prefers-reduced-motion para novos seletores ── */
 @media (prefers-reduced-motion: reduce) {
   .student-card,
@@ -274,7 +318,22 @@
   .recent-message-card,
   .library-row,
   .dashboard-quick-link,
-  .quick-link {
+  .quick-link,
+  .primary-action,
+  .secondary-action,
+  .danger-action,
+  .ghost-button,
+  .pill-button,
+  .icon-button,
+  .mini-button,
+  .nav-button,
+  .text-action,
+  .filter-btn,
+  .avatar-button,
+  .notification-button,
+  .action-menu summary,
+  .day-select,
+  .check-chip {
     transition: none;
   }
 }
