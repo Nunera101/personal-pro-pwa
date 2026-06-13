@@ -2459,6 +2459,25 @@ body::before {
   font-weight: 900;
 }
 
+/* shared photo display for all avatar variants */
+.entity-avatar.is-photo,
+.agenda-avatar.is-photo,
+.ap-student-avatar.is-photo,
+.cfs-result-avatar.is-photo {
+  overflow: hidden;
+  background: none;
+}
+
+.entity-avatar.is-photo img,
+.agenda-avatar.is-photo img,
+.ap-student-avatar.is-photo img,
+.cfs-result-avatar.is-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 .student-row .entity-main,
 .update-row .entity-main {
   display: grid;

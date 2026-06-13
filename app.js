@@ -2659,12 +2659,25 @@
     return (parts.length ? `${parts[0][0] || ""}${parts[1]?.[0] || ""}` : "AS").toUpperCase();
   }
 
-  function studentAvatar(student) {
-    if (student?.photoUrl) {
-      const src = String(student.photoUrl).startsWith("/") ? student.photoUrl : `/uploads/profiles/${student.photoUrl}`;
-      return `<span class="entity-avatar is-photo" aria-hidden="true"><img src="${escapeHtml(src)}" alt="" /></span>`;
+  function avatarColor(id) {
+    const P = ["#6d8ef7", "#f77b6d", "#6dcf8e", "#f7c46d", "#b06df7", "#6dd4f7", "#f76db5", "#8ef76d"];
+    const s = String(id ?? "");
+    let h = 0;
+    for (let i = 0; i < s.length; i++) h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
+    return P[Math.abs(h) % P.length];
+  }
+
+  function avatarHtml(entity, cls = "entity-avatar") {
+    if (entity?.photoUrl) {
+      const src = String(entity.photoUrl).startsWith("/") ? entity.photoUrl : `/uploads/profiles/${entity.photoUrl}`;
+      return `<span class="${cls} is-photo" aria-hidden="true"><img src="${escapeHtml(src)}" alt="" /></span>`;
     }
-    return `<span class="entity-avatar" aria-hidden="true">${escapeHtml(initialsFromName(student?.name))}</span>`;
+    const color = avatarColor(entity?.id);
+    return `<span class="${cls}" style="background:${color}1a;color:${color}" aria-hidden="true">${escapeHtml(initialsFromName(entity?.name))}</span>`;
+  }
+
+  function studentAvatar(student) {
+    return avatarHtml(student);
   }
 
   function updateHeaderAvatars() {
@@ -2675,9 +2688,12 @@
       if (photoUrl) {
         managerBtn.innerHTML = `<img src="${escapeHtml(photoUrl)}" alt="" />`;
         managerBtn.classList.add("has-photo");
+        managerBtn.removeAttribute("style");
       } else {
+        const color = avatarColor(state.currentUser?.id);
         managerBtn.textContent = initialsFromName(state.data.settings?.trainerName || state.currentUser?.name || "");
         managerBtn.classList.remove("has-photo");
+        managerBtn.style.cssText = `background:${color}1a;color:${color}`;
       }
     }
     if (studentBtn) {
@@ -2686,9 +2702,12 @@
         const src = String(student.photoUrl).startsWith("/") ? student.photoUrl : `/uploads/profiles/${student.photoUrl}`;
         studentBtn.innerHTML = `<img src="${escapeHtml(src)}" alt="" />`;
         studentBtn.classList.add("has-photo");
+        studentBtn.removeAttribute("style");
       } else {
+        const color = avatarColor(student?.id || state.currentUser?.id);
         studentBtn.textContent = initialsFromName(state.currentUser?.name || "");
         studentBtn.classList.remove("has-photo");
+        studentBtn.style.cssText = `background:${color}1a;color:${color}`;
       }
     }
   }
@@ -6071,7 +6090,8 @@
       <div class="agenda-list">
         ${items
           .map((item) => {
-            const studentName = getStudentName(item.studentId);
+            const agendaStudent = getStudent(item.studentId);
+            const studentName = agendaStudent?.name || "Aluno removido";
             const canWA = manager && canEditAgendaItem(item);
             const canStart = item.type === "workout" && item.workoutId && state.currentUser?.role === "student" && item.status !== "done";
             const hasPendingContract = item.type !== "contract" && !!getBlockingContractForStudent(item.studentId);
@@ -6082,7 +6102,7 @@
                   data-agenda-date="${escapeHtml(item.date)}"
                   data-agenda-student="${escapeHtml(item.studentId)}"
                   aria-label="Ver detalhes"></button>
-                <div class="agenda-avatar">${escapeHtml(initialsFromName(studentName))}</div>
+                ${avatarHtml(agendaStudent || { id: item.studentId, name: studentName }, "agenda-avatar")}
                 <span class="agenda-type-dot ${agendaItemClass(item)}" aria-hidden="true"></span>
                 <div class="agenda-time">${escapeHtml(item.time || "--:--")}</div>
                 <div class="agenda-main">
@@ -7497,16 +7517,17 @@
     const name = state.data.settings.trainerName || "";
     const phone = state.data.settings.trainerPhone || "";
     const email = state.data.settings.contactEmail || "";
-    const avatarHtml = photoUrl
+    const color = avatarColor(state.currentUser?.id);
+    const profileAvatarEl = photoUrl
       ? `<img class="profile-photo-preview" src="${escapeHtml(photoUrl)}" alt="Foto de perfil" />`
-      : `<span class="entity-avatar profile-avatar-lg" aria-hidden="true">${escapeHtml(initialsFromName(name))}</span>`;
+      : `<span class="entity-avatar profile-avatar-lg" style="background:${color}1a;color:${color}" aria-hidden="true">${escapeHtml(initialsFromName(name))}</span>`;
     return `
       <div class="content-stack">
         ${pageHeader("Meu Perfil", "Foto e dados de contato")}
         <section class="panel">
           <div class="profile-photo-section">
             <div class="profile-avatar-wrap">
-              ${avatarHtml}
+              ${profileAvatarEl}
               <label class="profile-photo-label" aria-label="Alterar foto de perfil">
                 <input type="file" accept="image/jpeg,image/png,image/webp" data-profile-photo-input="manager" class="sr-only" />
                 <span class="profile-photo-badge">
@@ -8614,7 +8635,7 @@
               ? students.map((s) => `
                 <label class="ap-student-row">
                   <input type="checkbox" name="studentIds" value="${escapeHtml(s.id)}" data-ap-student-name="${escapeHtml(s.name)}" />
-                  <span class="ap-student-avatar">${escapeHtml(s.name.slice(0, 2).toUpperCase())}</span>
+                  ${avatarHtml(s, "ap-student-avatar")}
                   <span class="ap-student-label">${escapeHtml(s.name)}</span>
                 </label>`).join("")
               : `<p class="ap-empty">Nenhum aluno cadastrado.</p>`
@@ -8809,9 +8830,7 @@
     if (titleEl) titleEl.textContent = item.title || activityLabel(item.type);
     if (stripe) stripe.style.background = typeColor;
 
-    const initials = student
-      ? student.name.split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase()
-      : "?";
+    const initials = student ? initialsFromName(student.name) : "?";
 
     const studentRow = `
       <div class="det-info-row">
@@ -9616,7 +9635,7 @@
       resultsList.innerHTML = matches.length
         ? matches.map((s) => `
             <button class="cfs-student-result" type="button" data-cfs-pick="${escapeHtml(s.id)}">
-              <span class="cfs-result-avatar">${escapeHtml(s.name.slice(0, 2).toUpperCase())}</span>
+              ${avatarHtml(s, "cfs-result-avatar")}
               <span>${escapeHtml(s.name)}</span>
             </button>
           `).join("")

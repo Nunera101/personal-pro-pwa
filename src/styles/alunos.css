@@ -3023,17 +3023,6 @@
   stroke-linejoin: round;
 }
 
-.entity-avatar.is-photo {
-  overflow: hidden;
-}
-
-.entity-avatar.is-photo img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
 /* perfil do gestor — foto grande */
 .profile-photo-section {
   display: flex;
