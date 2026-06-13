@@ -17,6 +17,7 @@
      Resultado: - Token assinado em um processo verifica em outro processo (persist├¬ncia entre restarts) Ô£à | - Produ├º├úo sem `JWT_SECRET` falha com erro claro Ô£à | - Dev sem a vari├ível usa segredo fixo + aviso Ô£à | Commit `6e7...
      Resultado: There's an issue with the selected model (claude-fable-5). It may not exist or you may not have access to it. Run --model to pick a different model.
 
-[x] FECHAR /api/health e segredos: remover da resposta publica de /api/health os campos sensiveis (status do banco, storage, mail, push) - retornar apenas { ok: true } para o publico; se precisar de health detalhado, criar /api/health/detail protegido por requireManager. git add . && git commit -m "fix(seguranca): health endpoint sem vazar infraestrutura" && git push origin main
+[OK] FECHAR /api/health e segredos: remover da resposta publica de /api/health os campos sensiveis (status do banco, storage, mail, push) - retornar apenas { ok: true } para o publico; se precisar de health detalhado, criar /api/health/detail protegido por requireManager. git add . && git commit -m "fix(seguranca): health endpoint sem vazar infraestrutura" && git push origin main
+     Resultado: **Mudan├ºa em `server/routes/api.js`:** | - `GET /api/health` agora ├® p├║blico e retorna apenas `{ ok: true }` ÔÇö sem `storage`, `databaseReady`, `mailConfigured` nem `pushConfigured`. | - Criei `GET /api/health/deta...
      Resultado: There's an issue with the selected model (claude-fable-5). It may not exist or you may not have access to it. Run --model to pick a different model.
 

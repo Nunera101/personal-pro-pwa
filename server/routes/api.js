@@ -172,10 +172,12 @@ function sanitizeStudent(student = {}) {
 }
 
 function sanitizeSettings(settings = {}) {
-  const { adminPasswordHash, ...safeSettings } = settings || {};
+  // Nunca expor hash ao cliente; descartamos tambem o campo legado adminPasswordHash/At.
+  // adminPasswordConfigured reflete o AMBIENTE (ADMIN_PASSWORD_HASH), unica fonte de verdade.
+  const { adminPasswordHash, adminPasswordUpdatedAt, ...safeSettings } = settings || {};
   return {
     ...safeSettings,
-    adminPasswordConfigured: Boolean(adminPasswordHash)
+    adminPasswordConfigured: Boolean(resolveAdminPasswordHash())
   };
 }
 
@@ -219,13 +221,12 @@ function mergeStudentsForWrite(existing = [], incoming = []) {
 }
 
 function mergeSettingsForWrite(existing = {}, incoming = {}) {
-  return {
-    ...incoming,
-    adminPasswordHash:
-      incoming.adminPasswordHash && incoming.adminPasswordHash !== "[hash]"
-        ? incoming.adminPasswordHash
-        : existing.adminPasswordHash || ""
-  };
+  // A senha do admin vem EXCLUSIVAMENTE de ADMIN_PASSWORD_HASH (ambiente).
+  // Removemos adminPasswordHash/adminPasswordUpdatedAt de qualquer gravacao de settings,
+  // purgando o hash legado do storage (Postgres/JSON) na proxima escrita e impedindo que
+  // ele volte a ser persistido. O login nunca mais le esse campo.
+  const { adminPasswordHash: _legacyIn, adminPasswordUpdatedAt: _legacyInAt, ...cleanIncoming } = incoming || {};
+  return { ...cleanIncoming };
 }
 
 function mergeStudentContracts(existing = [], incoming = [], auth = {}) {
@@ -455,13 +456,16 @@ async function findAccountByEmail(email) {
 
 async function updateAccountPassword(reset, password) {
   if (reset.role === "manager") {
-    const settings = await readCollection(SETTINGS_KEY, {});
-    await writeCollection(SETTINGS_KEY, {
-      ...settings,
-      adminPasswordHash: createPasswordHash(password),
-      adminPasswordUpdatedAt: new Date().toISOString()
-    });
-    return;
+    // DESATIVADO nesta fase: a senha do admin vem EXCLUSIVAMENTE de ADMIN_PASSWORD_HASH
+    // (ambiente). Trocar a senha pela UI nao teria efeito no login, entao recusamos de
+    // forma explicita em vez de fingir que trocou (nao deixar botao que mente).
+    // TODO(lancamento): transformar isto no fluxo de PRIMEIRO ACESSO do gestor, gravando
+    // a senha em um storage proprio e tornando-o a fonte de verdade do login do admin.
+    const error = new Error(
+      "Troca de senha do gestor indisponivel: a senha do admin e definida por ADMIN_PASSWORD_HASH no ambiente."
+    );
+    error.statusCode = 409;
+    throw error;
   }
 
   const students = await readCollection(STUDENTS_KEY, []);
@@ -566,22 +570,16 @@ function createApiRouter() {
       }
 
       if (email === ADMIN_EMAIL) {
-        const settings = await readCollection(SETTINGS_KEY, {});
-        // Hash do admin: senha trocada pelo gestor (settings) ou ADMIN_PASSWORD_HASH do ambiente.
-        const storedHash = settings.adminPasswordHash || resolveAdminPasswordHash();
+        // Senha do admin: FONTE UNICA DE VERDADE = ADMIN_PASSWORD_HASH (ambiente).
+        // NUNCA ler settings.adminPasswordHash aqui: um hash legado persistido no banco
+        // (ex.: o antigo "Admin@2026") deve ser totalmente inerte e jamais autorizar login.
+        const storedHash = resolveAdminPasswordHash();
         if (!storedHash || !verifyPassword(password, storedHash)) {
           response.status(401).json({ error: "E-mail ou senha invalidos." });
           return;
         }
 
-        if (!isBcryptHash(storedHash)) {
-          await writeCollection(SETTINGS_KEY, {
-            ...settings,
-            adminPasswordHash: createPasswordHash(password),
-            adminPasswordUpdatedAt: new Date().toISOString()
-          });
-        }
-
+        const settings = await readCollection(SETTINGS_KEY, {});
         const user = {
           role: "manager",
           name: settings.trainerName || "Gestor Elite AS",
