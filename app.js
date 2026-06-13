@@ -882,6 +882,16 @@
     return options.map((item) => `<option value="${item.value}" ${selected === item.value ? "selected" : ""}>${escapeHtml(item.label)}</option>`).join("");
   }
 
+  // Copia profunda de dados puros (sem funcoes/DOM). Usada para isolar copias
+  // geradas a partir de padroes (R-06) de qualquer referencia compartilhada.
+  function deepClonePlain(value) {
+    if (value == null || typeof value !== "object") return value;
+    try {
+      if (typeof structuredClone === "function") return structuredClone(value);
+    } catch (_) {}
+    return JSON.parse(JSON.stringify(value));
+  }
+
   function cloneWorkoutExercises(exercises = []) {
     return exercises.map((item, index) =>
       normalizeWorkoutExercise({
@@ -895,8 +905,12 @@
   }
 
   function buildStudentWorkoutFromPattern(pattern, studentId, overrides = {}) {
+    // R-06: copia profunda do padrao + novo id. A copia do aluno fica totalmente
+    // desacoplada do objeto-pai, entao editar o padrao depois nao altera
+    // retroativamente os treinos ja aplicados aos alunos.
+    const base = deepClonePlain(pattern);
     return normalizeWorkout({
-      ...pattern,
+      ...base,
       ...overrides,
       id: overrides.id || createId("workout"),
       studentId,
@@ -907,7 +921,7 @@
       appliedAt: new Date().toISOString(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      exercises: cloneWorkoutExercises(pattern.exercises)
+      exercises: cloneWorkoutExercises(base.exercises)
     });
   }
 
