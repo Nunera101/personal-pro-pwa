@@ -3135,7 +3135,7 @@ input:disabled {
   max-width: min(22rem, calc(100vw - 2rem));
   padding: 0.85rem 1rem;
   border-radius: var(--radius);
-  background: var(--ink);
+  background: rgba(15, 15, 15, 0.96);
   color: #fff;
   font-size: 0.9rem;
   line-height: 1.35;
@@ -4004,9 +4004,7 @@ body::before {
 }
 
 .toast {
-  background: rgba(15, 15, 15, 0.96);
-  border: 1px solid var(--line);
-  color: var(--ink);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 @media (max-width: 57.99rem) {

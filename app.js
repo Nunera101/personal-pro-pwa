@@ -12645,7 +12645,6 @@
         applyRouteFromHash();
         renderApp();
         openPendingContractAfterLogin();
-        showToast(user.role === "manager" ? "Painel do gestor aberto." : "área do aluno aberta.");
         schedulePushPermissionRequest();
       } catch (error) {
         const msg = error.message || getLoginAccessMessage(emailVal) || "E-mail ou senha inválidos. Verifique suas credenciais.";

@@ -225,9 +225,7 @@
 }
 
 .toast {
-  background: rgba(15, 15, 15, 0.96);
-  border: 1px solid var(--line);
-  color: var(--ink);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 @media (max-width: 57.99rem) {
