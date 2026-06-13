@@ -555,6 +555,30 @@
       </section>
     </div>
 
+    <!-- Sheet: Preview / recorte de foto de perfil -->
+    <div class="ag-sheet" id="photoCropSheet" role="dialog" aria-modal="true" aria-labelledby="photoCropSheetTitle" hidden>
+      <div class="ag-backdrop" data-close-photo-crop></div>
+      <section class="ag-panel photo-crop-panel">
+        <div class="sheet-handle" aria-hidden="true"></div>
+        <div class="ag-head">
+          <h2 id="photoCropSheetTitle" class="ag-title">Usar esta foto?</h2>
+          <button class="icon-button ag-close-btn" type="button" data-close-photo-crop aria-label="Cancelar">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div class="photo-crop-body">
+          <div class="photo-crop-preview-wrap">
+            <img class="photo-crop-preview-img" id="photoCropPreview" src="" alt="Pré-visualização da foto de perfil" />
+          </div>
+          <p class="photo-crop-hint">A imagem será centralizada e comprimida automaticamente.</p>
+        </div>
+        <div class="ag-sheet-footer photo-crop-footer">
+          <button class="primary-action" type="button" id="photoCropConfirm">Usar esta foto</button>
+          <button class="secondary-action" type="button" data-close-photo-crop>Cancelar</button>
+        </div>
+      </section>
+    </div>
+
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
     <div id="offlinePendingBanner" class="offline-pending-banner" hidden aria-live="polite">

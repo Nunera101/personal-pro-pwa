@@ -11323,16 +11323,76 @@
     showToast("Contato salvo.");
   }
 
-  async function uploadProfilePhoto(file, role) {
-    const maxSize = 5 * 1024 * 1024;
-    if (file.size > maxSize) { showToast("A foto deve ter até 5 MB."); return; }
-    const allowed = ["image/jpeg", "image/png", "image/webp"];
-    if (file.type && !allowed.includes(file.type)) { showToast("Use JPEG, PNG ou WebP."); return; }
+  function compressProfileImage(file, maxPx = 512, quality = 0.78) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const objectUrl = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        const { naturalWidth: w, naturalHeight: h } = img;
+        const size = Math.min(w, h);
+        const sx = (w - size) / 2;
+        const sy = (h - size) / 2;
+        const out = Math.min(size, maxPx);
+        const canvas = document.createElement("canvas");
+        canvas.width = out;
+        canvas.height = out;
+        canvas.getContext("2d").drawImage(img, sx, sy, size, size, 0, 0, out, out);
+        canvas.toBlob(
+          (blob) => (blob ? resolve(blob) : reject(new Error("Compressão falhou."))),
+          "image/jpeg",
+          quality
+        );
+      };
+      img.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error("Imagem inválida.")); };
+      img.src = objectUrl;
+    });
+  }
 
+  let pendingPhotoUpload = null;
+
+  function showPhotoCropSheet(file, role) {
+    const sheet = document.getElementById("photoCropSheet");
+    const preview = document.getElementById("photoCropPreview");
+    const confirmBtn = document.getElementById("photoCropConfirm");
+    if (!sheet || !preview) return;
+
+    if (preview._revokeUrl) { URL.revokeObjectURL(preview._revokeUrl); preview._revokeUrl = null; }
+    const previewUrl = URL.createObjectURL(file);
+    preview.src = previewUrl;
+    preview._revokeUrl = previewUrl;
+
+    if (confirmBtn) confirmBtn.disabled = true;
+    sheet.hidden = false;
+    sheet.classList.add("is-open");
+
+    compressProfileImage(file).then((blob) => {
+      pendingPhotoUpload = { blob, role };
+      if (confirmBtn) confirmBtn.disabled = false;
+    }).catch(() => {
+      pendingPhotoUpload = { blob: file, role };
+      if (confirmBtn) confirmBtn.disabled = false;
+    });
+  }
+
+  function closePhotoCropSheet() {
+    const sheet = document.getElementById("photoCropSheet");
+    const preview = document.getElementById("photoCropPreview");
+    if (!sheet) return;
+    sheet.classList.remove("is-open");
+    sheet.hidden = true;
+    if (preview) {
+      if (preview._revokeUrl) { URL.revokeObjectURL(preview._revokeUrl); preview._revokeUrl = null; }
+      preview.src = "";
+    }
+    pendingPhotoUpload = null;
+  }
+
+  async function uploadProfilePhoto(blob, role) {
     showToast("Enviando foto…");
     try {
       const fd = new FormData();
-      fd.append("photo", file);
+      fd.append("photo", blob, "profile.jpg");
       const headers = {};
       if (state.authToken) headers.Authorization = `Bearer ${state.authToken}`;
       const url = apiUrl("/uploads/profile");
@@ -11352,7 +11412,7 @@
       renderApp();
       updateHeaderAvatars();
       showSuccessToast("Foto salva com sucesso!");
-    } catch (error) {
+    } catch {
       showToast("Falha ao enviar foto. Tente novamente.");
     }
   }
@@ -12875,13 +12935,24 @@
   }
 
   function bindProfileEvents() {
-    document.addEventListener("change", async (event) => {
+    document.addEventListener("change", (event) => {
       const input = event.target.closest("[data-profile-photo-input]");
       if (!input) return;
       const file = input.files?.[0];
       if (!file) return;
-      await uploadProfilePhoto(file, input.dataset.profilePhotoInput);
+      const role = input.dataset.profilePhotoInput;
       input.value = "";
+      showPhotoCropSheet(file, role);
+    });
+
+    document.getElementById("photoCropConfirm")?.addEventListener("click", async () => {
+      const pending = pendingPhotoUpload;
+      closePhotoCropSheet();
+      if (pending) await uploadProfilePhoto(pending.blob, pending.role);
+    });
+
+    document.addEventListener("click", (event) => {
+      if (event.target.closest("[data-close-photo-crop]")) closePhotoCropSheet();
     });
   }
 
