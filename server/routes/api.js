@@ -15,6 +15,7 @@ const { storageDriver } = require("../config");
 const { readCollection, writeCollection } = require("../storage/collections");
 const { getDataScope, filterByOwner, splitByOwner, OWNER_SCOPED_COLLECTIONS } = require("../storage/dataScope");
 const { assertOwnership, enforceOwnerOnWrite } = require("../ownership");
+const { resolveStudentLogin } = require("../student-login");
 const { isMailConfigured, sendPasswordResetEmail, sendStudentInviteEmail, sendContractEmail } = require("../mail");
 const { TRAINER_ID, SESSION_TTL, createSessionToken, requireAuth, requireManager } = require("../auth");
 const { getVapidPublicKey, savePushSubscription, removePushSubscriptionByEndpoint, sendPushToStudent, sendPushToManager } = require("../push");
@@ -621,8 +622,11 @@ function createApiRouter() {
       }
 
       const students = await readCollection(STUDENTS_KEY, []);
-      const student = students.find((item) => normalizeEmail(item.email) === email && item.status !== "inactive");
-      if (!student || !verifyPassword(password, student.passwordHash)) {
+      // MULTI-TENANT (RELATORIO-MULTI-PERSONAL secao 6): o aluno nao informa o
+      // trainer. Resolvemos por e-mail+senha e, em caso de colisao de e-mail
+      // entre trainers, recusamos ambiguidades em vez de adivinhar o tenant.
+      const { student } = resolveStudentLogin(students, email, { normalizeEmail, verifyPassword, password });
+      if (!student) {
         response.status(401).json({ error: "E-mail ou senha invalidos." });
         return;
       }
@@ -638,6 +642,9 @@ function createApiRouter() {
         role: "student",
         name: student.name || "Aluno",
         email,
+        // trainerId vem do PROPRIO registro encontrado (nao da constante). O
+        // fallback TRAINER_ID cobre apenas registros legados ainda sem
+        // trainer_id (backfill na Fase 1 do relatorio).
         trainerId: student.trainerId || TRAINER_ID,
         studentId: student.id || ""
       };
