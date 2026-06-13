@@ -3087,7 +3087,7 @@
             </div>
             <button class="section-link" type="button" data-manager-nav="updates">Ver todas ›</button>
           </div>
-          ${pendingItems.length ? `<div class="entity-list dashboard-pending-list">${pendingItems.map(renderDashboardPendingItem).join("")}</div>` : emptyState("Nenhuma pendência", "Tudo certo por enquanto.")}
+          ${pendingItems.length ? `<div class="entity-list dashboard-pending-list">${pendingItems.map(renderDashboardPendingItem).join("")}</div>` : emptyState("Nenhuma pendência", "Tudo certo por enquanto.", icons.updates)}
         </section>
 
         <section class="dashboard-grid dashboard-main-grid">
@@ -3098,7 +3098,7 @@
               </div>
               <button class="section-link" type="button" data-manager-nav="agenda">Ver agenda ›</button>
             </div>
-            ${agendaToday.length ? `<div class="dashboard-agenda-list">${agendaToday.slice(0, 3).map(renderDashboardAgendaItem).join("")}</div>` : emptyState("Agenda livre hoje", "Novos treinos e atualizações aparecerão aqui.")}
+            ${agendaToday.length ? `<div class="dashboard-agenda-list">${agendaToday.slice(0, 3).map(renderDashboardAgendaItem).join("")}</div>` : emptyState("Agenda livre hoje", "Novos treinos e atualizações aparecerão aqui.", icons.agenda)}
           </div>
 
           <div class="panel dashboard-panel">

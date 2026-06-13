@@ -2186,18 +2186,21 @@ svg {
 }
 
 .empty-state .empty-state-icon {
-  opacity: 0.5;
-  width: 48px;
-  height: 48px;
+  opacity: 1;
+  width: 2.75rem;
+  height: 2.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--ink);
+  color: #f5b51b;
+  background: rgba(245, 181, 27, 0.1);
+  border: 1px solid rgba(245, 181, 27, 0.18);
+  border-radius: 50%;
 }
 
 .empty-state .empty-state-icon svg {
-  width: 48px;
-  height: 48px;
+  width: 1.5rem;
+  height: 1.5rem;
   stroke: currentColor;
   fill: none;
   stroke-width: 1.5;
