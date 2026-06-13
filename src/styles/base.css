@@ -6208,8 +6208,10 @@ button.dashboard-metric {
 /* A1 — Header: safe area real acima dos elementos clicáveis */
 .manager-header,
 .student-header {
-  padding-top: calc(env(safe-area-inset-top, 20px) + 8px) !important;
-  min-height: auto !important;
+  padding-top: max(0.72rem, env(safe-area-inset-top, 0px)) !important;
+  padding-bottom: 0.72rem !important;
+  min-height: calc(5rem + env(safe-area-inset-top, 0px)) !important;
+  overflow: visible !important;
 }
 
 .menu-trigger,
