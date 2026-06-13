@@ -1,12 +1,8 @@
-const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
+const { jwtSecret: JWT_SECRET } = require("./config");
 
 const TRAINER_ID = "trainer-demo";
 const SESSION_TTL = process.env.SESSION_TTL || "12h";
-const JWT_SECRET =
-  process.env.JWT_SECRET ||
-  process.env.SESSION_SECRET ||
-  crypto.randomBytes(32).toString("hex");
 
 function createSessionToken(account = {}) {
   return jwt.sign(

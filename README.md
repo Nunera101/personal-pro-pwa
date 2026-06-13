@@ -54,7 +54,10 @@ Crie um arquivo `.env` na raiz (nunca commite este arquivo):
 # Banco de dados (se omitido, usa armazenamento JSON em data/)
 DATABASE_URL=postgres://user:pass@host:5432/dbname
 
-# JWT
+# JWT — OBRIGATÓRIO em produção. Use um segredo estável e secreto
+# (ex.: openssl rand -hex 32). Se mudar, todas as sessões são invalidadas.
+# Em produção o app NÃO sobe sem esta variável. Em dev, se omitida, usa um
+# segredo fixo só para desenvolvimento (avisado no console).
 JWT_SECRET=seu-segredo-aqui
 
 # Admin / gestor — credenciais lidas do ambiente (nunca hardcode a senha)
