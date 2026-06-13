@@ -13,7 +13,8 @@ const authRateLimiter = rateLimit({
 const { isDatabaseReady, query: dbQuery } = require("../db");
 const { storageDriver } = require("../config");
 const { readCollection, writeCollection } = require("../storage/collections");
-const { getDataScope, filterByOwner, splitByOwner } = require("../storage/dataScope");
+const { getDataScope, filterByOwner, splitByOwner, OWNER_SCOPED_COLLECTIONS } = require("../storage/dataScope");
+const { assertOwnership } = require("../ownership");
 const { isMailConfigured, sendPasswordResetEmail, sendStudentInviteEmail, sendContractEmail } = require("../mail");
 const { TRAINER_ID, SESSION_TTL, createSessionToken, requireAuth, requireManager } = require("../auth");
 const { getVapidPublicKey, savePushSubscription, removePushSubscriptionByEndpoint, sendPushToStudent, sendPushToManager } = require("../push");
@@ -1032,6 +1033,14 @@ function createApiRouter() {
       if (!Array.isArray(existing)) {
         response.status(400).json({ error: "Operacao nao suportada para essa colecao." });
         return;
+      }
+      // OWNERSHIP (R-19, vetor mais destrutivo): antes de deletar, carregar o recurso-alvo e
+      // exigir pertencimento. assertOwnership lanca 404 (inexistente) ou 403 (recurso de outro dono).
+      // Aluno so deleta o proprio; manager so do proprio trainer. EXERCISES_KEY e biblioteca
+      // compartilhada (sem dono) e permanece fora do ownership.
+      if (OWNER_SCOPED_COLLECTIONS.has(collection)) {
+        const target = existing.find((item) => String(item.id || "") === String(id));
+        assertOwnership(target, request.auth);
       }
       const updated = existing.filter((item) => String(item.id || "") !== String(id));
       await writeCollection(collection, [...otherItems, ...updated]);
