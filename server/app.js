@@ -7,6 +7,7 @@ const { Server } = require("socket.io");
 const { rootDir, uploadDir } = require("./config");
 const { createApiRouter } = require("./routes/api");
 const { createUploadRouter } = require("./routes/uploads");
+const { createVideosRouter } = require("./routes/videos");
 const { configureRealtime } = require("./realtime");
 const { initWebPush } = require("./push");
 
@@ -30,6 +31,7 @@ function createServer() {
 
   app.use("/uploads", express.static(path.join(rootDir, "uploads")));
   app.use("/api/uploads", createUploadRouter());
+  app.use("/api/videos", createVideosRouter());
   app.use("/api", createApiRouter());
 
   configureRealtime(io);

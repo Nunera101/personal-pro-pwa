@@ -787,6 +787,10 @@
     return Boolean(exercise.videoUrl || exercise.videoName || exercise.videoKey);
   }
 
+  function isStaleVideoUrl(url) {
+    return Boolean(url && (url.startsWith("blob:") || url.includes("/uploads/exercises/")));
+  }
+
   function formatFileSize(bytes) {
     const size = Number(bytes || 0);
     if (!size) return "";
@@ -1950,6 +1954,9 @@
   }
 
   function videoActionHtml(exercise) {
+    if (exercise.videoUrl && isStaleVideoUrl(exercise.videoUrl)) {
+      return `<span class="video-meta"><button class="mini-button" type="button" data-open-exercise-video="${escapeHtml(exercise.id)}">Reenviar</button><span class="small-text">Vídeo precisa ser reenviado</span></span>`;
+    }
     if (exercise.videoUrl) {
       const label = exercise.videoName || (exercise.videoStorage === "external" ? "Link cadastrado" : "Vídeo cadastrado");
       const size = formatFileSize(exercise.videoSize);
@@ -1963,6 +1970,9 @@
 
   function execVideoPlayerHtml(exercise) {
     if (!hasExerciseVideo(exercise)) {
+      return `<div class="exec-video-placeholder" aria-hidden="true"><svg class="exec-video-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m10 9 6 3-6 3V9Z"/></svg></div>`;
+    }
+    if (exercise.videoUrl && isStaleVideoUrl(exercise.videoUrl)) {
       return `<div class="exec-video-placeholder" aria-hidden="true"><svg class="exec-video-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m10 9 6 3-6 3V9Z"/></svg></div>`;
     }
     if (exercise.videoStorage === "indexeddb" && exercise.videoKey) {
@@ -2013,8 +2023,8 @@
 
   async function uploadExerciseVideo(file, exerciseId) {
     if (!file || !file.size) return null;
-    const maxSize = 200 * 1024 * 1024;
-    if (file.size > maxSize) throw new Error("O vídeo deve ter até 200 MB.");
+    const maxSize = 60 * 1024 * 1024;
+    if (file.size > maxSize) throw new Error("O vídeo deve ter até 60 MB.");
     const allowed = ["video/mp4", "video/webm", "video/quicktime"];
     if (file.type && !allowed.includes(file.type)) throw new Error("Use vídeo MP4, WebM ou MOV.");
 
@@ -2025,7 +2035,7 @@
       formData.append("trainerId", TRAINER_ID);
       const headers = {};
       if (state.authToken) headers.Authorization = `Bearer ${state.authToken}`;
-      const response = await fetchWithTimeout(apiUrl("/uploads/exercises"), { method: "POST", body: formData, headers }, 60000);
+      const response = await fetchWithTimeout(apiUrl("/videos"), { method: "POST", body: formData, headers }, 120000);
       if (!response.ok) throw new Error("Upload remoto indisponível.");
       const payload = await response.json();
       state.apiAvailable = true;
@@ -4788,6 +4798,8 @@
 
     if (!hasExerciseVideo(exercise)) {
       body.innerHTML = placeholderHtml("Nenhum vídeo cadastrado", "Enviar vídeo");
+    } else if (exercise.videoUrl && isStaleVideoUrl(exercise.videoUrl)) {
+      body.innerHTML = placeholderHtml("Vídeo precisa ser reenviado", "Reenviar vídeo");
     } else if (exercise.videoStorage === "indexeddb" && exercise.videoKey) {
       try {
         const blob = await readLocalVideo(exercise.videoKey);
@@ -4962,7 +4974,7 @@
               <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
             </div>
             <p class="ev-drop-label">Toque para selecionar ou arraste o vídeo</p>
-            <p class="ev-drop-sub">MP4, MOV ou WebM · máx 200 MB</p>
+            <p class="ev-drop-sub">MP4, MOV ou WebM · máx 60 MB</p>
           </label>
         </div>`;
       body.querySelector(".ev-file-input").addEventListener("change", (e) => {
@@ -5018,7 +5030,7 @@
     function handleFileSelected(file) {
       const allowed = ["video/mp4", "video/webm", "video/quicktime"];
       if (file.type && !allowed.includes(file.type)) { showToast("Use vídeo MP4, WebM ou MOV."); return; }
-      if (file.size > 200 * 1024 * 1024) { showToast("O vídeo deve ter até 200 MB."); return; }
+      if (file.size > 60 * 1024 * 1024) { showToast("O vídeo deve ter até 60 MB."); return; }
       if (previewUrl) URL.revokeObjectURL(previewUrl);
       selectedFile = file;
       previewUrl = URL.createObjectURL(file);
