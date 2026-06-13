@@ -37,7 +37,7 @@
   border: none;
   border-radius: var(--radius);
   background: var(--brand);
-  color: #0b0904;
+  color: var(--brand-ink);
   font-size: 0.95rem;
   font-weight: 820;
   cursor: pointer;
@@ -347,7 +347,7 @@
 
 .diet-primary-action {
   background: var(--brand);
-  color: #100c04;
+  color: var(--brand-ink);
   box-shadow: none;
 }
 

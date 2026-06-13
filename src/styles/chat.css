@@ -320,7 +320,7 @@
   padding: 0 0.36rem;
   border-radius: 999px;
   background: var(--brand);
-  color: #070707;
+  color: var(--brand-ink);
   font-size: 0.78rem;
   font-weight: 900;
 }
@@ -512,7 +512,7 @@
   padding: 0 0.38rem;
   border-radius: 999px;
   background: var(--brand);
-  color: #070707;
+  color: var(--brand-ink);
   font-size: 0.82rem;
   font-weight: 900;
 }
@@ -677,7 +677,7 @@
   padding: 0 0.3rem;
   border-radius: 999px;
   background: var(--brand);
-  color: #070707;
+  color: var(--brand-ink);
   font-size: 0.72rem;
   font-weight: 900;
   line-height: 1;
@@ -1059,7 +1059,7 @@
   border: 0;
   border-radius: 50%;
   background: var(--brand);
-  color: #070707;
+  color: var(--brand-ink);
   cursor: pointer;
   transition: background 140ms ease, transform 110ms ease;
 }
@@ -1104,7 +1104,7 @@ body.is-student-chat-tab .thread-sheet {
   padding: 0 0.22rem;
   border-radius: 999px;
   background: var(--brand);
-  color: #070707;
+  color: var(--brand-ink);
   font-size: 0.6rem;
   font-weight: 900;
   line-height: 1.2rem;

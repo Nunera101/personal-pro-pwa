@@ -41,7 +41,7 @@
   min-height: 3.15rem;
   border-radius: 0.85rem;
   background: var(--brand);
-  color: #080808;
+  color: var(--brand-ink);
   box-shadow: none;
 }
 

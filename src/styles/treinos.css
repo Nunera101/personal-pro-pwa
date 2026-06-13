@@ -36,7 +36,7 @@
   border-radius: 1rem;
   border: none;
   background: var(--brand);
-  color: #080808;
+  color: var(--brand-ink);
   font-size: clamp(1rem, 3.8vw, 1.1rem);
   font-weight: 800;
   cursor: pointer;
@@ -759,7 +759,7 @@
   display: grid !important;
   place-items: center !important;
   border-radius: 999px !important;
-  color: #121212 !important;
+  color: var(--brand-ink) !important;
   background: var(--brand) !important;
   box-shadow: none !important;
 }
@@ -948,7 +948,7 @@
 }
 
 .library-exercise-actions .primary-action {
-  color: #111 !important;
+  color: var(--brand-ink) !important;
   background: var(--brand) !important;
   border-color: rgba(var(--brand-rgb), 0.52) !important;
 }
@@ -1815,7 +1815,7 @@
   place-items: center;
   border-radius: 999px;
   background: var(--brand);
-  color: #111;
+  color: var(--brand-ink);
   font-size: 0.62rem;
   font-weight: 750;
   line-height: 1;
@@ -2045,7 +2045,7 @@
   height: 2.4rem;
   border-radius: 999px;
   background: var(--brand);
-  color: #111;
+  color: var(--brand-ink);
 }
 
 .swd-ex-play svg {

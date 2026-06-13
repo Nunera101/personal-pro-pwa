@@ -35,7 +35,7 @@
   min-height: 3.1rem;
   padding-inline: 1.25rem;
   background: var(--brand);
-  color: #0b0904;
+  color: var(--brand-ink);
   box-shadow: none;
 }
 
@@ -451,7 +451,7 @@
 
 .finance-primary-action {
   background: var(--brand);
-  color: #100c04;
+  color: var(--brand-ink);
   box-shadow: none;
 }
 

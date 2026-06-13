@@ -84,7 +84,7 @@ h1 {
   gap: 1rem;
   background: #0b6b57;
   background: var(--brand);
-  color: #fff;
+  color: var(--brand-ink);
   transition: opacity 260ms ease, visibility 260ms ease;
 }
 
@@ -454,7 +454,7 @@ body.demo-mode .demo-only {
 .primary-action {
   border: 0;
   background: var(--brand);
-  color: #fff;
+  color: var(--brand-ink);
   box-shadow: 0 12px 24px rgba(11, 107, 87, 0.22);
 }
 
@@ -1163,7 +1163,7 @@ svg {
 
 .day-cell.is-today .day-number {
   background: var(--brand);
-  color: #fff;
+  color: var(--brand-ink);
 }
 
 .day-events {
@@ -2021,6 +2021,11 @@ body.app-installed [data-install-trigger] {
 /* ── Themes ─────────────────────────────────────────────────────────────
    Cada seletor sobrescreve apenas as 4 variáveis canônicas de marca.
    Trocar data-theme no <html> re-tematiza o app inteiro.
+
+   REGRA ÚNICA DE CONTRASTE: todo elemento com `background: var(--brand)`
+   usa `color: var(--brand-ink)` no texto — nunca branco/#fff sobre o
+   dourado (bug recorrente). `--brand-ink` é a única fonte dessa decisão e
+   é definido por tema abaixo; não hardcodar cor de texto sobre a marca.
    ──────────────────────────────────────────────────────────────────── */
 
 /* gold — âmbar dourado (ativo) */
@@ -2176,7 +2181,7 @@ body::before {
 .primary-action {
   border: none;
   background: var(--brand);
-  color: #0b0b0b;
+  color: var(--brand-ink);
   box-shadow: none;
 }
 
@@ -2596,7 +2601,7 @@ body::before {
 
 .day-cell.is-selected .day-number {
   background: var(--brand);
-  color: #080808;
+  color: var(--brand-ink);
 }
 
 .agenda-item {
@@ -2973,7 +2978,7 @@ body::before {
   min-width: 11.2rem;
   border-radius: 0.72rem;
   background: var(--brand);
-  color: #080808;
+  color: var(--brand-ink);
   box-shadow: none;
 }
 
@@ -4186,7 +4191,7 @@ button.dashboard-metric {
   min-height: 2.58rem;
   padding-inline: 0.95rem;
   background: var(--brand);
-  color: #090805;
+  color: var(--brand-ink);
   box-shadow: none;
 }
 
@@ -5973,7 +5978,7 @@ button.dashboard-metric {
   min-height: 2.8rem;
   padding: 0 1.1rem;
   background: var(--brand);
-  color: #080808;
+  color: var(--brand-ink);
   font-weight: 800;
   font-size: clamp(0.82rem, 3vw, 0.92rem);
   border-radius: 0.82rem;

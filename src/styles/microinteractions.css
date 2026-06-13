@@ -136,7 +136,7 @@
   padding: 0 1.5rem;
   border-radius: 0.82rem;
   background: var(--brand);
-  color: #111;
+  color: var(--brand-ink);
   font-size: 0.94rem;
   font-weight: 780;
   border: 0;
