@@ -1,6 +1,6 @@
 # DIVERGÊNCIAS-GESTOR — Auditoria Visual do Painel do Gestor
 
-**Data inicial:** 2026-06-08 | **Última revisão:** 2026-06-08 (pós-fechamento)  
+**Data inicial:** 2026-06-08 | **Última revisão:** 2026-06-13 (revisão final com screenshots)  
 **Branch:** main  
 **Método:** Análise estática + revisão de código pós-correções das Levas 1–4 + fechamento.
 
@@ -79,6 +79,7 @@
 | ID | Severidade | Elemento | Problema |
 |----|-----------|----------|----------|
 | U-03 | 🟡 | Strip de fotos | Fotos do card sem `alt` text; não indica número total de fotos |
+| U-05 | ✅ RESOLVIDO | Filtros truncados em 390px | 3 filtros em `display:flex` inline squishavam para 116px cada, truncando labels. **Fix:** removido `style="display:flex;overflow-x:auto"` do container; CSS `.updates-page .update-filter-grid { grid-template-columns: repeat(2, 1fr) }` agora se aplica (2 col topo + 1 col período). |
 
 ---
 
@@ -93,6 +94,7 @@
 | ID | Severidade | Elemento | Problema |
 |----|-----------|----------|----------|
 | F-06 | 🟢 | KPIs da visão mensal | "Faturamento / Ticket médio / Inadimplência" sem formatação de moeda BRL consistente em todos os breakpoints |
+| F-07 | ✅ RESOLVIDO | `.finance-hero` overflow | Botão "Registrar pagamento" vazava ~35px além do viewport em 390px — `min-width:auto` na coluna de texto forçava a hero a 414px. **Fix:** `min-width:0` em `.finance-hero > :first-child`. |
 
 ---
 

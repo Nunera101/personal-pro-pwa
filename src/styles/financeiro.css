@@ -11,6 +11,10 @@
   padding: 0.35rem 0 0.1rem;
 }
 
+.finance-hero > :first-child {
+  min-width: 0;
+}
+
 .finance-hero h3 {
   margin-top: 0.15rem;
   color: var(--ink);

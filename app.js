@@ -2742,7 +2742,8 @@
       return;
     }
 
-    const menu = studentMenus.find((item) => item.id === state.studentMenu) || studentMenus[0];
+    const _maisLabels = { "mais-perfil": "Perfil", "mais-contrato": "Contrato", "mais-config": "Configurações" };
+    const menu = studentMenus.find((item) => item.id === state.studentMenu) || { label: _maisLabels[state.studentMenu] || "Mais" };
     elements.studentTitle.textContent = fixMojibake(menu.label);
     renderSideNav(elements.studentSideNav, studentMenus.map((item) => ({ ...item, group: item.id === "today" ? "Aluno" : "" })), state.studentMenu, "data-student-nav");
     elements.studentSideNav.insertAdjacentHTML("afterbegin", `
@@ -6186,7 +6187,7 @@
           ${stdMetricCard("Pendentes", pendingCount, "Aguardando", "warning")}
           ${stdMetricCard("Atrasadas", lateCount, lateCount ? "Requerem atenção" : "Em dia", "danger")}
         </div>
-        <div class="update-filter-grid" style="display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;">
+        <div class="update-filter-grid">
           ${updateFilterSelect("studentId", "Aluno", icons.students, [["", "Todos os alunos"], ...students.map((student) => [student.id, student.name])], filters.studentId)}
           ${updateFilterSelect("status", "Status", icons.updates, [
             ["all", "Todos os status"],

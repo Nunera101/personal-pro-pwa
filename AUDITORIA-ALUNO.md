@@ -1,6 +1,6 @@
 # Auditoria do Modo Aluno
 
-**Data:** 2026-06-12 (revisão final dos widgets do Início; base anterior: pós-refinamento premium — Levas A–D, vídeo real 11/06)
+**Data:** 2026-06-13 (revisão final com screenshots; base anterior: widgets do Início 12/06)
 **Escopo:** Todas as telas do modo `student`: Login, Contrato/Gate, Início, Treinos, Detalhe do treino, Execução, Dieta, Mensagens/Chat, Progresso, Agenda, Mais, Perfil
 **Status do refinamento:** ✅ Concluído (8 tarefas de refinamento + passada premium)
 
@@ -90,6 +90,7 @@
 
 ### Perfil (`renderStudentMaisPerfil`)
 - Avatar + nome + status, summary grid, dados pessoais/conta, seção de contrato com "Visualizar".
+- Header da workspace mostrava "Início" ao navegar para "mais-perfil" (fallback para `studentMenus[0]`). **RESOLVIDO 13/06:** fallback agora mapeia `mais-perfil → "Perfil"`, `mais-contrato → "Contrato"`, `mais-config → "Configurações"`.
 - **OK**.
 
 ---
