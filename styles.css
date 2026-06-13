@@ -12547,6 +12547,175 @@ button.dashboard-metric {
   grid-template-columns: clamp(2.15rem, 8vw, 3rem) repeat(7, minmax(0, 1fr)) !important;
 }
 
+/* ─── ELITE HEADER v3 ──────────────────────────────────── */
+
+.manager-header,
+.student-header {
+  position: relative !important;
+  min-height: 5rem !important;
+  padding: 0 clamp(0.85rem, 3.5vw, 1.75rem) !important;
+  background: rgba(6, 6, 6, 0.97) !important;
+  backdrop-filter: blur(28px) saturate(1.6) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(1.6) !important;
+  border-bottom: 1px solid rgba(245, 184, 46, 0.12) !important;
+  box-shadow:
+    0 1px 0 rgba(245, 184, 46, 0.08),
+    0 10px 42px rgba(0, 0, 0, 0.72) !important;
+}
+
+/* Gold shimmer top accent */
+.manager-header::before,
+.student-header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(245, 184, 46, 0.18) 12%,
+    #f5b82e 38%,
+    #ffd060 52%,
+    #f5b82e 66%,
+    rgba(245, 184, 46, 0.18) 88%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+/* Subtle inner glow below the accent line */
+.manager-header::after,
+.student-header::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 0;
+  right: 0;
+  height: 28px;
+  background: linear-gradient(180deg, rgba(245, 184, 46, 0.04) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+/* Logo */
+.manager-header .brand-logo,
+.student-header .brand-logo {
+  width: 2.6rem !important;
+  height: 2.6rem !important;
+  border-radius: 0.65rem !important;
+  box-shadow:
+    0 0 0 1px rgba(245, 184, 46, 0.22),
+    0 3px 12px rgba(0, 0, 0, 0.5) !important;
+  flex-shrink: 0;
+}
+
+.manager-header .brand-inline,
+.student-header .brand-inline {
+  gap: 0.72rem !important;
+  flex-shrink: 0 !important;
+}
+
+.manager-header .brand-inline h2,
+.student-header .brand-inline h2 {
+  color: #f4f1ea !important;
+  font-size: clamp(1.1rem, 4vw, 1.55rem) !important;
+  font-weight: 840 !important;
+  letter-spacing: -0.025em !important;
+  line-height: 1 !important;
+}
+
+/* Page title — center */
+#managerTitle,
+#studentTitle {
+  flex: 1 1 0 !important;
+  display: block !important;
+  text-align: center !important;
+  color: rgba(244, 241, 234, 0.78) !important;
+  font-size: clamp(0.88rem, 3.2vw, 1rem) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.005em !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  padding: 0 0.5rem !important;
+}
+
+/* Badges de role */
+.manager-badge,
+.student-badge {
+  padding: 0.18rem 0.56rem !important;
+  border-radius: 999px !important;
+  background: linear-gradient(135deg, rgba(245, 184, 46, 0.14) 0%, rgba(245, 184, 46, 0.05) 100%) !important;
+  border: 1px solid rgba(245, 184, 46, 0.44) !important;
+  color: #ffc84b !important;
+  font-size: 0.57rem !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.16em !important;
+  box-shadow: 0 0 8px rgba(245, 184, 46, 0.1) !important;
+  margin-top: 0.18rem !important;
+}
+
+/* Avatar — anel dourado */
+.manager-header .avatar-button,
+.student-header .avatar-button {
+  width: 2.68rem !important;
+  height: 2.68rem !important;
+  border-radius: 50% !important;
+  border: 1.5px solid rgba(245, 184, 46, 0.58) !important;
+  color: #ffc84b !important;
+  font-weight: 870 !important;
+  font-size: 0.8rem !important;
+  background: rgba(245, 184, 46, 0.08) !important;
+  box-shadow:
+    0 0 0 3px rgba(245, 184, 46, 0.09),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+  transition: box-shadow 0.22s, border-color 0.22s !important;
+  flex-shrink: 0 !important;
+}
+
+.manager-header .avatar-button:hover,
+.student-header .avatar-button:hover {
+  border-color: #f5b82e !important;
+  box-shadow:
+    0 0 0 4px rgba(245, 184, 46, 0.18),
+    0 0 16px rgba(245, 184, 46, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Icon buttons */
+.manager-header .icon-button,
+.student-header .icon-button {
+  color: rgba(244, 241, 234, 0.68) !important;
+  transition: color 0.18s, background 0.18s !important;
+}
+
+.manager-header .icon-button:hover,
+.student-header .icon-button:hover {
+  color: #f4f1ea !important;
+  background: rgba(245, 184, 46, 0.07) !important;
+}
+
+.manager-header .header-actions,
+.student-header .header-actions {
+  gap: 0.46rem !important;
+  flex-shrink: 0 !important;
+}
+
+.manager-header .notification-button,
+.student-header .notification-button {
+  width: 2.4rem !important;
+  height: 2.4rem !important;
+}
+
+/* Mobile: oculta texto da brand para dar espaço ao título central */
+@media (max-width: 479px) {
+  .manager-header .brand-inline div,
+  .student-header .brand-inline div {
+    display: none !important;
+  }
+}
+
 .agenda-week-day {
   min-width: 0 !important;
   min-height: 2.62rem !important;
