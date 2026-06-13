@@ -13,6 +13,7 @@ const authRateLimiter = rateLimit({
 const { isDatabaseReady, query: dbQuery } = require("../db");
 const { storageDriver } = require("../config");
 const { readCollection, writeCollection } = require("../storage/collections");
+const { getDataScope, filterByOwner, splitByOwner } = require("../storage/dataScope");
 const { isMailConfigured, sendPasswordResetEmail, sendStudentInviteEmail, sendContractEmail } = require("../mail");
 const { TRAINER_ID, SESSION_TTL, createSessionToken, requireAuth, requireManager } = require("../auth");
 const { getVapidPublicKey, savePushSubscription, removePushSubscriptionByEndpoint, sendPushToStudent, sendPushToManager } = require("../push");
@@ -276,7 +277,10 @@ async function readCollectionForAuth(collection, auth) {
     throw error;
   }
   const fallback = collection === SETTINGS_KEY ? {} : [];
-  return sanitizeCollection(collection, await readCollection(collection, fallback), auth);
+  const scope = getDataScope(auth);
+  // PONTO CENTRAL DE LEITURA — filterByOwner é no-op enquanto scope.type==='global'
+  const raw = filterByOwner(await readCollection(collection, fallback), scope, collection);
+  return sanitizeCollection(collection, raw, auth);
 }
 
 async function writeCollectionForAuth(collection, payload, auth) {
@@ -287,6 +291,7 @@ async function writeCollectionForAuth(collection, payload, auth) {
   }
 
   const fallback = collection === SETTINGS_KEY ? {} : [];
+  // MULTI-PERSONAL: trocar readCollection por splitByOwner e propagar otherItems em cada writeCollection abaixo
   const existing = await readCollection(collection, fallback);
 
   if (auth.role === "manager") {
@@ -920,13 +925,15 @@ function createApiRouter() {
         response.status(403).json({ error: "Acesso negado." });
         return;
       }
-      const existing = await readCollection(collection, []);
+      // PONTO CENTRAL DE LEITURA — splitByOwner isola itens do dono; otherItems=[]) enquanto escopo global
+      const scope = getDataScope(request.auth);
+      const { ownerItems: existing, otherItems } = splitByOwner(await readCollection(collection, []), scope, collection);
       if (!Array.isArray(existing)) {
         response.status(400).json({ error: "Operacao nao suportada para essa colecao." });
         return;
       }
       const updated = existing.filter((item) => String(item.id || "") !== String(id));
-      await writeCollection(collection, updated);
+      await writeCollection(collection, [...otherItems, ...updated]);
       await writeAuditLog("delete", "collection", id, request.auth);
       response.json({ ok: true });
     } catch (error) {
