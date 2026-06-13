@@ -7011,20 +7011,20 @@ body::before {
 }
 
 .streak-number {
-  font-size: 34px;
-  font-weight: 800;
+  font-size: var(--t-num-lg);
+  font-weight: var(--t-num-w);
   line-height: 1.1;
   color: var(--dourado);
 }
 
 .streak-motivation {
-  font-size: 15px;
+  font-size: var(--t-sub);
   line-height: 1.3;
   overflow-wrap: anywhere;
 }
 
 .streak-label {
-  font-size: 12px;
+  font-size: var(--t-label);
   color: var(--txt2);
 }
 

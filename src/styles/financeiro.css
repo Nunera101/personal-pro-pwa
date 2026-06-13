@@ -333,7 +333,8 @@
 .finance-month-kpi strong {
   display: block;
   color: var(--ink);
-  font-size: 1.25rem;
+  font-size: var(--t-num-md);
+  font-weight: var(--t-num-w);
   line-height: 1.12;
 }
 

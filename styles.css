@@ -108,7 +108,8 @@
 
 .finance-summary-card strong {
   color: var(--ink);
-  font-size: clamp(1.45rem, 4.8vw, 2.1rem);
+  font-size: var(--t-num-md);
+  font-weight: var(--t-num-w);
   line-height: 1;
 }
 
@@ -344,7 +345,8 @@
 .finance-month-kpi strong {
   display: block;
   color: var(--ink);
-  font-size: 1.25rem;
+  font-size: var(--t-num-md);
+  font-weight: var(--t-num-w);
   line-height: 1.12;
 }
 
@@ -895,7 +897,8 @@ body.app-ready .startup-splash {
 }
 
 .brand-block h1 {
-  font-size: clamp(1.75rem, 8vw, 2.45rem);
+  font-size: var(--t-h1);
+  font-weight: var(--t-h1-w);
   line-height: 1.05;
 }
 
@@ -1692,8 +1695,8 @@ svg {
 .metric-card strong {
   display: block;
   margin-top: 0.35rem;
-  font-size: 24px;
-  font-weight: 700;
+  font-size: var(--t-num-lg);
+  font-weight: var(--t-num-w);
   line-height: 1;
 }
 
@@ -3677,7 +3680,8 @@ body::before {
 
 .metric-card strong {
   color: var(--ink);
-  font-size: clamp(1.75rem, 7vw, 2.55rem);
+  font-size: var(--t-num-lg);
+  font-weight: var(--t-num-w);
 }
 
 .panel {
@@ -3686,8 +3690,8 @@ body::before {
 }
 
 .section-title h3 {
-  font-size: 1.16rem;
-  font-weight: 780;
+  font-size: var(--t-section);
+  font-weight: var(--t-section-w);
 }
 
 .entity-row,
