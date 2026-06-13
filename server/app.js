@@ -5,7 +5,7 @@ const fs = require("fs");
 const http = require("http");
 const path = require("path");
 const { Server } = require("socket.io");
-const { rootDir, uploadDir } = require("./config");
+const { rootDir, uploadDir, corsOrigins } = require("./config");
 const { createApiRouter } = require("./routes/api");
 const { createUploadRouter, createUploadsAssetRouter } = require("./routes/uploads");
 const { createVideosRouter } = require("./routes/videos");
@@ -18,10 +18,26 @@ function createServer() {
 
   const app = express();
   const server = http.createServer(app);
+
+  // CORS restrito (A4): só as origens reais do app (Railway + GitHub Pages +
+  // localhost de dev), definidas em config.corsOrigins. Requisições sem header
+  // Origin (same-origin, curl, apps nativos) são liberadas; origens fora da
+  // allowlist são recusadas. Mesma allowlist no Express e no Socket.IO.
+  const corsOriginCheck = (origin, callback) => {
+    if (!origin || corsOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error(`Origem não permitida pelo CORS: ${origin}`));
+  };
+  const corsOptions = {
+    origin: corsOriginCheck,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    credentials: true
+  };
+
   const io = new Server(server, {
     cors: {
-      origin: "*",
-      methods: ["GET", "POST"]
+      origin: corsOriginCheck,
+      methods: ["GET", "POST"],
+      credentials: true
     }
   });
 
@@ -83,7 +99,7 @@ function createServer() {
     })
   );
 
-  app.use(cors());
+  app.use(cors(corsOptions));
   app.use(express.json({ limit: "10mb" }));
   app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 

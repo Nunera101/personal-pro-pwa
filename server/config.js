@@ -12,6 +12,30 @@ const smtpPort = Number(process.env.SMTP_PORT || 587);
 // Em dev, usa um segredo fixo (NUNCA aleatório) avisando no console,
 // para não invalidar sessões a cada restart.
 const DEV_JWT_SECRET = "personal-pro-local-dev-secret";
+
+// Allowlist de CORS (A4): origens reais do app — nada de origin "*".
+// Produção no Railway + frontend no GitHub Pages + localhost de dev.
+// Pode ser estendida/sobrescrita via env CORS_ORIGINS (lista separada por
+// vírgula). As origens são comparadas exatamente (esquema + host + porta),
+// por isso não inclui caminho.
+const DEFAULT_CORS_ORIGINS = [
+  "https://personal-pro-pwa-production.up.railway.app",
+  "https://nunera101.github.io",
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+  "http://localhost:8080",
+  "http://127.0.0.1:8080",
+  "http://localhost:5173",
+  "http://127.0.0.1:5173"
+];
+function resolveCorsOrigins() {
+  const fromEnv = (process.env.CORS_ORIGINS || "")
+    .split(",")
+    .map((value) => value.trim().replace(/\/+$/, ""))
+    .filter(Boolean);
+  return Array.from(new Set([...DEFAULT_CORS_ORIGINS, ...fromEnv]));
+}
+
 function resolveJwtSecret() {
   const fromEnv = process.env.JWT_SECRET || process.env.SESSION_SECRET || "";
   if (fromEnv) return fromEnv;
@@ -35,6 +59,7 @@ module.exports = {
   storageDriver: process.env.STORAGE_DRIVER || (process.env.DATABASE_URL ? "postgres" : "json"),
   databaseUrl: process.env.DATABASE_URL || "",
   jwtSecret: resolveJwtSecret(),
+  corsOrigins: resolveCorsOrigins(),
   appPublicUrl: process.env.APP_PUBLIC_URL || "https://nunera101.github.io/personal-pro-pwa/",
   mailFrom: process.env.MAIL_FROM || "",
   smtp: {
