@@ -14,7 +14,7 @@ const { isDatabaseReady, query: dbQuery } = require("../db");
 const { storageDriver } = require("../config");
 const { readCollection, writeCollection } = require("../storage/collections");
 const { getDataScope, filterByOwner, splitByOwner, OWNER_SCOPED_COLLECTIONS } = require("../storage/dataScope");
-const { assertOwnership } = require("../ownership");
+const { assertOwnership, enforceOwnerOnWrite } = require("../ownership");
 const { isMailConfigured, sendPasswordResetEmail, sendStudentInviteEmail, sendContractEmail } = require("../mail");
 const { TRAINER_ID, SESSION_TTL, createSessionToken, requireAuth, requireManager } = require("../auth");
 const { getVapidPublicKey, savePushSubscription, removePushSubscriptionByEndpoint, sendPushToStudent, sendPushToManager } = require("../push");
@@ -208,13 +208,17 @@ function sanitizeCollection(collection, value, auth) {
   return [];
 }
 
-function mergeStudentsForWrite(existing = [], incoming = []) {
+function mergeStudentsForWrite(existing = [], incoming = [], auth = {}) {
   const existingById = new Map(existing.map((item) => [String(item.id || ""), item]));
   return incoming.map((student) => {
     const previous = existingById.get(String(student.id || "")) || {};
     const passwordHash = student.passwordHash && student.passwordHash !== "[hash]" ? student.passwordHash : previous.passwordHash || "";
+    // OWNERSHIP (R-02): trainerId do aluno vem do SERVIDOR — preserva o do registro
+    // ja gravado ou carimba o da sessao em novos alunos. Nunca aceito do corpo.
+    const trainerId = previous.trainerId || auth.trainerId || TRAINER_ID;
     return {
       ...student,
+      trainerId,
       passwordHash,
       accessStatus: normalizeStudentAccessStatus(student.accessStatus, Boolean(passwordHash || student.hasPassword))
     };
@@ -325,16 +329,32 @@ async function writeCollectionForAuth(collection, payload, auth) {
   const existing = await readCollection(collection, fallback);
 
   if (auth.role === "manager") {
-    if (collection === STUDENTS_KEY) return writeCollection(collection, mergeStudentsForWrite(existing, Array.isArray(payload) ? payload : []));
+    if (collection === STUDENTS_KEY) return writeCollection(collection, mergeStudentsForWrite(existing, Array.isArray(payload) ? payload : [], auth));
     if (collection === SETTINGS_KEY) return writeCollection(collection, mergeSettingsForWrite(existing, payload || {}));
+
+    // OWNERSHIP (R-02, R-05, R-17): em colecoes com dono, os campos trainerId/studentId
+    // do recurso vem do SERVIDOR (sessao). Em update preserva o dono ja gravado (ignora
+    // tentativa de reatribuir treino/pagamento para outro studentId via corpo); em create
+    // carimba o trainerId da sessao. Itens de outro dono (otherItems, escopo multi-personal)
+    // sao preservados intactos e seus ids nao podem ser sequestrados.
+    let writablePayload = payload;
+    let otherItems = [];
+    const isOwnerScopedArray = OWNER_SCOPED_COLLECTIONS.has(collection) && Array.isArray(payload);
+    if (isOwnerScopedArray) {
+      const split = splitByOwner(Array.isArray(existing) ? existing : [], getDataScope(auth), collection);
+      otherItems = split.otherItems;
+      const foreignIds = new Set(otherItems.map((item) => String(item.id || "")));
+      writablePayload = enforceOwnerOnWrite(payload, split.ownerItems, auth, foreignIds);
+    }
+    const persist = isOwnerScopedArray ? [...otherItems, ...writablePayload] : payload;
 
     if (collection === WORKOUTS_KEY && Array.isArray(payload)) {
       const existingById = new Map((Array.isArray(existing) ? existing : []).map((w) => [w.id, w]));
-      const newlyPublished = payload.filter((w) => {
+      const newlyPublished = writablePayload.filter((w) => {
         const old = existingById.get(w.id);
         return w.status === "published" && w.studentId && (!old || old.status !== "published");
       });
-      await writeCollection(collection, payload);
+      await writeCollection(collection, persist);
       for (const w of newlyPublished) {
         sendPushToStudent(w.studentId, {
           title: "Novo treino disponível!",
@@ -347,8 +367,8 @@ async function writeCollectionForAuth(collection, payload, auth) {
 
     if (collection === ACTIVITIES_KEY && Array.isArray(payload)) {
       const existingIds = new Set((Array.isArray(existing) ? existing : []).map((a) => a.id));
-      const newActivities = payload.filter((a) => !existingIds.has(a.id) && a.studentId);
-      await writeCollection(collection, payload);
+      const newActivities = writablePayload.filter((a) => !existingIds.has(a.id) && a.studentId);
+      await writeCollection(collection, persist);
       for (const a of newActivities) {
         sendPushToStudent(a.studentId, {
           title: "Nova atividade na agenda!",
@@ -359,7 +379,7 @@ async function writeCollectionForAuth(collection, payload, auth) {
       return;
     }
 
-    return writeCollection(collection, payload);
+    return writeCollection(collection, persist);
   }
 
   if ([EXERCISES_KEY, WORKOUTS_KEY, STUDENTS_KEY, SETTINGS_KEY, PAYMENTS_KEY, DIETS_KEY].includes(collection)) return;
