@@ -2,7 +2,34 @@ const crypto = require("crypto");
 const express = require("express");
 const multer = require("multer");
 const { isDatabaseReady, query } = require("../db");
-const { requireManager } = require("../auth");
+const { requireManager, verifySessionToken } = require("../auth");
+
+// Sessão a partir do header Authorization OU do parâmetro ?token=. O elemento
+// <video> (e o streaming com Range no iOS) não envia o cabeçalho Authorization,
+// então o token de sessão também é aceito na query string.
+function authFromRequest(request) {
+  const header = String(request.headers.authorization || "");
+  let token = "";
+  if (header.toLowerCase().startsWith("bearer ")) token = header.slice(7).trim();
+  if (!token && request.query) token = String(request.query.token || "");
+  return verifySessionToken(token);
+}
+
+// Decide o acesso a UM vídeo com base APENAS no registro do servidor. Função
+// pura (recebe a linha do banco) para ser testável diretamente.
+//   { ok:true }              → autorizado
+//   { ok:false, status:401 } → sem sessão válida
+//   { ok:false, status:404 } → vídeo inexistente
+//   { ok:false, status:403 } → vídeo de OUTRO trainer
+// O vídeo é da biblioteca de um trainer; gestor e alunos do mesmo trainer têm
+// acesso (os alunos acessam os exercícios desse trainer). Vídeo de outro
+// trainer é negado independentemente do papel.
+function authorizeVideoAccess(video, auth) {
+  if (!auth) return { ok: false, status: 401 };
+  if (!video) return { ok: false, status: 404 };
+  if (video.trainer_id !== auth.trainerId) return { ok: false, status: 403 };
+  return { ok: true };
+}
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -52,16 +79,28 @@ function createVideosRouter() {
         res.status(404).end();
         return;
       }
+      // Exige sessão válida (C4): header Authorization OU ?token=.
+      const auth = authFromRequest(req);
+      if (!auth) {
+        res.status(401).json({ error: "Sessao expirada ou ausente. Entre novamente." });
+        return;
+      }
       if (!(await isDatabaseReady())) {
         res.status(503).end();
         return;
       }
       const result = await query(
-        "select mimetype, size_bytes, data from videos where id = $1",
+        "select trainer_id, mimetype, size_bytes, data from videos where id = $1",
         [req.params.id]
       );
-      if (!result.rows.length) {
-        res.status(404).end();
+      // Ownership multi-tenant verificado contra o registro do servidor.
+      const decision = authorizeVideoAccess(result.rows[0], auth);
+      if (!decision.ok) {
+        if (decision.status === 403) {
+          res.status(403).json({ error: "Acesso negado a este video." });
+        } else {
+          res.status(decision.status).end();
+        }
         return;
       }
       const { mimetype, data } = result.rows[0];
@@ -99,4 +138,4 @@ function createVideosRouter() {
   return router;
 }
 
-module.exports = { createVideosRouter };
+module.exports = { createVideosRouter, authorizeVideoAccess };

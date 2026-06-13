@@ -388,7 +388,10 @@
   function mediaUrl(rawUrl) {
     let value = String(rawUrl || "");
     if (!value || value.startsWith("blob:") || value.startsWith("data:")) return value;
-    const isProtected = value.includes("/uploads/contracts/") || value.includes("/uploads/profiles/");
+    const isProtected =
+      value.includes("/uploads/contracts/") ||
+      value.includes("/uploads/profiles/") ||
+      value.includes("/api/videos/");
     if (!isProtected) return value;
     if (!value.startsWith("http") && value.startsWith("/")) value = `${apiOrigin()}${value}`;
     if (!state.authToken) return value;
@@ -2033,7 +2036,7 @@
     if (exercise.videoUrl) {
       const label = exercise.videoName || (exercise.videoStorage === "external" ? "Link cadastrado" : "Vídeo cadastrado");
       const size = formatFileSize(exercise.videoSize);
-      return `<span class="video-meta"><a class="video-link" href="${escapeHtml(exercise.videoUrl)}" target="_blank" rel="noreferrer">Abrir vídeo</a><span class="small-text">${escapeHtml(label)}${size ? ` · ${escapeHtml(size)}` : ""}</span></span>`;
+      return `<span class="video-meta"><a class="video-link" href="${escapeHtml(mediaUrl(exercise.videoUrl))}" target="_blank" rel="noreferrer">Abrir vídeo</a><span class="small-text">${escapeHtml(label)}${size ? ` · ${escapeHtml(size)}` : ""}</span></span>`;
     }
     if (exercise.videoStorage === "indexeddb" && exercise.videoKey) {
       return `<span class="video-meta"><button class="mini-button" type="button" data-open-local-video="${escapeHtml(exercise.id)}">Abrir vídeo local</button><span class="small-text">Vídeo local deste aparelho: ${escapeHtml(exercise.videoName || "arquivo local")}${exercise.videoSize ? ` · ${escapeHtml(formatFileSize(exercise.videoSize))}` : ""}</span></span>`;
@@ -2059,7 +2062,7 @@
       }
     }
     if (exercise.videoUrl) {
-      return `<div class="exec-video-wrap"><video class="exec-video-el" controls playsinline preload="metadata" src="${escapeHtml(exercise.videoUrl)}"></video></div>`;
+      return `<div class="exec-video-wrap"><video class="exec-video-el" controls playsinline preload="metadata" src="${escapeHtml(mediaUrl(exercise.videoUrl))}"></video></div>`;
     }
     return "";
   }
@@ -4913,7 +4916,7 @@
         if (!body.contains(video)) return;
         body.innerHTML = placeholderHtml("Vídeo indisponível no servidor. O gestor pode reenviar.", "Reenviar vídeo");
       });
-      video.src = src;
+      video.src = mediaUrl(src);
     }
 
     function renderYouTubeEmbed(url) {
