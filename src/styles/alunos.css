@@ -1871,19 +1871,26 @@
   color: #fff !important;
   font-size: clamp(0.8rem, 3.2vw, 1rem) !important;
   font-weight: 700 !important;
-  line-height: 1.1 !important;
-  white-space: nowrap !important;
+  line-height: 1.2 !important;
+  white-space: normal !important;
   overflow: hidden !important;
-  text-overflow: ellipsis !important;
+  text-overflow: unset !important;
+  word-break: break-word !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
 }
 
 .profile-card-body > small {
   color: var(--txt2) !important;
   font-size: 10px !important;
   line-height: 1.2 !important;
-  white-space: nowrap !important;
+  white-space: normal !important;
   overflow: hidden !important;
-  text-overflow: ellipsis !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  text-overflow: unset !important;
 }
 
 /* Tone colors for summary cards */
