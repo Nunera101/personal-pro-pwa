@@ -1962,16 +1962,17 @@ body.app-installed [data-install-trigger] {
 
 /* Elite AS visual refresh v22 */
 :root {
-  --brand: #f5b51b;
-  --brand-strong: #ffc447;
-  --brand-soft: rgba(245, 181, 27, 0.15);
+  --brand: #F59E0B;
+  --brand-strong: #E7A83E;
+  --brand-soft: rgba(245,181,27,0.1);
+  --brand-ink: #1A1206;
   --ink: #f7f4eb;
   --muted: #aaa59a;
   --line: rgba(255, 255, 255, 0.12);
   --surface: rgba(18, 18, 18, 0.9);
   --canvas: #050505;
-  --accent: #f5b51b;
-  --accent-soft: rgba(245, 181, 27, 0.16);
+  --accent: var(--brand);
+  --accent-soft: var(--brand-soft);
   --danger: #ff5a4f;
   --danger-soft: rgba(255, 90, 79, 0.14);
   --success: #48d764;
@@ -1987,9 +1988,9 @@ body.app-installed [data-install-trigger] {
   --txt2: #9CA3AF;
   --ok: var(--success);
   --erro: var(--danger);
-  --dourado: #F59E0B;
-  --dourado-soft: rgba(245, 159, 11, 0.18);
-  --dourado-borda: rgba(245, 159, 11, 0.4);
+  --dourado: var(--brand);
+  --dourado-soft: var(--brand-soft);
+  --dourado-borda: rgba(245,181,27,0.4);
   --treino: #10B981;
   --treino-soft: rgba(16, 185, 129, 0.18);
   --treino-borda: rgba(16, 185, 129, 0.4);
