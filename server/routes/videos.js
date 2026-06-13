@@ -60,11 +60,33 @@ function createVideosRouter() {
         res.status(404).end();
         return;
       }
-      const { mimetype, size_bytes, data } = result.rows[0];
+      const { mimetype, data } = result.rows[0];
+      const totalSize = Number(result.rows[0].size_bytes);
+
+      res.setHeader("Accept-Ranges", "bytes");
       res.setHeader("Content-Type", mimetype);
-      res.setHeader("Content-Length", size_bytes);
       res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
-      res.send(data);
+
+      const rangeHeader = req.headers.range;
+      if (rangeHeader) {
+        const [startStr, endStr] = rangeHeader.replace(/bytes=/, "").split("-");
+        const start = parseInt(startStr, 10);
+        const end = endStr ? parseInt(endStr, 10) : totalSize - 1;
+
+        if (isNaN(start) || isNaN(end) || start > end || end >= totalSize) {
+          res.status(416).setHeader("Content-Range", `bytes */${totalSize}`).end();
+          return;
+        }
+
+        const chunk = data.slice(start, end + 1);
+        res.status(206);
+        res.setHeader("Content-Range", `bytes ${start}-${end}/${totalSize}`);
+        res.setHeader("Content-Length", chunk.length);
+        res.end(chunk);
+      } else {
+        res.setHeader("Content-Length", totalSize);
+        res.end(data);
+      }
     } catch (err) {
       next(err);
     }

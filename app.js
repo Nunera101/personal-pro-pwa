@@ -4991,7 +4991,7 @@
       body.innerHTML = `
         <div class="ev-body">
           <div class="ev-preview-wrap">
-            <video class="ev-preview-video" src="${previewUrl}" playsinline muted></video>
+            <video class="ev-preview-video" src="${previewUrl}" autoplay muted loop playsinline controls></video>
           </div>
           <div class="ev-file-info">
             <span class="ev-file-name">${escapeHtml(selectedFile.name)}</span>
@@ -8291,7 +8291,7 @@
     const primaryMuscle = isEdit ? getExercisePrimaryMuscle(exercise) : "";
     const secondaryMuscles = getExerciseSecondaryMuscles(exercise);
     const hasVideo = hasExerciseVideo(exercise);
-    const videoLink = exercise.videoStorage === "indexeddb" ? "" : exercise.videoUrl || "";
+    const videoLink = (exercise.videoStorage === "indexeddb" || exercise.videoStorage === "remote") ? "" : exercise.videoUrl || "";
 
     if (titleEl) titleEl.textContent = isEdit ? "Editar exercício" : "Novo exercício";
 
