@@ -11,7 +11,7 @@
 // Roda com:  node --test server/uploads-isolation.test.js
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { authorizeUploadAccess, fileNameFromUrl } = require("./routes/uploads");
+const { authorizeUploadAccess, resolveUploadTrainerId, fileNameFromUrl } = require("./routes/uploads");
 
 const authA = { role: "student", studentId: "alunoA", trainerId: "trainer-demo" };
 const authB = { role: "student", studentId: "alunoB", trainerId: "trainer-demo" };
@@ -81,6 +81,21 @@ test("legitimo: aluno acessa a propria foto de perfil", () => {
 
 test("legitimo: foto do personal e visivel a aluno autenticado do tenant", () => {
   assert.deepEqual(authorizeUploadAccess("profiles", "trainer-demo-9.jpg", authB, data), { ok: true });
+});
+
+// --- ATAQUE (M5): forjar trainerId no corpo para gravar upload em outro tenant
+test("ATAQUE: trainerId do corpo e IGNORADO; usa-se o da sessao", () => {
+  // Gestor autenticado como trainer-demo tenta forjar o tenant pelo corpo.
+  const request = {
+    auth: { role: "manager", trainerId: "trainer-demo" },
+    body: { trainerId: "trainer-x", exerciseId: "e1" }
+  };
+  assert.equal(resolveUploadTrainerId(request), "trainer-demo");
+});
+
+test("legitimo: trainerId vem da sessao mesmo sem corpo", () => {
+  const request = { auth: { role: "manager", trainerId: "trainer-demo" } };
+  assert.equal(resolveUploadTrainerId(request), "trainer-demo");
 });
 
 // --- Sanidade do extrator de nome de arquivo --------------------------------

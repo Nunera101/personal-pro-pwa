@@ -70,6 +70,14 @@ const profilePhotoUpload = multer({
   }
 });
 
+// M5: o trainer_id gravado num upload vem SEMPRE da sessao autenticada
+// (request.auth), NUNCA do corpo enviado pelo cliente. Um corpo com
+// trainerId de outro tenant e simplesmente ignorado por esta funcao.
+function resolveUploadTrainerId(request) {
+  const auth = (request && request.auth) || {};
+  return String(auth.trainerId || "trainer-demo");
+}
+
 function createUploadRouter() {
   const router = express.Router();
 
@@ -88,7 +96,7 @@ function createUploadRouter() {
             values ($1, $2, $3, $4, $5, $6, $7)
           `,
           [
-            String(request.body.trainerId || "trainer-demo"),
+            resolveUploadTrainerId(request),
             "exercise",
             String(request.body.exerciseId || ""),
             url,
@@ -122,7 +130,7 @@ function createUploadRouter() {
           `insert into media_uploads (trainer_id, owner_type, owner_id, url, original_name, size_bytes, mime_type)
            values ($1, $2, $3, $4, $5, $6, $7)`,
           [
-            String(request.body.trainerId || "trainer-demo"),
+            resolveUploadTrainerId(request),
             "contract",
             String(request.body.contractId || ""),
             url,
@@ -152,7 +160,7 @@ function createUploadRouter() {
           `insert into media_uploads (trainer_id, owner_type, owner_id, url, original_name, size_bytes, mime_type)
            values ($1, $2, $3, $4, $5, $6, $7)`,
           [
-            String(auth.trainerId || "trainer-demo"),
+            resolveUploadTrainerId(request),
             "profile",
             String(auth.role === "student" ? auth.studentId : (auth.trainerId || "trainer-demo")),
             url,
@@ -303,5 +311,6 @@ module.exports = {
   createUploadRouter,
   createUploadsAssetRouter,
   authorizeUploadAccess,
+  resolveUploadTrainerId,
   fileNameFromUrl
 };
