@@ -359,10 +359,13 @@
   function getApiBases() {
     const host = window.location.hostname;
     const sameOrigin = sameOriginApiBase();
-    if (host.endsWith("github.io") || host === "127.0.0.1" || host === "localhost" || window.location.protocol === "file:") {
-      return [REMOTE_API_BASE, sameOrigin].filter((value, index, list) => value && list.indexOf(value) === index);
+    // Dev local: o proprio servidor (node server.js) e a API; Railway como reserva.
+    if (host === "127.0.0.1" || host === "localhost") {
+      return [sameOrigin, REMOTE_API_BASE].filter((value, index, list) => value && list.indexOf(value) === index);
     }
-    return [sameOrigin, REMOTE_API_BASE].filter((value, index, list) => value && list.indexOf(value) === index);
+    // Qualquer outro host (GitHub Pages, file://, etc.): a UNICA fonte de verdade da API
+    // e o Railway. O GitHub Pages e estatico e NUNCA deve ser base de API (gerava 405).
+    return [REMOTE_API_BASE];
   }
 
   function apiUrl(path) {
@@ -388,6 +391,11 @@
       window.clearTimeout(timer);
     }
   }
+
+  // Status HTTP de erro de NEGOCIO: sao respostas definitivas da API (ex.: credencial
+  // invalida, conflito). Nao adianta tentar outra base — devem ser propagados na hora,
+  // para nao serem mascarados pelo fallback (era o que transformava um 401 em 405).
+  const BUSINESS_ERROR_STATUSES = new Set([400, 401, 403, 409]);
 
   async function fetchJsonFromApi(path, options = {}) {
     const bases = [state.apiBase, ...getApiBases()].filter((value, index, list) => value && list.indexOf(value) === index);
@@ -421,6 +429,14 @@
         state.apiAvailable = true;
         return await response.json();
       } catch (error) {
+        // Erro de negocio: esta base E a API e ja respondeu de forma definitiva.
+        // Fixa a base e propaga imediatamente, sem tentar as demais.
+        if (BUSINESS_ERROR_STATUSES.has(error.status)) {
+          state.apiBase = base;
+          state.apiAvailable = true;
+          throw error;
+        }
+        // Falha de rede/timeout/5xx/404: tenta a proxima base.
         lastError = error;
       }
     }
