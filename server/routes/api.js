@@ -905,21 +905,25 @@ function createApiRouter() {
     }
   });
 
-  router.post("/auth/contract-signature-meta", requireAuth, async (request, response) => {
-    const contractId = String(request.body?.contractId || "");
-    const studentId = String(request.body?.studentId || "");
-    if (!withinLen(contractId, 100) || !withinLen(studentId, 100)) {
-      response.status(400).json({ error: "Campos fora do tamanho permitido." });
-      return;
+  router.post("/auth/contract-signature-meta", requireAuth, async (request, response, next) => {
+    try {
+      const contractId = String(request.body?.contractId || "");
+      const studentId = String(request.body?.studentId || "");
+      if (!withinLen(contractId, 100) || !withinLen(studentId, 100)) {
+        response.status(400).json({ error: "Campos fora do tamanho permitido." });
+        return;
+      }
+      response.json({
+        ok: true,
+        contractId,
+        studentId,
+        ip: request.ip || request.headers["x-forwarded-for"] || "",
+        userAgent: request.get("user-agent") || "",
+        acceptedAt: new Date().toISOString()
+      });
+    } catch (error) {
+      next(error);
     }
-    response.json({
-      ok: true,
-      contractId,
-      studentId,
-      ip: request.ip || request.headers["x-forwarded-for"] || "",
-      userAgent: request.get("user-agent") || "",
-      acceptedAt: new Date().toISOString()
-    });
   });
 
   router.post("/auth/reset-password", authRateLimiter, async (request, response, next) => {

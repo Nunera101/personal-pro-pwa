@@ -62,6 +62,14 @@ function createServer() {
   });
 
   app.use((error, _request, response, _next) => {
+    if (error.code === "LIMIT_FILE_SIZE") {
+      response.status(413).json({ error: "Arquivo muito grande. Verifique o limite de tamanho permitido para este tipo de envio." });
+      return;
+    }
+    if (error.type === "entity.too.large") {
+      response.status(413).json({ error: "Requisição muito grande para o servidor processar." });
+      return;
+    }
     const status = Number(error.status || error.statusCode || 500);
     response.status(status).json({
       error: status >= 500 ? "Erro interno do servidor." : error.message

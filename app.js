@@ -4394,13 +4394,13 @@
 
             <label class="field">
               <span>Nome completo <span class="ns-required" aria-hidden="true">*</span></span>
-              <input name="name" type="text" placeholder="Ex: Maria Silva" autocomplete="name" required />
+              <input name="name" type="text" placeholder="Ex: Maria Silva" autocomplete="name" maxlength="120" required />
             </label>
 
             <div class="ns-row">
               <label class="field">
                 <span>Telefone <span class="ns-required" aria-hidden="true">*</span></span>
-                <input name="phone" type="tel" inputmode="numeric" placeholder="(11) 99999-9999" autocomplete="tel" required data-phone-mask />
+                <input name="phone" type="tel" inputmode="numeric" placeholder="(11) 99999-9999" autocomplete="tel" maxlength="30" required data-phone-mask />
               </label>
               <label class="field">
                 <span>Nascimento</span>
@@ -4410,7 +4410,7 @@
 
             <label class="field">
               <span>E-mail</span>
-              <input name="email" type="email" inputmode="email" placeholder="aluno@exemplo.com" autocomplete="email" />
+              <input name="email" type="email" inputmode="email" placeholder="aluno@exemplo.com" autocomplete="email" maxlength="254" />
             </label>
 
             <label class="field">
@@ -4466,7 +4466,7 @@
             <h4 class="ns-section-title">Observações internas</h4>
             <label class="field">
               <span class="sr-only">Observações</span>
-              <textarea name="internalNotes" rows="4" placeholder="Anotações privadas sobre o aluno, histórico, restrições..."></textarea>
+              <textarea name="internalNotes" rows="4" maxlength="2000" placeholder="Anotações privadas sobre o aluno, histórico, restrições..."></textarea>
             </label>
           </section>
 
@@ -6501,7 +6501,7 @@
               </div>
               <label class="field">
                 <span>Avaliação</span>
-                <textarea name="trainerComment" id="evaluateCommentArea" rows="5" placeholder="Registre orientações, ajustes de treino ou observações para o aluno.">${escapeHtml(update.trainerComment || "")}</textarea>
+                <textarea name="trainerComment" id="evaluateCommentArea" rows="5" maxlength="2000" placeholder="Registre orientações, ajustes de treino ou observações para o aluno.">${escapeHtml(update.trainerComment || "")}</textarea>
               </label>
             </form>
           </section>
@@ -7371,7 +7371,7 @@
         <section class="panel">
           <div class="section-title"><h3>Editar contato</h3><span class="small-text">Telefone</span></div>
           <form class="form-grid" id="studentSelfProfileForm">
-            <label class="field"><span>Telefone</span><input name="phone" type="tel" value="${escapeHtml(student?.phone || "")}" placeholder="(11) 99999-0000" /></label>
+            <label class="field"><span>Telefone</span><input name="phone" type="tel" maxlength="30" value="${escapeHtml(student?.phone || "")}" placeholder="(11) 99999-0000" /></label>
             <button class="primary-action" type="submit">Salvar</button>
           </form>
         </section>
@@ -7541,9 +7541,9 @@
         <section class="panel">
           <div class="section-title"><h3>Dados pessoais</h3></div>
           <form class="form-grid" id="managerProfileForm">
-            <label class="field"><span>Nome</span><input name="name" type="text" value="${escapeHtml(name)}" required /></label>
-            <label class="field"><span>Telefone</span><input name="phone" type="tel" value="${escapeHtml(phone)}" /></label>
-            <label class="field"><span>E-mail de contato</span><input name="email" type="email" value="${escapeHtml(email)}" /></label>
+            <label class="field"><span>Nome</span><input name="name" type="text" maxlength="120" value="${escapeHtml(name)}" required /></label>
+            <label class="field"><span>Telefone</span><input name="phone" type="tel" maxlength="30" value="${escapeHtml(phone)}" /></label>
+            <label class="field"><span>E-mail de contato</span><input name="email" type="email" maxlength="254" value="${escapeHtml(email)}" /></label>
             <button class="primary-action" type="submit">Salvar perfil</button>
           </form>
         </section>
@@ -7564,27 +7564,27 @@
           <div class="section-title"><h3>Personal e WhatsApp</h3><span class="small-text">Usado nos contatos da agenda</span></div>
           <form class="form-grid" id="settingsForm">
             <div class="form-grid two">
-              <label class="field"><span>Nome do personal</span><input name="trainerName" type="text" value="${escapeHtml(state.data.settings.trainerName)}" required /></label>
-              <label class="field"><span>Telefone do personal</span><input name="trainerPhone" type="tel" value="${escapeHtml(state.data.settings.trainerPhone)}" /></label>
-              <label class="field"><span>E-mail de contato</span><input name="contactEmail" type="email" value="${escapeHtml(state.data.settings.contactEmail)}" /></label>
+              <label class="field"><span>Nome do personal</span><input name="trainerName" type="text" maxlength="120" value="${escapeHtml(state.data.settings.trainerName)}" required /></label>
+              <label class="field"><span>Telefone do personal</span><input name="trainerPhone" type="tel" maxlength="30" value="${escapeHtml(state.data.settings.trainerPhone)}" /></label>
+              <label class="field"><span>E-mail de contato</span><input name="contactEmail" type="email" maxlength="254" value="${escapeHtml(state.data.settings.contactEmail)}" /></label>
             </div>
-            <label class="field"><span>Mensagem padrão</span><textarea name="whatsappTemplate" required>${escapeHtml(state.data.settings.whatsappTemplate)}</textarea></label>
+            <label class="field"><span>Mensagem padrão</span><textarea name="whatsappTemplate" maxlength="500" required>${escapeHtml(state.data.settings.whatsappTemplate)}</textarea></label>
             <p class="small-text">Você pode usar: {aluno}, {data}, {hora}, {atividade}, {personal}, {dia_semana}</p>
             <div class="preview-box"><strong>Prévia</strong><span>${escapeHtml(preview)}</span></div>
             <div class="section-title"><h3>Dados do profissional</h3><span class="small-text">Usados nos contratos gerados</span></div>
             <div class="form-grid two">
-              <label class="field"><span>Nome completo ou razão social</span><input name="professionalName" type="text" value="${escapeHtml(state.data.settings.professionalName)}" /></label>
-              <label class="field"><span>CPF ou CNPJ</span><input name="professionalDocument" type="text" inputmode="numeric" value="${escapeHtml(state.data.settings.professionalDocument)}" /></label>
-              <label class="field"><span>Telefone</span><input name="professionalPhone" type="tel" value="${escapeHtml(state.data.settings.professionalPhone)}" /></label>
-              <label class="field"><span>E-mail</span><input name="professionalEmail" type="email" value="${escapeHtml(state.data.settings.professionalEmail)}" /></label>
-              <label class="field"><span>Endereço (opcional)</span><input name="professionalAddress" type="text" value="${escapeHtml(state.data.settings.professionalAddress)}" /></label>
-              <label class="field"><span>CREF (opcional)</span><input name="professionalCref" type="text" value="${escapeHtml(state.data.settings.professionalCref)}" /></label>
+              <label class="field"><span>Nome completo ou razão social</span><input name="professionalName" type="text" maxlength="120" value="${escapeHtml(state.data.settings.professionalName)}" /></label>
+              <label class="field"><span>CPF ou CNPJ</span><input name="professionalDocument" type="text" inputmode="numeric" maxlength="30" value="${escapeHtml(state.data.settings.professionalDocument)}" /></label>
+              <label class="field"><span>Telefone</span><input name="professionalPhone" type="tel" maxlength="30" value="${escapeHtml(state.data.settings.professionalPhone)}" /></label>
+              <label class="field"><span>E-mail</span><input name="professionalEmail" type="email" maxlength="254" value="${escapeHtml(state.data.settings.professionalEmail)}" /></label>
+              <label class="field"><span>Endereço (opcional)</span><input name="professionalAddress" type="text" maxlength="200" value="${escapeHtml(state.data.settings.professionalAddress)}" /></label>
+              <label class="field"><span>CREF (opcional)</span><input name="professionalCref" type="text" maxlength="30" value="${escapeHtml(state.data.settings.professionalCref)}" /></label>
             </div>
             <div class="section-title"><h3>Contrato e e-mail</h3><span class="small-text">Modelo usado no aceite interno</span></div>
-            <label class="field"><span>Assunto do e-mail de contrato</span><input name="contractEmailSubject" type="text" value="${escapeHtml(state.data.settings.contractEmailSubject)}" required /></label>
-            <label class="field"><span>Mensagem do e-mail de contrato</span><textarea name="contractEmailMessage" required>${escapeHtml(state.data.settings.contractEmailMessage)}</textarea></label>
-            <label class="field"><span>Assinatura do e-mail</span><textarea name="contractEmailSignature">${escapeHtml(state.data.settings.contractEmailSignature)}</textarea></label>
-            <label class="field"><span>Modelo padrão de contrato</span><textarea name="contractTemplate" required>${escapeHtml(state.data.settings.contractTemplate)}</textarea></label>
+            <label class="field"><span>Assunto do e-mail de contrato</span><input name="contractEmailSubject" type="text" maxlength="500" value="${escapeHtml(state.data.settings.contractEmailSubject)}" required /></label>
+            <label class="field"><span>Mensagem do e-mail de contrato</span><textarea name="contractEmailMessage" maxlength="5000" required>${escapeHtml(state.data.settings.contractEmailMessage)}</textarea></label>
+            <label class="field"><span>Assinatura do e-mail</span><textarea name="contractEmailSignature" maxlength="1000">${escapeHtml(state.data.settings.contractEmailSignature)}</textarea></label>
+            <label class="field"><span>Modelo padrão de contrato</span><textarea name="contractTemplate" maxlength="10000" required>${escapeHtml(state.data.settings.contractTemplate)}</textarea></label>
             <p class="small-text">Variáveis: {aluno}, {cpf}, {telefone}, {email}, {personal}, {plano}, {valor}, {data_inicio}, {data_fim}, {quantidade_aulas}, {data_assinatura}, {link_contrato}, {data}.</p>
             <div class="preview-box"><strong>Prévia do e-mail</strong><span>${escapeHtml(contractPreview)}</span></div>
             <button class="primary-action" type="submit">Salvar configurações</button>
@@ -7878,18 +7878,18 @@
       `
         <form class="form-grid" id="studentForm" data-id="${student.id || ""}">
           <div class="form-grid two">
-            <label class="field"><span>Nome</span><input name="name" type="text" value="${escapeHtml(student.name)}" required /></label>
-            <label class="field"><span>E-mail</span><input name="email" type="email" value="${escapeHtml(student.email)}" required /></label>
-            <label class="field"><span>Telefone</span><input name="phone" type="tel" value="${escapeHtml(student.phone)}" /></label>
+            <label class="field"><span>Nome</span><input name="name" type="text" maxlength="120" value="${escapeHtml(student.name)}" required /></label>
+            <label class="field"><span>E-mail</span><input name="email" type="email" maxlength="254" value="${escapeHtml(student.email)}" required /></label>
+            <label class="field"><span>Telefone</span><input name="phone" type="tel" maxlength="30" value="${escapeHtml(student.phone)}" /></label>
             <label class="field"><span>CPF</span><input name="cpf" type="text" inputmode="numeric" placeholder="000.000.000-00" maxlength="14" autocomplete="off" data-cpf-mask value="${escapeHtml(student.cpf || "")}" /><span data-cpf-error role="alert" hidden></span></label>
-            <label class="field"><span>Objetivo</span><input name="goal" type="text" value="${escapeHtml(student.goal || "Condicionamento")}" /></label>
+            <label class="field"><span>Objetivo</span><input name="goal" type="text" maxlength="80" value="${escapeHtml(student.goal || "Condicionamento")}" /></label>
             <label class="field"><span>Status</span><select name="status"><option value="active" ${student.status !== "inactive" ? "selected" : ""}>Ativo</option><option value="inactive" ${student.status === "inactive" ? "selected" : ""}>Inativo</option></select></label>
           </div>
           <div class="empty-state compact-note">
             <strong>${student.id ? access.label : "Convite de acesso"}</strong>
             <span>${student.id ? escapeHtml(access.detail) : "Ao salvar, o sistema gera um link para o aluno criar a própria senha. O gestor não define nem visualiza senha de aluno."}</span>
           </div>
-          <label class="field"><span>Observações internas</span><textarea name="internalNotes">${escapeHtml(student.internalNotes)}</textarea></label>
+          <label class="field"><span>Observações internas</span><textarea name="internalNotes" maxlength="2000">${escapeHtml(student.internalNotes)}</textarea></label>
           <div class="form-actions">
             <button class="primary-action" type="submit">${student.id ? "Salvar aluno" : "Salvar e enviar convite"}</button>
             ${student.id ? `<button class="secondary-action" type="button" data-send-student-invite="${student.id}">${access.value === "active" ? "Enviar link de senha" : "Reenviar convite"}</button>` : ""}
@@ -8485,7 +8485,7 @@
 
         <label class="field">
           <span>Nome <span class="ns-required" aria-hidden="true">*</span></span>
-          <input name="name" type="text" value="${escapeHtml(exercise.name || "")}" required placeholder="Ex: Agachamento livre" autocomplete="off" />
+          <input name="name" type="text" maxlength="120" value="${escapeHtml(exercise.name || "")}" required placeholder="Ex: Agachamento livre" autocomplete="off" />
         </label>
 
         <div class="form-grid two">
@@ -8528,7 +8528,7 @@
 
         <label class="field">
           <span>Instruções de execução</span>
-          <textarea name="description" rows="4" placeholder="Descreva a técnica e pontos de atenção...">${escapeHtml(exercise.description || "")}</textarea>
+          <textarea name="description" rows="4" maxlength="1000" placeholder="Descreva a técnica e pontos de atenção...">${escapeHtml(exercise.description || "")}</textarea>
         </label>
 
         ${statusBadgeHtml}
@@ -8580,10 +8580,10 @@
           }
           <label class="field"><span>Status</span><select name="status">${workoutStatusOptions(workout.status || "draft", !isStudentWorkout)}</select></label>
         </div>
-        <label class="field"><span>Título</span><input name="title" type="text" value="${escapeHtml(workout.title || "")}" required /></label>
-        <label class="field"><span>Descrição</span><textarea name="description">${escapeHtml(workout.description || "")}</textarea></label>
+        <label class="field"><span>Título</span><input name="title" type="text" maxlength="120" value="${escapeHtml(workout.title || "")}" required /></label>
+        <label class="field"><span>Descrição</span><textarea name="description" maxlength="1000">${escapeHtml(workout.description || "")}</textarea></label>
         <div class="form-grid two">
-          <label class="field"><span>Foco/objetivo</span><input name="focus" type="text" value="${escapeHtml(workout.focus || "")}" /></label>
+          <label class="field"><span>Foco/objetivo</span><input name="focus" type="text" maxlength="120" value="${escapeHtml(workout.focus || "")}" /></label>
           <label class="field"><span>Nível</span><select name="level">${workoutLevelOptions(workout.level || "")}</select></label>
         </div>
         <section class="workout-builder">
@@ -8794,8 +8794,8 @@
           <label class="field"><span>Horário</span><input name="time" type="time" value="${escapeHtml(activity.time || "08:00")}" required /></label>
           <label class="field"><span>Duração (min)</span><input name="duration" type="number" min="0" value="${escapeHtml(activity.duration || "60")}" /></label>
         </div>
-        <label class="field"><span>Título</span><input name="title" type="text" value="${escapeHtml(activity.title || "Treino agendado")}" required /></label>
-        <label class="field"><span>Observações</span><textarea name="notes">${escapeHtml(activity.notes || "")}</textarea></label>
+        <label class="field"><span>Título</span><input name="title" type="text" maxlength="120" value="${escapeHtml(activity.title || "Treino agendado")}" required /></label>
+        <label class="field"><span>Observações</span><textarea name="notes" maxlength="500">${escapeHtml(activity.notes || "")}</textarea></label>
       </form>
     `;
     const agFooter = elements.agSheetFooter;
@@ -8937,19 +8937,19 @@
             <label class="field"><span>Aluno</span><select name="studentId" required>${studentOptions(selectedStudentId)}</select></label>
             <label class="field"><span>Status</span><select name="status">${dietStatusOptions(plan.status || "active")}</select></label>
           </div>
-          <label class="field"><span>Título do plano</span><input name="title" type="text" value="${escapeHtml(plan.title || "")}" placeholder="Plano alimentar Elite AS" required /></label>
+          <label class="field"><span>Título do plano</span><input name="title" type="text" maxlength="120" value="${escapeHtml(plan.title || "")}" placeholder="Plano alimentar Elite AS" required /></label>
           <div class="form-grid two">
             <label class="field"><span>Objetivo</span><select name="objective">${dietObjectiveOptions(plan.objective || getStudent(selectedStudentId)?.goal || "")}</select></label>
-            <label class="field"><span>Protocolo atual</span><input name="protocol" type="text" value="${escapeHtml(plan.protocol || "")}" placeholder="Hipertrofia 3.200 kcal" /></label>
-            <label class="field"><span>Calorias aproximadas</span><input name="calories" type="text" value="${escapeHtml(plan.calories || "")}" placeholder="3200 kcal" /></label>
+            <label class="field"><span>Protocolo atual</span><input name="protocol" type="text" maxlength="120" value="${escapeHtml(plan.protocol || "")}" placeholder="Hipertrofia 3.200 kcal" /></label>
+            <label class="field"><span>Calorias aproximadas</span><input name="calories" type="text" maxlength="50" value="${escapeHtml(plan.calories || "")}" placeholder="3200 kcal" /></label>
             <label class="field"><span>Refeições por dia</span><input name="mealCount" type="number" min="0" value="${escapeHtml(plan.mealCount || plan.meals?.length || 5)}" /></label>
             <label class="field"><span>Data de início</span><input name="startDate" type="date" value="${escapeHtml(plan.startDate || todayISO())}" /></label>
             <label class="field"><span>Próxima revisão</span><input name="nextReviewDate" type="date" value="${escapeHtml(plan.nextReviewDate || addDays(todayISO(), 15))}" /></label>
           </div>
-          <label class="field"><span>Refeições</span><textarea name="mealsText" placeholder="Café da manhã | 07:00 | ovos, fruta | observação">${escapeHtml(dietMealsToText(plan.meals || []))}</textarea></label>
+          <label class="field"><span>Refeições</span><textarea name="mealsText" maxlength="5000" placeholder="Café da manhã | 07:00 | ovos, fruta | observação">${escapeHtml(dietMealsToText(plan.meals || []))}</textarea></label>
           <p class="small-text">Use uma refeição por linha. Exemplo: Café da manhã | 07:00 | ovos, pão, fruta | manter hidratação.</p>
-          <label class="field"><span>Observações gerais</span><textarea name="notes">${escapeHtml(plan.notes || "")}</textarea></label>
-          <label class="field"><span>Instruções ao aluno</span><textarea name="instructions">${escapeHtml(plan.instructions || "")}</textarea></label>
+          <label class="field"><span>Observações gerais</span><textarea name="notes" maxlength="2000">${escapeHtml(plan.notes || "")}</textarea></label>
+          <label class="field"><span>Instruções ao aluno</span><textarea name="instructions" maxlength="2000">${escapeHtml(plan.instructions || "")}</textarea></label>
           <div class="form-actions two">
             <button class="primary-action" type="submit">${plan.id ? "Salvar plano" : "Criar plano alimentar"}</button>
             ${plan.id ? `<button class="secondary-action" type="button" data-send-diet-link="${escapeHtml(plan.id)}">Enviar link</button>` : ""}
@@ -9680,6 +9680,7 @@
 
     async function upload(file) {
       if (!file || file.type !== "application/pdf") { showToast("Selecione um arquivo PDF."); return; }
+      if (file.size > 20 * 1024 * 1024) { showToast("O PDF deve ter no máximo 20 MB."); return; }
       if (dropzone) dropzone.classList.add("is-uploading");
       const contractId = document.getElementById("contractSheetForm")?.dataset.contractId || "";
       const fd = new FormData();
@@ -9689,14 +9690,18 @@
         const headers = {};
         if (state.authToken) headers.Authorization = `Bearer ${state.authToken}`;
         const resp = await fetch(apiUrl("/uploads/contracts"), { method: "POST", body: fd, headers });
-        if (!resp.ok) throw new Error();
+        if (!resp.ok) {
+          let msg = "Erro ao enviar PDF. Tente novamente.";
+          try { const payload = await resp.json(); if (payload?.error) msg = payload.error; } catch (_e) { /* keep default */ }
+          throw new Error(msg);
+        }
         const data = await resp.json();
         urlInput.value = String(data.url || "").startsWith("http") ? data.url : `${apiOrigin()}${data.url || ""}`;
         if (fileNameEl) fileNameEl.textContent = file.name;
         if (dropzone) dropzone.hidden = true;
         if (attached) attached.hidden = false;
-      } catch {
-        showToast("Erro ao enviar PDF. Tente novamente.");
+      } catch (err) {
+        showToast(err?.message || "Erro ao enviar PDF. Tente novamente.");
       } finally {
         if (dropzone) dropzone.classList.remove("is-uploading");
       }
@@ -11408,6 +11413,7 @@
   }
 
   async function uploadProfilePhoto(blob, role) {
+    if (blob && blob.size > 5 * 1024 * 1024) { showToast("A foto deve ter no máximo 5 MB."); return; }
     showToast("Enviando foto…");
     try {
       const fd = new FormData();
@@ -11416,7 +11422,11 @@
       if (state.authToken) headers.Authorization = `Bearer ${state.authToken}`;
       const url = apiUrl("/uploads/profile");
       const resp = await fetchWithTimeout(url, { method: "POST", body: fd, headers }, 30000);
-      if (!resp.ok) throw new Error("Upload falhou.");
+      if (!resp.ok) {
+        let msg = "Falha ao enviar foto. Tente novamente.";
+        try { const payload = await resp.json(); if (payload?.error) msg = payload.error; } catch (_e) { /* keep default */ }
+        throw new Error(msg);
+      }
       const result = await resp.json();
       const photoUrl = result.url;
 
@@ -11431,8 +11441,8 @@
       renderApp();
       updateHeaderAvatars();
       showSuccessToast("Foto salva com sucesso!");
-    } catch {
-      showToast("Falha ao enviar foto. Tente novamente.");
+    } catch (err) {
+      showToast(err?.message || "Falha ao enviar foto. Tente novamente.");
     }
   }
 
