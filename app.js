@@ -714,6 +714,7 @@
     return {
       id: student.id || createId("student"),
       trainerId: student.trainerId || TRAINER_ID,
+      professionalId: student.professionalId || TRAINER_ID,
       name: student.name || "Aluno sem nome",
       email: normalizeEmail(student.email),
       passwordHash,
@@ -922,6 +923,7 @@
     return {
       id: exercise.id || createId("exercise"),
       trainerId: exercise.trainerId || TRAINER_ID,
+      professionalId: exercise.professionalId || TRAINER_ID,
       name: exercise.name || "Exercício",
       muscle: primaryMuscle,
       primaryMuscle,
@@ -949,6 +951,7 @@
     return {
       id: workout.id || createId("workout"),
       trainerId: workout.trainerId || TRAINER_ID,
+      professionalId: workout.professionalId || TRAINER_ID,
       studentId: workout.studentId || "",
       title: workout.title || "Treino",
       description: workout.description || "",
@@ -984,6 +987,7 @@
     return {
       id: activity.id || createId("activity"),
       trainerId: activity.trainerId || TRAINER_ID,
+      professionalId: activity.professionalId || TRAINER_ID,
       studentId: activity.studentId || "",
       type: activity.type || "workout",
       title: activity.title || "Atividade",
@@ -1005,6 +1009,7 @@
     return {
       id: session.id || createId("session"),
       trainerId: session.trainerId || TRAINER_ID,
+      professionalId: session.professionalId || TRAINER_ID,
       studentId: session.studentId || "",
       workoutId: session.workoutId || "",
       activityId: session.activityId || "",
@@ -1019,6 +1024,7 @@
     return {
       id: update.id || createId("update"),
       trainerId: update.trainerId || TRAINER_ID,
+      professionalId: update.professionalId || TRAINER_ID,
       studentId: update.studentId || "",
       dueDate: update.dueDate || todayISO(),
       status: update.status || "pending",
@@ -1040,6 +1046,7 @@
     return {
       id: contract.id || createId("contract"),
       trainerId: contract.trainerId || TRAINER_ID,
+      professionalId: contract.professionalId || TRAINER_ID,
       studentId: contract.studentId || "",
       title: contract.title || "Contrato de prestação de serviço",
       body: contract.body || "",
@@ -1074,6 +1081,7 @@
     return {
       id: message.id || createId("message"),
       trainerId: message.trainerId || TRAINER_ID,
+      professionalId: message.professionalId || TRAINER_ID,
       studentId: message.studentId || "",
       senderRole: message.senderRole || "student",
       body: message.body || "",
@@ -1086,6 +1094,7 @@
     return {
       id: payment.id || createId("payment"),
       trainerId: payment.trainerId || TRAINER_ID,
+      professionalId: payment.professionalId || TRAINER_ID,
       studentId: payment.studentId || "",
       contractId: payment.contractId || "",
       plan: payment.plan || "",
@@ -1130,6 +1139,7 @@
     return {
       id: plan.id || createId("diet"),
       trainerId: plan.trainerId || TRAINER_ID,
+      professionalId: plan.professionalId || TRAINER_ID,
       studentId: plan.studentId || "",
       title: plan.title || "",
       objective: plan.objective || "",
