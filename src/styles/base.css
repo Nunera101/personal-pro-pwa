@@ -2017,6 +2017,35 @@ body.app-installed [data-install-trigger] {
   --t-label-w: 800;
 }
 
+/* ── Themes ─────────────────────────────────────────────────────────────
+   Cada seletor sobrescreve apenas as 4 variáveis canônicas de marca.
+   Trocar data-theme no <html> re-tematiza o app inteiro.
+   ──────────────────────────────────────────────────────────────────── */
+
+/* gold — âmbar dourado (ativo) */
+[data-theme="gold"] {
+  --brand:        #F59E0B;
+  --brand-strong: #E7A83E;
+  --brand-soft:   rgba(245, 181, 27, 0.10);
+  --brand-ink:    #1A1206;
+}
+
+/* ocean — azul céu + rosa (inativo) */
+[data-theme="ocean"] {
+  --brand:        #0EA5E9;
+  --brand-strong: #F9A8D4;
+  --brand-soft:   rgba(14, 165, 233, 0.10);
+  --brand-ink:    #072331;
+}
+
+/* graphite — ardósia neutra (inativo) */
+[data-theme="graphite"] {
+  --brand:        #64748B;
+  --brand-strong: #CBD5E1;
+  --brand-soft:   rgba(100, 116, 139, 0.10);
+  --brand-ink:    #0F172A;
+}
+
 html,
 body {
   background: var(--canvas);
