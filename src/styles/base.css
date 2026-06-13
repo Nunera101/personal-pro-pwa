@@ -1877,7 +1877,6 @@ body.app-installed [data-install-trigger] {
 }
 
 @media (max-width: 28rem) {
-  .workspace-header,
   .demo-credentials,
   .page-head,
   .profile-hero,
@@ -2224,8 +2223,8 @@ body::before {
 }
 
 .manager-header {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  display: flex;
+  align-items: center;
 }
 
 .brand-inline h2 {
@@ -2816,10 +2815,6 @@ body::before {
 }
 
 @media (max-width: 28rem) {
-  .manager-header {
-    grid-template-columns: auto minmax(0, 1fr) auto;
-  }
-
   .manager-header .brand-logo {
     width: 3.2rem;
   }

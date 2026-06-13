@@ -3230,7 +3230,6 @@ body.app-installed [data-install-trigger] {
 }
 
 @media (max-width: 28rem) {
-  .workspace-header,
   .demo-credentials,
   .page-head,
   .profile-hero,
@@ -3546,8 +3545,8 @@ body::before {
 
 .manager-header,
 .student-header {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  display: flex;
+  align-items: center;
 }
 
 .brand-inline h2 {
@@ -4153,10 +4152,6 @@ body::before {
 }
 
 @media (max-width: 28rem) {
-  .manager-header {
-    grid-template-columns: auto minmax(0, 1fr) auto;
-  }
-
   .manager-header .brand-logo {
     width: 3.2rem;
   }
@@ -12558,6 +12553,11 @@ button.dashboard-metric {
 
 .manager-header,
 .student-header {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 0.75rem !important;
   position: relative !important;
   min-height: 5rem !important;
   padding: 0 clamp(0.85rem, 3.5vw, 1.75rem) !important;
@@ -12565,44 +12565,19 @@ button.dashboard-metric {
   backdrop-filter: blur(28px) saturate(1.6) !important;
   -webkit-backdrop-filter: blur(28px) saturate(1.6) !important;
   border-bottom: 1px solid rgba(245, 184, 46, 0.12) !important;
-  box-shadow:
-    0 1px 0 rgba(245, 184, 46, 0.08),
-    0 10px 42px rgba(0, 0, 0, 0.72) !important;
+  box-shadow: 0 10px 42px rgba(0, 0, 0, 0.72) !important;
 }
 
-/* Gold shimmer top accent */
+/* Remove linha dourada do topo */
 .manager-header::before,
 .student-header::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(245, 184, 46, 0.18) 12%,
-    #f5b82e 38%,
-    #ffd060 52%,
-    #f5b82e 66%,
-    rgba(245, 184, 46, 0.18) 88%,
-    transparent 100%
-  );
-  pointer-events: none;
+  content: none !important;
 }
 
-/* Subtle inner glow below the accent line */
+/* Remove brilho interno */
 .manager-header::after,
 .student-header::after {
-  content: "";
-  position: absolute;
-  top: 2px;
-  left: 0;
-  right: 0;
-  height: 28px;
-  background: linear-gradient(180deg, rgba(245, 184, 46, 0.04) 0%, transparent 100%);
-  pointer-events: none;
+  content: none !important;
 }
 
 /* Logo */
@@ -12632,20 +12607,18 @@ button.dashboard-metric {
   line-height: 1 !important;
 }
 
-/* Page title — center */
+/* Título movido para o corpo — oculto no header */
 #managerTitle,
 #studentTitle {
-  flex: 1 1 0 !important;
-  display: block !important;
-  text-align: center !important;
-  color: rgba(244, 241, 234, 0.78) !important;
-  font-size: clamp(0.88rem, 3.2vw, 1rem) !important;
-  font-weight: 600 !important;
-  letter-spacing: 0.005em !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  padding: 0 0.5rem !important;
+  display: none !important;
+}
+
+/* Header-actions empurrado para a direita */
+.manager-header .header-actions,
+.student-header .header-actions {
+  margin-left: auto !important;
+  flex: 0 0 auto !important;
+  width: auto !important;
 }
 
 /* Badges de role */
