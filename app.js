@@ -2720,6 +2720,15 @@
       void elements.studentContent.offsetWidth;
       elements.studentContent.innerHTML = fixMojibake(renderStudentContractGate(blockingContract));
       elements.studentContent.classList.add("is-entering");
+      if (!blockingContract.pdfUrl && blockingContract.body) {
+        ensureContractPdfUrl(blockingContract.id).then((url) => {
+          const slot = document.querySelector(`[data-contract-doc-slot="${blockingContract.id}"]`);
+          if (slot) slot.outerHTML = renderContractPdfViewer(url);
+        }).catch(() => {
+          const slot = document.querySelector(`[data-contract-doc-slot="${blockingContract.id}"]`);
+          if (slot) slot.innerHTML = `<p class="small-text" style="color:var(--muted)">Não foi possível carregar o documento. Tente novamente.</p>`;
+        });
+      }
       return;
     }
 
@@ -7051,10 +7060,9 @@
       planValue ? profileSummaryCard(icons.finance, "Valor", planValue, "Mensalidade") : "",
       vigencia ? profileSummaryCard(icons.agenda, "Vigência", vigencia, vigenciaDetail) : ""
     ].filter(Boolean);
-    // Com PDF do gestor, exibe o viewer real; sem PDF, cai no texto renderizado.
     const documentBlock = contract.pdfUrl
       ? renderContractPdfViewer(contract.pdfUrl)
-      : `<div class="contract-body premium-contract-body">${escapeHtml(cleanContractBody(contract.body))}</div>`;
+      : `<div class="contract-doc-loading" data-contract-doc-slot="${escapeHtml(contract.id)}"><span class="contract-doc-loading-spinner"></span><span>Preparando documento…</span></div>`;
     return `
       <div class="content-stack contract-gate">
         <section class="hero-panel">
@@ -9669,6 +9677,23 @@
     return String(data.url).startsWith("http") ? data.url : `${apiOrigin()}${data.url}`;
   }
 
+  // Garante que o contrato tenha uma URL de PDF — gerando retroativamente se necessário.
+  // Gestor: gera, faz upload e salva pdfUrl permanente. Aluno: gera blob URL efêmero só para exibição.
+  async function ensureContractPdfUrl(contractId) {
+    const contract = state.data.contracts.find((c) => c.id === contractId);
+    if (!contract) throw new Error("Contrato não encontrado");
+    if (contract.pdfUrl) return contract.pdfUrl;
+    if (!contract.body) throw new Error("Contrato sem conteúdo para gerar PDF");
+    const blob = await generateContractPdfBlob({ bodyText: contract.body, version: contract.version || "1.0" });
+    if (state.currentUser?.role === "manager") {
+      const url = await uploadGeneratedContractPdf(blob, contractId);
+      contract.pdfUrl = url;
+      persistData();
+      return url;
+    }
+    return URL.createObjectURL(blob);
+  }
+
   function _bindContractDocSection(contract = null) {
     const form = document.getElementById("contractSheetForm");
     const urlInput = document.getElementById("cfsPdfUrl");
@@ -9879,7 +9904,9 @@
           <h4 class="ns-section-title">Documento</h4>
           ${contract.pdfUrl
             ? renderContractPdfViewer(contract.pdfUrl)
-            : `<div class="contract-doc-body">${escapeHtml(cleanContractBody(contract.body) || "Texto do contrato não informado.")}</div>`
+            : contract.body
+              ? `<div class="contract-doc-loading" data-contract-doc-slot="${escapeHtml(contract.id)}"><span class="contract-doc-loading-spinner"></span><span>Preparando PDF…</span></div>`
+              : `<div class="contract-doc-body">Texto do contrato não disponível.</div>`
           }
           ${contract.signedAt ? `
             <p class="small-text">Assinado em ${new Date(contract.signedAt).toLocaleString("pt-BR")} · Versão ${escapeHtml(contract.signedVersion || contract.version)} · ${escapeHtml(contract.technicalId || "sem ID técnico")}${contract.signatureIp ? " · IP " + escapeHtml(contract.signatureIp) : ""}${contract.signerName ? " · " + escapeHtml(contract.signerName) : ""}${contract.signerCpf ? " · CPF " + escapeHtml(contract.signerCpf) : ""}</p>
@@ -9922,6 +9949,20 @@
 
     _openSheet(sheet);
     document.body.style.overflow = "hidden";
+
+    if (!contract.pdfUrl && contract.body) {
+      ensureContractPdfUrl(contract.id).then((url) => {
+        const slot = document.querySelector(`[data-contract-doc-slot="${contract.id}"]`);
+        if (slot) slot.outerHTML = renderContractPdfViewer(url);
+        if (isManager) {
+          const pdfBtn = footerEl.querySelector(`[data-contract-pdf]`);
+          if (pdfBtn) pdfBtn.outerHTML = `<a class="secondary-action" href="${escapeHtml(url)}" ${isIOS ? `target="_blank" rel="noopener noreferrer"` : `download`}>Baixar PDF</a>`;
+        }
+      }).catch(() => {
+        const slot = document.querySelector(`[data-contract-doc-slot="${contract.id}"]`);
+        if (slot) slot.innerHTML = `<p class="small-text" style="color:var(--muted)">Não foi possível gerar o PDF.</p>`;
+      });
+    }
   }
 
   function closeContractViewSheet() {
@@ -12286,12 +12327,16 @@
       }
       if (target.matches("[data-contract-pdf]")) {
         const cid = target.dataset.contractPdf;
-        import("./src/services.js").then(({ gerarPdf }) =>
-          gerarPdf(cid).then(() => {
-            showToast("Use a opção de salvar como PDF na impressão do navegador.");
-            window.print();
-          }).catch(() => showToast("Não foi possível gerar o PDF agora."))
-        );
+        target.disabled = true;
+        const prevLabel = target.textContent;
+        target.textContent = "Gerando…";
+        ensureContractPdfUrl(cid)
+          .then(() => openContractViewSheet(cid))
+          .catch(() => {
+            showToast("Não foi possível gerar o PDF agora.");
+            target.disabled = false;
+            target.textContent = prevLabel;
+          });
       }
       if (target.matches("[data-contract-renew]")) renewContract(target.dataset.contractRenew);
       if (target.matches("[data-copy-contract-link]")) {
