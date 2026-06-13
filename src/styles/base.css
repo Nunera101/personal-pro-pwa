@@ -27,6 +27,7 @@
 
 html {
   min-height: 100%;
+  overflow-x: hidden;
   background: var(--canvas);
 }
 
@@ -540,6 +541,7 @@ svg {
 
 .workspace {
   min-height: 100vh;
+  overflow-x: hidden;
   padding-bottom: calc(5.8rem + var(--safe-bottom));
 }
 

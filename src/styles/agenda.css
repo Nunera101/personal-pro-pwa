@@ -620,10 +620,6 @@
 }
 
 @media (max-width: 24.5rem) {
-  .agenda-week-grid {
-    min-width: 47rem;
-  }
-
   .agenda-period-label strong {
     font-size: 0.78rem;
   }

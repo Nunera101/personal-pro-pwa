@@ -728,12 +728,14 @@
 
 html {
   min-height: 100%;
+  overflow-x: hidden;
   background: var(--canvas);
 }
 
 body {
   min-height: 100vh;
   margin: 0;
+  overflow-x: hidden;
   color: var(--ink);
   background:
     linear-gradient(180deg, rgba(11, 107, 87, 0.09), rgba(246, 247, 242, 0) 30rem),
@@ -1226,6 +1228,7 @@ svg {
 
 .workspace {
   min-height: 100vh;
+  overflow-x: hidden;
   padding-bottom: calc(5.8rem + var(--safe-bottom));
 }
 
@@ -5915,10 +5918,6 @@ button.dashboard-metric {
 }
 
 @media (max-width: 24.5rem) {
-  .agenda-week-grid {
-    min-width: 47rem;
-  }
-
   .agenda-period-label strong {
     font-size: 0.78rem;
   }
@@ -7760,7 +7759,7 @@ button.dashboard-metric {
 
 .contract-filter-grid {
   display: grid;
-  grid-template-columns: 1.15fr 1fr 1fr;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 1fr);
   gap: 0.6rem;
 }
 

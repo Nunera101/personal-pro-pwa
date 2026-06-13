@@ -940,7 +940,7 @@
 
 .mp-food-item {
   display: grid;
-  grid-template-columns: 1fr 5rem 4.2rem 1.6rem;
+  grid-template-columns: minmax(0, 1fr) 5rem 4.2rem 1.6rem;
   align-items: center;
   gap: 0.4rem;
   padding: 0.38rem 0.85rem;
