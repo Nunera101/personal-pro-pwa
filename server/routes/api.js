@@ -128,6 +128,67 @@ const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,253}$/;
 function isValidEmail(value) { return EMAIL_RE.test(String(value || "")); }
 function withinLen(value, max) { return String(value ?? "").length <= max; }
 
+// M1 (validacao de schema): valida o CORPO de uma rota critica ANTES de tocar o banco.
+// Pura e testavel — recebe o body e uma lista de campos com tipo/obrigatoriedade/limites.
+// Reaproveita isValidEmail/withinLen do hardening anterior. Retorna a mensagem do
+// PRIMEIRO problema encontrado (vira 400 para o cliente) ou "" quando o payload e valido.
+// Campos: { key, type ("string"|"email"), required, min, max, requiredMessage,
+//           typeMessage, minMessage, maxMessage }. type default = "string".
+function validateSchema(body, fields) {
+  if (body === null || typeof body !== "object" || Array.isArray(body)) {
+    return "Payload invalido: esperado um objeto JSON.";
+  }
+  for (const field of fields) {
+    const value = body[field.key];
+    const missing = value === undefined || value === null || value === "";
+    if (missing) {
+      if (field.required) return field.requiredMessage || `Informe o campo "${field.key}".`;
+      continue;
+    }
+    if (field.type === "email") {
+      if (typeof value !== "string" || !isValidEmail(normalizeEmail(value))) {
+        return field.typeMessage || "Formato de e-mail invalido.";
+      }
+    } else if (typeof value !== "string") {
+      return field.typeMessage || `O campo "${field.key}" deve ser um texto.`;
+    }
+    if (typeof field.min === "number" && String(value).length < field.min) {
+      return field.minMessage || `O campo "${field.key}" e muito curto.`;
+    }
+    if (typeof field.max === "number" && !withinLen(value, field.max)) {
+      return field.maxMessage || `O campo "${field.key}" excede o tamanho permitido.`;
+    }
+  }
+  return "";
+}
+
+// M1: valida o payload de escrita de colecao (PUT). Aceita objeto (settings) ou
+// array (demais colecoes); corpo vazio (null/undefined) e no-op nas camadas abaixo.
+// Rejeita primitivos (string/numero/boolean), que indicariam JSON malformado.
+function validateCollectionPayload(body) {
+  if (body === null || body === undefined) return "";
+  if (typeof body !== "object") return "Payload invalido: esperado objeto ou array JSON.";
+  return "";
+}
+
+// Schemas das rotas criticas de autenticacao.
+const LOGIN_SCHEMA = [
+  { key: "email", type: "email", required: true, max: 254, requiredMessage: "Informe e-mail e senha." },
+  { key: "password", required: true, max: 128, requiredMessage: "Informe e-mail e senha.", maxMessage: "Senha muito longa." }
+];
+const RESET_PASSWORD_SCHEMA = [
+  { key: "token", required: true, max: 128, requiredMessage: "Informe um link valido e uma senha com pelo menos 8 caracteres.", maxMessage: "Campos fora do tamanho permitido." },
+  {
+    key: "password",
+    required: true,
+    min: 8,
+    max: 128,
+    requiredMessage: "Informe um link valido e uma senha com pelo menos 8 caracteres.",
+    minMessage: "Informe um link valido e uma senha com pelo menos 8 caracteres.",
+    maxMessage: "Campos fora do tamanho permitido."
+  }
+];
+
 function buildResetUrl(request, token) {
   const requestedBase = sanitizeBaseUrl(request.body?.appUrl);
   const origin = `${request.protocol}://${request.get("host")}`;
@@ -600,20 +661,14 @@ function createApiRouter() {
 
   router.post("/auth/login", authRateLimiter, async (request, response, next) => {
     try {
-      const email = normalizeEmail(request.body?.email);
-      const password = String(request.body?.password || "");
-      if (!email || !password) {
-        response.status(400).json({ error: "Informe e-mail e senha." });
+      // M1: valida tipo/campos/limites antes de qualquer leitura do banco.
+      const schemaError = validateSchema(request.body, LOGIN_SCHEMA);
+      if (schemaError) {
+        response.status(400).json({ error: schemaError });
         return;
       }
-      if (!isValidEmail(email)) {
-        response.status(400).json({ error: "Formato de e-mail invalido." });
-        return;
-      }
-      if (!withinLen(password, 128)) {
-        response.status(400).json({ error: "Senha muito longa." });
-        return;
-      }
+      const email = normalizeEmail(request.body.email);
+      const password = String(request.body.password);
 
       if (email === ADMIN_EMAIL) {
         // Senha do admin: FONTE UNICA DE VERDADE = ADMIN_PASSWORD_HASH (ambiente).
@@ -1009,16 +1064,14 @@ function createApiRouter() {
 
   router.post("/auth/reset-password", authRateLimiter, async (request, response, next) => {
     try {
-      const token = String(request.body?.token || "");
-      const password = String(request.body?.password || "");
-      if (!token || password.length < 8) {
-        response.status(400).json({ error: "Informe um link valido e uma senha com pelo menos 8 caracteres." });
+      // M1: valida tipo/campos/limites antes de tocar nos tokens/storage.
+      const schemaError = validateSchema(request.body, RESET_PASSWORD_SCHEMA);
+      if (schemaError) {
+        response.status(400).json({ error: schemaError });
         return;
       }
-      if (!withinLen(token, 128) || !withinLen(password, 128)) {
-        response.status(400).json({ error: "Campos fora do tamanho permitido." });
-        return;
-      }
+      const token = String(request.body.token);
+      const password = String(request.body.password);
 
       const tokenHash = hashToken(token);
       const resets = await readCollection(PASSWORD_RESETS_KEY, []);
@@ -1053,8 +1106,10 @@ function createApiRouter() {
 
   router.put("/collections/:collection", requireAuth, async (request, response, next) => {
     try {
-      if (request.body !== null && request.body !== undefined && typeof request.body !== "object") {
-        response.status(400).json({ error: "Payload invalido: esperado objeto ou array JSON." });
+      // M1: rejeita payload malformado (primitivos) antes de tocar o banco.
+      const payloadError = validateCollectionPayload(request.body);
+      if (payloadError) {
+        response.status(400).json({ error: payloadError });
         return;
       }
       await writeCollectionForAuth(request.params.collection, request.body, request.auth);
@@ -1184,6 +1239,12 @@ function createApiRouter() {
 
   router.put("/:collection", requireAuth, async (request, response, next) => {
     try {
+      // M1: mesma checagem de payload da rota /collections/:collection.
+      const payloadError = validateCollectionPayload(request.body);
+      if (payloadError) {
+        response.status(400).json({ error: payloadError });
+        return;
+      }
       await writeCollectionForAuth(request.params.collection, request.body, request.auth);
       await writeAuditLog("update", "collection", request.params.collection, request.auth);
       response.json({ ok: true });
@@ -1198,5 +1259,9 @@ function createApiRouter() {
 module.exports = {
   createApiRouter,
   mergeStudentContracts,
-  findActiveSingleUseToken
+  findActiveSingleUseToken,
+  validateSchema,
+  validateCollectionPayload,
+  LOGIN_SCHEMA,
+  RESET_PASSWORD_SCHEMA
 };
