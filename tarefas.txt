@@ -1,15 +1,11 @@
 ﻿==============================================
- FILA - POLIMENTO + CORRECOES GESTOR E ALUNO (consolidada, 12/06)
- Junta o polimento do video com os itens apontados pelo Guilherme.
- DECISOES TOMADAS (nao perguntar): card do gate vira ESCURO com acento
- dourado (nada de fundo dourado macico); video da biblioteca persiste
- no PostgreSQL servido por rota propria (limite 60MB, migracao para
- storage dedicado anotada para depois); widget "Adesao do mes" e
- REMOVIDO; "Treino de hoje" vira "Atividades de hoje" (agenda).
+ FILA - CORRECOES (video 13/06) + TOKENIZACAO DE TEMA
+ Dois blocos em ordem: LEVA A e B consertam os bugs vistos no video
+ (header quebrado, chat, gate, etc.) - rodar e VALIDAR antes. LEVA C
+ tokeniza as cores para preparar multi-personal e temas SEM retrabalho.
+ Bugs e tokenizacao sao trabalhos diferentes: nao misturar numa tarefa.
  Cada tarefa = UMA linha. SEM seta no texto. ~6-7 por janela:
- BACKUP + LEVA 0 + LEVA 1 (janela 1, presente por causa do SW),
- LEVA 2 (janela 2), LEVA 3 + LEVA 4 (janela 3),
- LEVA 5 BACKEND (janela 4, OBRIGATORIO presente), LEVA 6 (janela 5).
+ BACKUP + LEVA A (janela 1), LEVA B (janela 2), LEVA C (janela 3).
  "session limit" ou erro de CLI = NAO rodou.
  Tokens: dourado #F59E0B, fundo #0D0D0D, card #1A1A1A flat sem glow,
  borda rgba(255,255,255,0.06), radius 16px, txt2 #9CA3AF, ok #10B981,
@@ -17,105 +13,37 @@
 ==============================================
 
 == BACKUP ==
-[OK] git checkout -b backup/polimento-consolidado && git push origin backup/polimento-consolidado && git checkout main. NAO altere arquivos. Confirme que o app abre sem erro de sintaxe. (sem commit adicional)
-     Resultado: Tudo pronto:
- | 1. **Backup criado e enviado** ÔÇö a branch `backup/polimento-consolidado` foi criada a partir da `main` e publicada no remoto (`origin`). Em seguida voltei para a `main`.
- | 2. **Nenhum arquivo alterado ...
+[OK] git checkout -b backup/correcoes-tokenizacao && git push origin backup/correcoes-tokenizacao && git checkout main. NAO altere arquivos. Confirme que o app abre sem erro de sintaxe. (sem commit adicional)
+     Resultado: Tudo limpo: | - **Branch `backup/correcoes-tokenizacao`** criada e publicada no remote. | - **Retorno ao `main`** ÔÇö sem altera├º├Áes de arquivo. | - **Verifica├º├úo de sintaxe:** todos os 14 arquivos `.js` do servid...
 
-== LEVA 0 - BOOT, ZOOM E SERVICE WORKER (global) ==
-[OK] SPLASH IMEDIATO contra a tela preta do boot: adicionar splash INLINE no index.html (HTML e CSS puros antes de qualquer JS): fundo #0D0D0D, logo Elite AS centralizada, spinner dourado discreto; aparece instantaneamente e some quando a primeira tela renderiza; se apos 10 segundos nada carregar, mostrar "Demorando mais que o normal" com botao "Tentar novamente" que recarrega sem cache. git add . && git commit -m "feat(boot): splash imediato com fallback de retry" && git push origin main
-     Resultado: - **Layout corrigido:** o grid do splash espalhava logo, nome e spinner pela tela inteira; troquei por `align-content: center` para formar um bloco centralizado compacto (no inline e nos dois CSS externos).
- | - **sw.js:...
-[OK] TRAVAR O ZOOM no app inteiro (as vezes entra com zoom, as vezes sem): meta viewport com maximum-scale=1 e user-scalable=no; garantir que TODOS os inputs, textareas e selects tenham font-size minimo de 16px (e o que causa o auto-zoom do iOS ao focar campo); touch-action manipulation nos containers para eliminar zoom por duplo toque; testar focando inputs de login, chat e formularios. git add . && git commit -m "fix(global): zoom travado e inputs sem auto-zoom no iOS" && git push origin main
-     Resultado: | `acesso.html` | Viewport: `maximum-scale=1, user-scalable=no` ┬À `*` ganha `touch-action: manipulation` ┬À `input, select, textarea { font-size: max(16px, 1em) }` |
- | | `index.html` | Viewport: `maximum-scale=1, user-...
-[OK] SERVICE WORKER sem versao velha (causa provavel do erro intermitente ao entrar): revisar sw.js com skipWaiting e clients.claim, cache versionado, toast discreto "Nova versao disponivel - Atualizar" quando houver update, e fallback para cache em falha de rede (nunca tela preta). NAO mexer no push/VAPID. git add . && git commit -m "fix(pwa): atualizacao do service worker confiavel" && git push origin main
-     Resultado: - Cache versionado bumpeado para **v63** (alinhando tamb├®m os `?v=` do APP_SHELL).
- | **Toast discreto ÔÇö `app.js`:**
- | - Substitu├¡do o `window.location.reload()` autom├ítico por `showActionToast("Nova vers├úo dispon...
+== LEVA A - HEADER E BOOT (o que mais quebrou) ==
+[OK] HEADER QUEBRADO nos dois perfis: a logo ficou CENTRALIZADA, o sino e o avatar cairam para a esquerda embaixo, o titulo da aba foi para o canto superior direito, e surgiu uma linha dourada estranha no topo. Refazer o header em UMA linha horizontal estavel: [hamburguer] a esquerda, [logo + nome Elite AS + badge] logo apos, [espaco flexivel], [icone chat] [sino] [avatar] a direita - tudo centralizado verticalmente na mesma altura. Remover a linha dourada do topo. O titulo da tela (H1) fica no CORPO da pagina, nunca no header. Conferir gestor e aluno em 360px e 390px. git add . && git commit -m "fix(header): layout em uma linha estavel nos dois perfis" && git push origin main
+     Resultado: | `index.html` | Removeu `<span id="managerTitle">` e `<span id="studentTitle">` do `<header>` ÔÇö agora ficam como `hidden` fora do header (JS continua funcionando) | | | `styles.css` | `display: grid` ÔåÆ `display: fl...
+[OK] AVATAR CORTADO no topo: em algumas telas o avatar AS aparece cortado pela metade acima do header. Garantir que o header tem altura suficiente e overflow visivel para o avatar, com padding-top respeitando a safe-area (notch); o avatar nunca encosta na borda superior nem corta. git add . && git commit -m "fix(header): avatar inteiro respeitando safe-area" && git push origin main
+     Resultado: - `padding-top: calc(safe-area + 8px)` ÔåÆ `max(0.72rem, env(safe-area-inset-top, 0px))` ÔÇö fallback limpo, sem os 8px fixos desnecess├írios | - `min-height: auto` ÔåÆ `calc(5rem + env(safe-area-inset-top, 0px))` ÔÇö a...
+[OK] MENSAGEM BRANCA no login: ao logar aparece uma faixa/mensagem branca ilegivel que demora a sumir. Localizar esse toast/aviso (provavel mensagem de status de login ou de versao do SW) e corrigir: fundo escuro do tema, texto legivel, ou remover se for redundante; se for o toast de "nova versao", aplicar o estilo padrao escuro e auto-dismiss em 3s. git add . && git commit -m "fix(login): remover/estilizar faixa branca ilegivel ao logar" && git push origin main
+     Resultado: **Corre├º├Áes:** | 1. **`styles.css` (regra base `.toast`)** ÔÇö `background: var(--ink)` ÔåÆ `background: rgba(15,15,15,0.96)` (escuro fixo, independente do tema) | 2. **`styles.css` e `src/styles/nav.css` (regra de o...
+[OK] NOTIFICACOES nao sobem a tela toda: ao abrir a central de notificacoes (sino) o conteudo nao ocupa a altura total e fica cortado. A tela/sheet de notificacoes deve ocupar a altura disponivel (100dvh menos header), com lista rolavel ate o fim e safe-area respeitada; cabecalho fixo com titulo e fechar. git add . && git commit -m "fix(notificacoes): sheet ocupa a tela inteira e rola ate o fim" && git push origin main
+     Resultado: Feito. As duas causas do problema foram corrigidas em `src/styles/notificacoes.css`: | 1. **`#notifSheet .ag-panel`** ÔÇö sobrescreve o `max-height: 92dvh` do padr├úo com `calc(100dvh - env(safe-area-inset-top, 0px))`, ...
+[ ] AVATAR/FOTO leva ao PERFIL: tocar no avatar no header (gestor e aluno) abre o proprio perfil, onde o usuario edita seus dados e faz upload de FOTO de perfil (preview, salva e passa a aparecer no avatar do header e onde mais o usuario aparece; no aluno, a foto fica visivel tambem para o professor). Deixar o campo de foto preparado para reuso futuro numa aba Comunidade (posts/fotos) - so o armazenamento da foto, sem criar a aba agora. git add . && git commit -m "feat(perfil): avatar abre perfil com upload de foto" && git push origin main
 
-== LEVA 1 - INICIO DO ALUNO ESPELHANDO O DASHBOARD DO GESTOR ==
-[OK] CARDS DO INICIO COMPACTOS: os cards e textos do Inicio do aluno estao MUITO maiores que os do dashboard do gestor, que e a referencia e espelho. Igualar: mesmos tamanhos de fonte (label maiuscula pequena, valor, legenda), mesmo padding, mesma altura de card e mesma grade do gestor; numeros grandes na mesma escala. Comparar lado a lado ao finalizar. git add . && git commit -m "fix(aluno): cards do inicio na escala do dashboard do gestor" && git push origin main
-     Resultado: **base.css**:
- | - `.metrics-row .next-activity-card` ÔåÆ `.next-activity-card` com `padding: 14px; padding-left: 18px` para funcionar como card standalone
- | - `.next-activity-name` recebe `font-size: 15px !important` p...
-[OK] CARD TREINOS NA SEMANA premium: as bolinhas estao desorganizadas e desproporcionais. Refazer: card de largura inteira, numero X de Y + rotulo a esquerda, e as 7 bolinhas em LINHA HORIZONTAL a direita, todas do MESMO tamanho (proporcionais, ~22px), letras S T Q Q S S D pequenas e alinhadas sob cada bolinha, concluido = dourada com check escuro, pendente = contorno cinza, sem treino = contorno apagado; espacamento uniforme, visual limpo. git add . && git commit -m "fix(aluno): card treinos na semana com bolinhas proporcionais" && git push origin main
-     Resultado: - `.week-card`: flex row, justify-content space-between
- | - `.week-dot`: 22px ├ù 22px, `border-radius: 50%`, sem texto interno
- | - `.week-dot-label`: 9px fora do c├¡rculo, abaixo, alinhado ao centro
- | - Pending = `bor...
-[OK] REMOVER o widget "Adesao do mes" do Inicio (nao faz sentido para o aluno) e SUBSTITUIR o card "Treino de hoje" por "ATIVIDADES DE HOJE": lista compacta das atividades agendadas do dia (da agenda do aluno: treino, avaliacao, retorno, atualizacao) com faixa de cor por tipo e horario; estado vazio discreto "Nenhuma atividade hoje". git add . && git commit -m "feat(aluno): atividades de hoje no lugar de treino de hoje, sem adesao" && git push origin main
-     Resultado: Feito. Removido o widget "Ades├úo do m├¬s" da tela inicial do aluno ÔÇö apagados o bloco HTML/JS (`adesaoCard`) em `app.js` e todos os estilos `.adesao-*` em `base.css`. Commit publicado.
+  >>> VALIDAR COM VIDEO: header estavel nos dois perfis, sem faixa branca,
+      notificacoes em tela cheia, avatar abrindo o perfil. <<<
 
-[OK] UNIFICAR banner de sessao e widget de progresso (mostram a mesma coisa duplicada): com sessao ativa, APENAS o banner com a barra de progresso dentro; sem sessao mas com treino hoje, apenas o widget; nunca os dois. Card de peso refinado: numero grande dourado a esquerda com kg menor, data discreta, variacao colorida quando houver 2+ registros, mini grafico a direita; com 1 registro, numero + legenda "Primeiro registro" elegante. git add . && git commit -m "fix(aluno): banner unificado e card de peso refinado" && git push origin main
-     Resultado: **Card de peso refinado (`app.js` + `src/styles/base.css`):**
- | - Layout flex-row: n├║mero grande **dourado** ├á esquerda com `kg` mais escuro/menor + data discreta + varia├º├úo colorida; mini sparkline compacta ├á dire...
-[OK] GATE DE PRIMEIRO ACESSO sem card dourado macico: o card de boas-vindas dourado com texto preto nao transmite premium. Trocar por card ESCURO padrao #1A1A1A com acento dourado (borda esquerda ou icone), titulo claro, texto em txt2; o botao de acao continua dourado chapado. Conferir o restante do gate no mesmo padrao. git add . && git commit -m "fix(aluno): gate com card escuro e acento dourado" && git push origin main
-     Resultado: - **Subtexto (span)** ÔÇö `#9CA3AF` (cinza moderno = tom de `--txt2`)
- | - **Badge de status** ÔÇö borda e fundo com tint dourado sutil, texto dourado ÔÇö leg├¡vel sobre o escuro
- | - **Bot├úo de a├º├úo** ÔÇö n├úo tocado...
+== LEVA B - LARGURA, CHAT, TREINOS DA SEMANA, AGENDA, GATE ==
+[ ] ABAS MAIS LARGAS QUE A TELA (scroll horizontal indevido): em varias telas dos dois perfis da para arrastar para o lado, sinal de conteudo estourando a largura. Varrer e corrigir: nenhum elemento com largura fixa maior que a viewport, grades com minmax(0,1fr) para poder encolher, padding lateral consistente, e overflow-x hidden no container de pagina como rede de seguranca; identificar os culpados (cards, tabelas, linhas de metrica) e corrigir a raiz, nao so esconder. Testar cada aba em 360px. git add . && git commit -m "fix(layout): eliminar scroll horizontal em todas as abas" && git push origin main
+[ ] CHAT DO ALUNO com espaco embaixo empurrando para cima: ainda ha uma faixa morta abaixo do chat empurrando o conteudo. Garantir que a tela de conversa ocupa 100dvh com o compose grudado no fundo (safe-area), mensagens preenchendo o espaco acima, sem nenhuma faixa vazia entre o compose e a borda inferior; testar com e sem teclado. git add . && git commit -m "fix(aluno): chat sem faixa morta inferior, altura real" && git push origin main
+[ ] TREINOS NA SEMANA - bolinhas e "0 de 0": as 7 bolinhas estao desalinhadas/bugadas e o texto "0 de 0" nao faz sentido (nao existe meta para ser 0 de 0). Corrigir: (1) mostrar apenas QUANTOS treinos foram concluidos na semana (ex "0 treinos" ou so o numero grande), sem "de 0"; se houver treinos programados na semana, ai sim pode ser "X de Y"; (2) as 7 bolinhas (S T Q Q S S D) em linha horizontal, todas do MESMO tamanho (~20-22px), igualmente espacadas, letra alinhada sob cada bolinha, concluido dourado com check, pendente contorno cinza, sem treino contorno apagado; visual limpo e proporcional. git add . && git commit -m "fix(aluno): treinos na semana sem 0 de 0 e bolinhas alinhadas" && git push origin main
+[ ] AGENDA "Contrato pendente" AINDA vaza do card nos itens do dia: corrigir DEFINITIVO - o badge deve ficar 100 por cento dentro do card; reduzir o texto se preciso (ex so "Pendente" com a cor de contrato), dar max-width ao bloco de conteudo do item com min-width 0, e quebrar/encolher o que sobra, nunca o badge vazar. Testar em 360px com o texto mais longo. git add . && git commit -m "fix(agenda): badge de contrato contido no card definitivo" && git push origin main
+[ ] GATE DE ACEITE premium e sem cortes: hoje os cards PLANO e VIGENCIA cortam o texto ("Condicionamen...", "Desde 13/06/2..."). Reorganizar o gate: mostrar so as infos RELEVANTES (plano por extenso, valor, inicio e fim em formato curto dd/mm/aaaa) sem truncar - empilhar ou aumentar os cards conforme couber; o bloco de visualizar PDF em destaque; o formulario de aceite (checkbox, nome, CPF, confirmar) com espacamento premium; nada cortado em 360px. git add . && git commit -m "fix(aluno): gate de aceite premium sem informacoes cortadas" && git push origin main
+[ ] DETALHE DO TREINO - nome generico "Exercicio": em alguns exercicios o nome aparece como "Exercicio" em vez do nome real (backfill nao pegou tudo). Garantir o backfill tambem na tela de detalhe do treino e na biblioteca: resolver o nome real via getExercise ou o snapshot; se faltar, usar o ultimo nome conhecido, nunca so "Exercicio". git add . && git commit -m "fix(aluno): nomes reais de exercicios no detalhe do treino" && git push origin main
 
-== LEVA 2 - CORRECOES DO GESTOR ==
-[OK] AGENDA itens do dia - badge "Contrato pendente" AINDA vaza para fora do card: corrigir definitivamente o container do badge (max-width do item, overflow controlado, quebra para baixo se preciso) garantindo o badge INTEIRO DENTRO do card em 360px e 390px; conferir todos os tipos de badge. git add . && git commit -m "fix(agenda): badge inteiro dentro do card nos itens do dia" && git push origin main
-     Resultado: Feito. Na fun├º├úo `renderAgendaList` (linha 5793 do `app.js`), adicionei:
- | - Verifica├º├úo `hasPendingContract`: verdadeiro quando o aluno tem um contrato com status `pending` ou `viewed` **e** o item n├úo ├® do tipo ...
-[OK] BIBLIOTECA - icones desalinhados nos botoes dos cards de exercicio: os icones dos botoes (Ver video, Editar, Usar no treino) estao desalinhados do texto. Alinhar verticalmente icone e label (flex com align-items center, mesmo gap), mesmo tamanho de icone nos tres, conferindo nos estados normal e pressionado. git add . && git commit -m "fix(biblioteca): icones alinhados aos textos nos botoes" && git push origin main
-     Resultado: - `display: inline-flex` ÔÇö ativa o layout flex nos bot├Áes (o `gap` s├│ funciona com flex/grid)
- | - `align-items: center` ÔÇö alinha ├¡cone e label verticalmente no centro
- | - `justify-content: center` ÔÇö centraliza...
-[OK] VALIDACAO DE CPF NO CADASTRO DO ALUNO (gestor): nos formularios de Novo aluno e Editar aluno, o campo CPF ganha mascara 000.000.000-00 e validacao de digito verificador em tempo real (reusar isValidCpf e maskCpf ja existentes), mostrando "CPF invalido" inline assim que completar 11 digitos invalidos e impedindo salvar; assim o contrato nunca sai com CPF errado e a conferencia do aluno no aceite continua batendo com o cadastro. git add . && git commit -m "feat(alunos): validacao de cpf no cadastro do gestor" && git push origin main
-     Resultado: **Modal "Editar aluno"** (`openStudentForm`): campo CPF adicionado no grid junto com Telefone, carregando o valor existente do aluno. Mesmos atributos de m├íscara e o span de erro.
- | **Handler de input** (`[data-cpf-mas...
-[OK] BUG Novo contrato ao selecionar aluno: ao clicar em Novo contrato e selecionar o aluno, buga. Reproduzir, identificar a causa (console/erro no handler de selecao) e corrigir, garantindo o fluxo aluno, modelo, dados, pre-visualizacao funcionando de ponta a ponta. git add . && git commit -m "fix(contratos): selecao de aluno no novo contrato" && git push origin main
-     Resultado: **Bug 1 ÔÇö crash (`TypeError`) na linha 9106:**
- | A condi├º├úo `if (!studentId && !student)` protegia apenas o caso de `studentId` vazio. Quando o bot├úo "Novo contrato" ├® clicado a partir do perfil de um aluno (com I...
-[OK] SINO vira central de NOTIFICACOES: clicar no sino (gestor e aluno) abre uma tela/sheet "Notificacoes" listando as notificacoes recebidas pelo usuario (titulo, texto, horario relativo, icone por tipo: mensagem, atualizacao, contrato, financeiro, treino), mais recentes primeiro, nao lidas destacadas com ponto dourado; tocar numa notificacao marca como lida e NAVEGA para a aba onde se resolve (mensagem abre a conversa, atualizacao abre o check-in, contrato abre o contrato); registrar as notificacoes no estado quando os eventos acontecem (mesmos gatilhos do push) e badge de nao lidas no sino. git add . && git commit -m "feat(notificacoes): central de notificacoes no sino com navegacao" && git push origin main
-     Resultado: - **Navegar ao tocar**: marca como lida e abre a aba correta ÔÇö mensagem ÔåÆ conversa, atualiza├º├úo ÔåÆ check-ins, contrato ÔåÆ contrato do aluno, financeiro ÔåÆ financeiro, feedback ÔåÆ progresso
- | - **5 gatilhos reg...
+  >>> VALIDAR COM VIDEO: sem scroll lateral, chat sem faixa, bolinhas e
+      contador certos, badge contido, gate sem cortes. <<<
 
-== LEVA 3 - MENSAGENS ESTILO WHATSAPP (gestor e aluno) ==
-[OK] LISTA DE CONVERSAS no padrao WhatsApp de verdade: avatar redondo maior a esquerda, nome em peso forte, previa da ultima mensagem em txt2 truncada em 1 linha, horario pequeno no canto direito superior, badge circular dourado de nao lidas abaixo do horario, divisor sutil entre conversas, busca no topo; densidade compacta como o WhatsApp. git add . && git commit -m "feat(mensagens): lista de conversas no padrao whatsapp" && git push origin main
-     Resultado: - **`.wa-conv-body` / `.wa-conv-top` / `.wa-conv-bottom`** ÔÇö grid interno: nome bold + hor├írio pequeno na linha de cima; preview truncada em 1 linha + badge na linha de baixo
- | - **`.wa-conv-time`** ÔÇö fica dourado ...
-[OK] THREAD no padrao WhatsApp: baloes com cantos assimetricos (cauda sutil), minhas mensagens a direita em dourado escuro com texto claro, recebidas a esquerda em #1F1F1F, horario pequeno dentro do balao com duplo check, chips de DATA centralizados separando os dias (Hoje, Ontem, data), compose em pill com botao de anexo a esquerda e enviar circular dourado a direita, espacamento entre baloes do mesmo remetente menor que entre remetentes. Aplicar identico nos dois perfis. git add . && git commit -m "feat(mensagens): thread no padrao whatsapp" && git push origin main
-     Resultado: - `<div class="thread-compose-pill">` envolve attach + textarea; fundo semi-transparente, `border-radius: 99px`, borda dourada suave no foco
- | - Bot├úo attach: ghost (sem fundo), ├¡cone muted
- | - Bot├úo enviar: c├¡rcul...
-[OK] CHAT DO ALUNO - vazio preto embaixo: ao abrir o chat a barra inferior some mas o espaco dela fica como um buraco preto entre o compose e o fim da tela. Quando a nav some, o thread deve ocupar a ALTURA TOTAL (100dvh) com o compose grudado no fundo respeitando a safe-area; sem faixa morta. Testar com e sem teclado aberto. git add . && git commit -m "fix(aluno): chat ocupa a tela inteira sem faixa morta" && git push origin main
-     Resultado: 2. **JS override ruim**: `_applyThreadViewport()` sempre aplicava `height = window.innerHeight px`, que pode ser menor que a altura real da tela (ex: n├úo inclui safe-area em alguns browsers, ou o visual viewport ├® meno...
-
-== LEVA 4 - TREINOS DO ALUNO + CONTRATO SEMPRE PDF ==
-[OK] ABA TREINOS DO ALUNO reformulada no estilo da Biblioteca do gestor (referencia de visual e usabilidade): cada treino em card com thumbnail/icone a esquerda (inicial ou imagem), titulo forte, linha de meta (objetivo, numero de exercicios, duracao estimada), badge de status, e botoes no padrao (Abrir solido pequeno); busca e filtro inline quando houver varios; tela de detalhe com os exercicios em cards no mesmo estilo (thumb de video, nome, meta em linha) e INICIAR TREINO destacado fixo; navegacao fluida e dinamica. git add . && git commit -m "feat(aluno): aba treinos no estilo da biblioteca do gestor" && git push origin main
-     Resultado: - Meta line com ├¡cones (objetivo ┬À exerc├¡cios ┬À dura├º├úo estimada) no lugar do texto simples
- | **Cards de exerc├¡cio no detalhe** ÔÇö layout 2 colunas estilo Biblioteca:
- | - Thumbnail ├á esquerda (v├¡deo play dour...
-[OK] CONTRATO DO ALUNO SEMPRE EM PDF: o contrato antigo assinado ainda aparece como texto porque nao tem pdfUrl. Gerar PDF RETROATIVO: para contratos sem pdfUrl, gerar o PDF pelo motor atual a partir do conteudo e dados existentes (marcando a versao), salvar no mesmo caminho, e a partir dai gate e tela de contrato mostram SEMPRE o viewer de PDF; o texto renderizado deixa de ser exibido (fica so como fonte interna de geracao). git add . && git commit -m "feat(contratos): pdf retroativo e viewer sempre em pdf" && git push origin main
-     Resultado: - **Aluno**: cria blob URL ef├¬mero s├│ para exibi├º├úo (sem permiss├úo de upload)
- | **Gate (aluno)**: ao abrir um contrato sem `pdfUrl`, mostra spinner "Preparando documentoÔÇª" e substitui pelo iframe PDF viewer ao co...
-
-== LEVA 5 - BACKEND: VIDEO DA BIBLIOTECA PERSISTENTE (RODAR PRESENTE) ==
-[OK] continue: PERSISTENCIA REAL DO VIDEO (hoje o upload nao salva de fato e a pre-visualizacao nao mostra): criar no server/ a rota de upload de video que recebe o arquivo (limite 60MB, tipos mp4/mov/webm), grava no PostgreSQL (coluna bytea em tabela propria videos com id, exerciseId, mimetype, tamanho, criadoEm) e a rota GET /api/videos/:id que serve o video com Content-Type e cache; o upload da Biblioteca passa a enviar para essa rota e salvar a URL persistente no exercicio (substituindo blob/objectURL); a pre-visualizacao e o player usam a URL do servidor; video antigo em blob mostra aviso "Reenvie o video" no card. Anotar em comentario a migracao futura para storage dedicado (R2/S3) quando houver volume. Testar: upar, ver na pre-visu, recarregar a pagina e ver de novo, e abrir no lado do aluno. git add . && git commit -m "feat(biblioteca): upload de video persistente no banco com rota propria" && git push origin main
-     Resultado: **3 bugs corrected:** | 1. **Range request support (`server/routes/videos.js`)** ÔÇö The GET route now handles `Range: bytes=X-Y` headers and responds with `206 Partial Content`. Without this, Safari/iOS refuses to play...
-     Resultado: - `videoActionHtml` ÔÇö exerc├¡cios com URL antiga mostram bot├úo **Reenviar** em vez de "Abrir v├¡deo"
- | - `execVideoPlayerHtml` ÔÇö URL antiga exibe placeholder (sem tentar carregar v├¡deo quebrado)
- | - `openVideoMod...
-
-== LEVA 6 - MICRO-POLISH FINAL ==
-[OK] HEADER "Elite ..." sem truncar: reduzir levemente a fonte do nome, compactar gaps, e em telas muito estreitas mostrar so logo + badge sem o nome por extenso, NUNCA reticencias; conferir gestor e aluno. git add . && git commit -m "fix(header): nome sem truncar" && git push origin main
-     Resultado: - Mobile (< 480px): texto "Elite AS" + badge somem, s├│ fica o logo ÔÇö d├í espa├ºo para o t├¡tulo central n├úo amassar | **Detalhes:** | - Avatar com hover glow dourado expandido (`box-shadow: 0 0 16px ...`) | - Icon...
-     Resultado: You've hit your session limit ┬À resets 12am (America/Sao_Paulo)
-
-[OK] TIPOGRAFIA E RITMO unicos em todo o app: mesma escala de H1, subtitle, labels e legendas em todas as telas dos dois perfis; mesmo gap vertical entre secoes; mesmo padding de card; numeros grandes na mesma fonte e peso. Listar ajustes por tela. git add . && git commit -m "chore(visual): escala tipografica e ritmo unicos" && git push origin main
-     Resultado: ### N├║meros grandes | - `metric-card strong`, `dashboard-metric strong`, todos os `*-summary-card strong`, `weekly-kpi strong` ÔåÆ `var(--t-num-lg/md)` + `var(--t-num-w): 800` (antes sem peso expl├¡cito) | ### Labels/...
-     Resultado: You've hit your session limit ┬À resets 12am (America/Sao_Paulo)
-
-[OK] ESTADOS VAZIOS e MICROINTERACOES padronizados: estados vazios com icone dourado suave + frase curta + acao quando couber (substituir texto cinza solto); feedback de toque sutil em todos os botoes e cards clicaveis; transicoes 150-250ms consistentes. git add . && git commit -m "chore(visual): estados vazios e microinteracoes padronizados" && git push origin main
-     Resultado: Feito. O que foi aplicado: | **Empty states** ÔÇö o ├¡cone agora aparece dentro de um c├¡rculo dourado suave (`rgba(245,181,27, 0.1)` com borda fina dourada, SVG 1.5rem centrado), layout centrado em todos os estados vaz...
-     Resultado: You've hit your session limit ┬À resets 12am (America/Sao_Paulo)
-
-[OK] REVISAO FINAL com screenshots: percorrer TODAS as telas dos dois perfis, salvar screenshot de cada uma em .tmp/screens/, conferir contra o checklist (nada truncado, nada vazando, nada atras da barra, contraste, espacamentos, zoom travado, notificacoes navegando) e atualizar AUDITORIA-ALUNO.md e DIVERGENCIAS-GESTOR.md. git add . && git commit -m "chore(visual): revisao final com screenshots" && git push origin main
-     Resultado: 26 screenshots capturados. 3 bugs encontrados e corrigidos:
-     - F-07 financeiro hero overflow (min-width:0 em .finance-hero > :first-child)
-     - U-05 filtros de atualizacoes squishados (removido inline display:flex do container)
-     - header do aluno mostrava "Inicio" em mais-perfil (fallback corrigido no JS)
-
+== LEVA C - TOKENIZACAO DE TEMA (sobre o app ja corrigido) ==
+[ ] DEFINIR variaveis canonicas de marca no :root (base.css e :root local do acesso.html): --brand #F59E0B, --brand-strong #E7A83E, --brand-soft rgba(245,181,27,0.1), --brand-ink #1A1206 (texto/icone sobre a marca). Se ja existem --dourado/--gold/--gold-soft/--accent, consolidar nessas 4 canonicas e fazer as antigas virarem alias apontando para elas. NAO mudar nada visual: resultado pixel-identico. git add . && git commit -m "feat(tema): variaveis canonicas de marca no root" && git push origin main
+[ ] VARRER todo o CSS (styles.css, src/styles/*.css, acesso.html) trocando TODA cor de marca hardcoded (#F59E0B, #E7A83E e variantes do dourado em background, color, border, box-shadow, fill, stroke, gradiente) por var(--brand)/var(--brand-strong)/var(--brand-soft); texto/icone escuro sobre dourado vira var(--brand-ink). Listar ocorrencias por arquivo. Resultado pixel-identico. git add . && git commit -m "refactor(tema): cores de marca do css viram variaveis" && git push origin main
+[ ] VARRER app.js e demais JS por cores de marca em estilos inline, strings SVG, templates e graficos/sparklines (fill, stroke, background dourado): trocar por var(--brand...) quando CSS, ou por uma constante unica lida do tema quando valor JS, para graficos e SVG seguirem o tema. Resultado visual atual inalterado. git add . && git commit -m "refactor(tema): cores de marca no js e svg via variavel" && git push origin main
+[ ] CRIAR estrutura de temas por data-theme no elemento raiz: tema padrao "gold" (valores atuais) ativo, e deixar prontos dois exemplos inativos "ocean" (azul+rosa) e "graphite" - cada tema sobrescreve so --brand, --brand-strong, --brand-soft, --brand-ink. Trocar data-theme re-tematiza o app inteiro. Fixar em gold por enquanto (selecao por professor vem na frente de white-label). git add . && git commit -m "feat(tema): troca por data-theme com gold padrao e exemplos" && git push origin main
+[ ] VERIFICAR tematizacao completa: app pixel-identico com gold; como teste trocar data-theme para ocean e confirmar que TUDO muda de cor (sem sobrar dourado hardcoded em botoes, badges, icones, graficos, bolinhas), depois voltar para gold; listar qualquer dourado teimoso que nao re-tematizou e corrigir. git add . && git commit -m "test(tema): verificacao de tematizacao sem residuo" && git push origin main

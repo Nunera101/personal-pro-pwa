@@ -12662,6 +12662,21 @@ button.dashboard-metric {
     inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
 }
 
+.manager-header .avatar-button.has-photo,
+.student-header .avatar-button.has-photo {
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+.manager-header .avatar-button.has-photo img,
+.student-header .avatar-button.has-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 50%;
+}
+
 /* Icon buttons */
 .manager-header .icon-button,
 .student-header .icon-button {

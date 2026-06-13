@@ -934,6 +934,57 @@ function createApiRouter() {
     }
   });
 
+  router.get("/profile", requireAuth, async (request, response, next) => {
+    try {
+      const auth = request.auth;
+      if (auth.role === "manager") {
+        const settings = await readCollection(SETTINGS_KEY, {});
+        response.json({
+          name: settings.trainerName || "",
+          phone: settings.trainerPhone || "",
+          email: settings.contactEmail || "",
+          photoUrl: settings.trainerPhotoUrl || ""
+        });
+      } else if (auth.role === "student") {
+        const students = await readCollection(STUDENTS_KEY, []);
+        const student = students.find((s) => s.id === auth.studentId);
+        if (!student) { response.status(404).json({ error: "Aluno não encontrado." }); return; }
+        response.json({ name: student.name || "", phone: student.phone || "", email: student.email || "", photoUrl: student.photoUrl || "" });
+      } else {
+        response.status(403).json({ error: "Acesso negado." });
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.put("/profile", requireAuth, async (request, response, next) => {
+    try {
+      const auth = request.auth;
+      const body = request.body || {};
+      if (auth.role === "manager") {
+        const settings = await readCollection(SETTINGS_KEY, {});
+        const updated = { ...settings };
+        if (body.name !== undefined) updated.trainerName = String(body.name || "").trim();
+        if (body.phone !== undefined) updated.trainerPhone = String(body.phone || "").trim();
+        if (body.email !== undefined) updated.contactEmail = String(body.email || "").trim();
+        await writeCollection(SETTINGS_KEY, updated);
+        response.json({ ok: true });
+      } else if (auth.role === "student") {
+        const students = await readCollection(STUDENTS_KEY, []);
+        const idx = students.findIndex((s) => s.id === auth.studentId);
+        if (idx < 0) { response.status(404).json({ error: "Aluno não encontrado." }); return; }
+        if (body.phone !== undefined) students[idx] = { ...students[idx], phone: String(body.phone || "").trim() };
+        await writeCollection(STUDENTS_KEY, students);
+        response.json({ ok: true });
+      } else {
+        response.status(403).json({ error: "Acesso negado." });
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
+
   router.get("/:collection", requireAuth, async (request, response, next) => {
     try {
       response.json(await readCollectionForAuth(request.params.collection, request.auth));

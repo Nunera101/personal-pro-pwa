@@ -4,6 +4,7 @@ const rootDir = path.resolve(__dirname, "..");
 const dataDir = path.join(rootDir, "data");
 const uploadDir = path.join(rootDir, "uploads", "exercises");
 const contractUploadDir = path.join(rootDir, "uploads", "contracts");
+const profileUploadDir = path.join(rootDir, "uploads", "profiles");
 const smtpPort = Number(process.env.SMTP_PORT || 587);
 
 module.exports = {
@@ -11,6 +12,7 @@ module.exports = {
   dataDir,
   uploadDir,
   contractUploadDir,
+  profileUploadDir,
   storageDriver: process.env.STORAGE_DRIVER || (process.env.DATABASE_URL ? "postgres" : "json"),
   databaseUrl: process.env.DATABASE_URL || "",
   jwtSecret: process.env.JWT_SECRET || "personal-pro-local-dev-secret",

@@ -728,6 +728,7 @@
       inviteAcceptedAt: student.inviteAcceptedAt || "",
       passwordUpdatedAt: student.passwordUpdatedAt || "",
       internalNotes: student.internalNotes || "",
+      photoUrl: student.photoUrl || "",
       createdAt: student.createdAt || new Date().toISOString()
     };
   }
@@ -1190,6 +1191,7 @@
       trainerName: settings.trainerName || "Personal",
       trainerPhone: settings.trainerPhone || "",
       contactEmail: settings.contactEmail || "",
+      trainerPhotoUrl: settings.trainerPhotoUrl || "",
       professionalName: settings.professionalName || "",
       professionalDocument: settings.professionalDocument || "",
       professionalPhone: settings.professionalPhone || "",
@@ -2493,6 +2495,7 @@
       void elements.loginView.offsetWidth;
       elements.loginView.classList.add("is-entering");
     }
+    if (viewName === "manager" || viewName === "student") updateHeaderAvatars();
   }
 
   function renderNav(target, menus, activeId, attribute) {
@@ -2615,7 +2618,37 @@
   }
 
   function studentAvatar(student) {
+    if (student?.photoUrl) {
+      const src = String(student.photoUrl).startsWith("/") ? student.photoUrl : `/uploads/profiles/${student.photoUrl}`;
+      return `<span class="entity-avatar is-photo" aria-hidden="true"><img src="${escapeHtml(src)}" alt="" /></span>`;
+    }
     return `<span class="entity-avatar" aria-hidden="true">${escapeHtml(initialsFromName(student?.name))}</span>`;
+  }
+
+  function updateHeaderAvatars() {
+    const managerBtn = document.querySelector(".manager-header .avatar-button");
+    const studentBtn = document.querySelector(".student-header .avatar-button");
+    if (managerBtn) {
+      const photoUrl = state.data.settings?.trainerPhotoUrl;
+      if (photoUrl) {
+        managerBtn.innerHTML = `<img src="${escapeHtml(photoUrl)}" alt="" />`;
+        managerBtn.classList.add("has-photo");
+      } else {
+        managerBtn.textContent = initialsFromName(state.data.settings?.trainerName || state.currentUser?.name || "");
+        managerBtn.classList.remove("has-photo");
+      }
+    }
+    if (studentBtn) {
+      const student = getCurrentStudent();
+      if (student?.photoUrl) {
+        const src = String(student.photoUrl).startsWith("/") ? student.photoUrl : `/uploads/profiles/${student.photoUrl}`;
+        studentBtn.innerHTML = `<img src="${escapeHtml(src)}" alt="" />`;
+        studentBtn.classList.add("has-photo");
+      } else {
+        studentBtn.textContent = initialsFromName(state.currentUser?.name || "");
+        studentBtn.classList.remove("has-photo");
+      }
+    }
   }
 
   function renderApp() {
@@ -2650,7 +2683,7 @@
   }
 
   function renderManager() {
-    const menu = managerMenus.find((item) => item.id === state.managerMenu) || (state.managerMenu === "evaluateUpdate" ? { label: "Avaliar check-in" } : null) || { id: "studentProfile", label: "Perfil do aluno" };
+    const menu = managerMenus.find((item) => item.id === state.managerMenu) || (state.managerMenu === "evaluateUpdate" ? { label: "Avaliar check-in" } : null) || (state.managerMenu === "profile" ? { label: "Meu Perfil" } : null) || { id: "studentProfile", label: "Perfil do aluno" };
     elements.managerTitle.textContent = fixMojibake(menu.label);
     renderManagerSideNav();
     const managerBottomActive =
@@ -2677,7 +2710,8 @@
       reports: renderManagerRelatorios,
       studentProfile: renderManagerStudentProfile,
       more: renderManagerMore,
-      settings: renderSettings
+      settings: renderSettings,
+      profile: renderManagerProfile
     };
 
     const html = fixMojibake((renderers[state.managerMenu] || renderManagerHomeV2)());
@@ -7242,7 +7276,15 @@
         ${pageHeader("Perfil", escapeHtml(student?.name || "Aluno"))}
         <section class="panel mais-identity-panel">
           <div class="mais-identity">
-            ${studentAvatar(student)}
+            <div class="profile-avatar-wrap">
+              ${studentAvatar(student)}
+              <label class="profile-photo-label" aria-label="Alterar foto de perfil">
+                <input type="file" accept="image/jpeg,image/png,image/webp" data-profile-photo-input="student" class="sr-only" />
+                <span class="profile-photo-badge">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                </span>
+              </label>
+            </div>
             <div class="mais-identity-info">
               <h3>${escapeHtml(student?.name || "Aluno")}</h3>
               <p>${escapeHtml(student?.goal || "Sem objetivo cadastrado")}</p>
@@ -7261,14 +7303,15 @@
           <div class="profile-grid">
             <article class="profile-card"><span>Nome completo</span><strong>${escapeHtml(student?.name || "—")}</strong></article>
             <article class="profile-card"><span>Objetivo</span><strong>${escapeHtml(student?.goal || "—")}</strong></article>
-            ${student?.phone ? `<article class="profile-card"><span>Telefone</span><strong>${escapeHtml(student.phone)}</strong></article>` : ""}
+            <article class="profile-card"><span>E-mail</span><strong>${escapeHtml(student?.email || "—")}</strong></article>
           </div>
         </section>
         <section class="panel">
-          <div class="section-title"><h3>Dados da conta</h3></div>
-          <div class="profile-grid">
-            <article class="profile-card"><span>E-mail</span><strong>${escapeHtml(student?.email || "—")}</strong></article>
-          </div>
+          <div class="section-title"><h3>Editar contato</h3><span class="small-text">Telefone</span></div>
+          <form class="form-grid" id="studentSelfProfileForm">
+            <label class="field"><span>Telefone</span><input name="phone" type="tel" value="${escapeHtml(student?.phone || "")}" placeholder="(11) 99999-0000" /></label>
+            <button class="primary-action" type="submit">Salvar</button>
+          </form>
         </section>
         <section class="panel">
           <div class="section-title">
@@ -7404,6 +7447,44 @@
         ` : itemsText ? `<p class="smc-items-text small-text">${escapeHtml(itemsText)}</p>` : ""}
         ${meal.notes ? `<p class="smc-notes small-text">${escapeHtml(meal.notes)}</p>` : ""}
       </article>
+    `;
+  }
+
+  function renderManagerProfile() {
+    const photoUrl = state.data.settings.trainerPhotoUrl || "";
+    const name = state.data.settings.trainerName || "";
+    const phone = state.data.settings.trainerPhone || "";
+    const email = state.data.settings.contactEmail || "";
+    const avatarHtml = photoUrl
+      ? `<img class="profile-photo-preview" src="${escapeHtml(photoUrl)}" alt="Foto de perfil" />`
+      : `<span class="entity-avatar profile-avatar-lg" aria-hidden="true">${escapeHtml(initialsFromName(name))}</span>`;
+    return `
+      <div class="content-stack">
+        ${pageHeader("Meu Perfil", "Foto e dados de contato")}
+        <section class="panel">
+          <div class="profile-photo-section">
+            <div class="profile-avatar-wrap">
+              ${avatarHtml}
+              <label class="profile-photo-label" aria-label="Alterar foto de perfil">
+                <input type="file" accept="image/jpeg,image/png,image/webp" data-profile-photo-input="manager" class="sr-only" />
+                <span class="profile-photo-badge">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                </span>
+              </label>
+            </div>
+            <p class="small-text profile-photo-hint">Toque na câmera para alterar • JPEG, PNG ou WebP • até 5 MB</p>
+          </div>
+        </section>
+        <section class="panel">
+          <div class="section-title"><h3>Dados pessoais</h3></div>
+          <form class="form-grid" id="managerProfileForm">
+            <label class="field"><span>Nome</span><input name="name" type="text" value="${escapeHtml(name)}" required /></label>
+            <label class="field"><span>Telefone</span><input name="phone" type="tel" value="${escapeHtml(phone)}" /></label>
+            <label class="field"><span>E-mail de contato</span><input name="email" type="email" value="${escapeHtml(email)}" /></label>
+            <button class="primary-action" type="submit">Salvar perfil</button>
+          </form>
+        </section>
+      </div>
     `;
   }
 
@@ -10808,6 +10889,7 @@
       inviteAcceptedAt: old?.inviteAcceptedAt || "",
       passwordUpdatedAt: old?.passwordUpdatedAt || "",
       internalNotes: String(data.get("internalNotes") || "").trim(),
+      photoUrl: old?.photoUrl || "",
       createdAt: old?.createdAt || new Date().toISOString()
     };
     const index = state.data.students.findIndex((item) => item.id === id);
@@ -11172,6 +11254,65 @@
     state.studentMenu = "progress";
     renderApp();
     showToast("Atualização enviada! O personal foi notificado. A próxima vence em 15 dias.");
+  }
+
+  function handleManagerProfileForm(form) {
+    const data = new FormData(form);
+    state.data.settings = {
+      ...state.data.settings,
+      trainerName: String(data.get("name") || "").trim() || state.data.settings.trainerName,
+      trainerPhone: String(data.get("phone") || "").trim(),
+      contactEmail: String(data.get("email") || "").trim()
+    };
+    persistData();
+    renderApp();
+    updateHeaderAvatars();
+    showToast("Perfil salvo.");
+  }
+
+  function handleStudentSelfProfileForm(form) {
+    const data = new FormData(form);
+    const phone = String(data.get("phone") || "").trim();
+    const student = getCurrentStudent();
+    if (!student) return;
+    student.phone = phone;
+    student.updatedAt = new Date().toISOString();
+    persistData();
+    showToast("Contato salvo.");
+  }
+
+  async function uploadProfilePhoto(file, role) {
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) { showToast("A foto deve ter até 5 MB."); return; }
+    const allowed = ["image/jpeg", "image/png", "image/webp"];
+    if (file.type && !allowed.includes(file.type)) { showToast("Use JPEG, PNG ou WebP."); return; }
+
+    showToast("Enviando foto…");
+    try {
+      const fd = new FormData();
+      fd.append("photo", file);
+      const headers = {};
+      if (state.authToken) headers.Authorization = `Bearer ${state.authToken}`;
+      const url = apiUrl("/uploads/profile");
+      const resp = await fetchWithTimeout(url, { method: "POST", body: fd, headers }, 30000);
+      if (!resp.ok) throw new Error("Upload falhou.");
+      const result = await resp.json();
+      const photoUrl = result.url;
+
+      if (role === "manager") {
+        state.data.settings = { ...state.data.settings, trainerPhotoUrl: photoUrl };
+      } else {
+        const student = getCurrentStudent();
+        if (student) student.photoUrl = photoUrl;
+      }
+
+      persistData();
+      renderApp();
+      updateHeaderAvatars();
+      showSuccessToast("Foto salva com sucesso!");
+    } catch (error) {
+      showToast("Falha ao enviar foto. Tente novamente.");
+    }
   }
 
   function readPhotoFiles(files) {
@@ -12107,6 +12248,8 @@
       if (form.id === "studentForm") await handleStudentForm(form);
       if (form.id === "settingsForm") handleSettingsForm(form);
       if (form.id === "contractModelForm") handleContractModelForm(form);
+      if (form.id === "managerProfileForm") handleManagerProfileForm(form);
+      if (form.id === "studentSelfProfileForm") handleStudentSelfProfileForm(form);
     });
     window.addEventListener("hashchange", () => {
       if (applyRouteFromHash()) renderManager();
@@ -12689,6 +12832,17 @@
     });
   }
 
+  function bindProfileEvents() {
+    document.addEventListener("change", async (event) => {
+      const input = event.target.closest("[data-profile-photo-input]");
+      if (!input) return;
+      const file = input.files?.[0];
+      if (!file) return;
+      await uploadProfilePhoto(file, input.dataset.profilePhotoInput);
+      input.value = "";
+    });
+  }
+
   function bindEvents() {
     bindAgendaEvents();
     bindWorkoutEvents();
@@ -12703,6 +12857,7 @@
     bindPwaEvents();
     bindAuthEvents();
     bindNotifEvents();
+    bindProfileEvents();
     window.addEventListener("online", () => {
       if (state.offlinePending && state.authToken) scheduleRemoteSync(1500);
       renderOfflineBanner();

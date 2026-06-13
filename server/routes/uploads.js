@@ -2,12 +2,17 @@ const express = require("express");
 const fs = require("fs");
 const path = require("path");
 const multer = require("multer");
-const { uploadDir, contractUploadDir } = require("../config");
+const { uploadDir, contractUploadDir, profileUploadDir } = require("../config");
 const { isDatabaseReady, query } = require("../db");
-const { requireManager } = require("../auth");
+const { requireAuth, requireManager } = require("../auth");
+const { readCollection, writeCollection } = require("../storage/collections");
+
+const SETTINGS_KEY = "personal-pro-settings-v1";
+const STUDENTS_KEY = "personal-pro-students-v2";
 
 fs.mkdirSync(uploadDir, { recursive: true });
 fs.mkdirSync(contractUploadDir, { recursive: true });
+fs.mkdirSync(profileUploadDir, { recursive: true });
 
 const storage = multer.diskStorage({
   destination: (_request, _file, callback) => callback(null, uploadDir),
@@ -41,6 +46,25 @@ const contractPdfUpload = multer({
   limits: { fileSize: 20 * 1024 * 1024 },
   fileFilter: (_request, file, callback) => {
     callback(null, file.mimetype === "application/pdf");
+  }
+});
+
+const profilePhotoStorage = multer.diskStorage({
+  destination: (_request, _file, callback) => callback(null, profileUploadDir),
+  filename: (request, file, callback) => {
+    const auth = request.auth || {};
+    const ownerId = auth.role === "student" ? (String(auth.studentId || "student")) : String(auth.trainerId || "trainer");
+    const extension = path.extname(file.originalname || "").toLowerCase() || ".jpg";
+    callback(null, `${ownerId}-${Date.now()}${extension}`);
+  }
+});
+
+const profilePhotoUpload = multer({
+  storage: profilePhotoStorage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (_request, file, callback) => {
+    const allowed = new Set(["image/jpeg", "image/png", "image/webp"]);
+    callback(null, allowed.has(file.mimetype));
   }
 });
 
@@ -106,6 +130,49 @@ function createUploadRouter() {
           ]
         );
       }
+      response.json({ url, originalName: request.file.originalname, size: request.file.size });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post("/profile", requireAuth, profilePhotoUpload.single("photo"), async (request, response, next) => {
+    if (!request.file) {
+      response.status(400).json({ error: "Foto de perfil obrigatória (JPEG, PNG ou WebP até 5 MB)." });
+      return;
+    }
+    try {
+      const url = `/uploads/profiles/${request.file.filename}`;
+      const auth = request.auth;
+
+      if (await isDatabaseReady()) {
+        await query(
+          `insert into media_uploads (trainer_id, owner_type, owner_id, url, original_name, size_bytes, mime_type)
+           values ($1, $2, $3, $4, $5, $6, $7)`,
+          [
+            String(auth.trainerId || "trainer-demo"),
+            "profile",
+            String(auth.role === "student" ? auth.studentId : (auth.trainerId || "trainer-demo")),
+            url,
+            request.file.originalname,
+            request.file.size,
+            request.file.mimetype
+          ]
+        );
+      }
+
+      if (auth.role === "manager") {
+        const settings = await readCollection(SETTINGS_KEY, {});
+        await writeCollection(SETTINGS_KEY, { ...settings, trainerPhotoUrl: url });
+      } else if (auth.role === "student" && auth.studentId) {
+        const students = await readCollection(STUDENTS_KEY, []);
+        const idx = students.findIndex((s) => s.id === auth.studentId);
+        if (idx >= 0) {
+          students[idx] = { ...students[idx], photoUrl: url };
+          await writeCollection(STUDENTS_KEY, students);
+        }
+      }
+
       response.json({ url, originalName: request.file.originalname, size: request.file.size });
     } catch (error) {
       next(error);

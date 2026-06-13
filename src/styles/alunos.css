@@ -2980,6 +2980,97 @@
   flex-shrink: 0;
 }
 
+/* ---- perfil: foto de avatar ---- */
+.profile-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+  display: inline-flex;
+}
+
+.profile-photo-label {
+  position: absolute;
+  bottom: -3px;
+  right: -3px;
+  cursor: pointer;
+  line-height: 0;
+}
+
+.profile-photo-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--brand, #f5b82e);
+  border: 2px solid var(--surface, #1a1a1a);
+}
+
+.profile-photo-badge svg {
+  width: 11px;
+  height: 11px;
+  stroke: #000;
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.entity-avatar.is-photo {
+  overflow: hidden;
+}
+
+.entity-avatar.is-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* perfil do gestor — foto grande */
+.profile-photo-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+}
+
+.profile-photo-section .profile-avatar-wrap .entity-avatar,
+.profile-photo-section .profile-photo-preview {
+  width: 80px;
+  height: 80px;
+  min-width: 80px;
+  font-size: 1.6rem;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(245, 181, 27, 0.45);
+}
+
+.profile-photo-section .profile-photo-badge {
+  width: 28px;
+  height: 28px;
+}
+
+.profile-photo-section .profile-photo-badge svg {
+  width: 14px;
+  height: 14px;
+}
+
+.profile-photo-hint {
+  color: var(--muted);
+  text-align: center;
+  margin: 0;
+}
+
+.profile-avatar-lg {
+  width: 80px !important;
+  height: 80px !important;
+  min-width: 80px !important;
+  font-size: 1.6rem !important;
+}
+/* ---- fim perfil foto ---- */
+
 .mais-identity-info {
   min-width: 0;
   flex: 1;
