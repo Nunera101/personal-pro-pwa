@@ -6279,7 +6279,7 @@
       reassessment: "var(--aval, #8B5CF6)",
       update: "var(--atualiza, #3B82F6)",
       return: "var(--retorno, #F97316)",
-      contract: "var(--dourado)",
+      contract: "var(--brand)",
       other: "#6B7280"
     }[type] || "#6B7280";
   }
