@@ -1,8 +1,7 @@
 (function () {
   const TRAINER_ID = "trainer-demo";
   const ADMIN = {
-    email: "admin@personalpro.app",
-    passwordHash: hashPassword("Admin@2026")
+    email: "admin@personalpro.app"
   };
 
   const keys = {
@@ -119,7 +118,6 @@
     email: document.getElementById("email"),
     password: document.getElementById("password"),
     rememberMe: document.getElementById("rememberMe"),
-    fillAdminDemo: document.getElementById("fillAdminDemo"),
     forgotPassword: document.getElementById("forgotPassword"),
     modal: document.getElementById("formModal"),
     modalTitle: document.getElementById("modalTitle"),
@@ -2327,8 +2325,8 @@
   function authenticateLocal(email, password) {
     const normalizedEmail = normalizeEmail(email);
     const passwordHash = hashPassword(password);
-    const adminPasswordHash = state.data.settings.adminPasswordHash || ADMIN.passwordHash;
-    if (normalizedEmail === ADMIN.email && passwordHash === adminPasswordHash) {
+    const adminPasswordHash = state.data.settings.adminPasswordHash;
+    if (adminPasswordHash && normalizedEmail === ADMIN.email && passwordHash === adminPasswordHash) {
       return { role: "manager", name: "Admin", trainerId: TRAINER_ID };
     }
     const student = state.data.students.find((item) => item.email === normalizedEmail && item.passwordHash === passwordHash && item.status === "active");
@@ -7602,7 +7600,6 @@
           <div class="section-title"><h3>Sistema local</h3><span class="small-text">Ferramentas de teste</span></div>
           <div class="profile-grid">
             <article class="profile-card"><span>Dados</span><strong>${state.data.students.length} alunos</strong><small>${state.data.exercises.length} exercícios · ${state.data.workouts.length} treinos · ${state.data.sessions.length} históricos</small></article>
-            <article class="profile-card"><span>Admin</span><strong>${ADMIN.email}</strong><small>Senha de teste: Admin@2026</small></article>
           </div>
           <p class="small-text">A produção com autenticação forte e redefinição por link depende do backend ativo.</p>
           <button class="danger-action" type="button" data-clear-demo-data>Limpar dados demo</button>
@@ -12927,11 +12924,6 @@
       } finally {
         if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = "Entrar"; submitBtn.classList.remove("login-btn--loading"); }
       }
-    });
-    elements.fillAdminDemo.addEventListener("click", () => {
-      elements.email.value = ADMIN.email;
-      elements.password.value = "Admin@2026";
-      elements.password.focus();
     });
     elements.forgotPassword.addEventListener("click", requestPasswordReset);
     document.addEventListener("submit", async (event) => {
