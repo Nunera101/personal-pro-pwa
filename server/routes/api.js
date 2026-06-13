@@ -40,7 +40,7 @@ const PASSWORD_RESETS_KEY = "personal-pro-password-resets-v1";
 const PASSWORD_RESET_TTL_MS = 60 * 60 * 1000;
 const STUDENT_INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const CONTRACT_LINK_TTL_MS = 7 * 24 * 60 * 60 * 1000;
-const STUDENT_AREA_LINK_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const STUDENT_AREA_LINK_TTL_MS = 48 * 60 * 60 * 1000;
 const COLLECTION_ALLOWLIST = new Set([
   STUDENTS_KEY,
   EXERCISES_KEY,
@@ -461,6 +461,21 @@ async function createAccountToken(account, ttlMs, type = "password_reset", extra
   activeResets.push(reset);
   await writeCollection(PASSWORD_RESETS_KEY, activeResets);
   return { token, reset };
+}
+
+// A1: localiza um token de USO UNICO ainda valido (sem usedAt e nao expirado).
+// Retorna o indice no array para o chamador consumir (set usedAt) e regravar.
+// Quando `type` e informado, exige que o registro seja desse tipo. Mesmo padrao
+// usado pelo reset de senha e pela area do aluno, garantindo consumo unico.
+function findActiveSingleUseToken(resets, { tokenHash, type = "", now } = {}) {
+  const reference = now || new Date().toISOString();
+  return resets.findIndex(
+    (item) =>
+      item.tokenHash === tokenHash &&
+      !item.usedAt &&
+      item.expiresAt > reference &&
+      (!type || item.type === type)
+  );
 }
 
 async function findAccountByEmail(email) {
@@ -910,9 +925,8 @@ function createApiRouter() {
       const tokenHash = hashToken(token);
       const resets = await readCollection(PASSWORD_RESETS_KEY, []);
       const now = new Date().toISOString();
-      const reset = resets.find(
-        (item) => item.type === "student_area_view" && item.tokenHash === tokenHash && !item.usedAt && item.expiresAt > now
-      );
+      const resetIndex = findActiveSingleUseToken(resets, { tokenHash, type: "student_area_view", now });
+      const reset = resetIndex >= 0 ? resets[resetIndex] : null;
       if (!reset?.studentId) {
         response.status(400).json({ error: "Link invalido ou expirado." });
         return;
@@ -932,6 +946,9 @@ function createApiRouter() {
         response.status(404).json({ error: "Aluno nao encontrado." });
         return;
       }
+
+      resets[resetIndex] = { ...reset, usedAt: now };
+      await writeCollection(PASSWORD_RESETS_KEY, resets);
 
       const { passwordHash, ...safeStudent } = student;
 
@@ -1006,7 +1023,7 @@ function createApiRouter() {
       const tokenHash = hashToken(token);
       const resets = await readCollection(PASSWORD_RESETS_KEY, []);
       const now = new Date().toISOString();
-      const resetIndex = resets.findIndex((item) => item.tokenHash === tokenHash && !item.usedAt && item.expiresAt > now);
+      const resetIndex = findActiveSingleUseToken(resets, { tokenHash, now });
       if (resetIndex < 0) {
         response.status(400).json({ error: "Link invalido ou expirado. Solicite um novo link." });
         return;
@@ -1180,5 +1197,6 @@ function createApiRouter() {
 
 module.exports = {
   createApiRouter,
-  mergeStudentContracts
+  mergeStudentContracts,
+  findActiveSingleUseToken
 };
