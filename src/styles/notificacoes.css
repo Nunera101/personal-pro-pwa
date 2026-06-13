@@ -28,6 +28,11 @@
   opacity: 1;
 }
 
+/* Painel de notificações: ocupa toda a altura disponível abaixo do safe-area-inset-top */
+#notifSheet .ag-panel {
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px));
+}
+
 /* Body da sheet de notificações */
 .notif-sheet-body {
   padding: 0;
@@ -35,7 +40,8 @@
   -webkit-overflow-scrolling: touch;
   flex: 1;
   min-height: 0;
-  max-height: calc(82vh - 5rem);
+  /* sem max-height explícito: o flex:1 já preenche o espaço restante */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 /* Item de notificação */
