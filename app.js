@@ -11517,6 +11517,7 @@
   }
 
   function handleUpdateComment(form) {
+    if (state.currentUser?.role !== "manager") return showToast("Ação restrita ao gestor.");
     const update = state.data.updates.find((item) => item.id === form.dataset.id);
     if (!update) return;
     update.trainerComment = String(new FormData(form).get("trainerComment") || "").trim();
