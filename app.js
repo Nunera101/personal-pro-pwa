@@ -13414,7 +13414,14 @@
     showToast("Dados locais removidos.");
   }
 
-  function logout() {
+  async function logout() {
+    // AUDIT LOG (M4): registra o logout no servidor antes de descartar o token.
+    // Best-effort — se a chamada falhar (offline/expirado), o logout local prossegue.
+    try {
+      if (state.authToken) await fetchJsonFromApi("/auth/logout", { method: "POST", timeoutMs: 3000 });
+    } catch (_error) {
+      // O logout nunca deve travar por causa do audit/rede.
+    }
     state.currentUser = null;
     clearStoredAuth();
     if (state.socket) {

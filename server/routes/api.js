@@ -37,6 +37,10 @@ const PAYMENTS_KEY = "personal-pro-payments-v1";
 const DIETS_KEY = "personal-pro-diets-v1";
 const SETTINGS_KEY = "personal-pro-settings-v1";
 const PASSWORD_RESETS_KEY = "personal-pro-password-resets-v1";
+// AUDIT LOG de autenticacao (M4). Colecao propria — NUNCA entra no COLLECTION_ALLOWLIST,
+// pois nao deve ser lida/escrita pelas rotas genericas de /collections.
+const AUTH_AUDIT_KEY = "personal-pro-auth-audit-v1";
+const AUTH_AUDIT_MAX = 1000;
 const PASSWORD_RESET_TTL_MS = 60 * 60 * 1000;
 const STUDENT_INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const CONTRACT_LINK_TTL_MS = 7 * 24 * 60 * 60 * 1000;
@@ -370,6 +374,44 @@ async function writeAuditLog(action, entityType, entityId, auth) {
   }
 }
 
+// AUDIT LOG de autenticacao (M4): registra login (sucesso/falha), logout e uso de
+// links de token usando a MESMA abstracao de storage (readCollection/writeCollection).
+// Diferente de writeAuditLog — que so escreve na tabela audit_logs do Postgres e fica
+// inerte (no-op silencioso) no modo de arquivo JSON, o armazenamento atual padrao —
+// este helper funciona no modo de armazenamento vigente e NUNCA falha em silencio:
+// qualquer erro de persistencia deixa rastro no log do servidor.
+async function appendAuthAudit(event, details = {}) {
+  const entry = {
+    id: crypto.randomBytes(8).toString("hex"),
+    event,                              // login_success | login_failure | logout | token_used
+    at: new Date().toISOString(),       // horario
+    email: normalizeEmail(details.email), // identificador
+    role: details.role || "",
+    actorId: details.actorId || "",
+    trainerId: details.trainerId || "",
+    tokenType: details.tokenType || "",
+    reason: details.reason || "",
+    ip: details.ip || ""
+  };
+  try {
+    const existing = await readCollection(AUTH_AUDIT_KEY, []);
+    const log = Array.isArray(existing) ? existing : [];
+    log.push(entry);
+    // Mantem apenas as ultimas AUTH_AUDIT_MAX entradas para nao crescer sem limite no JSON.
+    await writeCollection(AUTH_AUDIT_KEY, log.slice(-AUTH_AUDIT_MAX));
+  } catch (error) {
+    // O audit nunca pode quebrar o fluxo de autenticacao, mas tambem nao pode falhar
+    // em silencio: registramos a falha para diagnostico (requisito M4).
+    console.error(`[audit] falha ao registrar evento de autenticacao "${event}":`, error?.message || error);
+  }
+}
+
+// Identificador de origem da requisicao para o audit (best-effort).
+function clientIp(request) {
+  const forwarded = String(request.headers["x-forwarded-for"] || "").split(",")[0].trim();
+  return forwarded || String(request.ip || request.connection?.remoteAddress || "");
+}
+
 async function readCollectionForAuth(collection, auth) {
   if (!COLLECTION_ALLOWLIST.has(collection)) {
     const error = new Error("Colecao indisponivel.");
@@ -676,6 +718,7 @@ function createApiRouter() {
         // (ex.: o antigo "Admin@2026") deve ser totalmente inerte e jamais autorizar login.
         const storedHash = resolveAdminPasswordHash();
         if (!storedHash || !verifyPassword(password, storedHash)) {
+          await appendAuthAudit("login_failure", { email, role: "manager", reason: "invalid_credentials", ip: clientIp(request) });
           response.status(401).json({ error: "E-mail ou senha invalidos." });
           return;
         }
@@ -687,6 +730,7 @@ function createApiRouter() {
           email,
           trainerId: TRAINER_ID
         };
+        await appendAuthAudit("login_success", { email, role: "manager", actorId: TRAINER_ID, trainerId: TRAINER_ID, ip: clientIp(request) });
         response.json({ ok: true, token: createSessionToken(user), expiresIn: SESSION_TTL, user });
         return;
       }
@@ -697,6 +741,7 @@ function createApiRouter() {
       // entre trainers, recusamos ambiguidades em vez de adivinhar o tenant.
       const { student } = resolveStudentLogin(students, email, { normalizeEmail, verifyPassword, password });
       if (!student) {
+        await appendAuthAudit("login_failure", { email, role: "student", reason: "invalid_credentials", ip: clientIp(request) });
         response.status(401).json({ error: "E-mail ou senha invalidos." });
         return;
       }
@@ -704,6 +749,14 @@ function createApiRouter() {
       const hasPassword = Boolean(student.passwordHash);
       const accessStatus = normalizeStudentAccessStatus(student.accessStatus, hasPassword);
       if (accessStatus !== "active" || !hasPassword) {
+        await appendAuthAudit("login_failure", {
+          email,
+          role: "student",
+          reason: "inactive",
+          actorId: student.id || "",
+          trainerId: student.trainerId || TRAINER_ID,
+          ip: clientIp(request)
+        });
         response.status(403).json({ error: "Acesso ainda nao ativado. Use o link de convite para criar sua senha." });
         return;
       }
@@ -718,7 +771,25 @@ function createApiRouter() {
         trainerId: student.trainerId || TRAINER_ID,
         studentId: student.id || ""
       };
+      await appendAuthAudit("login_success", { email, role: "student", actorId: user.studentId, trainerId: user.trainerId, ip: clientIp(request) });
       response.json({ ok: true, token: createSessionToken(user), expiresIn: SESSION_TTL, user });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post("/auth/logout", requireAuth, async (request, response, next) => {
+    try {
+      // AUDIT LOG de autenticacao (M4): o JWT e stateless, entao o logout e apenas o
+      // descarte do token no cliente; aqui apenas registramos o evento para rastreio.
+      await appendAuthAudit("logout", {
+        email: request.auth.email,
+        role: request.auth.role,
+        actorId: request.auth.studentId || request.auth.trainerId || "",
+        trainerId: request.auth.trainerId || "",
+        ip: clientIp(request)
+      });
+      response.json({ ok: true });
     } catch (error) {
       next(error);
     }
@@ -932,6 +1003,13 @@ function createApiRouter() {
         return;
       }
 
+      await appendAuthAudit("token_used", {
+        email: reset.email,
+        role: "student",
+        actorId: reset.studentId,
+        tokenType: "contract_view",
+        ip: clientIp(request)
+      });
       response.json({
         ok: true,
         studentId: reset.studentId,
@@ -1004,6 +1082,13 @@ function createApiRouter() {
 
       resets[resetIndex] = { ...reset, usedAt: now };
       await writeCollection(PASSWORD_RESETS_KEY, resets);
+      await appendAuthAudit("token_used", {
+        email: reset.email,
+        role: "student",
+        actorId: reset.studentId,
+        tokenType: "student_area_view",
+        ip: clientIp(request)
+      });
 
       const { passwordHash, ...safeStudent } = student;
 
@@ -1089,6 +1174,13 @@ function createApiRouter() {
         usedAt: now
       };
       await writeCollection(PASSWORD_RESETS_KEY, resets);
+      await appendAuthAudit("token_used", {
+        email: reset.email,
+        role: reset.role,
+        actorId: reset.studentId,
+        tokenType: reset.type || "password_reset",
+        ip: clientIp(request)
+      });
 
       response.json({ ok: true, role: reset.role, email: reset.email, type: reset.type || "password_reset" });
     } catch (error) {
