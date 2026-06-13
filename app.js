@@ -381,6 +381,21 @@
     }
   }
 
+  // Arquivos sob /uploads/contracts e /uploads/profiles agora são servidos por
+  // rota autenticada com verificação de ownership (C3). Como <img>/<iframe>/<a>
+  // não enviam o cabeçalho Authorization, anexamos o token de sessão na query.
+  // URLs blob:/data:/externas e demais caminhos passam intactos.
+  function mediaUrl(rawUrl) {
+    let value = String(rawUrl || "");
+    if (!value || value.startsWith("blob:") || value.startsWith("data:")) return value;
+    const isProtected = value.includes("/uploads/contracts/") || value.includes("/uploads/profiles/");
+    if (!isProtected) return value;
+    if (!value.startsWith("http") && value.startsWith("/")) value = `${apiOrigin()}${value}`;
+    if (!state.authToken) return value;
+    const sep = value.includes("?") ? "&" : "?";
+    return `${value}${sep}token=${encodeURIComponent(state.authToken)}`;
+  }
+
   async function fetchWithTimeout(url, options = {}, timeoutMs = 5000) {
     const controller = new AbortController();
     const timer = window.setTimeout(() => controller.abort(), timeoutMs);
@@ -2683,7 +2698,8 @@
 
   function avatarHtml(entity, cls = "entity-avatar") {
     if (entity?.photoUrl) {
-      const src = String(entity.photoUrl).startsWith("/") ? entity.photoUrl : `/uploads/profiles/${entity.photoUrl}`;
+      const raw = String(entity.photoUrl).startsWith("/") ? entity.photoUrl : `/uploads/profiles/${entity.photoUrl}`;
+      const src = mediaUrl(raw);
       return `<span class="${cls} is-photo" aria-hidden="true"><img src="${escapeHtml(src)}" alt="" /></span>`;
     }
     const color = avatarColor(entity?.id);
@@ -2700,7 +2716,7 @@
     if (managerBtn) {
       const photoUrl = state.data.settings?.trainerPhotoUrl;
       if (photoUrl) {
-        managerBtn.innerHTML = `<img src="${escapeHtml(photoUrl)}" alt="" />`;
+        managerBtn.innerHTML = `<img src="${escapeHtml(mediaUrl(photoUrl))}" alt="" />`;
         managerBtn.classList.add("has-photo");
         managerBtn.removeAttribute("style");
       } else {
@@ -2713,7 +2729,8 @@
     if (studentBtn) {
       const student = getCurrentStudent();
       if (student?.photoUrl) {
-        const src = String(student.photoUrl).startsWith("/") ? student.photoUrl : `/uploads/profiles/${student.photoUrl}`;
+        const raw = String(student.photoUrl).startsWith("/") ? student.photoUrl : `/uploads/profiles/${student.photoUrl}`;
+        const src = mediaUrl(raw);
         studentBtn.innerHTML = `<img src="${escapeHtml(src)}" alt="" />`;
         studentBtn.classList.add("has-photo");
         studentBtn.removeAttribute("style");
@@ -7141,7 +7158,8 @@
   }
 
   // Viewer de PDF reutilizado pelo gate e pela tela de contrato.
-  function renderContractPdfViewer(pdfUrl) {
+  function renderContractPdfViewer(rawPdfUrl) {
+    const pdfUrl = mediaUrl(rawPdfUrl);
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
     return `
       <div class="contract-pdf-viewer-wrap">
@@ -7533,7 +7551,7 @@
     const email = state.data.settings.contactEmail || "";
     const color = avatarColor(state.currentUser?.id);
     const profileAvatarEl = photoUrl
-      ? `<img class="profile-photo-preview" src="${escapeHtml(photoUrl)}" alt="Foto de perfil" />`
+      ? `<img class="profile-photo-preview" src="${escapeHtml(mediaUrl(photoUrl))}" alt="Foto de perfil" />`
       : `<span class="entity-avatar profile-avatar-lg" style="background:${color}1a;color:${color}" aria-hidden="true">${escapeHtml(initialsFromName(name))}</span>`;
     return `
       <div class="content-stack">
@@ -10103,14 +10121,14 @@
             <button class="primary-action" type="button" data-sign-contract="${escapeHtml(contract.id)}" disabled>Assinar contrato</button>
             <p class="small-text">O aceite registra data/hora, IP e identificação técnica para fins de comprovação jurídica.</p>
           ` : contract.pdfUrl ? `
-            <a class="secondary-action" href="${escapeHtml(contract.pdfUrl)}" ${isIOS ? `target="_blank" rel="noopener noreferrer"` : `download`}>Baixar PDF</a>
+            <a class="secondary-action" href="${escapeHtml(mediaUrl(contract.pdfUrl))}" ${isIOS ? `target="_blank" rel="noopener noreferrer"` : `download`}>Baixar PDF</a>
           ` : ""}
         </div>
       ` : ""}
       ${isManager ? `
         <div class="ex-footer-right">
           ${contract.pdfUrl
-            ? `<a class="secondary-action" href="${escapeHtml(contract.pdfUrl)}" ${isIOS ? `target="_blank" rel="noopener noreferrer"` : `download`}>Baixar PDF</a>`
+            ? `<a class="secondary-action" href="${escapeHtml(mediaUrl(contract.pdfUrl))}" ${isIOS ? `target="_blank" rel="noopener noreferrer"` : `download`}>Baixar PDF</a>`
             : `<button class="secondary-action" type="button" data-contract-pdf="${escapeHtml(contract.id)}">Gerar PDF</button>`}
           ${_isPending
             ? `<button class="secondary-action" type="button" data-contract-resend="${escapeHtml(contract.id)}">Reenviar</button>`

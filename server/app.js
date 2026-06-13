@@ -6,7 +6,7 @@ const path = require("path");
 const { Server } = require("socket.io");
 const { rootDir, uploadDir } = require("./config");
 const { createApiRouter } = require("./routes/api");
-const { createUploadRouter } = require("./routes/uploads");
+const { createUploadRouter, createUploadsAssetRouter } = require("./routes/uploads");
 const { createVideosRouter } = require("./routes/videos");
 const { configureRealtime } = require("./realtime");
 const { initWebPush } = require("./push");
@@ -29,7 +29,10 @@ function createServer() {
   app.use(express.json({ limit: "10mb" }));
   app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-  app.use("/uploads", express.static(path.join(rootDir, "uploads")));
+  // /uploads NÃO é mais estático público: contratos e fotos de perfil passam
+  // por rota autenticada com verificação de ownership (C3). Vídeos de exercício
+  // seguem servidos estaticamente dentro do próprio router.
+  app.use("/uploads", createUploadsAssetRouter());
   app.use("/api/uploads", createUploadRouter());
   app.use("/api/videos", createVideosRouter());
   app.use("/api", createApiRouter());
