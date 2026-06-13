@@ -48,6 +48,10 @@ function createVideosRouter() {
 
   router.get("/:id", async (req, res, next) => {
     try {
+      if (!/^[0-9a-f]{24}$/.test(req.params.id)) {
+        res.status(404).end();
+        return;
+      }
       if (!(await isDatabaseReady())) {
         res.status(503).end();
         return;

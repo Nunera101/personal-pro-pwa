@@ -98,6 +98,10 @@ function sanitizeBaseUrl(value) {
   }
 }
 
+const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,253}$/;
+function isValidEmail(value) { return EMAIL_RE.test(String(value || "")); }
+function withinLen(value, max) { return String(value ?? "").length <= max; }
+
 function buildResetUrl(request, token) {
   const requestedBase = sanitizeBaseUrl(request.body?.appUrl);
   const origin = `${request.protocol}://${request.get("host")}`;
@@ -481,8 +485,12 @@ function createApiRouter() {
   router.post("/push/subscribe", requireAuth, async (request, response, next) => {
     try {
       const { endpoint, keys } = request.body || {};
-      if (!endpoint || !keys?.p256dh || !keys?.auth) {
+      if (!endpoint || typeof endpoint !== "string" || !keys?.p256dh || typeof keys.p256dh !== "string" || !keys?.auth || typeof keys.auth !== "string") {
         response.status(400).json({ error: "Subscription invalida." });
+        return;
+      }
+      if (!withinLen(endpoint, 2048) || !withinLen(keys.p256dh, 500) || !withinLen(keys.auth, 500)) {
+        response.status(400).json({ error: "Campos fora do tamanho permitido." });
         return;
       }
       await savePushSubscription({
@@ -501,6 +509,10 @@ function createApiRouter() {
   router.delete("/push/subscribe", requireAuth, async (request, response, next) => {
     try {
       const { endpoint } = request.body || {};
+      if (endpoint && (typeof endpoint !== "string" || !withinLen(endpoint, 2048))) {
+        response.status(400).json({ error: "Endpoint invalido." });
+        return;
+      }
       if (endpoint) await removePushSubscriptionByEndpoint(endpoint);
       response.json({ ok: true });
     } catch (error) {
@@ -514,6 +526,14 @@ function createApiRouter() {
       const password = String(request.body?.password || "");
       if (!email || !password) {
         response.status(400).json({ error: "Informe e-mail e senha." });
+        return;
+      }
+      if (!isValidEmail(email)) {
+        response.status(400).json({ error: "Formato de e-mail invalido." });
+        return;
+      }
+      if (!withinLen(password, 128)) {
+        response.status(400).json({ error: "Senha muito longa." });
         return;
       }
 
@@ -577,6 +597,10 @@ function createApiRouter() {
         response.status(400).json({ error: "Informe o e-mail da conta." });
         return;
       }
+      if (!isValidEmail(email)) {
+        response.status(400).json({ error: "Formato de e-mail invalido." });
+        return;
+      }
 
       const account = await findAccountByEmail(email);
       if (!account) {
@@ -607,6 +631,18 @@ function createApiRouter() {
     try {
       const studentId = String(request.body?.studentId || "");
       const email = normalizeEmail(request.body?.email);
+      if (!studentId && !email) {
+        response.status(400).json({ error: "Informe studentId ou e-mail do aluno." });
+        return;
+      }
+      if (email && !isValidEmail(email)) {
+        response.status(400).json({ error: "Formato de e-mail invalido." });
+        return;
+      }
+      if (!withinLen(studentId, 100) || !withinLen(email, 254)) {
+        response.status(400).json({ error: "Campos fora do tamanho permitido." });
+        return;
+      }
       const students = await readCollection(STUDENTS_KEY, []);
       const index = students.findIndex((item) => (studentId && item.id === studentId) || (email && normalizeEmail(item.email) === email));
       if (index < 0) {
@@ -669,6 +705,14 @@ function createApiRouter() {
   router.post("/auth/contract-link", requireManager, async (request, response, next) => {
     try {
       const contractId = String(request.body?.contractId || "");
+      if (!contractId) {
+        response.status(400).json({ error: "Informe o contractId." });
+        return;
+      }
+      if (!withinLen(contractId, 100) || !withinLen(request.body?.subject, 500) || !withinLen(request.body?.message, 5000) || !withinLen(request.body?.signature, 1000)) {
+        response.status(400).json({ error: "Campos fora do tamanho permitido." });
+        return;
+      }
       const contracts = await readCollection(CONTRACTS_KEY, []);
       const contractIndex = contracts.findIndex((item) => item.id === contractId && item.status !== "canceled");
       if (contractIndex < 0) {
@@ -734,6 +778,10 @@ function createApiRouter() {
   router.post("/auth/contract-token", async (request, response, next) => {
     try {
       const token = String(request.body?.token || "");
+      if (!token || !withinLen(token, 128)) {
+        response.status(400).json({ error: "Link invalido ou expirado." });
+        return;
+      }
       const tokenHash = hashToken(token);
       const resets = await readCollection(PASSWORD_RESETS_KEY, []);
       const now = new Date().toISOString();
@@ -764,6 +812,10 @@ function createApiRouter() {
   router.post("/auth/student-area-link", requireManager, async (request, response, next) => {
     try {
       const studentId = String(request.body?.studentId || "");
+      if (!studentId || !withinLen(studentId, 100)) {
+        response.status(400).json({ error: "Informe um studentId valido." });
+        return;
+      }
       const students = await readCollection(STUDENTS_KEY, []);
       const student = students.find((item) => item.id === studentId && item.status !== "inactive");
       if (!student) {
@@ -787,7 +839,7 @@ function createApiRouter() {
   router.post("/auth/student-area-view", async (request, response, next) => {
     try {
       const token = String(request.body?.token || "");
-      if (!token) {
+      if (!token || !withinLen(token, 128)) {
         response.status(400).json({ error: "Token nao informado." });
         return;
       }
@@ -854,10 +906,16 @@ function createApiRouter() {
   });
 
   router.post("/auth/contract-signature-meta", requireAuth, async (request, response) => {
+    const contractId = String(request.body?.contractId || "");
+    const studentId = String(request.body?.studentId || "");
+    if (!withinLen(contractId, 100) || !withinLen(studentId, 100)) {
+      response.status(400).json({ error: "Campos fora do tamanho permitido." });
+      return;
+    }
     response.json({
       ok: true,
-      contractId: String(request.body?.contractId || ""),
-      studentId: String(request.body?.studentId || ""),
+      contractId,
+      studentId,
       ip: request.ip || request.headers["x-forwarded-for"] || "",
       userAgent: request.get("user-agent") || "",
       acceptedAt: new Date().toISOString()
@@ -870,6 +928,10 @@ function createApiRouter() {
       const password = String(request.body?.password || "");
       if (!token || password.length < 8) {
         response.status(400).json({ error: "Informe um link valido e uma senha com pelo menos 8 caracteres." });
+        return;
+      }
+      if (!withinLen(token, 128) || !withinLen(password, 128)) {
+        response.status(400).json({ error: "Campos fora do tamanho permitido." });
         return;
       }
 
@@ -906,6 +968,10 @@ function createApiRouter() {
 
   router.put("/collections/:collection", requireAuth, async (request, response, next) => {
     try {
+      if (request.body !== null && request.body !== undefined && typeof request.body !== "object") {
+        response.status(400).json({ error: "Payload invalido: esperado objeto ou array JSON." });
+        return;
+      }
       await writeCollectionForAuth(request.params.collection, request.body, request.auth);
       await writeAuditLog("update", "collection", request.params.collection, request.auth);
       response.json({ ok: true });
@@ -917,6 +983,10 @@ function createApiRouter() {
   router.delete("/collections/:collection/:id", requireAuth, async (request, response, next) => {
     try {
       const { collection, id } = request.params;
+      if (!id || !withinLen(id, 100)) {
+        response.status(400).json({ error: "ID invalido." });
+        return;
+      }
       if (!COLLECTION_ALLOWLIST.has(collection)) {
         response.status(404).json({ error: "Colecao indisponivel." });
         return;
@@ -969,6 +1039,25 @@ function createApiRouter() {
     try {
       const auth = request.auth;
       const body = request.body || {};
+      if (body.name !== undefined && !withinLen(body.name, 120)) {
+        response.status(400).json({ error: "Nome fora do tamanho permitido (max 120)." });
+        return;
+      }
+      if (body.phone !== undefined && !withinLen(body.phone, 30)) {
+        response.status(400).json({ error: "Telefone fora do tamanho permitido (max 30)." });
+        return;
+      }
+      if (body.email !== undefined) {
+        const normalizedProfileEmail = normalizeEmail(body.email);
+        if (normalizedProfileEmail && !isValidEmail(normalizedProfileEmail)) {
+          response.status(400).json({ error: "Formato de e-mail invalido." });
+          return;
+        }
+        if (!withinLen(normalizedProfileEmail, 254)) {
+          response.status(400).json({ error: "E-mail fora do tamanho permitido." });
+          return;
+        }
+      }
       if (auth.role === "manager") {
         const settings = await readCollection(SETTINGS_KEY, {});
         const updated = { ...settings };
