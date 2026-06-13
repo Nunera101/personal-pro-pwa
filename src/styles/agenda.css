@@ -14,16 +14,16 @@
 .agenda-hero h3 {
   margin-top: 0.12rem;
   color: var(--ink);
-  font-size: clamp(2rem, 7vw, 3rem);
-  font-weight: 850;
+  font-size: var(--t-h1);
+  font-weight: var(--t-h1-w);
   line-height: 1;
 }
 
 .agenda-hero p {
   margin-top: 0.34rem;
   color: var(--muted);
-  font-size: clamp(0.9rem, 2.8vw, 1.04rem);
-  line-height: 1.35;
+  font-size: var(--t-sub);
+  line-height: var(--t-sub-lh);
 }
 
 .agenda-hero .primary-action {
@@ -649,12 +649,13 @@
 }
 
 .agenda-hero h3 {
-  font-size: clamp(1.84rem, 7.2vw, 2.55rem) !important;
-  font-weight: 820 !important;
+  font-size: var(--t-h1) !important;
+  font-weight: var(--t-h1-w) !important;
 }
 
 .agenda-hero p {
-  font-size: clamp(0.84rem, 2.7vw, 1rem) !important;
+  font-size: var(--t-sub) !important;
+  line-height: var(--t-sub-lh) !important;
 }
 
 .agenda-hero .primary-action {
@@ -1206,14 +1207,14 @@ body.is-manager-view {
 }
 
 .agenda-hero h3 {
-  font-size: clamp(1.6rem, 6vw, 2.2rem) !important;
-  font-weight: 800 !important;
+  font-size: var(--t-h1) !important;
+  font-weight: var(--t-h1-w) !important;
   color: #fff !important;
   margin-top: 0 !important;
 }
 
 .agenda-hero p {
-  font-size: 13px !important;
+  font-size: var(--t-sub) !important;
   color: var(--txt2) !important;
   margin-top: 3px !important;
 }

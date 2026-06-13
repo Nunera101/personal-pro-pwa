@@ -95,21 +95,26 @@
 
 == LEVA 5 - BACKEND: VIDEO DA BIBLIOTECA PERSISTENTE (RODAR PRESENTE) ==
 [OK] continue: PERSISTENCIA REAL DO VIDEO (hoje o upload nao salva de fato e a pre-visualizacao nao mostra): criar no server/ a rota de upload de video que recebe o arquivo (limite 60MB, tipos mp4/mov/webm), grava no PostgreSQL (coluna bytea em tabela propria videos com id, exerciseId, mimetype, tamanho, criadoEm) e a rota GET /api/videos/:id que serve o video com Content-Type e cache; o upload da Biblioteca passa a enviar para essa rota e salvar a URL persistente no exercicio (substituindo blob/objectURL); a pre-visualizacao e o player usam a URL do servidor; video antigo em blob mostra aviso "Reenvie o video" no card. Anotar em comentario a migracao futura para storage dedicado (R2/S3) quando houver volume. Testar: upar, ver na pre-visu, recarregar a pagina e ver de novo, e abrir no lado do aluno. git add . && git commit -m "feat(biblioteca): upload de video persistente no banco com rota propria" && git push origin main
-     Resultado: - GET /api/videos/:id agora suporta HTTP Range requests (206 Partial Content) - corrige reproducao no Safari/iOS que exige suporte a range para qualquer video
- | - Preview no sheet de envio ganha autoplay muted loop controls - usuario ve o video selecionado antes de salvar
- | - Fix: videoLink em openExerciseForm exclui videoStorage=remote do hidden input, evitando que edicao do exercicio sobrescreva storage "remote" com "external"
- | - Backend (commit 070648a): tabela videos bytea, POST /api/videos, GET /api/videos/:id, upload do frontend aponta para /api/videos, URLs antigas blob/uploads mostram aviso Reenviar
+     Resultado: **3 bugs corrected:**
+ | 1. **Range request support (`server/routes/videos.js`)** ÔÇö The GET route now handles `Range: bytes=X-Y` headers and responds with `206 Partial Content`. Without this, Safari/iOS refuses to play...
+     Resultado: - `videoActionHtml` ÔÇö exerc├¡cios com URL antiga mostram bot├úo **Reenviar** em vez de "Abrir v├¡deo"
+ | - `execVideoPlayerHtml` ÔÇö URL antiga exibe placeholder (sem tentar carregar v├¡deo quebrado)
+ | - `openVideoMod...
 
 == LEVA 6 - MICRO-POLISH FINAL ==
-[ ] HEADER "Elite ..." sem truncar: reduzir levemente a fonte do nome, compactar gaps, e em telas muito estreitas mostrar so logo + badge sem o nome por extenso, NUNCA reticencias; conferir gestor e aluno. git add . && git commit -m "fix(header): nome sem truncar" && git push origin main
-     Resultado: You've hit your session limit ┬À resets 12am (America/Sao_Paulo)
+[OK] HEADER "Elite ..." sem truncar: reduzir levemente a fonte do nome, compactar gaps, e em telas muito estreitas mostrar so logo + badge sem o nome por extenso, NUNCA reticencias; conferir gestor e aluno. git add . && git commit -m "fix(header): nome sem truncar" && git push origin main
+     Resultado: - Mobile (< 480px): texto "Elite AS" + badge somem, s├│ fica o logo ÔÇö d├í espa├ºo para o t├¡tulo central n├úo amassar
+ | **Detalhes:**
+ | - Avatar com hover glow dourado expandido (`box-shadow: 0 0 16px ...`)
+ | - Icon...
+     
 
 [ ] TIPOGRAFIA E RITMO unicos em todo o app: mesma escala de H1, subtitle, labels e legendas em todas as telas dos dois perfis; mesmo gap vertical entre secoes; mesmo padding de card; numeros grandes na mesma fonte e peso. Listar ajustes por tela. git add . && git commit -m "chore(visual): escala tipografica e ritmo unicos" && git push origin main
-     Resultado: You've hit your session limit ┬À resets 12am (America/Sao_Paulo)
+    
 
 [ ] ESTADOS VAZIOS e MICROINTERACOES padronizados: estados vazios com icone dourado suave + frase curta + acao quando couber (substituir texto cinza solto); feedback de toque sutil em todos os botoes e cards clicaveis; transicoes 150-250ms consistentes. git add . && git commit -m "chore(visual): estados vazios e microinteracoes padronizados" && git push origin main
-     Resultado: You've hit your session limit ┬À resets 12am (America/Sao_Paulo)
+     
 
 [ ] REVISAO FINAL com screenshots: percorrer TODAS as telas dos dois perfis, salvar screenshot de cada uma em .tmp/screens/, conferir contra o checklist (nada truncado, nada vazando, nada atras da barra, contraste, espacamentos, zoom travado, notificacoes navegando) e atualizar AUDITORIA-ALUNO.md e DIVERGENCIAS-GESTOR.md. git add . && git commit -m "chore(visual): revisao final com screenshots" && git push origin main
-     Resultado: You've hit your session limit ┬À resets 12am (America/Sao_Paulo)
+    
 

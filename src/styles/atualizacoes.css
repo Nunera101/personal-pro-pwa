@@ -14,8 +14,8 @@
 .updates-hero h3 {
   margin-top: 0.15rem;
   color: var(--ink);
-  font-size: clamp(2rem, 7vw, 3.1rem);
-  font-weight: 850;
+  font-size: var(--t-h1);
+  font-weight: var(--t-h1-w);
   line-height: 1;
 }
 
@@ -23,8 +23,8 @@
   margin-top: 0.42rem;
   max-width: 42rem;
   color: var(--muted);
-  font-size: clamp(0.94rem, 2.8vw, 1.08rem);
-  line-height: 1.35;
+  font-size: var(--t-sub);
+  line-height: var(--t-sub-lh);
 }
 
 .updates-summary-grid {
@@ -86,7 +86,8 @@
   position: relative;
   z-index: 1;
   color: var(--ink);
-  font-size: clamp(2rem, 6vw, 2.65rem);
+  font-size: var(--t-num-md);
+  font-weight: var(--t-num-w);
   line-height: 0.98;
 }
 
@@ -657,16 +658,17 @@
 
 .updates-page .updates-hero h3 {
   margin: 0 !important;
-  font-size: clamp(1.78rem, 7.2vw, 2.45rem) !important;
-  line-height: 1.02 !important;
+  font-size: var(--t-h1) !important;
+  font-weight: var(--t-h1-w) !important;
+  line-height: 1 !important;
   letter-spacing: 0 !important;
 }
 
 .updates-page .updates-hero p {
   margin-top: 0.28rem !important;
   color: rgba(247, 244, 235, 0.68) !important;
-  font-size: clamp(0.88rem, 3.2vw, 1rem) !important;
-  line-height: 1.28 !important;
+  font-size: var(--t-sub) !important;
+  line-height: var(--t-sub-lh) !important;
 }
 
 .updates-page .updates-summary-grid {

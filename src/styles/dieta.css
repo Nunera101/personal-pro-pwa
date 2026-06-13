@@ -14,14 +14,16 @@
 .diet-hero h3 {
   margin: 0.14rem 0 0;
   color: var(--ink);
-  font-size: clamp(2rem, 6vw, 3rem);
+  font-size: var(--t-h1);
+  font-weight: var(--t-h1-w);
   line-height: 1;
 }
 
 .diet-hero p {
   margin: 0.42rem 0 0;
   color: var(--muted);
-  font-size: clamp(0.95rem, 2.5vw, 1.08rem);
+  font-size: var(--t-sub);
+  line-height: var(--t-sub-lh);
 }
 
 .diet-new-btn {
@@ -101,7 +103,8 @@
 
 .diet-summary-card strong {
   color: var(--ink);
-  font-size: clamp(1.55rem, 4.8vw, 2.25rem);
+  font-size: var(--t-num-md);
+  font-weight: var(--t-num-w);
   line-height: 1;
 }
 

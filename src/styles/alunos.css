@@ -17,8 +17,8 @@
 .student-profile-topbar h3 {
   margin-top: 0.15rem;
   color: var(--ink);
-  font-size: clamp(2rem, 7vw, 3.1rem);
-  font-weight: 850;
+  font-size: var(--t-h1);
+  font-weight: var(--t-h1-w);
   line-height: 1;
 }
 
@@ -26,8 +26,8 @@
 .student-profile-topbar p {
   margin-top: 0.42rem;
   color: var(--muted);
-  font-size: clamp(0.94rem, 2.8vw, 1.08rem);
-  line-height: 1.35;
+  font-size: var(--t-sub);
+  line-height: var(--t-sub-lh);
 }
 
 .students-hero .primary-action,
@@ -451,6 +451,7 @@
 
 .student-summary-card strong {
   font-size: clamp(1.05rem, 3.8vw, 1.55rem);
+  font-weight: var(--t-num-w);
   line-height: 1.08;
   overflow-wrap: anywhere;
 }
@@ -617,16 +618,17 @@
 .students-hero h3 {
   margin: 0.16rem 0 0 !important;
   color: var(--ink) !important;
-  font-size: clamp(1.85rem, 7.1vw, 2.45rem) !important;
-  line-height: 0.98 !important;
+  font-size: var(--t-h1) !important;
+  font-weight: var(--t-h1-w) !important;
+  line-height: 1 !important;
   letter-spacing: 0 !important;
 }
 
 .students-hero p {
   margin: 0.42rem 0 0 !important;
   color: rgba(247, 244, 235, 0.7) !important;
-  font-size: clamp(0.82rem, 3.2vw, 0.98rem) !important;
-  line-height: 1.25 !important;
+  font-size: var(--t-sub) !important;
+  line-height: var(--t-sub-lh) !important;
 }
 
 .students-hero .primary-action {
@@ -1088,10 +1090,10 @@
 .student-profile-topbar h3 {
   margin: 0 !important;
   color: var(--ink) !important;
-  font-size: clamp(1.45rem, 6.2vw, 2rem) !important;
-  font-weight: 600 !important;
+  font-size: var(--t-h1) !important;
+  font-weight: var(--t-h1-w) !important;
   letter-spacing: 0 !important;
-  line-height: 1.05 !important;
+  line-height: 1 !important;
 }
 
 .student-profile-topbar .back-button {
@@ -1362,7 +1364,7 @@
 .student-summary-card strong {
   color: var(--ink) !important;
   font-size: clamp(1.08rem, 4.8vw, 1.58rem) !important;
-  font-weight: 600 !important;
+  font-weight: var(--t-num-w) !important;
   line-height: 1.08 !important;
   letter-spacing: 0 !important;
 }

@@ -14,16 +14,16 @@
 .patterns-hero-text h3 {
   margin-top: 0.15rem;
   color: var(--ink);
-  font-size: clamp(2rem, 7vw, 3.1rem);
-  font-weight: 850;
+  font-size: var(--t-h1);
+  font-weight: var(--t-h1-w);
   line-height: 1;
 }
 
 .patterns-hero-text p {
   margin-top: 0.42rem;
   color: var(--muted);
-  font-size: clamp(0.94rem, 2.8vw, 1.08rem);
-  line-height: 1.35;
+  font-size: var(--t-sub);
+  line-height: var(--t-sub-lh);
 }
 
 .patterns-new-btn {
@@ -110,7 +110,8 @@
   position: relative;
   z-index: 1;
   color: var(--ink);
-  font-size: clamp(1.75rem, 4.8vw, 2.35rem);
+  font-size: var(--t-num-md);
+  font-weight: var(--t-num-w);
   line-height: 0.96;
 }
 
@@ -525,17 +526,17 @@
 .library-hero h2 {
   margin: 0.16rem 0 0 !important;
   color: var(--ink) !important;
-  font-size: clamp(1.7rem, 7.1vw, 2.45rem) !important;
-  font-weight: 600 !important;
-  line-height: 1.02 !important;
+  font-size: var(--t-h1) !important;
+  font-weight: var(--t-h1-w) !important;
+  line-height: 1 !important;
   letter-spacing: 0 !important;
 }
 
 .library-hero p {
   margin: 0.34rem 0 0 !important;
   color: rgba(247, 244, 235, 0.66) !important;
-  font-size: clamp(0.86rem, 3.4vw, 1rem) !important;
-  line-height: 1.25 !important;
+  font-size: var(--t-sub) !important;
+  line-height: var(--t-sub-lh) !important;
 }
 
 
@@ -571,8 +572,8 @@
 
 .library-stat-card strong {
   color: var(--ink) !important;
-  font-size: clamp(1.55rem, 6.4vw, 2.1rem) !important;
-  font-weight: 600 !important;
+  font-size: var(--t-num-md) !important;
+  font-weight: var(--t-num-w) !important;
   line-height: 1 !important;
   letter-spacing: 0 !important;
 }

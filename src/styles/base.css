@@ -2001,6 +2001,18 @@ body.app-installed [data-install-trigger] {
   --retorno: #F97316;
   --retorno-soft: rgba(249, 115, 22, 0.18);
   --retorno-borda: rgba(249, 115, 22, 0.4);
+  /* ── Typography & rhythm tokens ── */
+  --t-h1: clamp(1.85rem, 7vw, 2.5rem);
+  --t-h1-w: 820;
+  --t-sub: clamp(0.86rem, 2.8vw, 1rem);
+  --t-sub-lh: 1.3;
+  --t-section: clamp(1rem, 3.1vw, 1.18rem);
+  --t-section-w: 780;
+  --t-num-lg: clamp(1.75rem, 7vw, 2.55rem);
+  --t-num-md: clamp(1.4rem, 4.8vw, 2rem);
+  --t-num-w: 800;
+  --t-label: 0.72rem;
+  --t-label-w: 800;
 }
 
 html,
@@ -2340,7 +2352,8 @@ body::before {
 
 .metric-card strong {
   color: var(--ink);
-  font-size: clamp(1.75rem, 7vw, 2.55rem);
+  font-size: var(--t-num-lg);
+  font-weight: var(--t-num-w);
 }
 
 .panel {
@@ -2875,8 +2888,8 @@ body::before {
 .dashboard-hero h3 {
   margin-top: 0.08rem;
   color: var(--ink);
-  font-size: clamp(1.9rem, 7vw, 2.7rem);
-  font-weight: 820;
+  font-size: var(--t-h1);
+  font-weight: var(--t-h1-w);
   line-height: 1;
 }
 
@@ -3228,7 +3241,8 @@ button.dashboard-metric {
 
 .weekly-kpi strong {
   color: var(--ink);
-  font-size: clamp(1.65rem, 6vw, 2.2rem);
+  font-size: var(--t-num-md);
+  font-weight: var(--t-num-w);
   line-height: 1;
 }
 
@@ -3379,7 +3393,7 @@ button.dashboard-metric {
 }
 
 .dashboard-hero h3 {
-  font-size: clamp(1.55rem, 5.5vw, 2.25rem);
+  font-size: var(--t-h1);
 }
 
 .dashboard-hero p {
@@ -4053,15 +4067,17 @@ button.dashboard-metric {
 .student-profile-topbar h3,
 .agenda-hero h3,
 .patterns-hero h3,
+.patterns-hero-text h3,
 .updates-hero h3,
 .messages-hero h3,
 .contracts-hero h3,
 .finance-hero h3,
-.diet-hero h3 {
+.diet-hero h3,
+.reports-hero h3 {
   margin: 0.12rem 0 0;
-  font-size: clamp(1.62rem, 5.5vw, 2.45rem);
-  font-weight: 840;
-  line-height: 0.98;
+  font-size: var(--t-h1);
+  font-weight: var(--t-h1-w);
+  line-height: 1;
   letter-spacing: 0;
 }
 
@@ -4071,15 +4087,17 @@ button.dashboard-metric {
 .student-profile-topbar p,
 .agenda-hero p,
 .patterns-hero p,
+.patterns-hero-text p,
 .updates-hero p,
 .messages-hero p,
 .contracts-hero p,
 .finance-hero p,
-.diet-hero p {
+.diet-hero p,
+.reports-hero p {
   margin: 0.28rem 0 0;
   color: rgba(247, 244, 235, 0.64);
-  font-size: clamp(0.82rem, 2.5vw, 0.98rem);
-  line-height: 1.32;
+  font-size: var(--t-sub);
+  line-height: var(--t-sub-lh);
 }
 
 .primary-action,
@@ -4122,20 +4140,21 @@ button.dashboard-metric {
 }
 
 .section-title h3 {
-  font-size: clamp(1rem, 3.1vw, 1.18rem);
+  font-size: var(--t-section);
+  font-weight: var(--t-section-w);
   line-height: 1.08;
 }
 
 .section-title .small-text {
-  font-size: 0.7rem;
+  font-size: var(--t-label);
   line-height: 1.25;
 }
 
 .badge {
   min-height: 1.58rem;
   padding: 0.24rem 0.48rem;
-  font-size: 0.66rem;
-  font-weight: 780;
+  font-size: var(--t-label);
+  font-weight: var(--t-label-w);
   line-height: 1;
 }
 
@@ -4246,7 +4265,8 @@ button.dashboard-metric {
 .finance-summary-card strong,
 .diet-summary-card strong,
 .profile-card strong {
-  font-size: clamp(1.35rem, 4.2vw, 2rem);
+  font-size: var(--t-num-md);
+  font-weight: var(--t-num-w);
   line-height: 0.98;
 }
 
@@ -4627,12 +4647,14 @@ button.dashboard-metric {
   .student-profile-topbar h3,
   .agenda-hero h3,
   .patterns-hero h3,
+  .patterns-hero-text h3,
   .updates-hero h3,
   .messages-hero h3,
   .contracts-hero h3,
   .finance-hero h3,
-  .diet-hero h3 {
-    font-size: clamp(1.44rem, 7.6vw, 1.95rem);
+  .diet-hero h3,
+  .reports-hero h3 {
+    font-size: var(--t-h1);
   }
 
   .dashboard-metrics,
@@ -4998,15 +5020,15 @@ button.dashboard-metric {
 .dashboard-hero h3 {
   margin-top: 0.34rem !important;
   color: var(--elite-ink);
-  font-size: clamp(1.95rem, 8vw, 2.72rem) !important;
-  font-weight: 820 !important;
-  line-height: 0.98 !important;
+  font-size: var(--t-h1) !important;
+  font-weight: var(--t-h1-w) !important;
+  line-height: 1 !important;
 }
 
 .dashboard-hero p {
   max-width: 30rem;
   color: rgba(244, 241, 234, 0.68) !important;
-  font-size: clamp(0.86rem, 3vw, 1rem) !important;
+  font-size: var(--t-sub) !important;
 }
 
 .dashboard-hero .primary-action {
@@ -5076,8 +5098,8 @@ button.dashboard-metric {
 .dashboard-metric strong {
   margin-top: 0.18rem;
   color: #fffaf1;
-  font-size: clamp(1.62rem, 7vw, 2.05rem) !important;
-  font-weight: 840;
+  font-size: var(--t-num-md) !important;
+  font-weight: var(--t-num-w) !important;
   line-height: 0.95 !important;
 }
 
@@ -5320,7 +5342,8 @@ button.dashboard-metric {
 }
 
 .weekly-kpi strong {
-  font-size: clamp(1.45rem, 6vw, 2.05rem) !important;
+  font-size: var(--t-num-md) !important;
+  font-weight: var(--t-num-w) !important;
   line-height: 0.95;
 }
 
@@ -5498,13 +5521,14 @@ button.dashboard-metric {
 
 .dashboard-hero h3 {
   margin-top: 0.22rem !important;
-  font-size: clamp(1.82rem, 7.3vw, 2.42rem) !important;
+  font-size: var(--t-h1) !important;
+  font-weight: var(--t-h1-w) !important;
 }
 
 .dashboard-hero p {
   margin-top: 0.28rem !important;
-  font-size: clamp(0.78rem, 2.7vw, 0.95rem) !important;
-  line-height: 1.25 !important;
+  font-size: var(--t-sub) !important;
+  line-height: var(--t-sub-lh) !important;
 }
 
 .dashboard-hero .primary-action {
@@ -5547,7 +5571,8 @@ button.dashboard-metric {
 
 .dashboard-metric strong {
   margin-top: 0.12rem !important;
-  font-size: clamp(1.34rem, 6.1vw, 1.82rem) !important;
+  font-size: var(--t-num-md) !important;
+  font-weight: var(--t-num-w) !important;
 }
 
 .dashboard-metric small {
@@ -5567,7 +5592,8 @@ button.dashboard-metric {
 }
 
 .dashboard-panel .section-title h3 {
-  font-size: clamp(0.94rem, 3.6vw, 1.14rem) !important;
+  font-size: var(--t-section) !important;
+  font-weight: var(--t-section-w) !important;
   line-height: 1.1 !important;
 }
 
@@ -6507,8 +6533,8 @@ body::before {
 }
 
 .weekly-kpi strong {
-  font-size: clamp(1.9rem, 7vw, 2.6rem) !important;
-  font-weight: 700 !important;
+  font-size: var(--t-num-md) !important;
+  font-weight: var(--t-num-w) !important;
   line-height: 1 !important;
   color: #fff !important;
 }
