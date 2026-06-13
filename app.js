@@ -905,7 +905,7 @@
         if (!ex.exerciseId) return;
         const exercise = getExercise(ex.exerciseId);
         if (!exercise) return;
-        if (!ex.exerciseName) ex.exerciseName = exercise.name || "";
+        if (!ex.exerciseName || (isGenericExerciseName(ex.exerciseName) && !isGenericExerciseName(exercise.name))) ex.exerciseName = exercise.name || "";
         if (!ex.exerciseMuscle) ex.exerciseMuscle = getExercisePrimaryMuscle(exercise);
       });
     });
@@ -1318,10 +1318,10 @@
       const source = workout?.exercises?.find((item) => item.id === row.workoutExerciseId)
         || workout?.exercises?.find((item) => item.exerciseId === row.exerciseId);
       if (source) {
-        if (!row.exerciseName) row.exerciseName = source.exerciseName || "";
+        if (isGenericExerciseName(row.exerciseName)) row.exerciseName = isGenericExerciseName(source.exerciseName) ? "" : source.exerciseName;
         if (!row.exerciseMuscle) row.exerciseMuscle = source.exerciseMuscle || "";
       }
-      if (!row.exerciseName && row.name && row.name !== "Exercício") row.exerciseName = row.name;
+      if (isGenericExerciseName(row.exerciseName) && !isGenericExerciseName(row.name)) row.exerciseName = row.name;
       row.name = resolveWorkoutExerciseName(row);
     });
     return session;
@@ -1344,13 +1344,45 @@
     return state.data.exercises.find((exercise) => exercise.id === id);
   }
 
-  // Resolve um nome de exibicao para uma row de treino SEM nunca cair em "indisponivel":
-  // 1) nome atual da biblioteca; 2) snapshot do nome (ultimo nome conhecido);
-  // 3) "Exercicio" + grupo salvo; 4) "Exercicio".
+  // Detecta nomes placeholder gerados por backfill incompleto.
+  function isGenericExerciseName(name) {
+    if (!name) return true;
+    const n = name.trim().toLowerCase();
+    return n === "exercício" || n === "exercicio";
+  }
+
+  // Varre snapshots de todos os treinos buscando o ultimo nome real conhecido para um exercicio.
+  function findLastKnownExerciseName(exerciseId) {
+    if (!exerciseId) return null;
+    for (const workout of state.data.workouts) {
+      for (const ex of workout.exercises || []) {
+        if (ex.exerciseId === exerciseId && !isGenericExerciseName(ex.exerciseName)) {
+          return ex.exerciseName;
+        }
+      }
+    }
+    return null;
+  }
+
+  // Resolve o nome real de um exercicio da biblioteca; nunca retorna so "Exercicio".
+  function resolveLibraryExerciseName(exercise) {
+    if (!isGenericExerciseName(exercise?.name)) return exercise.name;
+    const lastKnown = findLastKnownExerciseName(exercise?.id);
+    if (lastKnown) return lastKnown;
+    const primary = getExercisePrimaryMuscle(exercise);
+    if (primary) return `Exercício · ${primary}`;
+    return "Exercício";
+  }
+
+  // Resolve um nome de exibicao para uma row de treino SEM nunca cair em "Exercicio":
+  // 1) nome atual da biblioteca (se nao for generico); 2) snapshot (se nao for generico);
+  // 3) ultimo nome conhecido via snapshots de outros treinos; 4) grupo muscular; 5) "Exercicio".
   function resolveWorkoutExerciseName(row = {}) {
     const exercise = getExercise(row.exerciseId);
-    if (exercise?.name) return exercise.name;
-    if (row.exerciseName) return row.exerciseName;
+    if (!isGenericExerciseName(exercise?.name)) return exercise.name;
+    if (!isGenericExerciseName(row.exerciseName)) return row.exerciseName;
+    const lastKnown = findLastKnownExerciseName(row.exerciseId);
+    if (lastKnown) return lastKnown;
     if (row.exerciseMuscle) return `Exercício · ${row.exerciseMuscle}`;
     return "Exercício";
   }
@@ -4725,7 +4757,7 @@
         <div class="library-exercise-content">
           <div class="library-exercise-header">
             <div>
-              <h3>${escapeHtml(exercise.name)}</h3>
+              <h3>${escapeHtml(resolveLibraryExerciseName(exercise))}</h3>
               <div class="library-exercise-meta">
                 <span>${icons.agenda}${escapeHtml(primaryMuscle)}</span>
                 <span>${icons.workouts}${escapeHtml(equipment)}</span>
@@ -5134,7 +5166,7 @@
     return `
       <article class="entity-row compact-row library-row">
         <div class="entity-main">
-          <strong>${escapeHtml(exercise.name)}</strong>
+          <strong>${escapeHtml(resolveLibraryExerciseName(exercise))}</strong>
           <span><b>Principal:</b> ${escapeHtml(primaryMuscle)} · ${escapeHtml(exercise.equipment)}</span>
           <div class="muscle-chip-row">
             ${secondaryMuscles.length ? secondaryMuscles.map((item) => `<span class="subtle-chip">${escapeHtml(item)}</span>`).join("") : '<span class="small-text">Sem grupos secundários.</span>'}
