@@ -1430,12 +1430,29 @@
   }
 
   function getWorkout(id) {
-    return state.data.workouts.find((workout) => workout.id === id && workout.trainerId === TRAINER_ID);
+    const workout = state.data.workouts.find((workout) => workout.id === id && workout.trainerId === TRAINER_ID);
+    return ownsResource(workout) ? workout : undefined;
   }
 
   function getCurrentStudent() {
     if (state.currentUser?.role !== "student") return null;
     return getStudent(state.currentUser.studentId);
+  }
+
+  // GUARDA DE DONO (S5 — defesa em profundidade): replica no front a regra de
+  // ownership que o servidor ja aplica na S2, fechando IDOR via console e
+  // evitando abrir recurso alheio. Regra unica, igual ao server/ownership.js:
+  //   manager → recurso do proprio trainer;
+  //   student → do proprio trainer E do proprio studentId.
+  // Recursos "padrao" (studentId vazio) sao templates do gestor: nunca pertencem
+  // a um aluno. Nao altera o visual; apenas recusa acesso indevido.
+  function ownsResource(resource) {
+    if (!resource) return false;
+    if (resource.trainerId && resource.trainerId !== TRAINER_ID) return false;
+    if (state.currentUser?.role === "student") {
+      return !!resource.studentId && resource.studentId === state.currentUser.studentId;
+    }
+    return true;
   }
 
   function isWorkoutPattern(workout) {
@@ -1948,7 +1965,8 @@
   }
 
   function getDietPlan(planId) {
-    return state.data.diets.find((plan) => plan.id === planId && plan.trainerId === TRAINER_ID);
+    const plan = state.data.diets.find((plan) => plan.id === planId && plan.trainerId === TRAINER_ID);
+    return ownsResource(plan) ? plan : undefined;
   }
 
   function getStudentDietPlans(studentId) {
@@ -8798,7 +8816,9 @@
   }
 
   function openAgendarSheet(activityId = "", prefillStudentId = "") {
-    const activity = state.data.activities.find((item) => item.id === activityId) || {};
+    const existing = activityId ? state.data.activities.find((item) => item.id === activityId) : null;
+    if (activityId && (!existing || !ownsResource(existing))) return showToast("Atividade indisponível.");
+    const activity = existing || {};
     const selectedStudentId = activity.studentId || prefillStudentId || state.data.students[0]?.id || "";
     const selectedType = activity.type || "workout";
     const selectedStatus = activity.status || (selectedType === "update" ? "pending" : "scheduled");
@@ -10407,6 +10427,7 @@
 
   function openPaymentForm(paymentId = "", defaults = {}) {
     const payment = paymentId ? state.data.payments.find((item) => item.id === paymentId) : null;
+    if (paymentId && (!payment || !ownsResource(payment))) return showToast("Pagamento indisponível.");
     const record = payment ? { ...payment } : defaults.recordId ? findFinanceRecord(defaults.recordId) : null;
     const selectedStudentId = defaults.studentId || payment?.studentId || record?.studentId || "";
     const student = getStudent(selectedStudentId);
@@ -13157,6 +13178,8 @@
   }
 
   function deleteActivity(id) {
+    const target = state.data.activities.find((activity) => activity.id === id);
+    if (!target || !ownsResource(target)) return showToast("Atividade indisponível.");
     if (!confirm("Remover este item da agenda?")) return;
     state.data.activities = state.data.activities.filter((activity) => activity.id !== id);
     persistData();
@@ -13167,7 +13190,7 @@
     const allowed = ["scheduled", "pending", "done", "sent", "missed", "canceled"];
     if (!allowed.includes(status)) return;
     const activity = state.data.activities.find((item) => item.id === id);
-    if (!activity) return showToast("Atividade não encontrada.");
+    if (!activity || !ownsResource(activity)) return showToast("Atividade não encontrada.");
     if ((status === "canceled" || status === "missed") && !confirm(status === "canceled" ? "Cancelar esta atividade?" : "Marcar como não realizada?")) return;
     activity.status = status;
     activity.updatedAt = new Date().toISOString();
@@ -13394,7 +13417,7 @@
 
   function markUpdateViewed(id) {
     const update = state.data.updates.find((item) => item.id === id);
-    if (!update || update.status === "pending") return;
+    if (!update || !ownsResource(update) || update.status === "pending") return;
     update.status = "viewed";
     update.viewedAt = new Date().toISOString();
     ensureUpdateActivity(update);
