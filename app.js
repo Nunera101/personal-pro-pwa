@@ -6157,7 +6157,7 @@
   }
 
   function agendaStatusLabel(status) {
-    return { scheduled: "Confirmado", pending: "Pendente", done: "Concluído", sent: "Enviado", canceled: "Cancelado", missed: "Não realizado", contract_pending: "Contrato pendente" }[status] || "Confirmado";
+    return { scheduled: "Confirmado", pending: "Pendente", done: "Concluído", sent: "Enviado", canceled: "Cancelado", missed: "Não realizado", contract_pending: "Pendente" }[status] || "Confirmado";
   }
 
   function agendaStatusTone(status) {
