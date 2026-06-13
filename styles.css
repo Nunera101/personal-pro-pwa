@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   --brand: #0b6b57;
   --brand-strong: #07493d;
   --brand-soft: #dff3ed;
@@ -3317,15 +3317,16 @@ body.app-installed [data-install-trigger] {
 /* Elite AS visual refresh v22 */
 :root {
   --brand: #f5b51b;
+  --brand-rgb: 245, 181, 27;
   --brand-strong: #ffc447;
-  --brand-soft: rgba(245, 181, 27, 0.15);
+  --brand-soft: rgba(var(--brand-rgb), 0.15);
   --ink: #f7f4eb;
   --muted: #aaa59a;
   --line: rgba(255, 255, 255, 0.12);
   --surface: rgba(18, 18, 18, 0.9);
   --canvas: #050505;
   --accent: #f5b51b;
-  --accent-soft: rgba(245, 181, 27, 0.16);
+  --accent-soft: rgba(var(--brand-rgb), 0.16);
   --danger: #ff5a4f;
   --danger-soft: rgba(255, 90, 79, 0.14);
   --success: #48d764;
@@ -5770,8 +5771,8 @@ button.dashboard-metric {
 }
 
 .day-event.is-type-return {
-  background: rgba(245, 155, 36, 0.24);
-  border-color: rgba(245, 155, 36, 0.6);
+  background: rgba(var(--brand-rgb), 0.24);
+  border-color: rgba(var(--brand-rgb), 0.6);
   border-left-color: #f59b24;
 }
 
@@ -8139,14 +8140,14 @@ button.dashboard-metric {
 }
 
 .contract-action-btn.is-brand {
-  border-color: rgba(245, 158, 11, 0.4);
-  background: rgba(245, 158, 11, 0.07);
+  border-color: rgba(var(--brand-rgb), 0.4);
+  background: rgba(var(--brand-rgb), 0.07);
   color: var(--brand-strong);
 }
 
 .contract-action-btn.is-brand:hover {
-  background: rgba(245, 158, 11, 0.14);
-  border-color: rgba(245, 158, 11, 0.65);
+  background: rgba(var(--brand-rgb), 0.14);
+  border-color: rgba(var(--brand-rgb), 0.65);
 }
 
 /* ── contract view sheet ── */
@@ -8324,7 +8325,7 @@ button.dashboard-metric {
   height: 2rem;
   place-items: center;
   border-radius: 999px;
-  background: rgba(245, 158, 11, 0.15);
+  background: rgba(var(--brand-rgb), 0.15);
   color: var(--brand-strong);
   font-size: 0.7rem;
   font-weight: 700;
@@ -8343,9 +8344,9 @@ button.dashboard-metric {
   gap: 0.65rem;
   margin-top: 0.65rem;
   padding: 0.62rem 0.9rem;
-  border: 1px solid rgba(245, 158, 11, 0.25);
+  border: 1px solid rgba(var(--brand-rgb), 0.25);
   border-radius: 0.72rem;
-  background: rgba(245, 158, 11, 0.05);
+  background: rgba(var(--brand-rgb), 0.05);
 }
 
 .cfs-preview-info {
@@ -11465,8 +11466,8 @@ button.dashboard-metric {
   display: inline-block;
   padding: 0.15rem 0.5rem;
   border-radius: 999px;
-  background: rgba(245, 158, 11, 0.18);
-  border: 1px solid rgba(245, 158, 11, 0.45);
+  background: rgba(var(--brand-rgb), 0.18);
+  border: 1px solid rgba(var(--brand-rgb), 0.45);
   color: var(--brand);
   font-size: 0.62rem;
   font-weight: 850;
@@ -11480,8 +11481,8 @@ button.dashboard-metric {
   display: inline-block;
   padding: 0.15rem 0.5rem;
   border-radius: 999px;
-  background: rgba(245, 158, 11, 0.18);
-  border: 1px solid rgba(245, 158, 11, 0.45);
+  background: rgba(var(--brand-rgb), 0.18);
+  border: 1px solid rgba(var(--brand-rgb), 0.45);
   color: var(--brand);
   font-size: 0.62rem;
   font-weight: 850;
@@ -11521,7 +11522,7 @@ button.dashboard-metric {
 .manager-header .avatar-button {
   width: 2.85rem !important;
   height: 2.85rem !important;
-  border: 1px solid rgba(245, 184, 46, 0.72) !important;
+  border: 1px solid rgba(var(--brand-rgb), 0.72) !important;
   color: #ffd567;
   font-weight: 860;
 }
@@ -11600,7 +11601,7 @@ button.dashboard-metric {
   width: 3.1rem;
   height: 3.1rem;
   border-radius: 999px;
-  background: rgba(245, 184, 46, 0.055);
+  background: rgba(var(--brand-rgb), 0.055);
 }
 
 .dashboard-metric .metric-icon {
@@ -11820,7 +11821,7 @@ button.dashboard-metric {
 }
 
 .weekly-area {
-  fill: rgba(245, 184, 46, 0.13);
+  fill: rgba(var(--brand-rgb), 0.13);
 }
 
 .weekly-line {
@@ -11829,7 +11830,7 @@ button.dashboard-metric {
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 2.1;
-  filter: drop-shadow(0 0 0.35rem rgba(245, 184, 46, 0.24));
+  filter: drop-shadow(0 0 0.35rem rgba(var(--brand-rgb), 0.24));
   vector-effect: non-scaling-stroke;
 }
 
@@ -11841,7 +11842,7 @@ button.dashboard-metric {
 }
 
 .weekly-point.is-empty {
-  fill: rgba(245, 184, 46, 0.34);
+  fill: rgba(var(--brand-rgb), 0.34);
 }
 
 .weekly-days {
@@ -11904,7 +11905,7 @@ button.dashboard-metric {
 
 .nav-button.is-active {
   background:
-    rgba(245, 184, 46, 0.075) !important;
+    rgba(var(--brand-rgb), 0.075) !important;
 }
 
 @media (max-width: 32.5rem) {
@@ -12476,7 +12477,7 @@ button.dashboard-metric {
 
 .agenda-view-tabs button.is-active {
   color: var(--elite-gold-3, #ffc84b) !important;
-  background: linear-gradient(180deg, rgba(245, 184, 46, 0.13), rgba(245, 184, 46, 0.025)) !important;
+  background: linear-gradient(180deg, rgba(var(--brand-rgb), 0.13), rgba(var(--brand-rgb), 0.025)) !important;
   box-shadow: inset 0 -2px 0 var(--elite-gold, #f5b82e) !important;
 }
 
@@ -12562,7 +12563,7 @@ button.dashboard-metric {
   background: rgba(6, 6, 6, 0.97) !important;
   backdrop-filter: blur(28px) saturate(1.6) !important;
   -webkit-backdrop-filter: blur(28px) saturate(1.6) !important;
-  border-bottom: 1px solid rgba(245, 184, 46, 0.12) !important;
+  border-bottom: 1px solid rgba(var(--brand-rgb), 0.12) !important;
   box-shadow: 0 10px 42px rgba(0, 0, 0, 0.72) !important;
 }
 
@@ -12585,7 +12586,7 @@ button.dashboard-metric {
   height: 2.6rem !important;
   border-radius: 0.65rem !important;
   box-shadow:
-    0 0 0 1px rgba(245, 184, 46, 0.22),
+    0 0 0 1px rgba(var(--brand-rgb), 0.22),
     0 3px 12px rgba(0, 0, 0, 0.5) !important;
   flex-shrink: 0;
 }
@@ -12624,13 +12625,13 @@ button.dashboard-metric {
 .student-badge {
   padding: 0.18rem 0.56rem !important;
   border-radius: 999px !important;
-  background: linear-gradient(135deg, rgba(245, 184, 46, 0.14) 0%, rgba(245, 184, 46, 0.05) 100%) !important;
-  border: 1px solid rgba(245, 184, 46, 0.44) !important;
+  background: linear-gradient(135deg, rgba(var(--brand-rgb), 0.14) 0%, rgba(var(--brand-rgb), 0.05) 100%) !important;
+  border: 1px solid rgba(var(--brand-rgb), 0.44) !important;
   color: #ffc84b !important;
   font-size: 0.57rem !important;
   font-weight: 900 !important;
   letter-spacing: 0.16em !important;
-  box-shadow: 0 0 8px rgba(245, 184, 46, 0.1) !important;
+  box-shadow: 0 0 8px rgba(var(--brand-rgb), 0.1) !important;
   margin-top: 0.18rem !important;
 }
 
@@ -12640,13 +12641,13 @@ button.dashboard-metric {
   width: 2.68rem !important;
   height: 2.68rem !important;
   border-radius: 50% !important;
-  border: 1.5px solid rgba(245, 184, 46, 0.58) !important;
+  border: 1.5px solid rgba(var(--brand-rgb), 0.58) !important;
   color: #ffc84b !important;
   font-weight: 870 !important;
   font-size: 0.8rem !important;
-  background: rgba(245, 184, 46, 0.08) !important;
+  background: rgba(var(--brand-rgb), 0.08) !important;
   box-shadow:
-    0 0 0 3px rgba(245, 184, 46, 0.09),
+    0 0 0 3px rgba(var(--brand-rgb), 0.09),
     inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
   transition: box-shadow 0.22s, border-color 0.22s !important;
   flex-shrink: 0 !important;
@@ -12656,8 +12657,8 @@ button.dashboard-metric {
 .student-header .avatar-button:hover {
   border-color: #f5b82e !important;
   box-shadow:
-    0 0 0 4px rgba(245, 184, 46, 0.18),
-    0 0 16px rgba(245, 184, 46, 0.22),
+    0 0 0 4px rgba(var(--brand-rgb), 0.18),
+    0 0 16px rgba(var(--brand-rgb), 0.22),
     inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
 }
 
@@ -12686,7 +12687,7 @@ button.dashboard-metric {
 .manager-header .icon-button:hover,
 .student-header .icon-button:hover {
   color: #f4f1ea !important;
-  background: rgba(245, 184, 46, 0.07) !important;
+  background: rgba(var(--brand-rgb), 0.07) !important;
 }
 
 .manager-header .header-actions,
@@ -12726,7 +12727,7 @@ button.dashboard-metric {
 }
 
 .agenda-week-day.is-selected {
-  background: linear-gradient(180deg, rgba(245, 184, 46, 0.12), rgba(245, 184, 46, 0.02)) !important;
+  background: linear-gradient(180deg, rgba(var(--brand-rgb), 0.12), rgba(var(--brand-rgb), 0.02)) !important;
 }
 
 .agenda-hour-label,
@@ -12811,7 +12812,7 @@ button.dashboard-metric {
 }
 
 .month-view .day-cell.is-selected {
-  background: rgba(245, 184, 46, 0.1) !important;
+  background: rgba(var(--brand-rgb), 0.1) !important;
   box-shadow: none;
 }
 
@@ -13211,7 +13212,7 @@ body.is-manager-view {
 }
 
 .student-search-field:focus-within {
-  border-color: rgba(245, 184, 46, 0.54) !important;
+  border-color: rgba(var(--brand-rgb), 0.54) !important;
   box-shadow: none !important;
 }
 
@@ -13491,7 +13492,7 @@ body.is-manager-view {
   font-weight: 650 !important;
   line-height: 1 !important;
   color: rgba(247, 244, 235, 0.88) !important;
-  border-color: rgba(245, 184, 46, 0.54) !important;
+  border-color: rgba(var(--brand-rgb), 0.54) !important;
   background: rgba(5, 5, 5, 0.2) !important;
 }
 
@@ -13844,7 +13845,7 @@ body.is-manager-view {
 
 .student-profile-tabs button.is-active {
   color: var(--brand-strong) !important;
-  background: linear-gradient(180deg, rgba(245, 184, 46, 0.11), rgba(245, 184, 46, 0.02)) !important;
+  background: linear-gradient(180deg, rgba(var(--brand-rgb), 0.11), rgba(var(--brand-rgb), 0.02)) !important;
   box-shadow: inset 0 -2px 0 var(--brand-strong) !important;
 }
 
@@ -13924,7 +13925,7 @@ body.is-manager-view {
   min-height: 2.12rem !important;
   padding: 0.46rem 0.78rem !important;
   border-radius: 999px !important;
-  border: 1px solid rgba(245, 184, 46, 0.58) !important;
+  border: 1px solid rgba(var(--brand-rgb), 0.58) !important;
   color: var(--brand-strong) !important;
   background: rgba(5, 5, 5, 0.22) !important;
   font-size: 0.78rem !important;
@@ -13955,8 +13956,8 @@ body.is-manager-view {
   height: 2.18rem !important;
   border-radius: 999px !important;
   color: var(--brand-strong) !important;
-  background: rgba(245, 184, 46, 0.1) !important;
-  border: 1px solid rgba(245, 184, 46, 0.22) !important;
+  background: rgba(var(--brand-rgb), 0.1) !important;
+  border: 1px solid rgba(var(--brand-rgb), 0.22) !important;
 }
 
 .profile-pending-icon svg {
@@ -14015,7 +14016,7 @@ body.is-manager-view {
 }
 
 .profile-volume-chart polygon {
-  fill: rgba(245, 184, 46, 0.12) !important;
+  fill: rgba(var(--brand-rgb), 0.12) !important;
 }
 
 .profile-volume-chart polyline,
@@ -14025,7 +14026,7 @@ body.is-manager-view {
   stroke-width: 3 !important;
   stroke-linecap: round !important;
   stroke-linejoin: round !important;
-  filter: drop-shadow(0 0.28rem 0.55rem rgba(245, 184, 46, 0.18)) !important;
+  filter: drop-shadow(0 0.28rem 0.55rem rgba(var(--brand-rgb), 0.18)) !important;
 }
 
 .profile-volume-chart circle {
@@ -14374,7 +14375,7 @@ body.is-manager-view {
   padding: 0.68rem !important;
   border-radius: 0.86rem !important;
   background: rgba(11, 11, 11, 0.98) !important;
-  border: 1px solid rgba(245, 184, 46, 0.2) !important;
+  border: 1px solid rgba(var(--brand-rgb), 0.2) !important;
   box-shadow: 0 1rem 2.2rem rgba(0, 0, 0, 0.48) !important;
 }
 
@@ -14564,8 +14565,8 @@ body.is-manager-view {
   padding: 0.16rem 0.5rem !important;
   border-radius: 0.44rem !important;
   color: var(--brand-strong) !important;
-  background: rgba(245, 184, 46, 0.12) !important;
-  border: 1px solid rgba(245, 184, 46, 0.28) !important;
+  background: rgba(var(--brand-rgb), 0.12) !important;
+  border: 1px solid rgba(var(--brand-rgb), 0.28) !important;
   font-size: 0.68rem !important;
   font-weight: 650 !important;
 }
@@ -14584,8 +14585,8 @@ body.is-manager-view {
   gap: 0.55rem !important;
   padding: 0.54rem 0.62rem !important;
   border-radius: 0.72rem !important;
-  background: rgba(245, 184, 46, 0.07) !important;
-  border: 1px solid rgba(245, 184, 46, 0.22) !important;
+  background: rgba(var(--brand-rgb), 0.07) !important;
+  border: 1px solid rgba(var(--brand-rgb), 0.22) !important;
 }
 
 .library-callout-icon {
@@ -14595,7 +14596,7 @@ body.is-manager-view {
   height: 2rem !important;
   border-radius: 999px !important;
   color: var(--brand-strong) !important;
-  background: rgba(245, 184, 46, 0.1) !important;
+  background: rgba(var(--brand-rgb), 0.1) !important;
 }
 
 .library-callout-icon svg {
@@ -14646,13 +14647,13 @@ body.is-manager-view {
 .library-exercise-actions .secondary-action {
   color: var(--brand-strong) !important;
   background: rgba(5, 5, 5, 0.18) !important;
-  border-color: rgba(245, 184, 46, 0.52) !important;
+  border-color: rgba(var(--brand-rgb), 0.52) !important;
 }
 
 .library-exercise-actions .primary-action {
   color: #111 !important;
   background: var(--brand) !important;
-  border-color: rgba(245, 184, 46, 0.52) !important;
+  border-color: rgba(var(--brand-rgb), 0.52) !important;
 }
 
 .library-exercise-actions svg {
@@ -14988,7 +14989,7 @@ body.is-manager-view {
 .updates-page .update-card-head .entity-avatar {
   width: clamp(3rem, 11vw, 4.1rem) !important;
   height: clamp(3rem, 11vw, 4.1rem) !important;
-  border-color: rgba(245, 184, 46, 0.38) !important;
+  border-color: rgba(var(--brand-rgb), 0.38) !important;
 }
 
 .updates-page .update-title-block strong {
@@ -15095,7 +15096,7 @@ body.is-manager-view {
   min-height: clamp(2.34rem, 9.5vw, 2.86rem) !important;
   border-radius: 0.68rem !important;
   background: rgba(5, 5, 5, 0.18) !important;
-  border-color: rgba(245, 184, 46, 0.58) !important;
+  border-color: rgba(var(--brand-rgb), 0.58) !important;
   color: var(--brand-strong) !important;
   font-size: clamp(0.86rem, 3.1vw, 1.04rem) !important;
   font-weight: 760 !important;

@@ -999,14 +999,14 @@
 .mp-add-food-btn {
   font-size: 0.78rem;
   background: none;
-  border: 1px dashed rgba(245,158,11,0.4);
+  border: 1px dashed rgba(var(--brand-rgb), 0.4);
   color: var(--dourado);
   border-radius: 7px;
   padding: 0.22rem 0.65rem;
   cursor: pointer;
 }
 
-.mp-add-food-btn:hover { background: rgba(245,158,11,0.07); border-color: var(--dourado); }
+.mp-add-food-btn:hover { background: rgba(var(--brand-rgb), 0.07); border-color: var(--dourado); }
 
 .mp-add-meal-btn {
   width: 100%;

@@ -680,7 +680,7 @@
   padding: 0.68rem !important;
   border-radius: 0.86rem !important;
   background: rgba(11, 11, 11, 0.98) !important;
-  border: 1px solid rgba(245, 184, 46, 0.2) !important;
+  border: 1px solid rgba(var(--brand-rgb), 0.2) !important;
   box-shadow: 0 1rem 2.2rem rgba(0, 0, 0, 0.48) !important;
 }
 
@@ -865,8 +865,8 @@
   padding: 0.16rem 0.5rem !important;
   border-radius: 0.44rem !important;
   color: var(--brand-strong) !important;
-  background: rgba(245, 184, 46, 0.12) !important;
-  border: 1px solid rgba(245, 184, 46, 0.28) !important;
+  background: rgba(var(--brand-rgb), 0.12) !important;
+  border: 1px solid rgba(var(--brand-rgb), 0.28) !important;
   font-size: 0.68rem !important;
   font-weight: 650 !important;
 }
@@ -885,8 +885,8 @@
   gap: 0.55rem !important;
   padding: 0.54rem 0.62rem !important;
   border-radius: 0.72rem !important;
-  background: rgba(245, 184, 46, 0.07) !important;
-  border: 1px solid rgba(245, 184, 46, 0.22) !important;
+  background: rgba(var(--brand-rgb), 0.07) !important;
+  border: 1px solid rgba(var(--brand-rgb), 0.22) !important;
 }
 
 .library-callout-icon {
@@ -896,7 +896,7 @@
   height: 2rem !important;
   border-radius: 999px !important;
   color: var(--brand-strong) !important;
-  background: rgba(245, 184, 46, 0.1) !important;
+  background: rgba(var(--brand-rgb), 0.1) !important;
 }
 
 .library-callout-icon svg {
@@ -944,13 +944,13 @@
 .library-exercise-actions .secondary-action {
   color: var(--brand-strong) !important;
   background: rgba(5, 5, 5, 0.18) !important;
-  border-color: rgba(245, 184, 46, 0.52) !important;
+  border-color: rgba(var(--brand-rgb), 0.52) !important;
 }
 
 .library-exercise-actions .primary-action {
   color: #111 !important;
   background: var(--brand) !important;
-  border-color: rgba(245, 184, 46, 0.52) !important;
+  border-color: rgba(var(--brand-rgb), 0.52) !important;
 }
 
 .library-exercise-actions svg {
@@ -1345,7 +1345,7 @@
   gap: 0.35rem;
   padding: 0.38rem 0.8rem;
   border-radius: 8px;
-  border: 1px solid rgba(245, 159, 11, 0.6);
+  border: 1px solid rgba(var(--brand-rgb), 0.6);
   color: var(--dourado);
   font-size: 0.8rem;
   font-weight: 600;
@@ -1354,7 +1354,7 @@
 }
 
 .ex-video-upload-btn:hover {
-  background: rgba(245, 159, 11, 0.1);
+  background: rgba(var(--brand-rgb), 0.1);
 }
 
 .ex-video-active {
@@ -1373,7 +1373,7 @@
 .ex-video-play-icon {
   width: 3rem;
   height: 3rem;
-  background: rgba(245, 159, 11, 0.9);
+  background: rgba(var(--brand-rgb), 0.9);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -1415,7 +1415,7 @@
   gap: 0.3rem;
   padding: 0.3rem 0.65rem;
   border-radius: 7px;
-  border: 1px solid rgba(245, 159, 11, 0.5);
+  border: 1px solid rgba(var(--brand-rgb), 0.5);
   color: var(--dourado);
   background: rgba(0, 0, 0, 0.65);
   font-size: 0.75rem;
@@ -1625,8 +1625,8 @@
   transition: background 120ms, border-color 120ms;
 }
 .ut-radio-item:has(input:checked) {
-  background: rgba(245, 158, 11, 0.08);
-  border-color: rgba(245, 158, 11, 0.28);
+  background: rgba(var(--brand-rgb), 0.08);
+  border-color: rgba(var(--brand-rgb), 0.28);
 }
 .ut-radio-item input[type="radio"] {
   accent-color: var(--dourado);
@@ -1689,7 +1689,7 @@
 .ev-drop-area:hover,
 .ev-drop-area:focus-within {
   border-color: var(--dourado);
-  background: rgba(245, 158, 11, 0.04);
+  background: rgba(var(--brand-rgb), 0.04);
 }
 .ev-file-input {
   position: absolute;

@@ -854,7 +854,7 @@
 .updates-page .update-card-head .entity-avatar {
   width: clamp(3rem, 11vw, 4.1rem) !important;
   height: clamp(3rem, 11vw, 4.1rem) !important;
-  border-color: rgba(245, 184, 46, 0.38) !important;
+  border-color: rgba(var(--brand-rgb), 0.38) !important;
 }
 
 .updates-page .update-title-block strong {
@@ -961,7 +961,7 @@
   min-height: clamp(2.75rem, 9.5vw, 3rem) !important;
   border-radius: 0.68rem !important;
   background: rgba(5, 5, 5, 0.18) !important;
-  border-color: rgba(245, 184, 46, 0.58) !important;
+  border-color: rgba(var(--brand-rgb), 0.58) !important;
   color: var(--brand-strong) !important;
   font-size: clamp(0.86rem, 3.1vw, 1.04rem) !important;
   font-weight: 760 !important;

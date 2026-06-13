@@ -272,7 +272,7 @@
 
 .finance-chart-dot.is-active {
   r: 6;
-  fill: #ffd66d;
+  fill: var(--brand);
 }
 
 .finance-chart-labels {

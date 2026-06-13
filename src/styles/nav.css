@@ -480,7 +480,7 @@
 
 .nav-button.is-active {
   background:
-    rgba(245, 184, 46, 0.075) !important;
+    rgba(var(--brand-rgb), 0.075) !important;
 }
 
 @media (max-width: 32.5rem) {
@@ -533,7 +533,7 @@
 
 .nav-button.is-active {
   color: var(--dourado) !important;
-  background: rgba(245, 159, 11, 0.1) !important;
+  background: rgba(var(--brand-rgb), 0.1) !important;
   box-shadow: none !important;
 }
 

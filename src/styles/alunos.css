@@ -664,7 +664,7 @@
 }
 
 .student-search-field:focus-within {
-  border-color: rgba(245, 184, 46, 0.54) !important;
+  border-color: rgba(var(--brand-rgb), 0.54) !important;
   box-shadow: none !important;
 }
 
@@ -950,7 +950,7 @@
   font-weight: 650 !important;
   line-height: 1 !important;
   color: rgba(247, 244, 235, 0.88) !important;
-  border-color: rgba(245, 184, 46, 0.54) !important;
+  border-color: rgba(var(--brand-rgb), 0.54) !important;
   background: rgba(5, 5, 5, 0.2) !important;
 }
 
@@ -1123,7 +1123,7 @@
 }
 
 .student-search-field:focus-within {
-  border-color: rgba(245, 159, 11, 0.5) !important;
+  border-color: rgba(var(--brand-rgb), 0.5) !important;
   box-shadow: none !important;
 }
 
@@ -1197,14 +1197,14 @@
 /* Action buttons: gold outline */
 .student-card-actions .secondary-action {
   background: transparent !important;
-  border: 1px solid rgba(245, 159, 11, 0.4) !important;
+  border: 1px solid rgba(var(--brand-rgb), 0.4) !important;
   color: var(--dourado) !important;
   font-size: 0.8rem !important;
   min-height: 40px !important;
 }
 
 .student-card-actions .secondary-action:hover {
-  background: rgba(245, 159, 11, 0.08) !important;
+  background: rgba(var(--brand-rgb), 0.08) !important;
 }
 
 .student-card-actions .secondary-action svg {
@@ -1418,7 +1418,7 @@
 
 .student-profile-tabs button.is-active {
   color: var(--brand-strong) !important;
-  background: linear-gradient(180deg, rgba(245, 184, 46, 0.11), rgba(245, 184, 46, 0.02)) !important;
+  background: linear-gradient(180deg, rgba(var(--brand-rgb), 0.11), rgba(var(--brand-rgb), 0.02)) !important;
   box-shadow: inset 0 -2px 0 var(--brand-strong) !important;
 }
 
@@ -1498,7 +1498,7 @@
   min-height: 2.75rem !important;
   padding: 0.46rem 0.78rem !important;
   border-radius: 999px !important;
-  border: 1px solid rgba(245, 184, 46, 0.58) !important;
+  border: 1px solid rgba(var(--brand-rgb), 0.58) !important;
   color: var(--brand-strong) !important;
   background: rgba(5, 5, 5, 0.22) !important;
   font-size: 0.78rem !important;
@@ -1529,8 +1529,8 @@
   height: 2.18rem !important;
   border-radius: 999px !important;
   color: var(--brand-strong) !important;
-  background: rgba(245, 184, 46, 0.1) !important;
-  border: 1px solid rgba(245, 184, 46, 0.22) !important;
+  background: rgba(var(--brand-rgb), 0.1) !important;
+  border: 1px solid rgba(var(--brand-rgb), 0.22) !important;
 }
 
 .profile-pending-icon svg {
@@ -1589,7 +1589,7 @@
 }
 
 .profile-volume-chart polygon {
-  fill: rgba(245, 184, 46, 0.12) !important;
+  fill: rgba(var(--brand-rgb), 0.12) !important;
 }
 
 .profile-volume-chart polyline,
@@ -1599,7 +1599,7 @@
   stroke-width: 3 !important;
   stroke-linecap: round !important;
   stroke-linejoin: round !important;
-  filter: drop-shadow(0 0.28rem 0.55rem rgba(245, 184, 46, 0.18)) !important;
+  filter: drop-shadow(0 0.28rem 0.55rem rgba(var(--brand-rgb), 0.18)) !important;
 }
 
 .profile-volume-chart circle {
@@ -1834,7 +1834,7 @@
   width: 34px !important;
   height: 34px !important;
   border-radius: 8px !important;
-  background: rgba(245, 159, 11, 0.1) !important;
+  background: rgba(var(--brand-rgb), 0.1) !important;
   color: var(--dourado) !important;
   display: grid !important;
   place-items: center !important;
@@ -1895,7 +1895,7 @@
 
 /* Tone colors for summary cards */
 .student-summary-card.is-success .profile-card-icon { background: rgba(72, 215, 100, 0.12) !important; color: #48d764 !important; }
-.student-summary-card.is-warning .profile-card-icon { background: rgba(245, 159, 11, 0.12) !important; color: var(--dourado) !important; }
+.student-summary-card.is-warning .profile-card-icon { background: rgba(var(--brand-rgb), 0.12) !important; color: var(--dourado) !important; }
 .student-summary-card.is-danger  .profile-card-icon { background: rgba(255, 90, 79, 0.12) !important; color: #ff5a4f !important; }
 
 /* Activity cards side-by-side */
@@ -1960,7 +1960,7 @@
 
 /* Active tab: clean underline, no glow */
 .student-profile-tabs button.is-active {
-  background: rgba(245, 159, 11, 0.08) !important;
+  background: rgba(var(--brand-rgb), 0.08) !important;
   box-shadow: inset 0 -2px 0 var(--dourado) !important;
 }
 
@@ -2270,8 +2270,8 @@
 }
 
 .radio-chip input:checked + span {
-  border-color: rgba(245, 159, 11, 0.7);
-  background: rgba(245, 159, 11, 0.12);
+  border-color: rgba(var(--brand-rgb), 0.7);
+  background: rgba(var(--brand-rgb), 0.12);
   color: var(--dourado);
   font-weight: 650;
 }
@@ -2487,7 +2487,7 @@
   border: 0;
   border-left: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 0;
-  background: rgba(245, 159, 11, 0.07);
+  background: rgba(var(--brand-rgb), 0.07);
   color: var(--dourado);
   cursor: pointer;
   flex-shrink: 0;
@@ -2495,7 +2495,7 @@
 }
 
 .el-copy-btn:hover {
-  background: rgba(245, 159, 11, 0.15);
+  background: rgba(var(--brand-rgb), 0.15);
 }
 
 .el-copy-btn svg {
@@ -2569,7 +2569,7 @@
 
 .el-regen-btn:hover {
   color: var(--brand-strong);
-  border-color: rgba(245, 184, 46, 0.35);
+  border-color: rgba(var(--brand-rgb), 0.35);
 }
 
 @media (min-width: 38rem) {
@@ -2921,7 +2921,7 @@
   border-radius: 0.68rem !important;
   font-size: 0.78rem !important;
   font-weight: 600 !important;
-  border-color: rgba(245, 159, 11, 0.4) !important;
+  border-color: rgba(var(--brand-rgb), 0.4) !important;
   background: transparent !important;
   color: var(--brand) !important;
 }

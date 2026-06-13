@@ -625,7 +625,7 @@
 }
 
 .cfs-student-search:focus-visible {
-  border-color: rgba(245, 158, 11, 0.5);
+  border-color: rgba(var(--brand-rgb), 0.5);
   box-shadow: 0 0 0 3px rgb(from var(--brand-soft) r g b / 0.3);
 }
 
@@ -683,8 +683,8 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.62rem 0.88rem;
-  background: rgba(245, 158, 11, 0.06);
-  border: 1px solid rgba(245, 158, 11, 0.22);
+  background: rgba(var(--brand-rgb), 0.06);
+  border: 1px solid rgba(var(--brand-rgb), 0.22);
   border-radius: 0.75rem;
   margin-top: 0.5rem;
 }
