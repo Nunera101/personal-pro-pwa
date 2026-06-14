@@ -2138,15 +2138,13 @@
   display: grid;
   place-items: center;
   border-radius: 0.72rem;
-  background:
-    linear-gradient(135deg,
-      hsl(var(--sw-hue, 40), 45%, 25%),
-      hsl(var(--sw-hue, 40), 30%, 16%));
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  /* Quadrado dourado fixo (fiel ao protótipo), igual em todos os treinos. */
+  background: linear-gradient(135deg, var(--accent, #efb24a), #c8881f);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
 }
 
 .pw-initial {
-  color: rgba(247, 244, 235, 0.88);
+  color: #3a2a07;
   font-size: clamp(1.2rem, 5vw, 1.5rem);
   font-weight: 800;
   letter-spacing: 0.03em;
@@ -2292,16 +2290,14 @@
   display: grid;
   place-items: center;
   border-radius: 0.9rem;
-  background:
-    linear-gradient(135deg,
-      hsl(var(--sw-hue, 40), 45%, 25%),
-      hsl(var(--sw-hue, 40), 30%, 16%));
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  /* Quadrado dourado fixo, consistente com o card da lista de treinos. */
+  background: linear-gradient(135deg, var(--accent, #efb24a), #c8881f);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
   flex-shrink: 0;
 }
 
 .swd-head-initial {
-  color: rgba(247, 244, 235, 0.85);
+  color: #3a2a07;
   font-size: 1.55rem;
   font-weight: 800;
   line-height: 1;

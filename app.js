@@ -5660,12 +5660,12 @@
     const lastSession = getStudentSessions(workout.studentId).find((session) => session.workoutId === workout.id);
     const lastLabel = lastSession ? formatDate(lastSession.finishedAt?.slice(0, 10) || "") : "Nunca executado";
     const initial = (workout.title || "T").trim().slice(0, 1).toUpperCase();
-    const hue = ((workout.title || "T").charCodeAt(0) * 47 + 120) % 360;
-    const statusTone = workout.status === "published" ? "is-success" : workout.status === "archived" ? "is-danger" : "is-info";
+    // Publicado = verde; Rascunho/Arquivado = cinza (fiel ao protótipo).
+    const statusTone = workout.status === "published" ? "is-success" : "is-muted";
     const statusLabel = statusWorkout(workout.status);
     return `
       <article class="pw-card pw-card--${escapeHtml(workout.status)}">
-        <div class="pw-thumb" style="--sw-hue:${hue}" aria-hidden="true">
+        <div class="pw-thumb" aria-hidden="true">
           <span class="pw-initial">${escapeHtml(initial)}</span>
           <span class="pw-ex-count">${exerciseCount}</span>
         </div>
@@ -5747,7 +5747,6 @@
     const lastSession = getStudentSessions(workout.studentId).find((s) => s.workoutId === workout.id);
     const lastLabel = lastSession ? formatDate(lastSession.finishedAt?.slice(0, 10) || "") : "Nunca executado";
     const initial = (workout.title || "T").trim().slice(0, 1).toUpperCase();
-    const hue = ((workout.title || "T").charCodeAt(0) * 47 + 120) % 360;
     const estimatedMin = Math.max(15, rows.length * 4);
     return `
       <div class="content-stack swd-detail">
@@ -5758,7 +5757,7 @@
           </button>
         </div>
         <header class="swd-head">
-          <div class="swd-head-thumb" style="--sw-hue:${hue}">
+          <div class="swd-head-thumb">
             <span class="swd-head-initial">${escapeHtml(initial)}</span>
           </div>
           <div class="swd-head-info">
