@@ -142,6 +142,7 @@
     apSheetBody: document.getElementById("apSheetBody"),
     apSheetTitle: document.getElementById("apSheetTitle"),
     apSheetFooter: document.getElementById("apSheetFooter"),
+    exPickerSheet: document.getElementById("exPickerSheet"),
     exerciseSheet: document.getElementById("exerciseSheet"),
     exerciseSheetBody: document.getElementById("exerciseSheetBody"),
     exerciseSheetTitle: document.getElementById("exerciseSheetTitle"),
@@ -8837,6 +8838,137 @@
     _closeSheet(sheet, () => { document.body.style.overflow = ""; });
   }
 
+  // ─── SELETOR DE EXERCÍCIOS (dentro do montador) ───────────────────
+  // Sheet com busca, chips de grupo muscular, lista de seleção múltipla
+  // (indicando vídeo) e rodapé fixo com contador + botão Adicionar.
+  const _exPicker = { selected: new Set(), muscle: "", bound: false };
+
+  function _activePickerExercises() {
+    return state.data.exercises.filter((exercise) => exercise.status === "active");
+  }
+
+  // Grupos presentes na biblioteca ativa, ordenados pela lista canônica.
+  function _exPickerMuscleGroups(exercises) {
+    const present = new Set(exercises.flatMap(getExerciseMuscleGroups));
+    const ordered = MUSCLE_GROUPS.filter((group) => present.has(group));
+    const extras = [...present].filter((group) => !MUSCLE_GROUPS.includes(group)).sort((a, b) => a.localeCompare(b));
+    return [...ordered, ...extras];
+  }
+
+  function openExercisePicker() {
+    const sheet = elements.exPickerSheet;
+    if (!sheet) return;
+    const exercises = _activePickerExercises();
+    if (!exercises.length) return showToast("Cadastre exercícios ativos na Biblioteca antes de montar.");
+
+    _exPicker.selected = new Set();
+    _exPicker.muscle = "";
+
+    const chips = document.getElementById("exPickerChips");
+    if (chips) {
+      chips.innerHTML = [`<button class="ex-picker-chip is-active" type="button" data-ex-chip="">Todos</button>`]
+        .concat(_exPickerMuscleGroups(exercises).map((group) =>
+          `<button class="ex-picker-chip" type="button" data-ex-chip="${escapeHtml(group)}">${escapeHtml(group)}</button>`
+        )).join("");
+    }
+    const search = document.getElementById("exPickerSearch");
+    if (search) search.value = "";
+
+    _renderExercisePickerList();
+    _updateExercisePickerCount();
+    _bindExercisePicker();
+
+    _openSheet(sheet);
+    document.body.style.overflow = "hidden";
+    if (search) setTimeout(() => search.focus(), 60);
+  }
+
+  function _exPickerItemTemplate(exercise) {
+    const hasVideo = hasExerciseVideo(exercise);
+    const checked = _exPicker.selected.has(exercise.id) ? "checked" : "";
+    return `
+      <label class="ex-picker-item">
+        <input type="checkbox" value="${escapeHtml(exercise.id)}" ${checked} />
+        <span class="ex-picker-item-main">
+          <strong>${escapeHtml(resolveLibraryExerciseName(exercise))}</strong>
+          <span class="ex-picker-item-muscle">${escapeHtml(getExercisePrimaryMuscle(exercise))}</span>
+        </span>
+        <span class="ex-picker-video ${hasVideo ? "has-video" : "no-video"}">${hasVideo ? "Com vídeo" : "Sem vídeo"}</span>
+      </label>
+    `;
+  }
+
+  function _renderExercisePickerList() {
+    const list = document.getElementById("exPickerList");
+    if (!list) return;
+    const query = (document.getElementById("exPickerSearch")?.value || "").trim().toLowerCase();
+    const muscle = _exPicker.muscle;
+    const matches = _activePickerExercises().filter((exercise) => {
+      if (muscle && !getExerciseMuscleGroups(exercise).includes(muscle)) return false;
+      if (!query) return true;
+      const haystack = `${resolveLibraryExerciseName(exercise)} ${getExerciseMuscleGroups(exercise).join(" ")} ${exercise.equipment || ""}`.toLowerCase();
+      return haystack.includes(query);
+    });
+    list.innerHTML = matches.length
+      ? matches.map(_exPickerItemTemplate).join("")
+      : `<p class="ap-empty">Nenhum exercício encontrado.</p>`;
+  }
+
+  function _updateExercisePickerCount() {
+    const count = _exPicker.selected.size;
+    const label = document.getElementById("exPickerCount");
+    const addBtn = document.getElementById("exPickerAdd");
+    if (label) label.textContent = count ? `${count} selecionado${count > 1 ? "s" : ""}` : "Nenhum selecionado";
+    if (addBtn) {
+      addBtn.disabled = count === 0;
+      addBtn.textContent = count ? `Adicionar (${count})` : "Adicionar";
+    }
+  }
+
+  function _bindExercisePicker() {
+    if (_exPicker.bound) return;
+    _exPicker.bound = true;
+
+    document.getElementById("exPickerSearch")?.addEventListener("input", _renderExercisePickerList);
+
+    document.getElementById("exPickerChips")?.addEventListener("click", (event) => {
+      const chip = event.target.closest("[data-ex-chip]");
+      if (!chip) return;
+      _exPicker.muscle = chip.dataset.exChip || "";
+      chip.parentElement.querySelectorAll(".ex-picker-chip").forEach((el) => el.classList.toggle("is-active", el === chip));
+      _renderExercisePickerList();
+    });
+
+    document.getElementById("exPickerList")?.addEventListener("change", (event) => {
+      const checkbox = event.target.closest('input[type="checkbox"]');
+      if (!checkbox) return;
+      if (checkbox.checked) _exPicker.selected.add(checkbox.value);
+      else _exPicker.selected.delete(checkbox.value);
+      _updateExercisePickerCount();
+    });
+
+    document.getElementById("exPickerAdd")?.addEventListener("click", () => {
+      const ids = [..._exPicker.selected];
+      if (!ids.length) return;
+      const container = document.getElementById("workoutRows");
+      if (container) {
+        ids.forEach((id) => {
+          const index = container.querySelectorAll("[data-workout-row]").length;
+          container.insertAdjacentHTML("beforeend", workoutRowTemplate(normalizeWorkoutExercise({ exerciseId: id, order: index + 1 }), index));
+        });
+        renumberWorkoutRows(container);
+      }
+      closeExercisePicker();
+      showToast(`${ids.length} exercício${ids.length > 1 ? "s adicionados" : " adicionado"}.`);
+    });
+  }
+
+  function closeExercisePicker() {
+    const sheet = elements.exPickerSheet;
+    if (!sheet || sheet.hidden) return;
+    _closeSheet(sheet, () => { if (elements.workoutSheet && !elements.workoutSheet.hidden) document.body.style.overflow = "hidden"; });
+  }
+
   function openApplyPatternSheet(workoutId) {
     const workout = getWorkout(workoutId);
     if (!workout || !isWorkoutPattern(workout)) return showToast("Padrão não encontrado.");
@@ -12408,19 +12540,18 @@
 
   function bindWorkoutEvents() {
     document.addEventListener("click", (event) => {
-      const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-close-workout-sheet], [data-close-ap-sheet], [data-manager-drawer-backdrop]");
+      const target = event.target.closest("button, .day-cell, [data-close-modal], [data-close-install], [data-close-workout-sheet], [data-close-ap-sheet], [data-close-ex-picker], [data-manager-drawer-backdrop]");
       if (!target) return;
       if (target.matches("[data-close-workout-sheet]")) closeWorkoutSheet();
       if (target.matches("[data-close-ap-sheet]")) closeApplyPatternSheet();
+      if (target.matches("[data-close-ex-picker]")) closeExercisePicker();
       if (target.matches("[data-ap-adjust]")) { closeApplyPatternSheet(); openWorkoutForm(target.dataset.apAdjust); }
       if (target.matches("[data-toggle-workout-filter]")) { state.workoutFilterOpen = !state.workoutFilterOpen; renderManager(); }
       if (target.matches("[data-open-workout-form]")) openWorkoutForm(target.dataset.openWorkoutForm || "", target.dataset.prefillStudent || "");
       if (target.matches("[data-open-apply-pattern-form]")) openApplyPatternSheet(target.dataset.openApplyPatternForm);
       if (target.matches("[data-open-student-pattern-workout]")) openStudentPatternWorkoutForm(target.dataset.openStudentPatternWorkout);
       if (target.matches("[data-add-workout-row]")) {
-        const container = document.getElementById("workoutRows");
-        container.insertAdjacentHTML("beforeend", workoutRowTemplate(normalizeWorkoutExercise({ order: container.querySelectorAll("[data-workout-row]").length + 1, exerciseId: state.data.exercises.find((e) => e.status === "active")?.id || "" }), container.querySelectorAll("[data-workout-row]").length));
-        renumberWorkoutRows(container);
+        openExercisePicker();
       }
       if (target.matches("[data-remove-workout-row]")) {
         const container = target.closest("#workoutRows");

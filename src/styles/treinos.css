@@ -1272,6 +1272,165 @@
   flex-shrink: 0;
 }
 
+/* ── Seletor de exercícios (dentro do montador) ─────────────────── */
+
+.ex-picker {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: end center;
+}
+
+.ex-picker[hidden] { display: none; }
+
+.ex-picker-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.62);
+  backdrop-filter: blur(2px);
+}
+
+.ex-picker-panel {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 42rem);
+  max-height: 92dvh;
+  overflow: hidden;
+  border-radius: 20px 20px 0 0;
+  background: var(--card);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 0;
+  box-shadow: 0 -24px 64px rgba(0, 0, 0, 0.6);
+}
+
+.ex-picker-panel > .ag-head { flex-shrink: 0; padding: 0.55rem 1.1rem 0.5rem; }
+
+.ex-picker-tools {
+  flex-shrink: 0;
+  padding: 0 1.1rem 0.6rem;
+  border-bottom: 1px solid var(--borda);
+}
+
+.ex-picker-search {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid var(--borda);
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.ex-picker-search::placeholder { color: var(--txt2); }
+
+.ex-picker-chips {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.55rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 0.1rem;
+}
+
+.ex-picker-chips::-webkit-scrollbar { display: none; }
+
+.ex-picker-chip {
+  flex-shrink: 0;
+  padding: 0.32rem 0.7rem;
+  border-radius: 99px;
+  border: 1px solid var(--borda);
+  background: transparent;
+  color: var(--txt2);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.ex-picker-chip.is-active {
+  background: var(--dourado);
+  border-color: var(--dourado);
+  color: #000;
+}
+
+.ex-picker-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--borda) transparent;
+}
+
+.ex-picker-item {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.65rem 1.1rem;
+  cursor: pointer;
+  border-bottom: 1px solid var(--borda);
+}
+
+.ex-picker-item:last-child { border-bottom: 0; }
+.ex-picker-item:hover { background: rgba(255, 255, 255, 0.03); }
+
+.ex-picker-item input[type="checkbox"] {
+  accent-color: var(--dourado);
+  width: 1.1rem;
+  height: 1.1rem;
+  flex-shrink: 0;
+}
+
+.ex-picker-item-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.ex-picker-item-main strong {
+  color: #fff;
+  font-size: 0.9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ex-picker-item-muscle { color: var(--txt2); font-size: 0.78rem; }
+
+.ex-picker-video {
+  flex-shrink: 0;
+  padding: 0.18rem 0.5rem;
+  border-radius: 99px;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.ex-picker-video.has-video { background: rgba(56, 189, 124, 0.16); color: #38bd7c; }
+.ex-picker-video.no-video { background: rgba(255, 255, 255, 0.06); color: var(--txt2); }
+
+.ex-picker-footer {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1.1rem;
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  border-top: 1px solid var(--borda);
+  background: var(--card);
+}
+
+.ex-picker-count { color: var(--txt2); font-size: 0.85rem; font-weight: 600; }
+.ex-picker-footer .primary-action { flex-shrink: 0; }
+
+@media (min-width: 42rem) {
+  .ex-picker-panel { border-radius: 20px; margin-bottom: 1rem; }
+}
+
 /* ── Toast com botão de ação ────────────────────────────────────── */
 
 .toast.has-action {

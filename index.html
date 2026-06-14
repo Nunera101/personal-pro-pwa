@@ -343,6 +343,29 @@
       </section>
     </div>
 
+    <!-- Sheet: Selecionar exercícios da biblioteca (dentro do montador) -->
+    <div class="ex-picker" id="exPickerSheet" role="dialog" aria-modal="true" aria-labelledby="exPickerTitle" hidden>
+      <div class="ex-picker-backdrop" data-close-ex-picker></div>
+      <section class="ex-picker-panel">
+        <div class="sheet-handle" aria-hidden="true"></div>
+        <div class="ag-head">
+          <h2 id="exPickerTitle" class="ag-title">Adicionar exercícios</h2>
+          <button class="icon-button ag-close-btn" type="button" data-close-ex-picker aria-label="Fechar">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div class="ex-picker-tools">
+          <input class="ex-picker-search" id="exPickerSearch" type="search" placeholder="Buscar exercício…" autocomplete="off" />
+          <div class="ex-picker-chips" id="exPickerChips" role="group" aria-label="Filtrar por grupo muscular"></div>
+        </div>
+        <div class="ex-picker-list" id="exPickerList"></div>
+        <div class="ex-picker-footer">
+          <span class="ex-picker-count" id="exPickerCount" aria-live="polite">Nenhum selecionado</span>
+          <button class="primary-action" type="button" id="exPickerAdd" disabled>Adicionar</button>
+        </div>
+      </section>
+    </div>
+
     <!-- Sheet: Novo / Editar exercício (tela cheia) -->
     <div class="workout-sheet" id="exerciseSheet" role="dialog" aria-modal="true" aria-labelledby="exerciseSheetTitle" hidden>
       <div class="workout-sheet-backdrop" data-close-exercise-sheet></div>
