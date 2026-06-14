@@ -1114,6 +1114,32 @@
   background: var(--surface, #f8faf8);
 }
 
+/* ── Reordenar exercícios por arrastar ──────────────────────────── */
+
+.workout-row-drag {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 8px;
+  cursor: grab;
+  color: var(--muted, #6b7280);
+  touch-action: none;
+}
+
+.workout-builder-row .section-title [data-workout-row-index] { flex: 1; }
+.workout-row-drag:hover { background: rgba(0, 0, 0, 0.05); color: var(--brand-ink, #1a1a1a); }
+.workout-row-drag svg { width: 1.15rem; height: 1.15rem; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; }
+
+.workout-builder-row.is-dragging {
+  cursor: grabbing;
+  opacity: 0.85;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  transform: scale(1.01);
+}
+
 @media (min-width: 42rem) {
   .workout-sheet-panel {
     border-radius: 20px;

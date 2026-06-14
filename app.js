@@ -8773,8 +8773,62 @@
     const wsFooter = elements.workoutSheetFooter;
     if (wsFooter) wsFooter.innerHTML = `<div class="pf-footer"><button class="secondary-action" type="button" data-close-workout-sheet>Cancelar</button><button class="primary-action" type="submit" form="workoutForm">${workoutSaveLabel}</button></div>`;
 
+    enableWorkoutRowReorder(document.getElementById("workoutRows"));
+
     _openSheet(sheet);
     document.body.style.overflow = "hidden";
+  }
+
+  // Renumera os rótulos "Exercício N" conforme a posição atual no DOM. A ordem
+  // do treino passa a ser a ordem visual das linhas (sem campo numérico manual).
+  function renumberWorkoutRows(container) {
+    if (!container) return;
+    container.querySelectorAll("[data-workout-row]").forEach((row, index) => {
+      const label = row.querySelector("[data-workout-row-index]");
+      if (label) label.textContent = `Exercício ${index + 1}`;
+    });
+  }
+
+  // Reordenar exercícios arrastando pela alça. Usa Pointer Events para funcionar
+  // tanto no mouse quanto no toque (PWA). Os listeners ficam no container do
+  // formulário, que é recriado a cada abertura — então não se acumulam.
+  function enableWorkoutRowReorder(container) {
+    if (!container) return;
+    let dragging = null;
+    let pointerId = null;
+
+    container.addEventListener("pointerdown", (event) => {
+      const handle = event.target.closest("[data-drag-handle]");
+      if (!handle) return;
+      const row = handle.closest("[data-workout-row]");
+      if (!row) return;
+      event.preventDefault();
+      dragging = row;
+      pointerId = event.pointerId;
+      row.classList.add("is-dragging");
+      handle.setPointerCapture(event.pointerId);
+    });
+
+    container.addEventListener("pointermove", (event) => {
+      if (!dragging || event.pointerId !== pointerId) return;
+      const others = [...container.querySelectorAll("[data-workout-row]:not(.is-dragging)")];
+      const after = others.find((row) => {
+        const rect = row.getBoundingClientRect();
+        return event.clientY < rect.top + rect.height / 2;
+      });
+      if (after) container.insertBefore(dragging, after);
+      else container.appendChild(dragging);
+    });
+
+    function endDrag() {
+      if (!dragging) return;
+      dragging.classList.remove("is-dragging");
+      renumberWorkoutRows(container);
+      dragging = null;
+      pointerId = null;
+    }
+    container.addEventListener("pointerup", endDrag);
+    container.addEventListener("pointercancel", endDrag);
   }
 
   function closeWorkoutSheet() {
@@ -8921,12 +8975,12 @@
     return `
       <article class="workout-builder-row" data-workout-row>
         <div class="section-title">
-          <strong>Exercício ${index + 1}</strong>
+          <button class="workout-row-drag" type="button" data-drag-handle aria-label="Arrastar para reordenar" title="Arrastar para reordenar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9h14M5 15h14"/></svg></button>
+          <strong data-workout-row-index>Exercício ${index + 1}</strong>
           <button class="mini-button is-danger" type="button" data-remove-workout-row>Remover</button>
         </div>
         <div class="form-grid two">
           <label class="field"><span>Exercício da biblioteca</span><select name="exerciseId" required>${exerciseOptions(row.exerciseId)}</select></label>
-          <label class="field"><span>Ordem</span><input name="order" type="number" min="1" value="${escapeHtml(row.order || index + 1)}" required /></label>
           <label class="field"><span>Séries</span><input name="sets" type="number" min="1" value="${escapeHtml(row.sets || 3)}" required /></label>
           <label class="field"><span>Repetições alvo</span><input name="targetReps" type="text" value="${escapeHtml(row.targetReps || "10")}" required /></label>
           <label class="field"><span>Carga sugerida</span><input name="suggestedLoad" type="text" value="${escapeHtml(row.suggestedLoad || "")}" /></label>
@@ -11245,7 +11299,7 @@
           exerciseId,
           exerciseName: getExercise(exerciseId)?.name || "",
           exerciseMuscle: getExercise(exerciseId) ? getExercisePrimaryMuscle(getExercise(exerciseId)) : "",
-          order: row.querySelector('[name="order"]').value || index + 1,
+          order: index + 1,
           sets: row.querySelector('[name="sets"]').value,
           targetReps: row.querySelector('[name="targetReps"]').value,
           suggestedLoad: row.querySelector('[name="suggestedLoad"]').value,
@@ -11253,8 +11307,7 @@
           coachNotes: row.querySelector('[name="coachNotes"]').value
         });
       })
-      .filter((row) => row.exerciseId)
-      .sort((a, b) => a.order - b.order);
+      .filter((row) => row.exerciseId);
     if (!rows.length) return showToast("Adicione pelo menos um exercício da biblioteca.");
     const status = String(data.get("status") || "draft");
     const workout = normalizeWorkout({
@@ -12367,8 +12420,13 @@
       if (target.matches("[data-add-workout-row]")) {
         const container = document.getElementById("workoutRows");
         container.insertAdjacentHTML("beforeend", workoutRowTemplate(normalizeWorkoutExercise({ order: container.querySelectorAll("[data-workout-row]").length + 1, exerciseId: state.data.exercises.find((e) => e.status === "active")?.id || "" }), container.querySelectorAll("[data-workout-row]").length));
+        renumberWorkoutRows(container);
       }
-      if (target.matches("[data-remove-workout-row]")) target.closest("[data-workout-row]")?.remove();
+      if (target.matches("[data-remove-workout-row]")) {
+        const container = target.closest("#workoutRows");
+        target.closest("[data-workout-row]")?.remove();
+        renumberWorkoutRows(container);
+      }
       if (target.matches("[data-duplicate-workout]")) duplicateWorkout(target.dataset.duplicateWorkout);
       if (target.matches("[data-publish-workout]")) publishWorkout(target.dataset.publishWorkout);
       if (target.matches("[data-archive-workout]")) archiveWorkout(target.dataset.archiveWorkout);
