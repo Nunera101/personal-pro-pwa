@@ -8033,11 +8033,6 @@
     return state.data.students.map((student) => `<option value="${student.id}" ${student.id === selected ? "selected" : ""}>${escapeHtml(student.name)}</option>`).join("");
   }
 
-  function exerciseOptions(selected = "") {
-    const active = state.data.exercises.filter((exercise) => exercise.status === "active");
-    if (!active.length) return '<option value="">Cadastre exercícios primeiro</option>';
-    return active.map((exercise) => `<option value="${exercise.id}" ${exercise.id === selected ? "selected" : ""}>${escapeHtml(exercise.name)} · ${escapeHtml(getExercisePrimaryMuscle(exercise))}</option>`).join("");
-  }
 
   // Conteudo do campo "Treino vinculado" do Agendar (so visivel quando tipo=Treino).
   // Lista os TREINOS PUBLICADOS DAQUELE ALUNO (nunca padroes) e e OPCIONAL: o
