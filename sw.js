@@ -1,11 +1,11 @@
-﻿const CACHE_NAME = "personal-pro-pwa-v67";
-const DATA_CACHE_NAME = "personal-pro-data-v67";
+﻿const CACHE_NAME = "personal-pro-pwa-v68";
+const DATA_CACHE_NAME = "personal-pro-data-v68";
 const CRITICAL_ASSETS = new Set(["/", "/index.html", "/app.js", "/styles.css", "/manifest.json"]);
 const APP_SHELL = [
   "./",
   "./index.html",
   "./styles.css?v=65",
-  "./app.js?v=67",
+  "./app.js?v=68",
   "./manifest.json",
   "./assets/logo-oficial.svg",
   "./assets/favicon.svg",

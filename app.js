@@ -8293,7 +8293,6 @@
       const archived = workouts.filter((workout) => workout.status === "archived");
       const published = workouts.filter((workout) => workout.status === "published");
       const drafts = workouts.filter((workout) => workout.status === "draft");
-      const availablePatterns = getAvailableWorkoutPatterns();
       return `
         <section class="panel profile-tab-panel">
           <div class="section-title">
@@ -8302,8 +8301,7 @@
               <span class="small-text">${workouts.length} treino(s) · ${published.length} publicado(s) · ${drafts.length} rascunho(s) · ${archived.length} arquivado(s)</span>
             </div>
             <div class="section-actions">
-              <button class="mini-button" type="button" data-open-workout-form data-prefill-student="${student.id}">Criar</button>
-              <button class="mini-button" type="button" data-open-student-pattern-workout="${student.id}" ${availablePatterns.length ? "" : "disabled"}>Aplicar padrão</button>
+              <button class="primary-action" type="button" data-create-workout-sheet="${student.id}">Criar treino</button>
             </div>
           </div>
           ${
@@ -8319,11 +8317,10 @@
                 </div>
               `
               : `
-                <div class="quick-grid student-profile-actions">
-                  <button class="quick-link" type="button" data-open-workout-form data-prefill-student="${student.id}"><strong>Criar treino</strong><span>Monte com exercícios da biblioteca</span></button>
-                  <button class="quick-link" type="button" data-open-student-pattern-workout="${student.id}" ${availablePatterns.length ? "" : "disabled"}><strong>Aplicar padrão</strong><span>${availablePatterns.length ? `${availablePatterns.length} padrão(s) disponível(is)` : "Nenhum padrão disponível"}</span></button>
-                </div>
                 ${emptyState("Nenhum treino ainda", "Crie um treino do zero ou aplique um padrão.", icons.workouts)}
+                <div class="student-profile-actions student-profile-actions--center">
+                  <button class="primary-action" type="button" data-create-workout-sheet="${student.id}">Criar treino</button>
+                </div>
               `
           }
         </section>
@@ -9108,6 +9105,40 @@
   // Porta "A partir de um padrao": lista os padroes disponiveis como cards. Ao
   // escolher um, abre o montador pre-preenchido (copia por valor) via
   // openWorkoutFromPattern; so vira treino do aluno ao salvar/publicar.
+  // Sheet "Criar treino para [nome]" com as DUAS PORTAS (fiel ao prototipo):
+  // (1) Criar do zero -> montador vazio; (2) A partir de um padrao -> lista de padroes.
+  // Aviso azul explica que o padrao vira copia independente do aluno.
+  function openCreateWorkoutSheet(studentId) {
+    const student = getStudent(studentId);
+    if (!student) return showToast("Aluno não encontrado.");
+    const patterns = getAvailableWorkoutPatterns();
+    const name = escapeHtml(student.name);
+    const pencilPlus = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5ZM5 7H2M3.5 5.5v3"/></svg>';
+    const template = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v6H4zM4 14h7v6H4zM14 14h6v6h-6z"/></svg>';
+    openModal(
+      `Criar treino para ${name}`,
+      `
+        <div class="create-door-sheet">
+          <button class="create-door" type="button" data-create-blank="${escapeHtml(student.id)}">
+            <span class="create-door-icon is-gold">${pencilPlus}</span>
+            <span class="create-door-text">
+              <strong>Criar do zero</strong>
+              <span>Monte um treino personalizado exercício por exercício</span>
+            </span>
+          </button>
+          <button class="create-door" type="button" data-create-from-pattern="${escapeHtml(student.id)}" ${patterns.length ? "" : "disabled"}>
+            <span class="create-door-icon is-purple">${template}</span>
+            <span class="create-door-text">
+              <strong>A partir de um padrão</strong>
+              <span>${patterns.length ? "Use um molde pronto como ponto de partida" : "Nenhum padrão disponível ainda"}</span>
+            </span>
+          </button>
+          <div class="create-door-info">${icons.updates}<span>Ao usar um padrão, ele vira um treino próprio do ${name}. Editar ou apagar o padrão depois NÃO afeta este treino.</span></div>
+        </div>
+      `
+    );
+  }
+
   function openStudentPatternWorkoutForm(studentId) {
     const student = getStudent(studentId);
     const patterns = getAvailableWorkoutPatterns();
@@ -12602,6 +12633,9 @@
       if (target.matches("[data-open-workout-form]")) { closeAgendarSheet(); openWorkoutForm(target.dataset.openWorkoutForm || "", target.dataset.prefillStudent || ""); }
       if (target.matches("[data-open-apply-pattern-form]")) openApplyPatternSheet(target.dataset.openApplyPatternForm);
       if (target.matches("[data-open-student-pattern-workout]")) openStudentPatternWorkoutForm(target.dataset.openStudentPatternWorkout);
+      if (target.matches("[data-create-workout-sheet]")) openCreateWorkoutSheet(target.dataset.createWorkoutSheet);
+      if (target.matches("[data-create-blank]")) { closeModal(); openWorkoutForm("", target.dataset.createBlank); }
+      if (target.matches("[data-create-from-pattern]")) openStudentPatternWorkoutForm(target.dataset.createFromPattern);
       if (target.matches("[data-pick-pattern]")) openWorkoutFromPattern(target.dataset.pickPattern, target.dataset.pickStudent);
       if (target.matches("[data-add-workout-row]")) {
         openExercisePicker();
