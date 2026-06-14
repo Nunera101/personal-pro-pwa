@@ -904,10 +904,13 @@
     );
   }
 
+  // Converte um PADRAO (molde) em TREINO DO ALUNO: recebe o padrao (sem studentId)
+  // e devolve um novo workout COM studentId, pertencente a colecao de treinos.
   function buildStudentWorkoutFromPattern(pattern, studentId, overrides = {}) {
     // R-06: copia profunda do padrao + novo id. A copia do aluno fica totalmente
     // desacoplada do objeto-pai, entao editar o padrao depois nao altera
-    // retroativamente os treinos ja aplicados aos alunos.
+    // retroativamente os treinos ja aplicados aos alunos. sourcePatternId
+    // (origemPadraoId) guarda so a referencia historica, sem criar dependencia.
     const base = deepClonePlain(pattern);
     return normalizeWorkout({
       ...base,
@@ -993,11 +996,45 @@
     };
   }
 
+  // ===========================================================================
+  // MODELO DE TREINO — DUAS ENTIDADES, UMA NORMALIZACAO
+  // ---------------------------------------------------------------------------
+  // Existem dois tipos de objeto na colecao state.data.workouts. Eles compartilham
+  // o mesmo formato (esta funcao), mas sao entidades distintas:
+  //
+  //   PADRAO (molde/template)
+  //     - NAO tem studentId (studentId === "").
+  //     - E o molde reutilizavel; vive logicamente como "Padrao de treino".
+  //     - Identificado por isWorkoutPattern() / listado por getWorkoutPatterns().
+  //
+  //   TREINO DO ALUNO (workout)
+  //     - TEM studentId.
+  //     - E a copia desacoplada aplicada a um aluno; listado por getStudentWorkouts().
+  //     - Campos canonicos do treino do aluno (mapeamento nome conceitual -> campo):
+  //         id            -> id
+  //         studentId     -> studentId
+  //         professionalId-> professionalId
+  //         nome          -> title
+  //         objetivo      -> focus
+  //         nivel         -> level
+  //         status        -> status (draft | published | archived)
+  //         exercicios[]  -> exercises[]
+  //         createdAt     -> createdAt
+  //         updatedAt     -> updatedAt
+  //         origemPadraoId-> sourcePatternId (OPCIONAL, ver abaixo)
+  //
+  // sourcePatternId/sourcePatternTitle (origemPadraoId) sao apenas REFERENCIA
+  // HISTORICA: registram de qual padrao o treino nasceu, mas NUNCA criam
+  // dependencia. O treino do aluno e uma copia profunda independente
+  // (ver buildStudentWorkoutFromPattern / R-06); editar ou apagar o padrao de
+  // origem nao altera nem invalida treinos ja aplicados.
+  // ===========================================================================
   function normalizeWorkout(workout) {
     return {
       id: workout.id || createId("workout"),
       trainerId: workout.trainerId || TRAINER_ID,
       professionalId: workout.professionalId || TRAINER_ID,
+      // studentId vazio = PADRAO (molde); studentId preenchido = TREINO DO ALUNO.
       studentId: workout.studentId || "",
       title: workout.title || "Treino",
       description: workout.description || "",
@@ -1005,6 +1042,7 @@
       level: workout.level || workout.difficulty || "",
       status: workout.status || "draft",
       exercises: Array.isArray(workout.exercises) ? workout.exercises.map(normalizeWorkoutExercise) : [],
+      // origemPadraoId (referencia historica, sem dependencia) — ver bloco acima.
       sourcePatternId: workout.sourcePatternId || "",
       sourcePatternTitle: workout.sourcePatternTitle || "",
       appliedAt: workout.appliedAt || "",
@@ -1469,10 +1507,14 @@
     return true;
   }
 
+  // PADRAO vs TREINO DO ALUNO: a unica chave que separa as duas entidades e o
+  // studentId. Sem studentId => PADRAO (molde). Com studentId => TREINO DO ALUNO.
+  // (Ver bloco de documentacao em normalizeWorkout.)
   function isWorkoutPattern(workout) {
     return !workout?.studentId;
   }
 
+  // Retorna apenas PADROES (moldes, sem studentId) da colecao state.data.workouts.
   function getWorkoutPatterns() {
     return state.data.workouts
       .filter(isWorkoutPattern)
@@ -1491,6 +1533,8 @@
       .join("");
   }
 
+  // Retorna apenas TREINOS DO ALUNO (com studentId) da colecao state.data.workouts.
+  // Padroes (sem studentId) nunca entram aqui, pois nao casam com nenhum studentId.
   function getStudentWorkouts(studentId, options = {}) {
     return state.data.workouts
       .filter((workout) => workout.studentId === studentId)
