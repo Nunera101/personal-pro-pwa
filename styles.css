@@ -12702,11 +12702,43 @@ button.dashboard-metric {
   height: 2.4rem !important;
 }
 
-/* Mobile: oculta texto da brand para dar espaço ao título central */
+/* Mobile: mantem nome Elite AS + badge ALUNO visiveis numa unica linha
+   (fiel ao prototipo). Reduz gaps e tamanhos para tudo caber sem quebrar. */
 @media (max-width: 479px) {
+  .manager-header,
+  .student-header {
+    gap: 0.5rem !important;
+    padding-left: clamp(0.7rem, 3vw, 1rem) !important;
+    padding-right: clamp(0.7rem, 3vw, 1rem) !important;
+  }
   .manager-header .brand-inline div,
   .student-header .brand-inline div {
-    display: none !important;
+    display: block !important;
+  }
+  .manager-header .brand-inline h2,
+  .student-header .brand-inline h2 {
+    font-size: 1rem !important;
+  }
+  .manager-header .brand-logo,
+  .student-header .brand-logo {
+    width: 2.2rem !important;
+    height: 2.2rem !important;
+  }
+  .manager-header .header-actions,
+  .student-header .header-actions {
+    gap: 0.32rem !important;
+  }
+  .manager-header .avatar-button,
+  .student-header .avatar-button {
+    width: 2.3rem !important;
+    height: 2.3rem !important;
+  }
+  .manager-header .notification-button,
+  .student-header .notification-button,
+  .manager-header .icon-button,
+  .student-header .icon-button {
+    width: 2.15rem !important;
+    height: 2.15rem !important;
   }
 }
 

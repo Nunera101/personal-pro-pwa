@@ -5814,6 +5814,15 @@
     `;
   }
 
+  // Saudacao por periodo do dia (fiel ao prototipo): "Bom dia" ate 12h,
+  // "Boa tarde" ate 18h, "Boa noite" depois.
+  function getDayGreeting() {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Bom dia";
+    if (hour < 18) return "Boa tarde";
+    return "Boa noite";
+  }
+
   function renderStudentToday() {
     // Inicio é sempre o dashboard; treino em andamento vive na aba Treinos
     // e aparece aqui apenas como banner de retomada.
@@ -5982,7 +5991,7 @@
       <div class="content-stack dashboard-home">
         <section class="dashboard-hero">
           <div>
-            <h3>Olá, ${escapeHtml(firstName)}</h3>
+            <h3>${escapeHtml(getDayGreeting())}, ${escapeHtml(firstName)}</h3>
             <p>${escapeHtml(nextActivityLine)}</p>
           </div>
         </section>
