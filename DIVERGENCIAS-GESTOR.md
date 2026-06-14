@@ -66,6 +66,8 @@
 
 *(Sem pendências — P-01 a P-07 todos resolvidos.)*
 
+**Nova capacidade (frente "Treino do aluno", 14/06):** o gestor deixou de só *aplicar* padrões e passou a **criar treino próprio do aluno**. Padrão (molde sem `studentId`) e treino do aluno (com `studentId`) são entidades distintas na mesma coleção `state.data.workouts`, separadas por `isWorkoutPattern`. Duas portas no perfil do aluno: **Criar treino** (do zero, montador `data-scope="student"`) e **Aplicar padrão** (cards de padrão → `openWorkoutFromPattern` abre o montador pré-preenchido e editável). Ao publicar vira cópia independente (`buildStudentWorkoutFromPattern`, R-06) — editar/apagar o padrão depois não afeta o treino aplicado (`sourcePatternId` é só referência histórica). A aba Padrões (`renderManagerWorkouts`) segue listando apenas padrões e intacta. Visual flat com variáveis de tema (`var(--card)`, `var(--borda)`, `var(--brand)`, `var(--brand-ink)`), sem glow nem dourado hardcoded.
+
 ---
 
 ### 5. Biblioteca de Exercícios
@@ -194,6 +196,8 @@
 | G7 | Acessibilidade — aria-labels e focus-visible | ✅ Resolvido (incl. DI-02, M-04, G-03/G-04) |
 | G8 | Mensagens — compose bar iOS com teclado | ✅ Resolvido (M-03) |
 | G9 | Revisão final + atualizar este doc | ✅ Concluído |
+| T1–T3 | Treino do aluno: separação padrão/treino, criar do zero, aplicar padrão editável, agenda lista treinos do aluno | ✅ Concluído |
+| T-Rev | Revisão da frente + atualizar AUDITORIA-ALUNO.md e este doc | ✅ Concluído |
 
 ---
 

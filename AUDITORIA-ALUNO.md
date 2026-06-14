@@ -56,6 +56,8 @@
 
 ### Treinos (`renderStudentWorkouts`)
 - Cards nomeados com título do professor, objetivo, nº de exercícios, última execução, botão Abrir.
+- Os treinos exibidos podem nascer **do zero** (montados especificamente para o aluno) ou **a partir de um padrão** (cópia editável do molde). Em ambos os casos o aluno só vê o que está **publicado** — rascunhos ficam ocultos.
+- Cada treino do aluno é uma **cópia independente** (`buildStudentWorkoutFromPattern`, R-06): editar ou apagar o padrão de origem depois **não altera** o treino já publicado para o aluno.
 - **OK** — sem exercícios soltos.
 
 ### Detalhe do treino (`state.studentWorkoutDetailId`)
@@ -164,3 +166,24 @@
 | Revisão final: ordem dos widgets | `chore(aluno): revisao final do Inicio com ordem definitiva dos widgets` |
 
 **Verificações da revisão final:** ordem saudação → banner de sessão ativa → progresso de hoje → grade de métricas → sequência → peso → adesão; gate de contrato abre o PDF gerado (`contract.pdfUrl` → viewer com iframe / cartão iOS, verificado no app real em ciclo anterior); progresso atualiza ao concluir séries; sem glow; sem texto branco sobre dourado; sem texto cortado.
+
+---
+
+## 8. Treino do aluno — criação pelo profissional (frente 14/06)
+
+Antes desta frente o profissional só **aplicava** padrões. Agora ele também **cria treino próprio do aluno**, do zero ou usando um padrão como ponto de partida. Do lado do aluno nada na execução muda — ele continua vendo e iniciando treinos publicados como antes; o que muda é a origem do treino.
+
+| Verificação | Resultado |
+|---|---|
+| Padrão e treino do aluno são entidades independentes | ✅ `isWorkoutPattern` (sem `studentId`) × treino com `studentId`; cópia profunda desacoplada em `buildStudentWorkoutFromPattern` (R-06) |
+| Editar/apagar o padrão depois não afeta o treino aplicado | ✅ `sourcePatternId`/`sourcePatternTitle` são só referência histórica, nunca vínculo vivo |
+| Profissional cria **do zero** | ✅ porta "Criar treino"/"Novo treino" → montador com `data-scope="student"` |
+| Profissional cria **a partir de padrão** | ✅ porta "Aplicar padrão" → cards de padrão → montador pré-preenchido e **editável** antes de publicar |
+| Rascunho invisível, publicado visível ao aluno | ✅ `getStudentWorkouts(..., { publishedOnly })`; aba Treinos do aluno só lista publicados |
+| Arquivar some pro aluno e da agenda, mantém histórico | ✅ `isAgendaWorkoutStartable` exige treino existente e publicado |
+| Agenda (tipo Treino) lista treinos do aluno, **opcional** | ✅ `workoutFieldContent` lista publicados do aluno (nunca padrões) + opção "Decidir na hora" |
+| Aba Padrões do gestor continua funcionando | ✅ `renderManagerWorkouts` lista só `getWorkoutPatterns()`; eyebrow "Elite AS" segue oculto (P-07) |
+| Aluno continua executando treino como antes | ✅ fluxo de execução intacto; `node -c app.js` OK |
+| Visual flat com variáveis de tema | ✅ `.pw-card`/montador usam `var(--card)`, `var(--borda)`, `var(--brand)`, `var(--brand-ink)`; sem glow, sem dourado hardcoded |
+
+**Nenhuma quebra detectada.** A frente entrega a nova capacidade sem regressões na experiência do aluno.
