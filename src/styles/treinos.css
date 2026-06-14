@@ -1110,8 +1110,167 @@
   gap: 0.75rem;
 }
 
-#workoutSheetBody .workout-builder {
-  background: var(--surface, #f8faf8);
+/* ── Seção de exercícios do montador (fiel ao protótipo) ────────── */
+.wb-builder { display: grid; gap: 0.7rem; }
+
+.wb-builder-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.wb-builder-head h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.wb-builder-meta { color: var(--muted); font-size: 0.78rem; font-weight: 600; }
+
+.wb-rows { display: grid; gap: 0.7rem; }
+
+.wb-row {
+  display: grid;
+  gap: 0.7rem;
+  padding: 0.75rem;
+  border: 1px solid var(--borda);
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.wb-row.is-dragging {
+  cursor: grabbing;
+  opacity: 0.9;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  transform: scale(1.01);
+}
+
+.wb-row-head {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.wb-row-thumb {
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 0.6rem;
+  flex-shrink: 0;
+}
+
+.wb-row-thumb.has-video { background: rgba(var(--brand-rgb), 0.14); color: var(--brand-strong); }
+.wb-row-thumb.has-video svg { fill: currentColor; stroke: none; }
+.wb-row-thumb.no-video { background: rgba(255, 255, 255, 0.05); color: var(--muted); }
+.wb-row-thumb svg { width: 1.2rem; height: 1.2rem; stroke: currentColor; stroke-width: 1.6; fill: none; }
+
+.wb-row-info { min-width: 0; display: grid; gap: 0.12rem; }
+
+.wb-row-info strong {
+  color: var(--ink);
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.15;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wb-row-muscle { color: var(--muted); font-size: 0.74rem; }
+
+.wb-row-remove {
+  all: unset;
+  display: inline-grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 0.5rem;
+  color: var(--erro, #ef4444);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.wb-row-remove:hover { background: rgba(239, 68, 68, 0.12); }
+.wb-row-remove svg { width: 1.12rem; height: 1.12rem; stroke: currentColor; stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+.wb-row-params {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.wb-param { display: grid; gap: 0.26rem; }
+
+.wb-param span {
+  color: var(--muted);
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.wb-param input {
+  width: 100%;
+  min-height: 2.5rem;
+  padding: 0 0.4rem;
+  text-align: center;
+  border-radius: 0.55rem;
+  border: 1px solid var(--borda);
+  background: rgba(0, 0, 0, 0.22);
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.wb-param input:focus-visible {
+  outline: none;
+  border-color: rgb(from var(--brand-soft) r g b / 0.62);
+}
+
+.wb-empty {
+  margin: 0;
+  padding: 1rem;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.85rem;
+  border: 1px dashed var(--borda);
+  border-radius: 0.8rem;
+}
+
+.wb-empty[hidden] { display: none; }
+
+.wb-add-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 3rem;
+  padding: 0 1rem;
+  border: 1.5px dashed rgb(from var(--brand-soft) r g b / 0.6);
+  border-radius: 0.8rem;
+  background: transparent;
+  color: var(--brand-strong);
+  font-size: 0.9rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.wb-add-btn:hover { background: rgba(var(--brand-rgb), 0.06); }
+.wb-add-btn svg { width: 1.15rem; height: 1.15rem; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; }
+
+.wb-footer { display: flex; gap: 0.6rem; }
+.wb-footer .secondary-action,
+.wb-footer .primary-action { flex: 1; }
+
+@media (max-width: 28rem) {
+  .wb-row-params { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 /* ── Reordenar exercícios por arrastar ──────────────────────────── */
@@ -1129,16 +1288,8 @@
   touch-action: none;
 }
 
-.workout-builder-row .section-title [data-workout-row-index] { flex: 1; }
-.workout-row-drag:hover { background: rgba(0, 0, 0, 0.05); color: var(--brand-ink, #1a1a1a); }
+.workout-row-drag:hover { background: rgba(255, 255, 255, 0.06); color: var(--ink); }
 .workout-row-drag svg { width: 1.15rem; height: 1.15rem; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; }
-
-.workout-builder-row.is-dragging {
-  cursor: grabbing;
-  opacity: 0.85;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
-  transform: scale(1.01);
-}
 
 @media (min-width: 42rem) {
   .workout-sheet-panel {

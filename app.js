@@ -8764,53 +8764,76 @@
     const fromPattern = Boolean(seed && seed.sourcePatternId);
     const isStudentWorkout = Boolean(workout.studentId || prefillStudentId);
     const selectedStudentId = isStudentWorkout ? workout.studentId || prefillStudentId || state.data.students[0]?.id || "" : "";
-    const rows = Array.isArray(workout.exercises) && workout.exercises.length ? workout.exercises : [normalizeWorkoutExercise({ order: 1, exerciseId: state.data.exercises.find((e) => e.status === "active")?.id || "" })];
+    // Montador inicia VAZIO ao criar do zero (fiel ao protótipo); exercícios entram
+    // pelo seletor da biblioteca. Ao editar/copiar padrão, carrega os existentes.
+    const rows = Array.isArray(workout.exercises) ? workout.exercises : [];
+    const studentName = isStudentWorkout ? getStudent(selectedStudentId)?.name || "aluno" : "";
 
-    if (titleEl) titleEl.textContent = fromPattern ? "Ajustar cópia do padrão" : workout.id ? (isStudentWorkout ? "Editar treino do aluno" : "Editar padrão de treino") : isStudentWorkout ? "Novo treino do aluno" : "Novo padrão de treino";
+    if (titleEl) titleEl.textContent = fromPattern ? "Ajustar cópia do padrão" : workout.id ? (isStudentWorkout ? `Editar treino · ${studentName}` : "Editar padrão de treino") : isStudentWorkout ? `Novo treino · para ${studentName}` : "Novo padrão de treino";
 
-    const workoutSaveLabel = isStudentWorkout ? "Salvar treino" : "Salvar padrão";
+    const plusIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
     body.innerHTML = `
       <form class="form-grid" id="workoutForm" data-id="${workout.id || ""}" data-scope="${isStudentWorkout ? "student" : "pattern"}">
         <input type="hidden" name="sourcePatternId" value="${escapeHtml(isStudentWorkout ? workout.sourcePatternId || "" : "")}" />
         <input type="hidden" name="sourcePatternTitle" value="${escapeHtml(isStudentWorkout ? workout.sourcePatternTitle || "" : "")}" />
+        <input type="hidden" name="status" id="workoutStatusField" value="${escapeHtml(workout.status || "draft")}" />
+        <input type="hidden" name="description" value="${escapeHtml(workout.description || "")}" />
+        ${
+          isStudentWorkout
+            ? `<input type="hidden" name="studentId" value="${escapeHtml(selectedStudentId)}" />`
+            : `<input type="hidden" name="studentId" value="" /><div class="empty-state compact-note"><strong>Modelo base</strong><span>Este padrão fica na área global de treino e não é vinculado a um aluno.</span></div>`
+        }
         ${fromPattern ? `<div class="empty-state compact-note"><strong>Cópia editável de “${escapeHtml(workout.sourcePatternTitle || "padrão")}”</strong><span>Ajuste o que quiser antes de publicar. Vira um treino próprio do aluno — editar ou apagar o padrão depois NÃO afeta este treino.</span></div>` : ""}
+        <label class="field"><span>Nome</span><input name="title" type="text" maxlength="120" value="${escapeHtml(workout.title || "")}" placeholder="Ex: Treino A - Peito e Tríceps" required /></label>
         <div class="form-grid two">
-          ${
-            isStudentWorkout
-              ? `<label class="field"><span>Aluno</span><select name="studentId" required>${studentOptions(selectedStudentId)}</select></label>`
-              : `<input type="hidden" name="studentId" value="" /><div class="empty-state compact-note"><strong>Modelo base</strong><span>Este padrão fica na área global de treino e não é vinculado a um aluno.</span></div>`
-          }
-          <label class="field"><span>Status</span><select name="status">${workoutStatusOptions(workout.status || "draft", !isStudentWorkout)}</select></label>
-        </div>
-        <label class="field"><span>Título</span><input name="title" type="text" maxlength="120" value="${escapeHtml(workout.title || "")}" required /></label>
-        <label class="field"><span>Descrição</span><textarea name="description" maxlength="1000">${escapeHtml(workout.description || "")}</textarea></label>
-        <div class="form-grid two">
-          <label class="field"><span>Foco/objetivo</span><input name="focus" type="text" maxlength="120" value="${escapeHtml(workout.focus || "")}" /></label>
+          <label class="field"><span>Objetivo</span><input name="focus" type="text" maxlength="120" value="${escapeHtml(workout.focus || "")}" placeholder="Ex: Hipertrofia" /></label>
           <label class="field"><span>Nível</span><select name="level">${workoutLevelOptions(workout.level || "")}</select></label>
         </div>
-        <section class="workout-builder">
-          <div class="section-title"><h3>Exercícios do ${isStudentWorkout ? "treino" : "padrão"}</h3><button class="mini-button" type="button" data-add-workout-row>Adicionar exercício</button></div>
-          <div id="workoutRows">${rows.map((row, index) => workoutRowTemplate(row, index)).join("")}</div>
+        <section class="wb-builder">
+          <div class="wb-builder-head">
+            <h3>Exercícios</h3>
+            <span class="wb-builder-meta" id="workoutBuilderMeta"></span>
+          </div>
+          <div id="workoutRows" class="wb-rows">${rows.map((row, index) => workoutRowTemplate(row, index)).join("")}</div>
+          <p class="wb-empty" id="workoutBuilderEmpty"${rows.length ? " hidden" : ""}>Nenhum exercício ainda. Adicione da biblioteca abaixo.</p>
+          <button class="wb-add-btn" type="button" data-add-workout-row>${plusIcon}Adicionar exercício da biblioteca</button>
         </section>
       </form>
     `;
     const wsFooter = elements.workoutSheetFooter;
-    if (wsFooter) wsFooter.innerHTML = `<div class="pf-footer"><button class="secondary-action" type="button" data-close-workout-sheet>Cancelar</button><button class="primary-action" type="submit" form="workoutForm">${workoutSaveLabel}</button></div>`;
+    if (wsFooter) wsFooter.innerHTML = `<div class="pf-footer wb-footer"><button class="secondary-action" type="submit" form="workoutForm" data-save-workout="draft">Salvar rascunho</button><button class="primary-action" type="submit" form="workoutForm" data-save-workout="published">${isStudentWorkout ? "Publicar treino" : "Salvar padrão"}</button></div>`;
 
     enableWorkoutRowReorder(document.getElementById("workoutRows"));
+    updateWorkoutBuilderMeta(document.getElementById("workoutRows"));
 
     _openSheet(sheet);
     document.body.style.overflow = "hidden";
   }
 
-  // Renumera os rótulos "Exercício N" conforme a posição atual no DOM. A ordem
-  // do treino passa a ser a ordem visual das linhas (sem campo numérico manual).
+  // A ordem do treino é a ordem visual das linhas (sem campo numérico manual).
+  // Após qualquer mudança nas linhas (adicionar, remover, reordenar, editar séries
+  // ou descanso) recalcula contador e duração estimada do montador.
   function renumberWorkoutRows(container) {
+    updateWorkoutBuilderMeta(container);
+  }
+
+  // Contador de exercícios + duração estimada (~ séries × (40s de execução + descanso)).
+  // Também alterna o estado vazio da seção de exercícios.
+  function updateWorkoutBuilderMeta(container) {
+    container = container || document.getElementById("workoutRows");
     if (!container) return;
-    container.querySelectorAll("[data-workout-row]").forEach((row, index) => {
-      const label = row.querySelector("[data-workout-row-index]");
-      if (label) label.textContent = `Exercício ${index + 1}`;
+    const rows = [...container.querySelectorAll("[data-workout-row]")];
+    let totalSeconds = 0;
+    rows.forEach((row) => {
+      const sets = Number(row.querySelector('[name="sets"]')?.value || 0);
+      const rest = Number(row.querySelector('[name="restSeconds"]')?.value || 0);
+      totalSeconds += sets * (40 + rest);
     });
+    const minutes = Math.max(0, Math.round(totalSeconds / 60));
+    const metaEl = document.getElementById("workoutBuilderMeta");
+    if (metaEl) metaEl.textContent = `${rows.length} exercício${rows.length === 1 ? "" : "s"} · ~${minutes} min`;
+    const emptyEl = document.getElementById("workoutBuilderEmpty");
+    if (emptyEl) emptyEl.hidden = rows.length > 0;
   }
 
   // Reordenar exercícios arrastando pela alça. Usa Pointer Events para funcionar
@@ -9203,22 +9226,38 @@
     openWorkoutForm("", student.id, seed);
   }
 
+  // Card de exercício do montador, fiel ao protótipo: alça de arrastar, thumb com
+  // play (vídeo) ou ícone de foto, nome + grupo, lixeira; abaixo, 4 caixas
+  // SÉRIES / REPS / CARGA (kg numérico) / DESC.(s). O exercício é escolhido pelo
+  // seletor da biblioteca — aqui fica como hidden (não há mais <select> por linha).
   function workoutRowTemplate(row, index) {
+    const exercise = getExercise(row.exerciseId);
+    const name = resolveWorkoutExerciseName(row);
+    const muscle = (exercise ? getExercisePrimaryMuscle(exercise) : row.exerciseMuscle) || "Geral";
+    const hasVideo = exercise ? hasExerciseVideo(exercise) : false;
+    const dragSvg = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9h14M5 15h14"/></svg>';
+    const playSvg = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
+    const photoSvg = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18v14H3zM3 15l5-5 4 4 3-3 6 6"/><circle cx="8.5" cy="9.5" r="1.5"/></svg>';
+    const trashSvg = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>';
     return `
-      <article class="workout-builder-row" data-workout-row>
-        <div class="section-title">
-          <button class="workout-row-drag" type="button" data-drag-handle aria-label="Arrastar para reordenar" title="Arrastar para reordenar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9h14M5 15h14"/></svg></button>
-          <strong data-workout-row-index>Exercício ${index + 1}</strong>
-          <button class="mini-button is-danger" type="button" data-remove-workout-row>Remover</button>
+      <article class="wb-row" data-workout-row>
+        <input type="hidden" name="exerciseId" value="${escapeHtml(row.exerciseId)}" />
+        <input type="hidden" name="coachNotes" value="${escapeHtml(row.coachNotes || "")}" />
+        <div class="wb-row-head">
+          <button class="workout-row-drag" type="button" data-drag-handle aria-label="Arrastar para reordenar" title="Arrastar para reordenar">${dragSvg}</button>
+          <span class="wb-row-thumb ${hasVideo ? "has-video" : "no-video"}">${hasVideo ? playSvg : photoSvg}</span>
+          <span class="wb-row-info">
+            <strong>${escapeHtml(name)}</strong>
+            <span class="wb-row-muscle">${escapeHtml(muscle)}</span>
+          </span>
+          <button class="wb-row-remove" type="button" data-remove-workout-row aria-label="Remover exercício" title="Remover">${trashSvg}</button>
         </div>
-        <div class="form-grid two">
-          <label class="field"><span>Exercício da biblioteca</span><select name="exerciseId" required>${exerciseOptions(row.exerciseId)}</select></label>
-          <label class="field"><span>Séries</span><input name="sets" type="number" min="1" value="${escapeHtml(row.sets || 3)}" required /></label>
-          <label class="field"><span>Repetições alvo</span><input name="targetReps" type="text" value="${escapeHtml(row.targetReps || "10")}" required /></label>
-          <label class="field"><span>Carga sugerida</span><input name="suggestedLoad" type="text" value="${escapeHtml(row.suggestedLoad || "")}" /></label>
-          <label class="field"><span>Descanso em segundos</span><input name="restSeconds" type="number" min="0" value="${escapeHtml(row.restSeconds || 60)}" required /></label>
+        <div class="wb-row-params">
+          <label class="wb-param"><span>Séries</span><input name="sets" type="number" inputmode="numeric" min="1" value="${escapeHtml(row.sets || 3)}" required /></label>
+          <label class="wb-param"><span>Reps</span><input name="targetReps" type="text" inputmode="numeric" value="${escapeHtml(row.targetReps || "10")}" required /></label>
+          <label class="wb-param"><span>Carga (kg)</span><input name="suggestedLoad" type="number" inputmode="decimal" min="0" step="0.5" value="${escapeHtml(row.suggestedLoad || "")}" placeholder="0" /></label>
+          <label class="wb-param"><span>Desc. (s)</span><input name="restSeconds" type="number" inputmode="numeric" min="0" step="5" value="${escapeHtml(row.restSeconds || 60)}" required /></label>
         </div>
-        <label class="field"><span>Observação específica</span><textarea name="coachNotes">${escapeHtml(row.coachNotes || "")}</textarea></label>
       </article>
     `;
   }
@@ -12637,6 +12676,11 @@
       if (target.matches("[data-create-blank]")) { closeModal(); openWorkoutForm("", target.dataset.createBlank); }
       if (target.matches("[data-create-from-pattern]")) openStudentPatternWorkoutForm(target.dataset.createFromPattern);
       if (target.matches("[data-pick-pattern]")) openWorkoutFromPattern(target.dataset.pickPattern, target.dataset.pickStudent);
+      if (target.matches("[data-save-workout]")) {
+        // Define o status pelo botão do rodapé (rascunho/publicado) antes do submit.
+        const field = document.getElementById("workoutStatusField");
+        if (field) field.value = target.dataset.saveWorkout;
+      }
       if (target.matches("[data-add-workout-row]")) {
         openExercisePicker();
       }
@@ -12664,6 +12708,8 @@
     document.addEventListener("input", (event) => {
       const target = event.target;
       if (target.matches("[data-workout-filter]")) { state.workoutFilters[target.dataset.workoutFilter] = target.value; renderManager(); }
+      // Atualiza contador/duração ao editar séries ou descanso de um exercício.
+      if (target.closest("#workoutRows") && (target.name === "sets" || target.name === "restSeconds")) updateWorkoutBuilderMeta();
     });
     document.addEventListener("change", (event) => {
       const target = event.target;
