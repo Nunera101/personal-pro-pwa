@@ -8028,9 +8028,17 @@
     return active.map((exercise) => `<option value="${exercise.id}" ${exercise.id === selected ? "selected" : ""}>${escapeHtml(exercise.name)} · ${escapeHtml(getExercisePrimaryMuscle(exercise))}</option>`).join("");
   }
 
-  function workoutOptions(studentId = "", selected = "") {
-    const workouts = state.data.workouts.filter((workout) => workout.status === "published" && (!studentId || workout.studentId === studentId));
-    return `<option value="">Sem treino vinculado</option>${workouts.map((workout) => `<option value="${workout.id}" ${workout.id === selected ? "selected" : ""}>${escapeHtml(workout.title)}</option>`).join("")}`;
+  // Conteudo do campo "Treino vinculado" do Agendar (so visivel quando tipo=Treino).
+  // Lista os TREINOS PUBLICADOS DAQUELE ALUNO (nunca padroes) e e OPCIONAL: o
+  // profissional pode agendar sem escolher e decidir na hora. Se o aluno ainda nao
+  // tem treinos publicados, mostra um atalho para criar.
+  function workoutFieldContent(studentId = "", selected = "") {
+    const published = studentId ? getStudentWorkouts(studentId, { publishedOnly: true }) : [];
+    if (studentId && !published.length) {
+      return `<span>Treino vinculado</span><div class="empty-state compact-note"><strong>Sem treinos publicados</strong><span>Este aluno ainda não tem treinos. Agende mesmo assim e decida depois, ou crie um treino agora.</span><button class="mini-button" type="button" data-open-workout-form data-prefill-student="${escapeHtml(studentId)}">Criar treino</button></div>`;
+    }
+    const options = published.map((workout) => `<option value="${workout.id}" ${workout.id === selected ? "selected" : ""}>${escapeHtml(workout.title)}</option>`).join("");
+    return `<span>Treino vinculado (opcional)</span><select name="workoutId"><option value="">Decidir na hora</option>${options}</select>`;
   }
 
   function openStudentForm(studentId = "") {
@@ -9204,7 +9212,7 @@
             <option value="return" ${selectedType === "return" ? "selected" : ""}>Retorno</option>
             <option value="other" ${selectedType === "other" ? "selected" : ""}>Outro evento</option>
           </select></label>
-          <label class="field"><span>Treino vinculado</span><select name="workoutId">${workoutOptions(selectedStudentId, activity.workoutId)}</select></label>
+          <div class="field" data-activity-workout-field${selectedType === "workout" ? "" : " hidden"}>${workoutFieldContent(selectedStudentId, activity.workoutId)}</div>
           <label class="field"><span>Status</span><select name="status"><option value="scheduled" ${selectedStatus === "scheduled" ? "selected" : ""}>Agendado</option><option value="pending" ${selectedStatus === "pending" ? "selected" : ""}>Pendente</option><option value="done" ${selectedStatus === "done" ? "selected" : ""}>Concluído</option><option value="sent" ${selectedStatus === "sent" ? "selected" : ""}>Atualização enviada</option><option value="missed" ${selectedStatus === "missed" ? "selected" : ""}>Não realizado</option><option value="canceled" ${selectedStatus === "canceled" ? "selected" : ""}>Cancelado</option></select></label>
           <label class="field"><span>Data</span><input name="date" type="date" value="${escapeHtml(activity.date || state.agendaDate)}" required /></label>
           <label class="field"><span>Horário</span><input name="time" type="time" value="${escapeHtml(activity.time || "08:00")}" required /></label>
@@ -12580,7 +12588,7 @@
       if (target.matches("[data-close-ex-picker]")) closeExercisePicker();
       if (target.matches("[data-ap-adjust]")) { closeApplyPatternSheet(); openWorkoutForm(target.dataset.apAdjust); }
       if (target.matches("[data-toggle-workout-filter]")) { state.workoutFilterOpen = !state.workoutFilterOpen; renderManager(); }
-      if (target.matches("[data-open-workout-form]")) openWorkoutForm(target.dataset.openWorkoutForm || "", target.dataset.prefillStudent || "");
+      if (target.matches("[data-open-workout-form]")) { closeAgendarSheet(); openWorkoutForm(target.dataset.openWorkoutForm || "", target.dataset.prefillStudent || ""); }
       if (target.matches("[data-open-apply-pattern-form]")) openApplyPatternSheet(target.dataset.openApplyPatternForm);
       if (target.matches("[data-open-student-pattern-workout]")) openStudentPatternWorkoutForm(target.dataset.openStudentPatternWorkout);
       if (target.matches("[data-pick-pattern]")) openWorkoutFromPattern(target.dataset.pickPattern, target.dataset.pickStudent);
@@ -12616,8 +12624,12 @@
       const target = event.target;
       if (target.matches("[data-workout-filter]")) { state.workoutFilters[target.dataset.workoutFilter] = target.value; state.workoutFilterOpen = true; renderManager(); }
       if (target.matches("[data-activity-student]")) {
-        const workoutSelect = document.querySelector('#activityForm [name="workoutId"]');
-        if (workoutSelect) workoutSelect.innerHTML = workoutOptions(target.value);
+        const field = document.querySelector('#activityForm [data-activity-workout-field]');
+        if (field) field.innerHTML = workoutFieldContent(target.value);
+      }
+      if (target.matches("[data-activity-type]")) {
+        const field = document.querySelector('#activityForm [data-activity-workout-field]');
+        if (field) field.hidden = target.value !== "workout";
       }
     });
     document.addEventListener("submit", async (event) => {
