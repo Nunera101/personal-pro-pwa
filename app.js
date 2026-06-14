@@ -1543,6 +1543,16 @@
       .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
   }
 
+  // Um item de agenda do tipo treino so e "iniciavel" pelo aluno quando o treino
+  // referenciado ainda existe e esta PUBLICADO. Se o treino foi arquivado (ou
+  // removido), o agendamento continua visivel como historico, mas sem botao de
+  // iniciar/abrir — e o que garante que arquivar "some pro aluno e da agenda".
+  function isAgendaWorkoutStartable(item) {
+    if (!item || item.type !== "workout" || !item.workoutId || item.status === "done") return false;
+    const workout = getWorkout(item.workoutId);
+    return Boolean(workout) && workout.status === "published";
+  }
+
   function getStudentSessions(studentId) {
     return state.data.sessions.filter((session) => session.studentId === studentId).sort((a, b) => b.startedAt.localeCompare(a.startedAt));
   }
@@ -5817,7 +5827,9 @@
 
     // Treino agendado para hoje (apenas atalho — sem expor exercícios na home).
     const todayAgenda = getAgendaItemsForDate(todayISO(), student.id);
-    const todayWorkoutItem = todayAgenda.find((item) => item.type === "workout" && item.workoutId && item.status !== "done") || null;
+    // So vira atalho de "hoje" se o treino agendado ainda estiver publicado;
+    // arquivar o treino faz o card sumir e cair no estado vazio.
+    const todayWorkoutItem = todayAgenda.find(isAgendaWorkoutStartable) || null;
     const todayWorkoutData = todayWorkoutItem ? getWorkout(todayWorkoutItem.workoutId) : null;
 
     const nextActivityLine = nextActivity
@@ -6256,7 +6268,7 @@
             const agendaStudent = getStudent(item.studentId);
             const studentName = agendaStudent?.name || "Aluno removido";
             const canWA = manager && canEditAgendaItem(item);
-            const canStart = item.type === "workout" && item.workoutId && state.currentUser?.role === "student" && item.status !== "done";
+            const canStart = state.currentUser?.role === "student" && isAgendaWorkoutStartable(item);
             const hasPendingContract = item.type !== "contract" && !!getBlockingContractForStudent(item.studentId);
             return `
               <article class="agenda-item ${agendaItemClass(item)}">
@@ -6304,7 +6316,7 @@
     return `
       <div class="agenda-list">
         ${items.map((item) => {
-          const canStart = item.type === "workout" && item.workoutId && item.status !== "done";
+          const canStart = isAgendaWorkoutStartable(item);
           const statusLabel = item.status === "done" ? "Completo" : agendaStatusLabel(item.status);
           return `
             <article class="student-agenda-row ${agendaItemClass(item)}">
@@ -6347,7 +6359,7 @@
         <div class="row-actions">
           <button class="mini-button" type="button" data-open-agenda-detail="${escapeHtml(item.id)}" data-agenda-date="${escapeHtml(item.date)}" data-agenda-student="${escapeHtml(item.studentId)}">Detalhes</button>
           ${manager && canEditAgendaItem(item) ? whatsappButton(item.id, item.studentId) : ""}
-          ${item.type === "workout" && item.workoutId && state.currentUser?.role === "student" && item.status !== "done" ? `<button class="mini-button" type="button" data-start-workout="${item.workoutId}" data-activity-id="${item.id}">Iniciar</button>` : ""}
+          ${state.currentUser?.role === "student" && isAgendaWorkoutStartable(item) ? `<button class="mini-button" type="button" data-start-workout="${item.workoutId}" data-activity-id="${item.id}">Iniciar</button>` : ""}
         </div>
       </article>
     `;
