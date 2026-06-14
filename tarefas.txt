@@ -1,35 +1,74 @@
 ﻿==============================================
- FILA - TOKENIZACAO DE TEMA (SEGURA p/ rodar sozinho)
- Por que e segura sem supervisao: o criterio de sucesso e "NADA muda
- visualmente" - o app fica PIXEL-IDENTICO no tema atual. Nao ha escolha
- estetica para errar. Prepara o terreno para a lapidacao aba por aba e
- para os temas do white-label (trocar tema = trocar 4 variaveis).
- NAO e lapidacao (isso depende de aprovacao visual e fica para quando
- voce voltar). Esta fila so move cores fixas para variaveis.
- Cada tarefa = UMA linha. SEM seta no texto. ~7 numa janela.
- "session limit" ou erro de CLI = NAO rodou.
- Paleta atual (vira o tema padrao "gold"): brand #F59E0B,
- brand-strong #E7A83E, brand-soft rgba(245,181,27,0.1),
- brand-ink #1A1206 (texto sobre a marca), fundo #0D0D0D, card #1A1A1A,
- borda rgba(255,255,255,0.06), txt2 #9CA3AF, ok #10B981, erro #EF4444.
+ FILA - TREINO DO ALUNO (frente estrutural, RODAR PRESENTE)
+ O que esta frente entrega: hoje o profissional so APLICA padroes; passa
+ a poder CRIAR treino personalizado para o aluno (do zero) e a aplicar
+ padrao como ponto de partida. Padrao = molde sem dono. Treino do aluno
+ = pertence ao aluno. Aplicar padrao GERA COPIA INDEPENDENTE, SEM VINCULO
+ (apagar o padrao depois NAO apaga o treino ja aplicado). A agenda, no
+ tipo Treino, passa a listar os TREINOS DO ALUNO (nao padroes), e e
+ OPCIONAL (pode agendar sem definir o treino).
+ PROTOTIPOS APROVADOS pelo Guilherme (seguir fielmente): aba Treinos no
+ perfil do aluno (ativos/arquivados + Criar treino); duas portas (Do zero
+ / A partir de um padrao) com aviso de "sem vinculo"; Montador (nome,
+ objetivo, nivel, exercicios com series/reps/carga/descanso, reordenar,
+ rascunho vs publicar); Seletor de exercicios da biblioteca (busca,
+ chips de grupo, selecao multipla, indica com/sem video).
+ DIRETRIZ VISUAL: estilo "aplicativo" flat - sem degrade, sem glow,
+ cards #1A1A1A, cantos arredondados, USANDO as variaveis de tema
+ (var(--brand) etc. - NAO cor dourada hardcoded), para nao virar uma
+ ilha visual. Texto sobre dourado = escuro.
+ BASE JA EXISTENTE: a copia independente ao aplicar padrao (R-06) JA foi
+ implementada na fila de seguranca - reutilizar, nao recriar.
+ REGRAS CRITICAS:
+ - RODAR PRESENTE, uma leva por janela. Toca dados e a relacao
+   padrao/treino/agenda - nao rodar noturno.
+ - Apos CADA leva: criar um treino, aplicar um padrao, e conferir no
+   lado do ALUNO que o treino aparece. Se algo quebrar, PARAR e reverter.
+ - NAO quebrar o que ja existe: a aba Padroes continua funcionando; o
+   aluno continua vendo e executando treinos como hoje.
+ - Construir em camadas (modelo de dados -> criar do zero -> aplicar
+   padrao -> agenda), cada uma testavel antes da proxima.
+ - SEM seta no texto. Cada tarefa = UMA linha.
+ - "session limit" ou erro de CLI = NAO rodou.
 ==============================================
 
 == BACKUP ==
-[OK] git checkout -b backup/tokenizacao-tema && git push origin backup/tokenizacao-tema && git checkout main. NAO altere arquivos. Confirme que o app abre sem erro de sintaxe. (sem commit adicional)
-     Resultado: **Verifica├º├úo de sintaxe** | - `node --check` em todos os arquivos JS do projeto (`server.js`, `server/*.js`, `src/**/*.js`) ÔÇö sem erros de sintaxe. | - `index.html` (entry do PWA) presente na raiz. | O app abre s...
+[OK] git checkout -b backup/treino-do-aluno && git push origin backup/treino-do-aluno && git checkout main. NAO altere arquivos. Confirme que o app abre, que o login funciona, que a aba Padroes abre e que o aluno consegue ver um treino. (sem commit adicional)
+     Resultado: Os erros `401` no console s├úo apenas as cargas de cole├º├úo **antes do login** (boot sem token) ÔÇö esperados; ap├│s o login as leituras autenticadas funcionam. | ## Limpeza | Como os dados ficam em `data/*.json` (git...
 
-== TOKENIZACAO ==
-[OK] DEFINIR variaveis canonicas de marca no :root (base.css e :root local do acesso.html): --brand #F59E0B, --brand-strong #E7A83E, --brand-soft rgba(245,181,27,0.1), --brand-ink #1A1206 (texto/icone sobre a marca). Se ja existem --dourado/--gold/--gold-soft/--accent, consolidar nessas 4 canonicas e fazer as antigas virarem alias apontando para elas. NAO mudar nada visual: resultado pixel-identico. git add . && git commit -m "feat(tema): variaveis canonicas de marca no root" && git push origin main
-     Resultado: --gold-soft: var(--brand-soft); | ``` | One note worth flagging on `--brand-soft`: your spec wrote `rgba(245,181,27,0.1)`, but neither file uses that exact value ÔÇö base uses the brand hex at 0.1 (`rgba(245,158,11,0.1...
-[OK] VARRER todo o CSS (styles.css, src/styles/*.css, acesso.html) trocando TODA cor de marca hardcoded (#F59E0B, #E7A83E e variantes do dourado em background, color, border, box-shadow, fill, stroke, gradiente) por var(--brand)/var(--brand-strong)/var(--brand-soft); texto/icone escuro sobre dourado vira var(--brand-ink). Listar ocorrencias por arquivo. Resultado pixel-identico. git add . && git commit -m "refactor(tema): cores de marca do css viram variaveis" && git push origin main
-     Resultado: 1. **Leave as-is (recommended)** ÔÇö the brand is already tokenized; the rest are deliberately non-brand. No commit. | 2. **Tokenize only the decorative "elite gold" accents** (avatar/badge/progress: `#ffc84b`, `#ffd567...
-[OK] VARRER app.js e demais JS por cores de marca em estilos inline, strings SVG, templates e graficos/sparklines (fill, stroke, background dourado): trocar por var(--brand...) quando CSS, ou por uma constante unica lida do tema quando valor JS, para graficos e SVG seguirem o tema. Resultado visual atual inalterado. git add . && git commit -m "refactor(tema): cores de marca no js e svg via variavel" && git push origin main
-     Resultado: **Deixados de prop├│sito (mud├í-los alteraria o visual):** | - Paleta de avatares (`avatarColor`) e cores de categoria de atividade (treino/avalia├º├úo/atualiza├º├úo/retorno) ÔåÆ cores categ├│ricas n├úo-marca | - Acent...
-[OK] CRIAR estrutura de temas por data-theme no elemento raiz: tema padrao "gold" (valores atuais) ativo, e deixar prontos dois exemplos inativos "ocean" (azul+rosa) e "graphite" - cada tema sobrescreve so --brand, --brand-strong, --brand-soft, --brand-ink. Trocar data-theme re-tematiza o app inteiro. Fixar em gold por enquanto (selecao por professor vem na frente de white-label). git add . && git commit -m "feat(tema): troca por data-theme com gold padrao e exemplos" && git push origin main
-     Resultado: So there was **no code to write** ÔÇö the feature exists and is correct. This commit only updated `tarefas.txt` to mark the task done. | Two things I deliberately did **not** do, against your literal `git add .`: | - *...
-[OK] GARANTIR contraste do texto sobre a marca via uma regra unica: todo elemento com fundo var(--brand) usa cor var(--brand-ink); revisar que nenhum lugar usa texto branco sobre dourado (bug recorrente); --brand-ink e a unica fonte dessa decisao por tema. git add . && git commit -m "fix(tema): contraste do texto sobre a marca via brand-ink" && git push origin main
-     Resultado: - **Cores escuras hardcoded** (`#080808`, `#070707`, `#111`, `#0b0904`, `#000`...) trocadas por `var(--brand-ink)`, tornando o texto orientado ao tema em vez de coincidentemente escuro. | **Verifica├º├úo:** varredura co...
+== LEVA T1 - MODELO DE DADOS E SEPARACAO PADRAO x TREINO (fundacao) ==
+[OK] CLAREZA DE MODELO sem quebrar nada: garantir no codigo a distincao entre PADRAO (molde, sem studentId, vive na colecao de padroes/templates) e TREINO DO ALUNO (com studentId, vive na colecao de treinos/workouts). Documentar num comentario no topo das funcoes envolvidas qual e qual. NAO mudar comportamento ainda - so garantir que as duas entidades estao bem separadas no estado e na normalizacao, e que um treino do aluno tem os campos: id, studentId, professionalId, nome, objetivo, nivel, status (draft/published/archived), exercicios[], createdAt, updatedAt, e (opcional) origemPadraoId apenas como REFERENCIA HISTORICA que nunca cria dependencia. git add . && git commit -m "refactor(treino): separar claramente padrao (molde) de treino do aluno" && git push origin main
+     Resultado: - **`isWorkoutPattern` / `getWorkoutPatterns` / `getStudentWorkouts`**: coment├írio deixando expl├¡cito qual ├® qual. | - **`buildStudentWorkoutFromPattern`**: refor├ºo de que `sourcePatternId` (origemPadraoId) ├® s├│ *...
+[OK] CONFIRMAR a copia independente ao aplicar padrao (R-06 ja fez isso na seguranca): revisar que aplicar um padrao a um aluno gera um NOVO treino com novo id e studentId do aluno, copiando os exercicios por valor (deep copy), e que NAO ha referencia viva ao padrao; testar: aplicar padrao a um aluno, depois EDITAR o padrao e confirmar que o treino do aluno nao mudou; APAGAR o padrao e confirmar que o treino do aluno continua existindo e executavel. Se algo ainda vincular, corrigir. git add . && git commit -m "test(treino): aplicar padrao gera copia independente sem vinculo" && git push origin main
+     Resultado: 2. `sourcePatternId/Title` s├úo strings (refer├¬ncia hist├│rica), e os arrays/objetos de exerc├¡cio n├úo s├úo os mesmos do padr├úo. | 3. **Editar** o padr├úo depois (t├¡tulo, carga, s├®ries, novo exerc├¡cio) n├úo altera...
 
-== VERIFICACAO ==
-[OK] VERIFICAR tematizacao completa: app pixel-identico com gold; como teste trocar data-theme para ocean e confirmar que TUDO muda de cor (sem sobrar dourado hardcoded em botoes, badges, icones, graficos, bolinhas), depois voltar para gold; listar qualquer dourado teimoso que nao re-tematizou e corrigir. git add . && git commit -m "test(tema): verificacao de tematizacao sem residuo" && git push origin main
-     Resultado: Auditoria de cascata (styles.css + src/styles/*, ambos carregados). Mecanismo data-theme OK: blocos [data-theme] vencem os :root de marca, e var(--brand)/--elite-gold/--dourado re-tematizam. Icones (currentColor) e cores de evento (var(--treino/--aval/--brand)) seguem o tema. Dourados teimosos corrigidos (venciam por !important sobre regras ja tematizadas do base.css): badges de role e iniciais do avatar (#ffc84b -> var(--brand)), anel do avatar no hover (#f5b82e -> var(--brand)), e barra de progresso de execucao (#f8d477/#f2a91d -> var(--brand-strong)/var(--brand)). Literais ja neutralizados por regras posteriores (sem residuo visivel): bolinha ativa do grafico financeiro, barra semanal, is-warning do dashboard. Mantidas cores SEMANTICAS, independentes da marca: warning/pending ambar, retorno, sucesso/erro/info, WhatsApp. data-theme volta para "gold" no index/acesso.
+  >>> TESTAR: aplicar padrao, editar/apagar o padrao, treino do aluno
+      intacto. App e aluno normais. <<<
+
+== LEVA T2 - ABA TREINOS NO PERFIL DO ALUNO + CRIAR DO ZERO ==
+[OK] ABA TREINOS no perfil do aluno (visao do gestor): adicionar/identificar a aba "Treinos" dentro do perfil do aluno que lista os treinos DAQUELE aluno separados em ATIVOS e ARQUIVADOS, cada card com inicial/letra do treino, nome, numero de exercicios, duracao estimada, badge de status (Publicado/Rascunho) e ultima execucao, e botoes Editar / Ver / menu (...). Botao "Criar treino" no topo. Seguir o prototipo aprovado: estilo flat app, cards #1A1A1A, cores via variaveis de tema. Estado vazio elegante quando o aluno nao tem treinos. git add . && git commit -m "feat(treino): aba treinos no perfil do aluno com ativos e arquivados" && git push origin main
+     Resultado: - `src/styles/treinos.css` ÔÇö estilos `.pw-*` (grupos, cards, thumb, a├º├Áes, menu) | - `index.html` ÔÇö bump de cache `app.js?v=62` | Validei a sintaxe com `node --check app.js`. N├úo rodei a UI; se quiser, posso usa...
+[OK] DUAS PORTAS ao criar treino: o botao "Criar treino" abre um sheet com duas opcoes - "Criar do zero" (monta personalizado) e "A partir de um padrao" (usa molde como ponto de partida) - com um aviso claro de que ao usar um padrao ele vira um treino proprio do aluno e que editar/apagar o padrao depois NAO afeta este treino. Seguir o prototipo aprovado. git add . && git commit -m "feat(treino): duas portas de criacao com aviso de independencia" && git push origin main
+     Resultado: - Os dois bot├Áes est├úo abrindo o **mesmo modal** quando deveriam ser diferentes (ou vice-versa)? | - Um dos bot├Áes "Criar" est├í com **bug** (n├úo abre, salva no lugar errado)? | - Voc├¬ quer **unificar** as duas po...
+[OK] MONTADOR DE TREINO (criar do zero / editar): reaproveitar o montador existente (o mesmo usado para padrao), mas salvando como TREINO DO ALUNO (com studentId). Campos: nome, objetivo, nivel, e lista de exercicios, cada um com series, reps, carga e descanso, com opcao de remover e de REORDENAR por arrastar; rodape com "Salvar rascunho" (status draft, invisivel ao aluno) e "Publicar treino" (status published, visivel ao aluno); duracao estimada calculada. Seguir o prototipo aprovado (estilo flat, variaveis de tema). git add . && git commit -m "feat(treino): montador salva treino personalizado do aluno" && git push origin main
+     Resultado: - **`src/styles/treinos.css`**: estilos da al├ºa (cursor grab, `touch-action: none`) e do estado `is-dragging`. | - **`index.html` / `sw.js`**: alinhei os cache-busters que estavam inconsistentes (index em v62/v55, SW e...
+[OK] SELETOR DE EXERCICIOS da biblioteca (dentro do montador): sheet com busca, chips de grupo muscular para filtrar, lista com SELECAO MULTIPLA (varios de uma vez), cada item indicando se tem video ou nao, barra fixa no rodape com contador de selecionados e botao "Adicionar ao treino", e atalho "Criar novo exercicio na biblioteca". Os exercicios adicionados entram no montador com valores padrao de series/reps que o profissional ajusta. Seguir o prototipo aprovado. git add . && git commit -m "feat(treino): seletor multiplo de exercicios da biblioteca" && git push origin main
+     Resultado: - Mantive o `<select>` por linha para **trocar** o exerc├¡cio de uma linha j├í existente; o picker ├® **aditivo**. | - Se a biblioteca ativa estiver vazia, o picker n├úo abre e mostra um toast orientando a cadastrar exe...
+
+  >>> TESTAR: criar um treino do zero para o aluno, adicionar exercicios,
+      publicar, e CONFIRMAR no lado do aluno que o treino aparece e e
+      executavel. Salvar rascunho NAO aparece para o aluno. <<<
+
+== LEVA T3 - APLICAR PADRAO PELA NOVA PORTA + AGENDA ==
+[OK] APLICAR PADRAO pela porta "A partir de um padrao": ao escolher essa opcao, mostrar a lista de padroes disponiveis (cards no mesmo estilo), e ao escolher um, ABRIR O MONTADOR ja preenchido com os exercicios copiados do padrao (copia por valor), permitindo o profissional ajustar antes de publicar para o aluno; ao publicar, vira treino do aluno independente (sem vinculo, conforme T1). Deixar claro na tela que e uma copia editavel. git add . && git commit -m "feat(treino): aplicar padrao abre montador pre-preenchido editavel" && git push origin main
+     Resultado: A porta "Aplicar padrao" no perfil do aluno agora abre um seletor com os padroes em CARDS (.pw-card). Ao escolher "Ajustar e aplicar", o montador abre pre-preenchido com a copia por valor dos exercicios (buildStudentWorkoutFromPattern, R-06) via novo seed em openWorkoutForm, sem persistir nada. Aviso de "Copia editavel" no topo. So vira treino do aluno ao Salvar rascunho/Publicar; sourcePatternId/Title viajam em campos ocultos como REFERENCIA HISTORICA (sem vinculo). Removi o form antigo studentPatternWorkoutForm (select unico). node --check ok; 4 testes de aplicar-padrao-copia passam. UI nao rodada no navegador.
+[ ] AGENDA lista TREINOS DO ALUNO (nao padroes): no Agendar atividade, quando o tipo for Treino, o campo "qual treino" passa a listar os TREINOS PUBLICADOS DAQUELE ALUNO (nao os padroes), e e OPCIONAL - o profissional pode agendar um treino sem especificar qual, decidindo na hora. Se o aluno nao tiver treinos ainda, mostrar atalho para criar. Seguir o prototipo aprovado do Agendar (grade de tipos com cores, campo de treino condicional ao tipo Treino). git add . && git commit -m "feat(agenda): tipo treino lista treinos do aluno, opcional" && git push origin main
+[ ] COMUNICACAO entre as abas sem bug: garantir o fluxo redondo - criar/publicar treino reflete imediatamente na lista de treinos do aluno, no que o aluno ve, e na lista de treinos disponivel ao agendar; arquivar um treino tira ele dos publicados (some pro aluno e da agenda) mas mantem no historico; o badge de "treinos" e contadores do perfil do aluno atualizam. Testar a cadeia inteira sem recarregar manualmente. git add . && git commit -m "fix(treino): sincronizacao entre treinos, aluno e agenda" && git push origin main
+
+  >>> TESTAR (cadeia completa): criar do zero -> publica -> aluno ve;
+      aplicar padrao -> ajusta -> publica -> aluno ve; agendar treino
+      listando os treinos do aluno; arquivar some pro aluno mas fica no
+      historico; editar/apagar padrao nao afeta treinos aplicados. <<<
+
+== FECHAMENTO ==
+[ ] Revisao da frente: conferir que padrao e treino do aluno sao independentes, que o profissional cria do zero e por padrao, que a agenda lista treinos do aluno (opcional), que nada do que existia quebrou (aba Padroes ok, aluno executa treino ok), e que o visual segue o estilo flat aprovado usando variaveis de tema. Atualizar AUDITORIA-ALUNO.md e DIVERGENCIAS-GESTOR.md com a nova capacidade de criar treino do aluno. git add . && git commit -m "chore(treino): revisao da frente de treino do aluno" && git push origin main

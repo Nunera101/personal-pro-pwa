@@ -8735,22 +8735,29 @@
     _closeSheet(sheet, () => { document.body.style.overflow = ""; });
   }
 
-  function openWorkoutForm(workoutId = "", prefillStudentId = "") {
+  // seed (opcional): objeto-treino JA preenchido (ex.: copia por valor de um
+  // padrao, ver openWorkoutFromPattern) que NAO esta persistido. Quando presente,
+  // o montador abre pre-preenchido e so vira treino do aluno ao salvar/publicar.
+  function openWorkoutForm(workoutId = "", prefillStudentId = "", seed = null) {
     const sheet = elements.workoutSheet;
     const body = elements.workoutSheetBody;
     const titleEl = elements.workoutSheetTitle;
     if (!sheet || !body) return;
 
-    const workout = getWorkout(workoutId) || {};
+    const workout = seed || getWorkout(workoutId) || {};
+    const fromPattern = Boolean(seed && seed.sourcePatternId);
     const isStudentWorkout = Boolean(workout.studentId || prefillStudentId);
     const selectedStudentId = isStudentWorkout ? workout.studentId || prefillStudentId || state.data.students[0]?.id || "" : "";
     const rows = Array.isArray(workout.exercises) && workout.exercises.length ? workout.exercises : [normalizeWorkoutExercise({ order: 1, exerciseId: state.data.exercises.find((e) => e.status === "active")?.id || "" })];
 
-    if (titleEl) titleEl.textContent = workout.id ? (isStudentWorkout ? "Editar treino do aluno" : "Editar padrão de treino") : isStudentWorkout ? "Novo treino do aluno" : "Novo padrão de treino";
+    if (titleEl) titleEl.textContent = fromPattern ? "Ajustar cópia do padrão" : workout.id ? (isStudentWorkout ? "Editar treino do aluno" : "Editar padrão de treino") : isStudentWorkout ? "Novo treino do aluno" : "Novo padrão de treino";
 
     const workoutSaveLabel = isStudentWorkout ? "Salvar treino" : "Salvar padrão";
     body.innerHTML = `
       <form class="form-grid" id="workoutForm" data-id="${workout.id || ""}" data-scope="${isStudentWorkout ? "student" : "pattern"}">
+        <input type="hidden" name="sourcePatternId" value="${escapeHtml(isStudentWorkout ? workout.sourcePatternId || "" : "")}" />
+        <input type="hidden" name="sourcePatternTitle" value="${escapeHtml(isStudentWorkout ? workout.sourcePatternTitle || "" : "")}" />
+        ${fromPattern ? `<div class="empty-state compact-note"><strong>Cópia editável de “${escapeHtml(workout.sourcePatternTitle || "padrão")}”</strong><span>Ajuste o que quiser antes de publicar. Vira um treino próprio do aluno — editar ou apagar o padrão depois NÃO afeta este treino.</span></div>` : ""}
         <div class="form-grid two">
           ${
             isStudentWorkout
@@ -9079,28 +9086,71 @@
     openApplyPatternSheet(workoutId);
   }
 
+  // Porta "A partir de um padrao": lista os padroes disponiveis como cards. Ao
+  // escolher um, abre o montador pre-preenchido (copia por valor) via
+  // openWorkoutFromPattern; so vira treino do aluno ao salvar/publicar.
   function openStudentPatternWorkoutForm(studentId) {
     const student = getStudent(studentId);
     const patterns = getAvailableWorkoutPatterns();
     if (!student) return showToast("Aluno não encontrado.");
     if (!patterns.length) return showToast("Crie um padrão de treino antes de usar esta opção.");
     openModal(
-      "Criar treino por padrão",
+      "A partir de um padrão",
       `
-        <form class="form-grid" id="studentPatternWorkoutForm" data-student-id="${student.id}">
+        <div class="pattern-pick">
           <div class="empty-state compact-note">
-            <strong>${escapeHtml(student.name)}</strong>
-            <span>Será criada uma cópia individual para este aluno. O padrão original não será alterado.</span>
+            <strong>Cópia editável para ${escapeHtml(student.name)}</strong>
+            <span>Escolha um padrão para abrir o montador já preenchido com os exercícios. Ao publicar, vira um treino próprio do aluno — editar ou apagar o padrão depois NÃO afeta este treino.</span>
           </div>
-          <label class="field"><span>Padrão de treino</span><select name="patternId" required>${workoutPatternOptions(patterns[0]?.id || "")}</select></label>
-          <div class="form-grid two">
-            <label class="field"><span>Status do treino</span><select name="status"><option value="draft">Rascunho</option><option value="published">Publicado para o aluno</option></select></label>
-            <label class="field"><span>Título opcional</span><input name="title" type="text" placeholder="Usar título do padrão" /></label>
+          <div class="pw-list">
+            ${patterns.map((pattern) => renderPatternPickCard(pattern, student.id)).join("")}
           </div>
-          <button class="primary-action" type="submit">Criar treino do aluno</button>
-        </form>
+        </div>
       `
     );
+  }
+
+  // Card de padrao no seletor da porta "A partir de um padrao" (estilo .pw-card).
+  function renderPatternPickCard(pattern, studentId) {
+    const exerciseCount = pattern.exercises.length;
+    const estimatedMin = Math.max(15, exerciseCount * 4);
+    const initial = (pattern.title || "P").trim().slice(0, 1).toUpperCase();
+    const hue = ((pattern.title || "P").charCodeAt(0) * 47 + 120) % 360;
+    return `
+      <article class="pw-card">
+        <div class="pw-thumb" style="--sw-hue:${hue}" aria-hidden="true">
+          <span class="pw-initial">${escapeHtml(initial)}</span>
+          <span class="pw-ex-count">${exerciseCount}</span>
+        </div>
+        <div class="pw-body">
+          <div class="pw-head">
+            <h4 class="pw-title">${escapeHtml(pattern.title)}</h4>
+            <span class="badge is-info">Padrão</span>
+          </div>
+          <div class="pw-meta">
+            <span>${icons.workouts}${exerciseCount} exercício${exerciseCount !== 1 ? "s" : ""}</span>
+            <span>${icons.today}~${estimatedMin} min</span>
+          </div>
+          ${pattern.focus ? `<span class="pw-last">Foco: ${escapeHtml(pattern.focus)}</span>` : ""}
+          <div class="pw-actions">
+            <button class="primary-action" type="button" data-pick-pattern="${escapeHtml(pattern.id)}" data-pick-student="${escapeHtml(studentId)}">Ajustar e aplicar</button>
+          </div>
+        </div>
+      </article>
+    `;
+  }
+
+  // Abre o montador com uma COPIA POR VALOR do padrao (R-06), sem persistir nada.
+  // O treino do aluno so nasce quando o profissional salva/publica no montador.
+  function openWorkoutFromPattern(patternId, studentId) {
+    const pattern = getWorkout(patternId);
+    const student = getStudent(studentId);
+    if (!pattern || !isWorkoutPattern(pattern)) return showToast("Padrão não encontrado.");
+    if (!student) return showToast("Aluno não encontrado.");
+    closeModal();
+    const seed = buildStudentWorkoutFromPattern(pattern, student.id, { status: "draft" });
+    seed.id = "";
+    openWorkoutForm("", student.id, seed);
   }
 
   function workoutRowTemplate(row, index) {
@@ -11442,6 +11492,11 @@
       .filter((row) => row.exerciseId);
     if (!rows.length) return showToast("Adicione pelo menos um exercício da biblioteca.");
     const status = String(data.get("status") || "draft");
+    // Referencia historica do padrao de origem (so REFERENCIA, nunca vinculo).
+    // Vem do campo oculto quando o treino nasce de um padrao (porta "A partir de
+    // um padrao"); ao editar, preserva o valor ja existente.
+    const formSourcePatternId = isPattern ? "" : String(data.get("sourcePatternId") || "") || old?.sourcePatternId || "";
+    const formSourcePatternTitle = isPattern ? "" : String(data.get("sourcePatternTitle") || "") || old?.sourcePatternTitle || "";
     const workout = normalizeWorkout({
       id,
       trainerId: TRAINER_ID,
@@ -11452,9 +11507,9 @@
       level: String(data.get("level") || ""),
       status,
       exercises: rows,
-      sourcePatternId: isPattern ? "" : old?.sourcePatternId || "",
-      sourcePatternTitle: isPattern ? "" : old?.sourcePatternTitle || "",
-      appliedAt: isPattern ? "" : old?.appliedAt || "",
+      sourcePatternId: formSourcePatternId,
+      sourcePatternTitle: formSourcePatternTitle,
+      appliedAt: isPattern ? "" : old?.appliedAt || (formSourcePatternId ? new Date().toISOString() : ""),
       createdAt: old?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       publishedAt: status === "published" ? old?.publishedAt || new Date().toISOString() : old?.publishedAt || ""
@@ -11513,28 +11568,6 @@
 
   function handleApplyPatternForm(form) {
     handleApplyPatternSheetForm(form);
-  }
-
-  function handleStudentPatternWorkoutForm(form) {
-    const data = new FormData(form);
-    const studentId = form.dataset.studentId || "";
-    const student = getStudent(studentId);
-    const pattern = getWorkout(String(data.get("patternId") || ""));
-    if (!student) return showToast("Aluno não encontrado.");
-    if (!pattern || !isWorkoutPattern(pattern)) return showToast("Selecione um padrão válido.");
-    const status = String(data.get("status") || "draft");
-    const customTitle = String(data.get("title") || "").trim();
-    const studentWorkout = buildStudentWorkoutFromPattern(pattern, student.id, {
-      title: customTitle || pattern.title,
-      status
-    });
-    state.data.workouts.unshift(studentWorkout);
-    persistData();
-    closeModal();
-    state.profileTab = "workouts";
-    openStudentProfile(student.id);
-    if (status === "published") showSuccessToast("Treino criado e publicado para o aluno.");
-    else showToast("Treino criado como rascunho do aluno.");
   }
 
   function handleDietForm(form) {
@@ -12550,6 +12583,7 @@
       if (target.matches("[data-open-workout-form]")) openWorkoutForm(target.dataset.openWorkoutForm || "", target.dataset.prefillStudent || "");
       if (target.matches("[data-open-apply-pattern-form]")) openApplyPatternSheet(target.dataset.openApplyPatternForm);
       if (target.matches("[data-open-student-pattern-workout]")) openStudentPatternWorkoutForm(target.dataset.openStudentPatternWorkout);
+      if (target.matches("[data-pick-pattern]")) openWorkoutFromPattern(target.dataset.pickPattern, target.dataset.pickStudent);
       if (target.matches("[data-add-workout-row]")) {
         openExercisePicker();
       }
@@ -12592,7 +12626,6 @@
       if (form.id === "workoutForm") handleWorkoutForm(form);
       if (form.id === "applyPatternForm") handleApplyPatternSheetForm(form);
       if (form.id === "applyPatternSheetForm") handleApplyPatternSheetForm(form);
-      if (form.id === "studentPatternWorkoutForm") handleStudentPatternWorkoutForm(form);
       if (form.id === "utForm") handleUtForm(form);
     });
   }
