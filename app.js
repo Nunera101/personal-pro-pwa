@@ -5641,6 +5641,58 @@
     `;
   }
 
+  // Card de treino do aluno na visao do gestor (aba Treinos do perfil).
+  // Mostra inicial/letra, nome, nº de exercicios, duracao estimada, status e ultima execucao.
+  function renderProfileWorkoutCard(workout) {
+    const exerciseCount = workout.exercises.length;
+    const estimatedMin = Math.max(15, exerciseCount * 4);
+    const lastSession = getStudentSessions(workout.studentId).find((session) => session.workoutId === workout.id);
+    const lastLabel = lastSession ? formatDate(lastSession.finishedAt?.slice(0, 10) || "") : "Nunca executado";
+    const initial = (workout.title || "T").trim().slice(0, 1).toUpperCase();
+    const hue = ((workout.title || "T").charCodeAt(0) * 47 + 120) % 360;
+    const statusTone = workout.status === "published" ? "is-success" : workout.status === "archived" ? "is-danger" : "is-info";
+    const statusLabel = statusWorkout(workout.status);
+    return `
+      <article class="pw-card pw-card--${escapeHtml(workout.status)}">
+        <div class="pw-thumb" style="--sw-hue:${hue}" aria-hidden="true">
+          <span class="pw-initial">${escapeHtml(initial)}</span>
+          <span class="pw-ex-count">${exerciseCount}</span>
+        </div>
+        <div class="pw-body">
+          <div class="pw-head">
+            <h4 class="pw-title">${escapeHtml(workout.title)}</h4>
+            <span class="badge ${statusTone}">${escapeHtml(statusLabel)}</span>
+          </div>
+          <div class="pw-meta">
+            <span>${icons.workouts}${exerciseCount} exercício${exerciseCount !== 1 ? "s" : ""}</span>
+            <span>${icons.today}~${estimatedMin} min</span>
+          </div>
+          <span class="pw-last">Última execução: ${escapeHtml(lastLabel)}</span>
+          <div class="pw-actions">
+            <button class="mini-button" type="button" data-open-workout-form="${escapeHtml(workout.id)}">Editar</button>
+            <details class="pw-view">
+              <summary>Ver</summary>
+              <div class="pw-view-body">${renderWorkoutExercisePreview(workout)}</div>
+            </details>
+            <details class="action-menu pw-menu">
+              <summary aria-label="Mais ações">${icons.more}</summary>
+              <div>
+                ${workout.status === "draft" ? `<button class="mini-button" type="button" data-publish-workout="${escapeHtml(workout.id)}">Publicar</button>` : ""}
+                <button class="mini-button" type="button" data-duplicate-workout="${escapeHtml(workout.id)}">Duplicar</button>
+                ${
+                  workout.status === "archived"
+                    ? `<button class="mini-button" type="button" data-restore-workout="${escapeHtml(workout.id)}">Reativar</button>`
+                    : `<button class="mini-button" type="button" data-archive-workout="${escapeHtml(workout.id)}">Arquivar</button>`
+                }
+                <button class="mini-button is-danger" type="button" data-delete-workout="${escapeHtml(workout.id)}">Remover</button>
+              </div>
+            </details>
+          </div>
+        </div>
+      </article>
+    `;
+  }
+
   function renderStudentWorkoutDetailExercise(row, index) {
     const exercise = getExercise(row.exerciseId);
     const name = resolveWorkoutExerciseName(row);
@@ -8217,9 +8269,10 @@
     }
 
     if (tab === "workouts") {
+      const active = workouts.filter((workout) => workout.status !== "archived");
+      const archived = workouts.filter((workout) => workout.status === "archived");
       const published = workouts.filter((workout) => workout.status === "published");
       const drafts = workouts.filter((workout) => workout.status === "draft");
-      const archived = workouts.filter((workout) => workout.status === "archived");
       const availablePatterns = getAvailableWorkoutPatterns();
       return `
         <section class="panel profile-tab-panel">
@@ -8229,15 +8282,30 @@
               <span class="small-text">${workouts.length} treino(s) · ${published.length} publicado(s) · ${drafts.length} rascunho(s) · ${archived.length} arquivado(s)</span>
             </div>
             <div class="section-actions">
-              <button class="mini-button" type="button" data-open-workout-form data-prefill-student="${student.id}">Novo treino</button>
+              <button class="mini-button" type="button" data-open-workout-form data-prefill-student="${student.id}">Criar</button>
               <button class="mini-button" type="button" data-open-student-pattern-workout="${student.id}" ${availablePatterns.length ? "" : "disabled"}>Aplicar padrão</button>
             </div>
           </div>
-          <div class="quick-grid student-profile-actions">
-            <button class="quick-link" type="button" data-open-workout-form data-prefill-student="${student.id}"><strong>Novo treino</strong><span>Monte com exercícios da biblioteca</span></button>
-            <button class="quick-link" type="button" data-open-student-pattern-workout="${student.id}" ${availablePatterns.length ? "" : "disabled"}><strong>Aplicar padrão</strong><span>${availablePatterns.length ? `${availablePatterns.length} padrão(s) disponível(is)` : "Nenhum padrão disponível"}</span></button>
-          </div>
-          ${workouts.length ? `<div class="workout-list">${workouts.map((workout) => renderWorkoutCard(workout, true)).join("")}</div>` : emptyState("Nenhum treino publicado", "Crie um treino do zero ou aplique um padrão.", icons.workouts)}
+          ${
+            workouts.length
+              ? `
+                <div class="pw-group">
+                  <div class="pw-group-head"><h4>Ativos</h4><span class="pw-group-count">${active.length}</span></div>
+                  ${active.length ? `<div class="pw-list">${active.map(renderProfileWorkoutCard).join("")}</div>` : `<p class="small-text pw-group-empty">Nenhum treino ativo. Use “Criar” para montar um novo.</p>`}
+                </div>
+                <div class="pw-group">
+                  <div class="pw-group-head"><h4>Arquivados</h4><span class="pw-group-count">${archived.length}</span></div>
+                  ${archived.length ? `<div class="pw-list">${archived.map(renderProfileWorkoutCard).join("")}</div>` : `<p class="small-text pw-group-empty">Nenhum treino arquivado.</p>`}
+                </div>
+              `
+              : `
+                <div class="quick-grid student-profile-actions">
+                  <button class="quick-link" type="button" data-open-workout-form data-prefill-student="${student.id}"><strong>Criar treino</strong><span>Monte com exercícios da biblioteca</span></button>
+                  <button class="quick-link" type="button" data-open-student-pattern-workout="${student.id}" ${availablePatterns.length ? "" : "disabled"}><strong>Aplicar padrão</strong><span>${availablePatterns.length ? `${availablePatterns.length} padrão(s) disponível(is)` : "Nenhum padrão disponível"}</span></button>
+                </div>
+                ${emptyState("Nenhum treino ainda", "Crie um treino do zero ou aplique um padrão.", icons.workouts)}
+              `
+          }
         </section>
       `;
     }

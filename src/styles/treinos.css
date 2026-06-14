@@ -1889,6 +1889,206 @@
   font-weight: 670;
 }
 
+/* ===== Treinos do aluno na visao do gestor (aba Treinos do perfil) ===== */
+.pw-group {
+  margin-top: 0.9rem;
+}
+
+.pw-group-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.pw-group-head h4 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.82rem;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.pw-group-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.4rem;
+  height: 1.4rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.pw-group-empty {
+  margin: 0;
+}
+
+.pw-list {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.pw-card {
+  display: grid;
+  grid-template-columns: clamp(3rem, 14vw, 3.75rem) minmax(0, 1fr);
+  gap: 0.7rem;
+  padding: 0.62rem;
+  border-radius: 1rem;
+  background: var(--card);
+  border: 1px solid var(--borda);
+}
+
+.pw-card--archived {
+  opacity: 0.82;
+}
+
+.pw-thumb {
+  position: relative;
+  width: 100%;
+  height: clamp(3rem, 14vw, 3.75rem);
+  display: grid;
+  place-items: center;
+  border-radius: 0.72rem;
+  background:
+    linear-gradient(135deg,
+      hsl(var(--sw-hue, 40), 45%, 25%),
+      hsl(var(--sw-hue, 40), 30%, 16%));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.pw-initial {
+  color: rgba(247, 244, 235, 0.88);
+  font-size: clamp(1.2rem, 5vw, 1.5rem);
+  font-weight: 800;
+  letter-spacing: 0.03em;
+}
+
+.pw-ex-count {
+  position: absolute;
+  bottom: -0.4rem;
+  right: -0.4rem;
+  min-width: 1.35rem;
+  height: 1.35rem;
+  padding: 0 0.28rem;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--brand);
+  color: var(--brand-ink);
+  font-size: 0.6rem;
+  font-weight: 750;
+  line-height: 1;
+  box-shadow: 0 0 0 2px var(--card);
+}
+
+.pw-body {
+  display: grid;
+  align-content: start;
+  gap: 0.32rem;
+  min-width: 0;
+}
+
+.pw-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 0.45rem;
+}
+
+.pw-title {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(0.95rem, 3.6vw, 1.08rem);
+  font-weight: 700;
+  line-height: 1.14;
+}
+
+.pw-head .badge {
+  min-height: 1.42rem;
+  padding: 0.18rem 0.48rem;
+  font-size: 0.66rem;
+  white-space: nowrap;
+}
+
+.pw-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.24rem 0.52rem;
+  align-items: center;
+  color: rgba(247, 244, 235, 0.72);
+  font-size: clamp(0.67rem, 2.4vw, 0.78rem);
+}
+
+.pw-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.24rem;
+  min-width: 0;
+}
+
+.pw-meta svg {
+  width: 0.8rem;
+  height: 0.8rem;
+  color: var(--brand-strong);
+  flex-shrink: 0;
+}
+
+.pw-last {
+  color: var(--muted);
+  font-size: clamp(0.62rem, 2.2vw, 0.72rem);
+}
+
+.pw-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.18rem;
+}
+
+.pw-view[open] {
+  flex-basis: 100%;
+}
+
+.pw-view > summary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.4rem;
+  padding: 0 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.055);
+  color: var(--brand-strong);
+  font-size: 0.8rem;
+  font-weight: 700;
+  list-style: none;
+  cursor: pointer;
+}
+
+.pw-view > summary::-webkit-details-marker {
+  display: none;
+}
+
+.pw-view-body {
+  width: 100%;
+  margin-top: 0.45rem;
+}
+
+.pw-menu summary {
+  min-height: 2.4rem;
+  padding: 0 0.55rem;
+}
+
+.pw-menu summary svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
 /* ===== Tela do treino (detalhe do aluno) ===== */
 .swd-detail {
   padding-bottom: 5.5rem;
